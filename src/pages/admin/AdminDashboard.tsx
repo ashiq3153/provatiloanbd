@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye } from 'lucide-react';
+import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, CreditCard, Settings, Star, Download, Upload } from 'lucide-react';
 import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, getSystemSettings, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const [stories, setStories] = useState<SuccessStory[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // New Story Form State
   const [newStory, setNewStory] = useState({
@@ -151,39 +152,101 @@ export default function AdminDashboard() {
   const filteredLoans = loans.filter(l => l.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) || l.id.includes(searchTerm));
   const filteredTxns = transactions.filter(t => t.trx_id?.toLowerCase().includes(searchTerm.toLowerCase()) || t.chat_id.toString().includes(searchTerm));
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading admin panel...</div>;
+  if (loading) return <div className="p-8 text-center text-gray-500 flex items-center justify-center h-screen"><Activity className="animate-spin text-primary-500 mr-2" /> Loading admin panel...</div>;
+
+  const sidebarLinks = [
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'loans', label: 'Loan Applications', icon: FileText },
+    { id: 'deposits', label: 'Deposits', icon: Download },
+    { id: 'withdrawals', label: 'Withdrawals', icon: Upload },
+    { id: 'users', label: 'Manage Users', icon: Users },
+    { id: 'stories', label: 'Success Stories', icon: Star },
+    { id: 'settings', label: 'System Settings', icon: Settings },
+  ] as const;
 
   return (
-    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto dark:bg-gray-900 min-h-screen transition-colors">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-            <ShieldAlert className="text-rose-500" /> Admin Control Panel
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Manage users, loans, transactions & settings</p>
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 transition-colors overflow-hidden">
+      
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-100 dark:border-gray-700 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 flex flex-col`}>
+        <div className="p-6 flex items-center gap-3 border-b border-gray-100 dark:border-gray-700">
+          <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-xl flex items-center justify-center shrink-0">
+            <ShieldAlert size={24} />
+          </div>
+          <div>
+            <h1 className="font-black text-gray-900 dark:text-white leading-tight">Admin</h1>
+            <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Control Panel</p>
+          </div>
+          <button onClick={() => setSidebarOpen(false)} className="md:hidden ml-auto text-gray-500">
+            <X size={20} />
+          </button>
         </div>
-        <div className="flex flex-wrap gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-xl">
-          {['overview', 'loans', 'deposits', 'withdrawals', 'users', 'stories', 'settings'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab as any)}
-              className={`px-4 py-2 rounded-lg text-sm font-bold capitalize transition-all ${activeTab === tab ? 'bg-white dark:bg-gray-600 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
-            >
-              {tab}
-            </button>
-          ))}
+
+        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+          {sidebarLinks.map(link => {
+            const Icon = link.icon;
+            const isActive = activeTab === link.id;
+            return (
+              <button
+                key={link.id}
+                onClick={() => { setActiveTab(link.id as any); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                  isActive 
+                    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' 
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                <Icon size={18} className={isActive ? 'text-primary-600 dark:text-primary-400' : 'text-gray-400'} />
+                {link.label}
+              </button>
+            );
+          })}
+        </div>
+        
+        <div className="p-4 border-t border-gray-100 dark:border-gray-700 text-xs text-center text-gray-400 font-bold">
+          Provati Loan Admin v1.0
         </div>
       </div>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-        >
-          {activeTab === 'overview' && (
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        {/* Top Header */}
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 h-16 flex items-center justify-between px-4 sm:px-6 shrink-0">
+          <button onClick={() => setSidebarOpen(true)} className="md:hidden text-gray-500 p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+            <Menu size={24} />
+          </button>
+          
+          <div className="hidden sm:block text-gray-500 dark:text-gray-400 text-sm font-bold">
+            Welcome back, Admin
+          </div>
+          
+          <div className="flex items-center gap-4">
+             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-primary-700 text-white flex items-center justify-center font-bold text-sm shadow-md">
+               A
+             </div>
+          </div>
+        </header>
+
+        {/* Scrollable Content */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="max-w-6xl mx-auto space-y-6"
+            >
+              {activeTab === 'overview' && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
             <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-xl flex items-center justify-center mb-4"><Users size={24} /></div>
@@ -582,6 +645,8 @@ export default function AdminDashboard() {
       )}
       </motion.div>
       </AnimatePresence>
+        </main>
+      </div>
     </div>
   );
 }
