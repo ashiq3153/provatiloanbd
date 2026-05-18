@@ -195,6 +195,7 @@ export default function ApplyLoan() {
   const [amount, setAmount] = useState(100000);
   const [tenure, setTenure] = useState(24);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [documents, setDocuments] = useState<Record<string, string>>({});
@@ -302,95 +303,6 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
       }
 
       if (step === 7 && acceptedTerms) {
-        setIsSubmitting(true);
-        const loadingId = toast.loading(isBn ? 'আবেদন জমা দেওয়া হচ্ছে...' : 'Submitting application...');
-        
-        try {
-          const formData = methods.getValues();
-          
-          // Check for fake/duplicate apply
-          const duplicateMatch = await checkDuplicateApplication(
-            formData.mobile,
-            formData.email || null,
-            formData.accountNumber,
-            formData.nomineeNid,
-            formData.nidNumber,
-            formData.passportNumber || null,
-            editId
-          );
-          
-          if (duplicateMatch) {
-            toast.error(isBn ? `এই ${duplicateMatch} ইতিমধ্যে ব্যবহার করা হয়েছে! Fake Apply Detected.` : `This ${duplicateMatch} is already used! Fake Apply Detected.`, { id: loadingId });
-            setIsSubmitting(false);
-            return;
-          }
-
-          // Check if user is banned
-          const { data: profile } = await supabase.from('profiles').select('is_banned').eq('chat_id', user.id).single();
-          if (profile?.is_banned) {
-            toast.error(isBn ? 'আপনার অ্যাকাউন্ট স্থগিত করা হয়েছে। আপনি আবেদন করতে পারবেন না।' : 'Your account is suspended. You cannot apply.', { id: loadingId });
-            setIsSubmitting(false);
-            return;
-          }
-
-          // Build professional info based on category
-          const professionalInfo: Record<string, string> = {};
-          if (category?.id === 'personal') {
-            professionalInfo.companyName = formData.companyName || '';
-            professionalInfo.designation = formData.designation || '';
-            professionalInfo.workDuration = formData.workDuration || '';
-            professionalInfo.monthlyIncome = formData.monthlyIncome || '';
-          } else if (category?.id === 'business' || category?.id === 'women') {
-            professionalInfo.businessName = formData.businessName || '';
-            professionalInfo.shopAddress = formData.shopAddress || '';
-            professionalInfo.tradeLicense = formData.tradeLicense || '';
-          } else if (category?.id === 'expat') {
-            professionalInfo.workingCountry = formData.workingCountry || '';
-            professionalInfo.visaType = formData.visaType || '';
-            professionalInfo.passportNumber = formData.passportNumber || '';
-          } else if (category?.id === 'student') {
-            professionalInfo.institutionName = formData.institutionName || '';
-            professionalInfo.studentId = formData.studentId || '';
-            professionalInfo.guardianIncome = formData.guardianIncome || '';
-          } else if (category?.id === 'emergency') {
-            professionalInfo.professionName = formData.professionName || '';
-            professionalInfo.emergencyReason = formData.emergencyReason || '';
-          }
-
-          const payload = {
-            chat_id: user.id,
-            loan_category: category?.id || 'personal',
-            amount,
-            tenure_months: tenure,
-            interest_rate: category?.minRate || 0,
-            emi_amount: calculateEMI(),
-            processing_fee: amount * (category?.procFee || 0.01),
-            security_deposit: amount * (category?.secDeposit || 0.1),
-            full_name: formData.fullName,
-            father_name: formData.fatherName,
-            mother_name: formData.motherName,
-            dob: formData.dob,
-            gender: formData.gender,
-            mobile: formData.mobile,
-            whatsapp: formData.whatsapp || null,
-            email: formData.email || null,
-            current_address: formData.currentAddress,
-            permanent_address: formData.permanentAddress,
-            nid_number: formData.nidNumber,
-            professional_info: professionalInfo,
-            bank_name: formData.bankName,
-            account_name: formData.accountName,
-            account_number: formData.accountNumber,
-            routing_number: formData.routingNumber || null,
-            mobile_banking: formData.mobileBanking || null,
-            nominee_name: formData.nomineeName,
-            nominee_relation: formData.nomineeRelation,
-            nominee_mobile: formData.nomineeMobile,
-            nominee_nid: formData.nomineeNid,
-            documents: documents,
-          };
-
-          let result;
           if (editId) {
             result = await updateLoanApplication(editId, payload);
           } else {
@@ -1076,12 +988,30 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
         </div>
       </div>
 
+      <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl border border-red-100 dark:border-red-900/40 text-left mt-6 flex gap-3 transition-colors">
+        <AlertCircle size={24} className="text-red-500 shrink-0 mt-1" />
+        <div>
+          <h3 className="font-bold text-red-800 dark:text-red-300 transition-colors">
+            {isBn ? 'গুরুত্বপূর্ণ নোটিশ' : 'Important Notice'}
+          </h3>
+          <p className="text-xs font-medium text-red-600 dark:text-red-400 mt-1 transition-colors">
+            {isBn ? 'আপনার লোন আবেদনটি প্রসেস করার জন্য "প্রসেসিং ফি" ডিপোজিট করা বাধ্যতামূলক। ফি প্রদান ছাড়া ফাইলটি রিভিউ করা হবে না।' : 'To begin processing your application, you must deposit the "Processing Fee". Files without fee will not be reviewed.'}
+          </p>
+        </div>
+      </div>
+
       <div className="pt-6">
         <Link 
-          to="/transactions" 
-          className="w-full block bg-gray-900 text-white font-bold py-4 rounded-xl shadow-lg shadow-gray-900/20 active:scale-95 transition-all text-sm"
+          to="/deposit" 
+          className="w-full block bg-primary-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary-600/20 hover:-translate-y-0.5 active:scale-95 transition-all text-sm mb-3"
         >
-          ট্র্যাকিং পেজে যান
+          {isBn ? "প্রসেসিং ফি জমা দিন" : "Deposit Processing Fee"}
+        </Link>
+        <Link 
+          to="/transactions" 
+          className="w-full block bg-gray-900 dark:bg-gray-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-gray-900/20 active:scale-95 transition-all text-sm"
+        >
+          {isBn ? "ট্র্যাকিং পেজে যান" : "Go to Tracking Page"}
         </Link>
       </div>
     </motion.div>
@@ -1126,21 +1056,21 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
             exit={{ opacity: 0, x: -10 }}
             transition={{ duration: 0.2 }}
           >
-            {step === 1 && <Step1Category />}
-            {step === 2 && <Step2Calculator />}
-            {step === 3 && <Step3PersonalInfo />}
-            {step === 4 && <Step4ProfessionalInfo />}
-            {step === 5 && <Step5BankInfo />}
-            {step === 6 && <Step6Documents />}
-            {step === 7 && <Step7Review />}
-            {step === 8 && <Step8Success />}
+            {step === 1 && Step1Category()}
+            {step === 2 && Step2Calculator()}
+            {step === 3 && Step3PersonalInfo()}
+            {step === 4 && Step4ProfessionalInfo()}
+            {step === 5 && Step5BankInfo()}
+            {step === 6 && Step6Documents()}
+            {step === 7 && Step7Review()}
+            {step === 8 && Step8Success()}
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* Bottom Action Bar */}
       {step < 8 && (
-        <div className="sticky bottom-0 left-0 right-0 p-5 bg-white dark:bg-gray-800 transition-colors border-t border-gray-100 dark:border-gray-700 transition-colors z-50">
+        <div className="sticky bottom-0 left-0 right-0 p-5 bg-white dark:bg-gray-800 transition-colors border-t border-gray-100 dark:border-gray-700 transition-colors z-40">
           <button
             onClick={nextStep}
             disabled={(step === 1 && !category) || (step === 7 && !acceptedTerms) || isSubmitting}
@@ -1148,6 +1078,43 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
           >
             {isSubmitting ? (isBn ? 'অপেক্ষা করুন...' : 'Please wait...') : step === 7 ? (isBn ? "সাবমিট করুন" : "Submit") : (isBn ? "পরবর্তী ধাপ" : "Next Step")} {!isSubmitting && <ChevronRight size={18} />}
           </button>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-gray-100 dark:border-gray-700"
+          >
+            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500">
+              <FileText size={32} />
+            </div>
+            <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">
+              {isBn ? 'আবেদন সাবমিট করবেন?' : 'Submit Application?'}
+            </h3>
+            <p className="text-sm text-center text-gray-600 dark:text-gray-400 mb-6">
+              {isBn 
+                ? 'আবেদন সাবমিট করার পর কোনো তথ্য পরিবর্তন করা যাবে না (শুধু এডমিন চাইলে পারবে)। আপনি কি নিশ্চিত?' 
+                : 'You will not be able to change information after submitting (unless admin allows). Are you sure?'}
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 py-3 rounded-xl font-bold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              >
+                {isBn ? 'বাতিল' : 'Cancel'}
+              </button>
+              <button 
+                onClick={processLoanApplication}
+                className="flex-1 py-3 rounded-xl font-bold bg-primary-600 text-white hover:bg-primary-700 transition-colors"
+              >
+                {isBn ? 'হ্যাঁ, সাবমিট' : 'Yes, Submit'}
+              </button>
+            </div>
+          </motion.div>
         </div>
       )}
     </div>

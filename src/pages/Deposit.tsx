@@ -25,6 +25,7 @@ export default function Deposit() {
   const [amount, setAmount] = useState('');
   const [senderNo, setSenderNo] = useState('');
   const [trxId, setTrxId] = useState('');
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [screenshotUrl, setScreenshotUrl] = useState<string>('');
@@ -43,10 +44,14 @@ export default function Deposit() {
   const selectedMethod = paymentMethods.find((m) => m.id === method);
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || Number(amount) <= 0 || !senderNo || !trxId) return;
-    
+    setShowConfirmModal(true);
+  };
+
+  const processDeposit = async () => {
+    setShowConfirmModal(false);
     setSubmitted(true);
     const loadingId = toast.loading(isBn ? 'রিকুয়েস্ট জমা দেওয়া হচ্ছে...' : 'Submitting request...');
     
@@ -109,6 +114,18 @@ export default function Deposit() {
             <p className="text-xs font-medium text-orange-600 dark:text-orange-400 mt-1 transition-colors">
               {isBn ? 'সাধারণত ২০-৩০ মিনিটের মধ্যে আপডেট হয়ে যাবে।' : 'Usually updates within 20-30 minutes.'}
             </p>
+          </div>
+
+          <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-100 dark:border-red-900/40 mb-6 transition-colors flex gap-3 text-left">
+            <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={20} />
+            <div>
+              <p className="text-sm font-bold text-red-800 dark:text-red-300 transition-colors">
+                {isBn ? 'গুরুত্বপূর্ণ সতর্কতা' : 'Important Warning'}
+              </p>
+              <p className="text-xs font-medium text-red-600 dark:text-red-400 mt-1 transition-colors">
+                {isBn ? 'আপনার TrxID এবং সেন্ডার নাম্বারটি সংরক্ষণ করে রাখুন। ভুয়া বা এডিট করা স্ক্রিনশট দিলে একাউন্ট সাসপেন্ড করা হবে।' : 'Keep your TrxID and Sender Number safe. Submitting fake or edited screenshots will result in account suspension.'}
+              </p>
+            </div>
           </div>
 
           <button 
@@ -327,7 +344,7 @@ export default function Deposit() {
 
       </div>
 
-      <div className="sticky bottom-0 left-0 right-0 p-5 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 z-50 transition-colors">
+      <div className="sticky bottom-0 left-0 right-0 p-5 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 z-40 transition-colors">
         <button
           form="deposit-form"
           type="submit"
@@ -337,6 +354,43 @@ export default function Deposit() {
           {submitted ? (isBn ? 'অপেক্ষা করুন...' : 'Please wait...') : (isBn ? 'সাবমিট করুন' : 'Submit')}
         </button>
       </div>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-gray-100 dark:border-gray-700"
+          >
+            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-500">
+              <AlertCircle size={32} />
+            </div>
+            <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">
+              {isBn ? 'আপনি কি নিশ্চিত?' : 'Are you sure?'}
+            </h3>
+            <p className="text-sm text-center text-gray-600 dark:text-gray-400 mb-6">
+              {isBn 
+                ? 'ডিপোজিট সাবমিট করার আগে নিশ্চিত করুন আপনি সঠিক ট্রানজেকশন আইডি এবং সেন্ডার নাম্বার দিয়েছেন। ভুল তথ্য দিলে রিকুয়েস্ট বাতিল হবে।' 
+                : 'Please ensure TrxID and Sender Number are correct before submitting. Incorrect details will lead to rejection.'}
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 py-3 rounded-xl font-bold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              >
+                {isBn ? 'বাতিল' : 'Cancel'}
+              </button>
+              <button 
+                onClick={processDeposit}
+                className="flex-1 py-3 rounded-xl font-bold bg-primary-600 text-white hover:bg-primary-700 transition-colors"
+              >
+                {isBn ? 'হ্যাঁ, সাবমিট' : 'Yes, Submit'}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
