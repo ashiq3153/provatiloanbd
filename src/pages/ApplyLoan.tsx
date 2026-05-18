@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getTelegramUser } from "../lib/telegram";
-import { submitLoanApplication } from "../lib/api";
+import { submitLoanApplication, getLoanApplicationById, updateLoanApplication, checkDuplicateApplication, uploadDocument } from "../lib/api";
+import { supabase } from "../lib/supabase";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Briefcase,
@@ -195,15 +196,57 @@ export default function ApplyLoan() {
   const [tenure, setTenure] = useState(24);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [documents, setDocuments] = useState<Record<string, string>>({});
+  const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const selectedCategory = params.get('category');
-    if (selectedCategory && !category) {
+    const edit = params.get('edit');
+
+    if (edit) {
+      setEditId(edit);
+      getLoanApplicationById(edit).then(loan => {
+        if (loan) {
+          const matched = categories.find(cat => cat.id === loan.loan_category);
+          if (matched) setCategory(matched);
+          setAmount(Number(loan.amount));
+          setTenure(Number(loan.tenure_months));
+          if (loan.documents) {
+            setDocuments(loan.documents);
+          }
+
+          methods.reset({
+            fullName: loan.full_name,
+            fatherName: loan.father_name,
+            motherName: loan.mother_name,
+            dob: loan.dob || '',
+            gender: loan.gender || 'Male',
+            mobile: loan.mobile,
+            whatsapp: loan.whatsapp || '',
+            email: loan.email || '',
+            currentAddress: loan.current_address,
+            permanentAddress: loan.permanent_address,
+            bankName: loan.bank_name,
+            accountName: loan.account_name,
+            accountNumber: loan.account_number,
+            routingNumber: loan.routing_number || '',
+            mobileBanking: loan.mobile_banking || '',
+            nomineeName: loan.nominee_name,
+            nomineeRelation: loan.nominee_relation,
+            nomineeMobile: loan.nominee_mobile,
+            nomineeNid: loan.nominee_nid,
+            ...(loan.professional_info as any)
+          });
+          if (loan.documents) setDocuments(loan.documents);
+        }
+      });
+    } else if (selectedCategory && !category) {
       const matched = categories.find((cat) => cat.id === selectedCategory);
       if (matched) setCategory(matched);
     }
-  }, [location.search, categories, category]);
+  }, [location.search, categories]);
 
   // Auto-adjusted tenure state
   const handleAmountChange = (val: number) => {
@@ -232,7 +275,7 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
       if (step === 1 && !category) return;
       if (step === 2 && (!amount || !tenure)) return;
       if (step === 3) {
-        const isValid = await trigger(['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'mobile', 'whatsapp', 'email', 'currentAddress', 'permanentAddress']);
+        const isValid = await trigger(['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'mobile', 'whatsapp', 'email', 'currentAddress', 'permanentAddress', 'nidNumber']);
         if (!isValid) return;
       }
       if (step === 4) {
@@ -251,12 +294,45 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
         if (!isValid) return;
       }
 
+      if (step === 6) {
+        if (!documents.nid_front || !documents.nid_back) {
+          toast.error(isBn ? 'অনুগ্রহ করে NID এর উভয় পিঠ আপলোড করুন' : 'Please upload both sides of NID');
+          return;
+        }
+      }
+
       if (step === 7 && acceptedTerms) {
         setIsSubmitting(true);
         const loadingId = toast.loading(isBn ? 'আবেদন জমা দেওয়া হচ্ছে...' : 'Submitting application...');
         
         try {
           const formData = methods.getValues();
+          
+          // Check for fake/duplicate apply
+          const duplicateMatch = await checkDuplicateApplication(
+            formData.mobile,
+            formData.email || null,
+            formData.accountNumber,
+            formData.nomineeNid,
+            formData.nidNumber,
+            formData.passportNumber || null,
+            editId
+          );
+          
+          if (duplicateMatch) {
+            toast.error(isBn ? `এই ${duplicateMatch} ইতিমধ্যে ব্যবহার করা হয়েছে! Fake Apply Detected.` : `This ${duplicateMatch} is already used! Fake Apply Detected.`, { id: loadingId });
+            setIsSubmitting(false);
+            return;
+          }
+
+          // Check if user is banned
+          const { data: profile } = await supabase.from('profiles').select('is_banned').eq('chat_id', user.id).single();
+          if (profile?.is_banned) {
+            toast.error(isBn ? 'আপনার অ্যাকাউন্ট স্থগিত করা হয়েছে। আপনি আবেদন করতে পারবেন না।' : 'Your account is suspended. You cannot apply.', { id: loadingId });
+            setIsSubmitting(false);
+            return;
+          }
+
           // Build professional info based on category
           const professionalInfo: Record<string, string> = {};
           if (category?.id === 'personal') {
@@ -281,7 +357,7 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
             professionalInfo.emergencyReason = formData.emergencyReason || '';
           }
 
-          const result = await submitLoanApplication({
+          const payload = {
             chat_id: user.id,
             loan_category: category?.id || 'personal',
             amount,
@@ -300,6 +376,7 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
             email: formData.email || null,
             current_address: formData.currentAddress,
             permanent_address: formData.permanentAddress,
+            nid_number: formData.nidNumber,
             professional_info: professionalInfo,
             bank_name: formData.bankName,
             account_name: formData.accountName,
@@ -310,7 +387,15 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
             nominee_relation: formData.nomineeRelation,
             nominee_mobile: formData.nomineeMobile,
             nominee_nid: formData.nomineeNid,
-          });
+            documents: documents,
+          };
+
+          let result;
+          if (editId) {
+            result = await updateLoanApplication(editId, payload);
+          } else {
+            result = await submitLoanApplication(payload);
+          }
 
           if (result) {
             toast.success(isBn ? 'আপনার আবেদন সফলভাবে জমা হয়েছে!' : 'Application successfully submitted!', { id: loadingId });
@@ -530,6 +615,10 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
             <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "মাতার নাম" : "Mother's Name"}</label>
             <input type="text" {...register("motherName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.motherName ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder={isBn ? "মাতার নাম" : "Mother's Name"} /><ErrorText field="motherName" />
           </div>
+        </div>
+        <div>
+          <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "আপনার NID নম্বর" : "Your NID Number"}</label>
+          <input type="text" {...register("nidNumber")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nidNumber ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder={isBn ? "এনআইডি নম্বর লিখুন" : "Enter NID Number"} /><ErrorText field="nidNumber" />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -772,6 +861,49 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
     </div>
   );
 
+  const FileUploader = ({ id, title }: { id: string, title: string }) => {
+    return (
+      <div className="relative">
+        <input 
+          type="file" 
+          id={`file-${id}`}
+          className="hidden" 
+          accept="image/*,.pdf"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            setUploadingDoc(id);
+            const url = await uploadDocument(file, id, user.id);
+            if (url) {
+              setDocuments(prev => ({ ...prev, [id]: url }));
+            } else {
+              toast.error(isBn ? 'ফাইল আপলোড ব্যর্থ হয়েছে' : 'File upload failed');
+            }
+            setUploadingDoc(null);
+          }}
+        />
+        <button 
+          onClick={() => document.getElementById(`file-${id}`)?.click()}
+          disabled={uploadingDoc === id}
+          type="button"
+          className={`w-full bg-gray-50 dark:bg-gray-900 transition-colors border-2 ${documents[id] ? 'border-solid border-green-500' : 'border-dashed border-gray-200 dark:border-gray-700'} rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-primary-50 hover:border-primary-300 transition-colors`}
+        >
+           <div className={`w-10 h-10 ${documents[id] ? 'bg-green-100 dark:bg-green-900' : 'bg-white dark:bg-gray-800'} transition-colors rounded-full flex items-center justify-center shadow-sm`}>
+             {uploadingDoc === id ? (
+               <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+             ) : documents[id] ? (
+               <CheckCircle2 size={18} className="text-green-600 dark:text-green-400" />
+             ) : (
+               <UploadCloud size={18} className="text-gray-500 dark:text-gray-400" />
+             )}
+           </div>
+           <span className="text-xs font-bold text-gray-600 text-center">{title}</span>
+           {documents[id] && <span className="text-[10px] text-green-600 font-bold">{isBn ? 'আপলোড হয়েছে' : 'Uploaded'}</span>}
+        </button>
+      </div>
+    );
+  };
+
   const Step6Documents = () => (
     <div className="space-y-6 pb-6">
       <div className="mb-4">
@@ -782,32 +914,12 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
       <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors p-5 shadow-sm space-y-4">
         <h3 className="font-bold text-gray-800 text-sm border-b border-gray-100 dark:border-gray-700 transition-colors pb-2">{isBn ? "পরিচয়পত্র ও ছবি (সবার জন্য)" : "ID & Photo (For All)"}</h3>
         <div className="grid grid-cols-2 gap-3">
-          <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-primary-50 hover:border-primary-300 transition-colors">
-             <div className="w-10 h-10 bg-white dark:bg-gray-800 transition-colors rounded-full flex items-center justify-center shadow-sm">
-               <UploadCloud size={18} className="text-gray-500" />
-             </div>
-             <span className="text-xs font-bold text-gray-600 text-center">{isBn ? "NID সামনের অংশ" : "NID Front"}</span>
-          </button>
-          <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-primary-50 hover:border-primary-300 transition-colors">
-             <div className="w-10 h-10 bg-white dark:bg-gray-800 transition-colors rounded-full flex items-center justify-center shadow-sm">
-               <UploadCloud size={18} className="text-gray-500" />
-             </div>
-             <span className="text-xs font-bold text-gray-600 text-center">{isBn ? "NID পেছনের অংশ" : "NID Back"}</span>
-          </button>
+          <FileUploader id="nid_front" title={isBn ? "NID সামনের অংশ" : "NID Front"} />
+          <FileUploader id="nid_back" title={isBn ? "NID পেছনের অংশ" : "NID Back"} />
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-primary-50 hover:border-primary-300 transition-colors">
-              <div className="w-10 h-10 bg-white dark:bg-gray-800 transition-colors rounded-full flex items-center justify-center shadow-sm">
-                <User size={18} className="text-blue-500" />
-              </div>
-              <span className="text-xs font-bold text-gray-600 text-center">{isBn ? "সেলফি (NID সহ)" : "Selfie (with NID)"}</span>
-          </button>
-          <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-primary-50 hover:border-primary-300 transition-colors">
-              <div className="w-10 h-10 bg-white dark:bg-gray-800 transition-colors rounded-full flex items-center justify-center shadow-sm">
-                <UploadCloud size={18} className="text-primary-500" />
-              </div>
-              <span className="text-xs font-bold text-gray-600 text-center">{isBn ? "পাসপোর্ট সাইজ ছবি" : "Passport Size Photo"}</span>
-          </button>
+        <div className="grid grid-cols-2 gap-3 mt-3">
+          <FileUploader id="selfie" title={isBn ? "সেলফি (NID সহ)" : "Selfie (with NID)"} />
+          <FileUploader id="photo" title={isBn ? "পাসপোর্ট সাইজ ছবি" : "Passport Size Photo"} />
         </div>
       </div>
 
@@ -816,18 +928,9 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
         <div className="grid grid-cols-1 gap-3">
           {category?.id === 'personal' && (
             <>
-              <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-primary-50 hover:border-primary-300 transition-colors text-left">
-                 <UploadCloud size={18} className="text-gray-500 shrink-0" />
-                 <span className="text-xs font-bold text-gray-600 flex-1">{isBn ? "অফিস আইডি কার্ড (Job ID)" : "Office ID Card"}</span>
-              </button>
-              <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-primary-50 hover:border-primary-300 transition-colors text-left">
-                 <UploadCloud size={18} className="text-gray-500 shrink-0" />
-                 <span className="text-xs font-bold text-gray-600 flex-1">{isBn ? "বেতনের প্রমাণপত্র" : "Salary Certificate"}</span>
-              </button>
-              <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-primary-50 hover:border-primary-300 transition-colors text-left">
-                 <UploadCloud size={18} className="text-gray-500 shrink-0" />
-                 <span className="text-xs font-bold text-gray-600 flex-1">{isBn ? "অ্যাপয়েন্টমেন্ট লেটার" : "Appointment Letter"}</span>
-              </button>
+              <FileUploader id="office_id" title={isBn ? "অফিস আইডি কার্ড (Job ID)" : "Office ID Card"} />
+              <FileUploader id="salary_cert" title={isBn ? "বেতনের প্রমাণপত্র" : "Salary Certificate"} />
+              <FileUploader id="appointment_letter" title={isBn ? "অ্যাপয়েন্টমেন্ট লেটার" : "Appointment Letter"} />
             </>
           )}
 

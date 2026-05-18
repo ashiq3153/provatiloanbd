@@ -27,6 +27,16 @@ export default function Support() {
     }
   ];
 
+  const openTelegram = () => {
+    const telegram = useAppStore.getState().systemSettings?.telegramSupport || 'https://t.me/Provati_Loan';
+    window.open(telegram, '_blank');
+  };
+
+  const openWhatsApp = () => {
+    const whatsapp = useAppStore.getState().systemSettings?.whatsappSupport || 'https://wa.me/8801700000000';
+    window.open(whatsapp, '_blank');
+  };
+
   return (
     <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-950 transition-colors pt-6 pb-24 px-5">
       <div className="mb-6 flex items-center gap-3">
@@ -44,17 +54,17 @@ export default function Support() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-8">
-        <button className="flex flex-col items-center justify-center gap-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-4 rounded-2xl shadow-sm">
-          <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-            <Phone size={18} className="text-green-600 dark:text-green-400" />
+        <button onClick={openWhatsApp} className="flex flex-col items-center justify-center gap-2 bg-white dark:bg-gray-900 border border-[#25D366]/20 p-4 rounded-2xl shadow-sm hover:bg-[#25D366]/5 transition-colors">
+          <div className="w-10 h-10 rounded-full bg-[#25D366]/10 flex items-center justify-center">
+            <MessageCircle size={18} className="text-[#25D366]" />
           </div>
-          <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{isBn ? 'কল করুন' : 'Call Us'}</span>
+          <span className="text-sm font-bold text-[#25D366]">{isBn ? 'হোয়াটসঅ্যাপ' : 'WhatsApp'}</span>
         </button>
-        <button className="flex flex-col items-center justify-center gap-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-4 rounded-2xl shadow-sm">
-          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-            <MessageCircle size={18} className="text-blue-600 dark:text-blue-400" />
+        <button onClick={openTelegram} className="flex flex-col items-center justify-center gap-2 bg-white dark:bg-gray-900 border border-[#0088cc]/20 p-4 rounded-2xl shadow-sm hover:bg-[#0088cc]/5 transition-colors">
+          <div className="w-10 h-10 rounded-full bg-[#0088cc]/10 flex items-center justify-center">
+            <Send size={18} className="text-[#0088cc]" />
           </div>
-          <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{isBn ? 'লাইভ চ্যাট' : 'Live Chat'}</span>
+          <span className="text-sm font-bold text-[#0088cc]">{isBn ? 'টেলিগ্রাম' : 'Telegram'}</span>
         </button>
       </div>
 
@@ -112,7 +122,7 @@ export default function Support() {
         <p className="text-gray-400 text-xs mb-4 relative z-10">
           {isBn ? 'আমাদের সাপোর্ট টিমের সাথে কথা বলুন, আমরা ২৪/৭ আছি আপনার সেবায়।' : 'Talk to our support team, we are available 24/7 at your service.'}
         </p>
-        <button className="w-full bg-white text-gray-900 font-bold py-3 rounded-xl flex items-center justify-center gap-2 relative z-10 hover:bg-gray-100 transition-colors">
+        <button onClick={openTelegram} className="w-full bg-white text-gray-900 font-bold py-3 rounded-xl flex items-center justify-center gap-2 relative z-10 hover:bg-gray-100 transition-colors">
           <Send size={16} />
           {isBn ? 'ম্যাসেজ পাঠান' : 'Send Message'}
         </button>

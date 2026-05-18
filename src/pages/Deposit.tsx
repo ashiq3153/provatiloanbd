@@ -29,8 +29,14 @@ export default function Deposit() {
   const [isSuccess, setIsSuccess] = useState(false);
 
   // Handlers for social
-  const openTelegram = () => window.open('https://t.me/YourSupportUsername', '_blank');
-  const openWhatsApp = () => window.open('https://wa.me/8801700000000', '_blank');
+  const openTelegram = () => {
+    const telegram = useAppStore.getState().systemSettings?.telegramSupport || 'https://t.me/Provati_Loan';
+    window.open(telegram, '_blank');
+  };
+  const openWhatsApp = () => {
+    const whatsapp = useAppStore.getState().systemSettings?.whatsappSupport || 'https://wa.me/8801700000000';
+    window.open(whatsapp, '_blank');
+  };
 
   const selectedMethod = paymentMethods.find((m) => m.id === method);
 

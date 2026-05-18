@@ -10,6 +10,29 @@ export async function getAllProfiles(): Promise<Profile[]> {
   return data || [];
 }
 
+export async function banUser(chatId: number, isBanned: boolean): Promise<boolean> {
+  const { error } = await supabase.from('profiles').update({ is_banned: isBanned }).eq('chat_id', chatId);
+  if (error) {
+    console.error('banUser error:', error);
+    return false;
+  }
+  return true;
+}
+
+export async function deleteUser(chatId: number): Promise<boolean> {
+  // Since we don't have cascade delete set up in foreign keys for all tables maybe,
+  // we delete transactions and loan applications first to be safe, then the profile.
+  await supabase.from('transactions').delete().eq('chat_id', chatId);
+  await supabase.from('loan_applications').delete().eq('chat_id', chatId);
+  
+  const { error } = await supabase.from('profiles').delete().eq('chat_id', chatId);
+  if (error) {
+    console.error('deleteUser error:', error);
+    return false;
+  }
+  return true;
+}
+
 export async function getAllLoanApplications(): Promise<LoanApplication[]> {
   const { data, error } = await supabase.from('loan_applications').select('*').order('applied_at', { ascending: false });
   if (error) console.error('getAllLoanApplications error:', error);

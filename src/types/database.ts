@@ -11,6 +11,7 @@ export interface Profile {
   phone: string | null;
   address: string | null;
   nid_number: string | null;
+  is_banned: boolean;
   created_at: string;
 }
 
@@ -36,8 +37,11 @@ export interface LoanApplication {
   email: string | null;
   current_address: string;
   permanent_address: string;
+  nid_number: string;
   // Professional info (varies by category)
   professional_info: Record<string, string> | null;
+  // Documents
+  documents: Record<string, string> | null;
   // Bank info
   bank_name: string;
   account_name: string;
@@ -50,7 +54,7 @@ export interface LoanApplication {
   nominee_mobile: string;
   nominee_nid: string;
   // Status
-  status: 'pending' | 'approved' | 'rejected' | 'active' | 'completed';
+  status: 'pending' | 'approved' | 'rejected' | 'active' | 'completed' | 'action_required';
   admin_feedback: string | null;
   applied_at: string;
   approved_at: string | null;

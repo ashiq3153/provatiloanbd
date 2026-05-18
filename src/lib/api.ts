@@ -53,6 +53,60 @@ export async function submitLoanApplication(application: Omit<LoanApplication, '
   return data;
 }
 
+export async function updateLoanApplication(id: string, application: Partial<LoanApplication>): Promise<LoanApplication | null> {
+  const { data, error } = await supabase
+    .from('loan_applications')
+    .update({ ...application, status: 'pending' }) // Reset to pending after update
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('updateLoanApplication error:', error);
+    return null;
+  }
+  return data;
+}
+
+export async function checkDuplicateApplication(
+  mobile: string,
+  email: string | null,
+  accountNumber: string,
+  nomineeNid: string,
+  nidNumber: string,
+  passportNumber: string | null,
+  excludeId?: string | null
+): Promise<string | null> {
+  let query = supabase.from('loan_applications').select('id, mobile, email, account_number, nominee_nid, nid_number, professional_info');
+  if (excludeId) {
+    query = query.neq('id', excludeId);
+  }
+  
+  const orConditions = [
+    `mobile.eq.${mobile}`,
+    `account_number.eq.${accountNumber}`,
+    `nominee_nid.eq.${nomineeNid}`,
+    `nid_number.eq.${nidNumber}`
+  ];
+  if (email) orConditions.push(`email.eq.${email}`);
+  if (passportNumber) orConditions.push(`professional_info->>passportNumber.eq.${passportNumber}`);
+  
+  query = query.or(orConditions.join(','));
+  
+  const { data, error } = await query;
+  if (error || !data || data.length === 0) return null;
+
+  const duplicate = data[0];
+  if (duplicate.mobile === mobile) return 'Mobile Number';
+  if (email && duplicate.email === email) return 'Email Address';
+  if (duplicate.account_number === accountNumber) return 'Bank Account Number';
+  if (duplicate.nid_number === nidNumber) return 'NID Number';
+  if (duplicate.nominee_nid === nomineeNid) return 'Nominee NID';
+  if (passportNumber && duplicate.professional_info && (duplicate.professional_info as any).passportNumber === passportNumber) return 'Passport Number';
+  
+  return 'Information';
+}
+
 export async function getLoanApplications(chatId: number): Promise<LoanApplication[]> {
   const { data, error } = await supabase
     .from('loan_applications')
@@ -139,6 +193,26 @@ export async function getSuccessStories(): Promise<SuccessStory[]> {
     return [];
   }
   return data || [];
+}
+
+// ── Document Upload API ──────────────────────────────────
+
+export async function uploadDocument(file: File, userId: number, docType: string): Promise<string | null> {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${userId}_${docType}_${Date.now()}.${fileExt}`;
+  const filePath = `${userId}/${fileName}`;
+
+  const { error } = await supabase.storage
+    .from('loan_documents')
+    .upload(filePath, file, { upsert: true });
+
+  if (error) {
+    console.error('uploadDocument error:', error);
+    return null;
+  }
+
+  const { data } = supabase.storage.from('loan_documents').getPublicUrl(filePath);
+  return data.publicUrl;
 }
 
 // ── Dashboard Stats ──────────────────────────────────────

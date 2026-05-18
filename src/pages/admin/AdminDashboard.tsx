@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign } from 'lucide-react';
-import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, getSystemSettings, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory } from '../../lib/adminApi';
+import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, getSystemSettings, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
 import { useAppStore } from '../../lib/store';
+import { motion, AnimatePresence } from 'motion/react';
+import { Trash2, Ban } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings'>('overview');
@@ -33,7 +35,9 @@ export default function AdminDashboard() {
     minRateExpat: 1.0,
     minRateStudent: 0.8,
     minRateEmergency: 2.0,
-    minRateWomen: 0.8
+    minRateWomen: 0.8,
+    telegramSupport: 'https://t.me/Provati_Loan',
+    whatsappSupport: 'https://wa.me/8801700000000'
   });
 
   useEffect(() => {
@@ -97,11 +101,11 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleLoanStatus = async (id: string, status: LoanApplication['status']) => {
-    const success = await updateLoanApplicationStatus(id, status);
+  const handleLoanStatus = async (id: string, status: LoanApplication['status'], feedback?: string) => {
+    const success = await updateLoanApplicationStatus(id, status, feedback);
     if (success) {
-      toast.success(`Loan marked as ${status}`);
-      setLoans(loans.map(l => l.id === id ? { ...l, status } : l));
+      toast.success(`Loan marked as ${status.replace('_', ' ')}`);
+      setLoans(loans.map(l => l.id === id ? { ...l, status, admin_feedback: feedback || l.admin_feedback } : l));
     } else {
       toast.error('Failed to update loan status');
     }
@@ -114,6 +118,30 @@ export default function AdminDashboard() {
       setTransactions(transactions.map(t => t.id === id ? { ...t, status } : t));
     } else {
       toast.error('Failed to update transaction status');
+    }
+  };
+
+  const handleBanUser = async (chatId: number, isBanned: boolean) => {
+    const success = await banUser(chatId, isBanned);
+    if (success) {
+      toast.success(isBanned ? 'User banned successfully' : 'User unbanned successfully');
+      setProfiles(profiles.map(p => p.chat_id === chatId ? { ...p, is_banned: isBanned } : p));
+    } else {
+      toast.error('Failed to update user status');
+    }
+  };
+
+  const handleDeleteUser = async (chatId: number) => {
+    if (!window.confirm('Are you sure you want to completely delete this user and all their data? This action cannot be undone.')) return;
+    const success = await deleteUser(chatId);
+    if (success) {
+      toast.success('User and all associated data deleted');
+      setProfiles(profiles.filter(p => p.chat_id !== chatId));
+      // Optional: remove their loans and transactions from local state too
+      setLoans(loans.filter(l => l.chat_id !== chatId));
+      setTransactions(transactions.filter(t => t.chat_id !== chatId));
+    } else {
+      toast.error('Failed to delete user');
     }
   };
 
@@ -144,7 +172,15 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {activeTab === 'overview' && (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+        >
+          {activeTab === 'overview' && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
             <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-xl flex items-center justify-center mb-4"><Users size={24} /></div>
@@ -213,15 +249,44 @@ export default function AdminDashboard() {
                         {loan.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 flex gap-2">
+                    <td className="px-6 py-4 flex flex-col gap-2">
                       {loan.status === 'pending' && (
-                        <>
-                          <button onClick={() => handleLoanStatus(loan.id, 'approved')} className="p-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors"><CheckCircle size={18} /></button>
-                          <button onClick={() => handleLoanStatus(loan.id, 'rejected')} className="p-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-lg transition-colors"><XCircle size={18} /></button>
-                        </>
+                        <div className="flex gap-2 mb-2">
+                          <button onClick={() => handleLoanStatus(loan.id, 'approved')} className="p-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors" title="Approve"><CheckCircle size={18} /></button>
+                          <button onClick={() => handleLoanStatus(loan.id, 'rejected')} className="p-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-lg transition-colors" title="Reject"><XCircle size={18} /></button>
+                        </div>
+                      )}
+                      {(loan.status === 'pending' || loan.status === 'action_required') && (
+                        <div className="flex flex-col gap-1">
+                           <input 
+                             type="text" 
+                             placeholder="Feedback for user..." 
+                             className="px-2 py-1 text-xs border rounded bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 w-32"
+                             id={`feedback-${loan.id}`}
+                           />
+                           <button 
+                             onClick={() => {
+                               const fb = (document.getElementById(`feedback-${loan.id}`) as HTMLInputElement).value;
+                               if(!fb) return toast.error('Please enter feedback');
+                               handleLoanStatus(loan.id, 'action_required', fb);
+                             }}
+                             className="text-[10px] px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg font-bold"
+                           >
+                             Request Update
+                           </button>
+                        </div>
                       )}
                       {(loan.status === 'approved' || loan.status === 'active') && (
                          <button onClick={() => handleLoanStatus(loan.id, 'completed')} className="text-xs px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-bold">Mark Completed</button>
+                      )}
+                      {loan.documents && Object.keys(loan.documents).length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {Object.entries(loan.documents).map(([key, url]) => (
+                            <a key={key} href={url as string} target="_blank" rel="noopener noreferrer" className="text-[10px] px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-200 transition-colors text-gray-700 dark:text-gray-300">
+                              {key.replace('_', ' ')}
+                            </a>
+                          ))}
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -307,11 +372,13 @@ export default function AdminDashboard() {
                   <th className="px-6 py-4">Chat ID</th>
                   <th className="px-6 py-4">Username</th>
                   <th className="px-6 py-4">Joined At</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {profiles.map(user => (
-                  <tr key={user.chat_id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                  <motion.tr layout key={user.chat_id} className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${user.is_banned ? 'opacity-50' : ''}`}>
                     <td className="px-6 py-4 flex items-center gap-3">
                       <img src={user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name}`} alt="" className="w-8 h-8 rounded-full" />
                       <span className="font-bold text-gray-900 dark:text-white">{user.first_name} {user.last_name}</span>
@@ -319,7 +386,30 @@ export default function AdminDashboard() {
                     <td className="px-6 py-4 font-mono text-gray-600 dark:text-gray-400">{user.chat_id}</td>
                     <td className="px-6 py-4 text-blue-500">@{user.username || '-'}</td>
                     <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{new Date(user.created_at).toLocaleDateString()}</td>
-                  </tr>
+                    <td className="px-6 py-4">
+                      {user.is_banned ? (
+                        <span className="px-2 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-md text-xs font-bold">Suspended</span>
+                      ) : (
+                        <span className="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-md text-xs font-bold">Active</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 flex justify-end gap-2">
+                      <button 
+                        onClick={() => handleBanUser(user.chat_id, !user.is_banned)} 
+                        className={`p-2 rounded-lg transition-colors ${user.is_banned ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'}`}
+                        title={user.is_banned ? 'Unban User' : 'Suspend User'}
+                      >
+                        {user.is_banned ? <CheckCircle size={16} /> : <Ban size={16} />}
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteUser(user.chat_id)}
+                        className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
+                        title="Delete User & Data"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>
@@ -455,11 +545,25 @@ export default function AdminDashboard() {
                 <input type="number" step="0.1" value={config.minRateWomen} onChange={e => setConfig({...config, minRateWomen: parseFloat(e.target.value) || 0})} className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white" />
               </div>
             </div>
+            
+            <h3 className="font-bold text-gray-700 dark:text-gray-300 mb-3 border-b border-gray-100 dark:border-gray-700 pb-2">Support Links</h3>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Telegram Link</label>
+                <input type="text" value={config.telegramSupport || ''} onChange={e => setConfig({...config, telegramSupport: e.target.value})} className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">WhatsApp Link</label>
+                <input type="text" value={config.whatsappSupport || ''} onChange={e => setConfig({...config, whatsappSupport: e.target.value})} className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white" />
+              </div>
+            </div>
 
             <button onClick={handleSaveSettings} className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-xl font-bold transition-colors w-full">Save System Settings</button>
           </div>
         </div>
       )}
+      </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

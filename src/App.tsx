@@ -11,6 +11,7 @@ import ApplyLoan from './pages/ApplyLoan';
 import Deposit from './pages/Deposit';
 import Withdraw from './pages/Withdraw';
 import Transactions from './pages/Transactions';
+import Loans from './pages/Loans';
 import PlaceholderPage from './pages/PlaceholderPage';
 import ApplicationDetails from './pages/ApplicationDetails';
 import Profile from './pages/Profile';
@@ -69,7 +70,7 @@ export default function App() {
               <Route path="/apply" element={<ApplyLoan />} />
               <Route path="/deposit" element={<Deposit />} />
               <Route path="/withdraw" element={<Withdraw />} />
-              <Route path="/loans" element={<PlaceholderPage title="My Loans" />} />
+              <Route path="/loans" element={<Loans />} />
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/application/:id" element={<ApplicationDetails />} />
               <Route path="/profile" element={<Profile />} />

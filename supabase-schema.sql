@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS profiles (
   phone TEXT,
   address TEXT,
   nid_number TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  is_banned BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
