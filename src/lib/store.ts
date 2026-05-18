@@ -1,0 +1,32 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+interface AppState {
+  theme: 'light' | 'dark';
+  language: 'en' | 'bn';
+  systemSettings: any;
+  toggleTheme: () => void;
+  setLanguage: (lang: 'en' | 'bn') => void;
+  setSystemSettings: (settings: any) => void;
+}
+
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
+      theme: 'light',
+      language: 'bn', // Defaulting to Bangla as requested context implies Bangla might be preferred, or English
+      systemSettings: null,
+      toggleTheme: () =>
+        set((state) => {
+          const newTheme = state.theme === 'light' ? 'dark' : 'light';
+          document.documentElement.classList.toggle('dark', newTheme === 'dark');
+          return { theme: newTheme };
+        }),
+      setLanguage: (lang) => set({ language: lang }),
+      setSystemSettings: (settings) => set({ systemSettings: settings }),
+    }),
+    {
+      name: 'app-settings',
+    }
+  )
+);
