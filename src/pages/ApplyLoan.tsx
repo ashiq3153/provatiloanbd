@@ -303,27 +303,121 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
       }
 
       if (step === 7 && acceptedTerms) {
-          if (editId) {
-            result = await updateLoanApplication(editId, payload);
-          } else {
-            result = await submitLoanApplication(payload);
-          }
-
-          if (result) {
-            toast.success(isBn ? 'আপনার আবেদন সফলভাবে জমা হয়েছে!' : 'Application successfully submitted!', { id: loadingId });
-          } else {
-            toast.error(isBn ? 'সমস্যা হয়েছে, আবার চেষ্টা করুন' : 'Failed, please try again', { id: loadingId });
-          }
-        } catch (err) {
-          console.error('Loan submit error:', err);
-          toast.error(isBn ? 'সার্ভার সমস্যা' : 'Server error', { id: loadingId });
-        }
-        setIsSubmitting(false);
+        setShowConfirmModal(true);
+        return;
       }
 
       setStep(s => s + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  };
+
+  const processLoanApplication = async () => {
+    setShowConfirmModal(false);
+    setIsSubmitting(true);
+    const loadingId = toast.loading(isBn ? 'আবেদন জমা দেওয়া হচ্ছে...' : 'Submitting application...');
+    
+    try {
+      const formData = methods.getValues();
+      
+      const duplicateMatch = await checkDuplicateApplication(
+        formData.mobile,
+        formData.email || null,
+        formData.accountNumber,
+        formData.nomineeNid,
+        formData.nidNumber,
+        formData.passportNumber || null,
+        editId
+      );
+      
+      if (duplicateMatch) {
+        toast.error(isBn ? `এই ${duplicateMatch} ইতিমধ্যে ব্যবহার করা হয়েছে! Fake Apply Detected.` : `This ${duplicateMatch} is already used! Fake Apply Detected.`, { id: loadingId });
+        setIsSubmitting(false);
+        return;
+      }
+
+      const { data: profile } = await supabase.from('profiles').select('is_banned').eq('chat_id', user.id).single();
+      if (profile?.is_banned) {
+        toast.error(isBn ? 'আপনার অ্যাকাউন্ট স্থগিত করা হয়েছে। আপনি আবেদন করতে পারবেন না।' : 'Your account is suspended. You cannot apply.', { id: loadingId });
+        setIsSubmitting(false);
+        return;
+      }
+
+      const professionalInfo: Record<string, string> = {};
+      if (category?.id === 'personal') {
+        professionalInfo.companyName = formData.companyName || '';
+        professionalInfo.designation = formData.designation || '';
+        professionalInfo.workDuration = formData.workDuration || '';
+        professionalInfo.monthlyIncome = formData.monthlyIncome || '';
+      } else if (category?.id === 'business' || category?.id === 'women') {
+        professionalInfo.businessName = formData.businessName || '';
+        professionalInfo.shopAddress = formData.shopAddress || '';
+        professionalInfo.tradeLicense = formData.tradeLicense || '';
+      } else if (category?.id === 'expat') {
+        professionalInfo.workingCountry = formData.workingCountry || '';
+        professionalInfo.visaType = formData.visaType || '';
+        professionalInfo.passportNumber = formData.passportNumber || '';
+      } else if (category?.id === 'student') {
+        professionalInfo.institutionName = formData.institutionName || '';
+        professionalInfo.studentId = formData.studentId || '';
+        professionalInfo.guardianIncome = formData.guardianIncome || '';
+      } else if (category?.id === 'emergency') {
+        professionalInfo.professionName = formData.professionName || '';
+        professionalInfo.emergencyReason = formData.emergencyReason || '';
+      }
+
+      const payload = {
+        chat_id: user.id,
+        loan_category: category?.id || 'personal',
+        amount,
+        tenure_months: tenure,
+        interest_rate: category?.minRate || 0,
+        emi_amount: calculateEMI(),
+        processing_fee: amount * (systemSettings?.procFee || 0.01),
+        security_deposit: amount * (systemSettings?.secDeposit || 0.1),
+        full_name: formData.fullName,
+        father_name: formData.fatherName,
+        mother_name: formData.motherName,
+        dob: formData.dob,
+        gender: formData.gender,
+        mobile: formData.mobile,
+        whatsapp: formData.whatsapp || null,
+        email: formData.email || null,
+        current_address: formData.currentAddress,
+        permanent_address: formData.permanentAddress,
+        nid_number: formData.nidNumber,
+        professional_info: professionalInfo,
+        bank_name: formData.bankName,
+        account_name: formData.accountName,
+        account_number: formData.accountNumber,
+        routing_number: formData.routingNumber || null,
+        mobile_banking: formData.mobileBanking || null,
+        nominee_name: formData.nomineeName,
+        nominee_relation: formData.nomineeRelation,
+        nominee_mobile: formData.nomineeMobile,
+        nominee_nid: formData.nomineeNid,
+        documents: documents,
+      };
+
+      let result;
+      if (editId) {
+        result = await updateLoanApplication(editId, payload);
+      } else {
+        result = await submitLoanApplication(payload);
+      }
+
+      if (result) {
+        toast.success(isBn ? 'আপনার আবেদন সফলভাবে জমা হয়েছে!' : 'Application successfully submitted!', { id: loadingId });
+        setStep(8);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        toast.error(isBn ? 'সমস্যা হয়েছে, আবার চেষ্টা করুন' : 'Failed, please try again', { id: loadingId });
+      }
+    } catch (err) {
+      console.error('Loan submit error:', err);
+      toast.error(isBn ? 'সার্ভার সমস্যা' : 'Server error', { id: loadingId });
+    }
+    setIsSubmitting(false);
   };
 
   const prevStep = () => {

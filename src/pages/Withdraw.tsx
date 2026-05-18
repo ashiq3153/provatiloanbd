@@ -63,6 +63,7 @@ export default function Withdraw() {
         payment_method: 'bank',
         sender_number: null,
         trx_id: null,
+        screenshot_url: null,
         status: 'pending',
       });
 
