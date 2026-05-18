@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban } from 'lucide-react';
+import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye } from 'lucide-react';
 import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, getSystemSettings, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
@@ -322,7 +322,8 @@ export default function AdminDashboard() {
                   <th className="px-6 py-4">User (Chat ID)</th>
                   <th className="px-6 py-4">Type / Method</th>
                   <th className="px-6 py-4">Amount</th>
-                  <th className="px-6 py-4">Trx ID</th>
+                  <th className="px-6 py-4">Details</th>
+                  <th className="px-6 py-4">Proof</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Actions</th>
                 </tr>
@@ -332,11 +333,25 @@ export default function AdminDashboard() {
                   <tr key={txn.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                     <td className="px-6 py-4 font-mono text-gray-900 dark:text-white">{txn.chat_id}</td>
                     <td className="px-6 py-4">
-                      <div className="font-bold text-gray-900 dark:text-white capitalize">{txn.type.replace('_', ' ')}</div>
+                      <div className="font-bold text-gray-900 dark:text-white capitalize">
+                        {txn.type === 'deposit' && txn.deposit_type ? txn.deposit_type.replace('_', ' ') : txn.type.replace('_', ' ')}
+                      </div>
                       <div className="text-xs text-gray-500 uppercase">{txn.payment_method}</div>
                     </td>
                     <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">৳{txn.amount?.toLocaleString()}</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400 text-xs font-mono">{txn.trx_id || '-'}</td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-mono text-gray-900 dark:text-white">Trx: {txn.trx_id || '-'}</div>
+                      <div className="text-xs text-gray-500">From: {txn.sender_number || '-'}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      {txn.screenshot_url ? (
+                        <a href={txn.screenshot_url} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline text-xs flex items-center gap-1 font-bold">
+                          <Eye size={14} /> View
+                        </a>
+                      ) : (
+                        <span className="text-gray-400 text-xs">No image</span>
+                      )}
+                    </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded-md text-xs font-bold uppercase ${
                         txn.status === 'completed' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
