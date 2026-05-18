@@ -12,6 +12,7 @@ export const getLoanSchema = (isBn: boolean) => z.object({
   email: z.string().email({ message: isBn ? "সঠিক ইমেইল দিন" : "Enter a valid email" }).optional().or(z.literal('')),
   currentAddress: z.string().min(5, { message: isBn ? "সঠিক ঠিকানা দিন" : "Enter valid address" }),
   permanentAddress: z.string().min(5, { message: isBn ? "সঠিক ঠিকানা দিন" : "Enter valid address" }),
+  nidNumber: z.string().min(10, { message: isBn ? "সঠিক NID নাম্বার দিন (অন্তত ১০ ডিজিট)" : "Enter valid NID (min 10 digits)" }),
 
   // Step 4 - Using min(1) so they fail if empty, but we'll only trigger them conditionally
   companyName: z.string().min(1, { message: isBn ? "কোম্পানির নাম দিন" : "Enter company name" }).optional(),

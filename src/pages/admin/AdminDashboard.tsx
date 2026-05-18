@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign } from 'lucide-react';
+import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban } from 'lucide-react';
 import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, getSystemSettings, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
 import { useAppStore } from '../../lib/store';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trash2, Ban } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings'>('overview');
@@ -50,7 +49,9 @@ export default function AdminDashboard() {
         minRateExpat: systemSettings.minRateExpat ? systemSettings.minRateExpat * 100 : 1.0,
         minRateStudent: systemSettings.minRateStudent ? systemSettings.minRateStudent * 100 : 0.8,
         minRateEmergency: systemSettings.minRateEmergency ? systemSettings.minRateEmergency * 100 : 2.0,
-        minRateWomen: systemSettings.minRateWomen ? systemSettings.minRateWomen * 100 : 0.8
+        minRateWomen: systemSettings.minRateWomen ? systemSettings.minRateWomen * 100 : 0.8,
+        telegramSupport: systemSettings.telegramSupport || 'https://t.me/Provati_Loan',
+        whatsappSupport: systemSettings.whatsappSupport || 'https://wa.me/8801700000000'
       });
     }
   }, [systemSettings]);
@@ -89,7 +90,9 @@ export default function AdminDashboard() {
       minRateExpat: config.minRateExpat / 100,
       minRateStudent: config.minRateStudent / 100,
       minRateEmergency: config.minRateEmergency / 100,
-      minRateWomen: config.minRateWomen / 100
+      minRateWomen: config.minRateWomen / 100,
+      telegramSupport: config.telegramSupport,
+      whatsappSupport: config.whatsappSupport
     };
     
     const success = await updateSystemSettings('global_loan_config', newSettings);
