@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign } from 'lucide-react';
 import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, getSystemSettings, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory } from '../../lib/adminApi';
-import type { Profile, LoanApplication, Transaction } from '../../types/database';
+import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
 import { useAppStore } from '../../lib/store';
 
