@@ -873,7 +873,7 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
             const file = e.target.files?.[0];
             if (!file) return;
             setUploadingDoc(id);
-            const url = await uploadDocument(file, id, user.id);
+            const url = await uploadDocument(file, user.id, id);
             if (url) {
               setDocuments(prev => ({ ...prev, [id]: url }));
             } else {
