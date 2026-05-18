@@ -243,11 +243,42 @@ export default function ApplyLoan() {
           if (loan.documents) setDocuments(loan.documents);
         }
       });
-    } else if (selectedCategory && !category) {
-      const matched = categories.find((cat) => cat.id === selectedCategory);
-      if (matched) setCategory(matched);
+    } else {
+      const draftStr = localStorage.getItem('loan_draft_v1');
+      if (draftStr) {
+        try {
+          const draft = JSON.parse(draftStr);
+          if (draft.step) setStep(draft.step);
+          if (draft.categoryId) {
+            const matched = categories.find(cat => cat.id === draft.categoryId);
+            if (matched) setCategory(matched);
+          }
+          if (draft.amount) setAmount(draft.amount);
+          if (draft.tenure) setTenure(draft.tenure);
+          if (draft.formData) {
+            methods.reset(draft.formData);
+          }
+        } catch(e) {}
+      } else if (selectedCategory && !category) {
+        const matched = categories.find((cat) => cat.id === selectedCategory);
+        if (matched) setCategory(matched);
+      }
     }
   }, [location.search, categories]);
+
+  const watchedData = methods.watch();
+  useEffect(() => {
+    if (!editId && step < 8) {
+      const draft = {
+        step,
+        categoryId: category?.id,
+        amount,
+        tenure,
+        formData: watchedData
+      };
+      localStorage.setItem('loan_draft_v1', JSON.stringify(draft));
+    }
+  }, [step, category, amount, tenure, watchedData, editId]);
 
   // Auto-adjusted tenure state
   const handleAmountChange = (val: number) => {
@@ -408,6 +439,7 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
 
       if (result) {
         toast.success(isBn ? 'আপনার আবেদন সফলভাবে জমা হয়েছে!' : 'Application successfully submitted!', { id: loadingId });
+        localStorage.removeItem('loan_draft_v1');
         setStep(8);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
@@ -900,7 +932,11 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
              )}
            </div>
            <span className="text-xs font-bold text-gray-600 text-center">{title}</span>
-           {documents[id] && <span className="text-[10px] text-green-600 font-bold">{isBn ? 'আপলোড হয়েছে' : 'Uploaded'}</span>}
+           {documents[id] && (
+             <span className="text-[10px] text-green-600 font-bold">
+               {isBn ? 'আপলোড হয়েছে (পরিবর্তন করতে ক্লিক করুন)' : 'Uploaded (Click to change)'}
+             </span>
+           )}
         </button>
       </div>
     );

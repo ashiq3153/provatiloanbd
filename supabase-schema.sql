@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS loan_applications (
   nominee_relation TEXT NOT NULL,
   nominee_mobile TEXT NOT NULL,
   nominee_nid TEXT NOT NULL,
+  documents JSONB,
   -- Status
   status TEXT DEFAULT 'pending',
   admin_feedback TEXT,
