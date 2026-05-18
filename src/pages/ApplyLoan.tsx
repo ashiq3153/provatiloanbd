@@ -851,11 +851,7 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
           <input type="text" {...register("nomineeNid")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nomineeNid ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="নমিনির এনআইডি নম্বর" /><ErrorText field="nomineeNid" />
         </div>
         <div>
-           <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "নমিনির ছবি (ঐচ্ছিক)" : "Nominee Photo (Optional)"}</label>
-           <button className="w-full bg-gray-50 dark:bg-gray-900 transition-colors border border-dashed border-gray-200 rounded-xl py-3 flex items-center justify-center gap-2 hover:bg-primary-50 hover:border-primary-300 transition-colors">
-             <UploadCloud size={16} className="text-gray-500" />
-             <span className="text-xs font-bold text-gray-600">{isBn ? "ছবি আপলোড করুন" : "Upload Photo"}</span>
-           </button>
+           <FileUploader id="nominee_photo" title={isBn ? "নমিনির ছবি (ঐচ্ছিক)" : "Nominee Photo (Optional)"} />
         </div>
       </div>
     </div>

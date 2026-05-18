@@ -1,11 +1,11 @@
-import { ArrowLeft, MessageCircle, Send, UploadCloud, AlertCircle, Landmark } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Send, UploadCloud, AlertCircle, Landmark, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
 import { toast } from 'sonner';
 import { getTelegramUser } from '../lib/telegram';
-import { createTransaction } from '../lib/api';
+import { createTransaction, uploadDocument } from '../lib/api';
 
 const paymentMethods = [
   { id: 'bkash', name: 'bKash', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e1/Bkash_logo.svg', color: 'bg-[#e2136e]', text: 'text-[#e2136e]', bgLight: 'bg-[#e2136e]/10', border: 'border-[#e2136e]/30' },
@@ -27,6 +27,8 @@ export default function Deposit() {
   const [trxId, setTrxId] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [screenshotUrl, setScreenshotUrl] = useState<string>('');
+  const [uploading, setUploading] = useState(false);
 
   // Handlers for social
   const openTelegram = () => {
@@ -58,6 +60,7 @@ export default function Deposit() {
         payment_method: method,
         sender_number: senderNo,
         trx_id: trxId,
+        screenshot_url: screenshotUrl || null,
         status: 'pending',
       });
 
@@ -275,12 +278,49 @@ export default function Deposit() {
                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1 transition-colors">
                  {isBn ? 'স্ক্রিনশট (ঐচ্ছিক)' : 'Screenshot (Optional)'}
                </label>
-               <button type="button" className="w-full bg-gray-50 dark:bg-gray-900 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl py-4 flex flex-col items-center justify-center gap-2 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-800 transition-colors">
-                 <UploadCloud size={24} className="text-gray-400 dark:text-gray-500 transition-colors" />
-                 <span className="text-xs font-bold text-gray-600 dark:text-gray-400 transition-colors">
-                   {isBn ? 'পেমেন্টের স্ক্রিনশট আপলোড করুন' : 'Upload payment screenshot'}
-                 </span>
-               </button>
+               
+               <div className="relative">
+                 <input 
+                   type="file" 
+                   id="screenshot-upload"
+                   className="hidden" 
+                   accept="image/*"
+                   onChange={async (e) => {
+                     const file = e.target.files?.[0];
+                     if (!file) return;
+                     setUploading(true);
+                     const url = await uploadDocument(file, user.id, 'deposit_screenshot');
+                     if (url) {
+                       setScreenshotUrl(url);
+                     } else {
+                       toast.error(isBn ? 'ফাইল আপলোড ব্যর্থ হয়েছে' : 'File upload failed');
+                     }
+                     setUploading(false);
+                   }}
+                 />
+                 <label 
+                   htmlFor="screenshot-upload" 
+                   className="w-full bg-gray-50 dark:bg-gray-900 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl py-4 flex flex-col items-center justify-center gap-2 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-800 transition-colors cursor-pointer"
+                 >
+                   {uploading ? (
+                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mb-1"></div>
+                   ) : screenshotUrl ? (
+                     <div className="flex flex-col items-center gap-1">
+                       <CheckCircle2 size={24} className="text-green-500" />
+                       <span className="text-xs font-bold text-green-600 dark:text-green-400">
+                         {isBn ? 'স্ক্রিনশট আপলোড হয়েছে' : 'Screenshot Uploaded'}
+                       </span>
+                     </div>
+                   ) : (
+                     <>
+                       <UploadCloud size={24} className="text-gray-400 dark:text-gray-500 transition-colors" />
+                       <span className="text-xs font-bold text-gray-600 dark:text-gray-400 transition-colors">
+                         {isBn ? 'পেমেন্টের স্ক্রিনশট আপলোড করুন' : 'Upload payment screenshot'}
+                       </span>
+                     </>
+                   )}
+                 </label>
+               </div>
             </div>
           </form>
         </section>

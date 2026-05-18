@@ -70,6 +70,7 @@ export interface Transaction {
   payment_method: string | null;
   sender_number: string | null;
   trx_id: string | null;
+  screenshot_url: string | null;
   status: 'completed' | 'pending' | 'failed';
   created_at: string;
 }

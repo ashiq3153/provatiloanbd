@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   payment_method TEXT, -- bkash, nagad, rocket, bank, visa
   sender_number TEXT,
   trx_id TEXT,
+  screenshot_url TEXT,
   status TEXT DEFAULT 'pending',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
