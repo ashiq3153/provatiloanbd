@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, FileText, PlusCircle, CreditCard, User, MessageCircle } from 'lucide-react';
+import { Home, FileText, PlusCircle, CreditCard, User } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppStore } from '../lib/store';
@@ -38,16 +38,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Bottom Navigation */}
       
-      {/* Support / Live Chat FAB */}
-      {location.pathname !== '/support' && (
-        <Link 
-          to="/support" 
-          className="absolute bottom-28 right-5 w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full shadow-[0_10px_25px_-5px_rgba(59,130,246,0.6)] flex items-center justify-center text-white active:scale-90 hover:scale-105 hover:-translate-y-1 transition-all duration-300 z-40 group"
-        >
-          <div className="absolute inset-0 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <MessageCircle size={28} className="relative z-10" />
-          <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse"></span>
-        </Link>
+      {/* Support / Live Chat FAB - only on home page */}
+      {location.pathname === '/' && (
+        <>
+          <style>{`
+            @keyframes waterFlow {
+              0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.7), 0 0 0 4px rgba(239,68,68,0.3); }
+              50%  { box-shadow: 0 0 0 6px rgba(239,68,68,0.2), 0 0 0 12px rgba(239,68,68,0.05); }
+              100% { box-shadow: 0 0 0 0 rgba(239,68,68,0), 0 0 0 0 rgba(239,68,68,0); }
+            }
+            .live-badge {
+              animation: waterFlow 1.8s ease-out infinite;
+            }
+          `}</style>
+          <Link
+            to="/support"
+            className="absolute bottom-28 right-5 bg-red-600 rounded-xl px-3 py-2 z-40 active:scale-90 transition-transform live-badge flex items-center justify-center"
+          >
+            <span className="text-white text-xs font-black tracking-[0.2em] select-none">LIVE</span>
+          </Link>
+        </>
       )}
 
       <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800 px-6 py-2 pb-6 rounded-t-3xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] transition-colors z-50">

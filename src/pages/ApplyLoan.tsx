@@ -22,155 +22,13 @@ import {
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from 'sonner';
 import { useAppStore } from "../lib/store";
+import { convertDigits, formatCurrency } from "../lib/translation";
 import { useForm, FormProvider, useFormContext } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getLoanSchema, LoanFormData } from "./ApplyLoanSchema";
 
-// Constants & Data Models
-const getCategories = (isBn: boolean, settings?: any) => [
-  {
-    id: "personal",
-    title: isBn ? "চাকরিজীবী" : "Salaried",
-    icon: Briefcase,
-    limit: isBn ? "৫ লক্ষ" : "5 Lac",
-    maxAmount: 500000,
-    tenureRange: isBn ? "১২-৬০ মাস" : "12-60 months",
-    intRates: settings?.minRatePersonal ? `${(settings.minRatePersonal * 100).toFixed(1)}% - ${(settings.minRatePersonal * 100 + 0.8).toFixed(1)}%` : (isBn ? "১.২% - ২.০%" : "1.2% - 2.0%"),
-    procTime: isBn ? "২-৩ দিন" : "2-3 days",
-    color: "blue",
-    features: isBn ? ["যেকোনো প্রয়োজনে", "সহজ কিস্তি"] : ["Any purpose", "Easy EMI"],
-    minRate: settings?.minRatePersonal ?? 0.012,
-    procFee: settings?.procFee ?? 0.01,
-    secDeposit: settings?.secDeposit ?? 0.1,
-  },
-  {
-    id: "business",
-    title: isBn ? "ব্যবসায়ী" : "Business",
-    icon: Store,
-    limit: isBn ? "৫০ লক্ষ" : "50 Lac",
-    maxAmount: 5000000,
-    tenureRange: isBn ? "১২-১২০ মাস" : "12-120 months",
-    intRates: settings?.minRateBusiness ? `${(settings.minRateBusiness * 100).toFixed(1)}% - ${(settings.minRateBusiness * 100 + 1.0).toFixed(1)}%` : (isBn ? "১.৫% - ২.৫%" : "1.5% - 2.5%"),
-    procTime: isBn ? "৩-৫ দিন" : "3-5 days",
-    color: "green",
-    features: isBn ? ["ব্যবসা সম্প্রসারণ", "সহজ শর্ত"] : ["Business Expansion", "Easy Terms"],
-    minRate: settings?.minRateBusiness ?? 0.015,
-    procFee: settings?.procFee ?? 0.01,
-    secDeposit: settings?.secDeposit ?? 0.1,
-  },
-  {
-    id: "expat",
-    title: isBn ? "প্রবাসী" : "Expatriate",
-    icon: Plane,
-    limit: isBn ? "১০ লক্ষ" : "10 Lac",
-    maxAmount: 1000000,
-    tenureRange: isBn ? "২৪-৭২ মাস" : "24-72 months",
-    intRates: settings?.minRateExpat ? `${(settings.minRateExpat * 100).toFixed(1)}% - ${(settings.minRateExpat * 100 + 0.8).toFixed(1)}%` : (isBn ? "১.০% - ১.৮%" : "1.0% - 1.8%"),
-    procTime: isBn ? "১-২ দিন" : "1-2 days",
-    color: "purple",
-    features: isBn ? ["দ্রুত অনুমোদন", "অনলাইন আবেদন সুবিধা"] : ["Fast Approval", "Online Apply"],
-    minRate: settings?.minRateExpat ?? 0.01,
-    procFee: settings?.procFee ?? 0.01,
-    secDeposit: settings?.secDeposit ?? 0.1,
-  },
-  {
-    id: "student",
-    title: isBn ? "শিক্ষার্থী" : "Student",
-    icon: GraduationCap,
-    limit: isBn ? "৫ লক্ষ" : "5 Lac",
-    maxAmount: 500000,
-    tenureRange: isBn ? "১২-৪৮ মাস" : "12-48 months",
-    intRates: settings?.minRateStudent ? `${(settings.minRateStudent * 100).toFixed(1)}% - ${(settings.minRateStudent * 100 + 0.4).toFixed(1)}%` : (isBn ? "০.৮% - ১.২%" : "0.8% - 1.2%"),
-    procTime: isBn ? "২-৩ দিন" : "2-3 days",
-    color: "orange",
-    features: isBn ? ["শিক্ষা লোন", "সর্বনিম্ন ফি"] : ["Education Loan", "Low Fees"],
-    minRate: settings?.minRateStudent ?? 0.008,
-    procFee: settings?.procFee ?? 0.01,
-    secDeposit: settings?.secDeposit ?? 0.1,
-  },
-  {
-    id: "emergency",
-    title: isBn ? "জরুরি ঋণ" : "Emergency",
-    icon: AlertCircle,
-    limit: isBn ? "১ লক্ষ" : "1 Lac",
-    maxAmount: 100000,
-    tenureRange: isBn ? "৬-২৪ মাস" : "6-24 months",
-    intRates: settings?.minRateEmergency ? `${(settings.minRateEmergency * 100).toFixed(1)}% - ${(settings.minRateEmergency * 100 + 1.0).toFixed(1)}%` : (isBn ? "২.০% - ৩.০%" : "2.0% - 3.0%"),
-    procTime: isBn ? "২-৬ ঘণ্টা" : "2-6 hours",
-    color: "rose",
-    features: isBn ? ["তাৎক্ষণিক অনুমোদন", "চিকিৎসা বা জরুরি"] : ["Instant Approval", "Medical/Emergency"],
-    minRate: settings?.minRateEmergency ?? 0.02,
-    procFee: settings?.procFee ?? 0.01,
-    secDeposit: settings?.secDeposit ?? 0.1,
-  },
-  {
-    id: "women",
-    title: isBn ? "নারী উদ্যোক্তা" : "Women Entrepreneur",
-    icon: Award,
-    limit: isBn ? "২০ লক্ষ" : "20 Lac",
-    maxAmount: 2000000,
-    tenureRange: isBn ? "১২-৮৪ মাস" : "12-84 months",
-    intRates: settings?.minRateWomen ? `${(settings.minRateWomen * 100).toFixed(1)}% - ${(settings.minRateWomen * 100 + 0.7).toFixed(1)}%` : (isBn ? "০.৮% - ১.৫%" : "0.8% - 1.5%"),
-    procTime: isBn ? "৩-৫ দিন" : "3-5 days",
-    color: "pink",
-    features: isBn ? ["বিশেষ রেট", "সরকারি সুবিধা"] : ["Special Rate", "Govt Benefits"],
-    minRate: settings?.minRateWomen ?? 0.008,
-    procFee: settings?.procFee ?? 0.01,
-    secDeposit: settings?.secDeposit ?? 0.1,
-  }
-];
+import { getCategories, snapPoints, amountPackages, formatAmount, getAllowedTenure, getColorStyles, getIconColor } from "./apply-loan-utils";
 
-const snapPoints = [12, 24, 36, 48, 60, 72, 84, 96, 120, 144, 180];
-const amountPackages = [
-  50000, 100000, 150000, 200000, 300000, 500000, 700000, 1000000, 1500000, 2000000, 2500000, 3000000, 4000000, 5000000
-];
-
-const formatAmount = (num: number, isBn: boolean) => {
-  if (num >= 100000) return isBn ? `৳ ${(num / 100000).toString()} লাখ` : `৳ ${(num / 100000).toString()} Lac`;
-  return isBn ? `৳ ${(num / 1000).toString()} হাজার` : `৳ ${(num / 1000).toString()}k`;
-};
-
-const getAllowedTenure = (amount: number) => {
-  if (amount <= 50000) return [12, 24];
-  if (amount <= 100000) return [12, 36];
-  if (amount <= 150000) return [24, 36];
-  if (amount <= 200000) return [24, 48];
-  if (amount <= 300000) return [24, 60];
-  if (amount <= 500000) return [36, 84];
-  if (amount <= 700000) return [36, 96];
-  if (amount <= 1000000) return [60, 120];
-  if (amount <= 1500000) return [84, 144];
-  if (amount <= 2500000) return [84, 180];
-  if (amount <= 3000000) return [96, 180];
-  return [120, 180]; 
-};
-
-// Helper for UI colors
-const getColorStyles = (color: string, isActive: boolean) => {
-  const base = "transition-all duration-200 border-2 ";
-  if (!isActive) return base + "border-gray-100 dark:border-gray-700 transition-colors dark:border-gray-700 bg-white dark:bg-gray-800 transition-colors dark:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-600 transition-colors";
-  switch (color) {
-    case "blue": return base + "border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 shadow-md shadow-blue-500/20 transition-colors";
-    case "green": return base + "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/20 shadow-md shadow-emerald-500/20 transition-colors";
-    case "purple": return base + "border-purple-500 bg-purple-50/50 dark:bg-purple-900/20 shadow-md shadow-purple-500/20 transition-colors";
-    case "orange": return base + "border-orange-500 bg-orange-50/50 dark:bg-orange-900/20 shadow-md shadow-orange-500/20 transition-colors";
-    case "rose": return base + "border-rose-500 bg-rose-50/50 dark:bg-rose-900/20 shadow-md shadow-rose-500/20 transition-colors";
-    case "pink": return base + "border-pink-500 bg-pink-50/50 dark:bg-pink-900/20 shadow-md shadow-pink-500/20 transition-colors";
-    default: return base + "border-primary-500 bg-primary-50/50 dark:bg-primary-900/20 shadow-md shadow-primary-500/20 transition-colors";
-  }
-};
-
-const getIconColor = (color: string) => {
-  switch (color) {
-    case "blue": return "text-blue-500 bg-blue-100 dark:bg-blue-900/30 transition-colors";
-    case "green": return "text-emerald-500 bg-emerald-100 dark:bg-emerald-900/30 transition-colors";
-    case "purple": return "text-purple-500 bg-purple-100 dark:bg-purple-900/30 transition-colors";
-    case "orange": return "text-orange-500 bg-orange-100 dark:bg-orange-900/30 transition-colors";
-    case "rose": return "text-rose-500 bg-rose-100 dark:bg-rose-900/30 transition-colors";
-    case "pink": return "text-pink-500 bg-pink-100 dark:bg-pink-900/30 transition-colors";
-    default: return "text-primary-500 bg-primary-100 dark:bg-primary-900/30 transition-colors";
-  }
-};
 
 export default function ApplyLoan() {
   const navigate = useNavigate();
@@ -178,7 +36,7 @@ export default function ApplyLoan() {
   const { language, systemSettings } = useAppStore();
   const isBn = language === "bn";
   const user = getTelegramUser();
-  const categories = getCategories(isBn, systemSettings);
+  const categories = React.useMemo(() => getCategories(isBn, systemSettings), [isBn, systemSettings]);
 
   const methods = useForm<LoanFormData>({
     resolver: zodResolver(getLoanSchema(isBn)),
@@ -243,42 +101,57 @@ export default function ApplyLoan() {
           if (loan.documents) setDocuments(loan.documents);
         }
       });
+    } else if (selectedCategory) {
+      // URL param category (from quick links)
+      const matched = categories.find((cat) => cat.id === selectedCategory);
+      if (matched) {
+        setCategory(matched);
+        setStep(2);
+      }
     } else {
+      // Try to restore in-progress draft (only if past step 1)
       const draftStr = localStorage.getItem('loan_draft_v1');
       if (draftStr) {
         try {
           const draft = JSON.parse(draftStr);
-          if (draft.step) setStep(draft.step);
-          if (draft.categoryId) {
-            const matched = categories.find(cat => cat.id === draft.categoryId);
-            if (matched) setCategory(matched);
+          // Only restore if user was past step 1 (mid-application)
+          if (draft.step && draft.step > 1) {
+            setStep(draft.step);
+            if (draft.categoryId) {
+              const matched = categories.find(cat => cat.id === draft.categoryId);
+              if (matched) setCategory(matched);
+            }
+            if (draft.amount) setAmount(draft.amount);
+            if (draft.tenure) setTenure(draft.tenure);
+            if (draft.formData) {
+              methods.reset(draft.formData);
+            }
+          } else {
+            // Draft was at step 1 — clear it, start fresh
+            localStorage.removeItem('loan_draft_v1');
           }
-          if (draft.amount) setAmount(draft.amount);
-          if (draft.tenure) setTenure(draft.tenure);
-          if (draft.formData) {
-            methods.reset(draft.formData);
-          }
-        } catch(e) {}
-      } else if (selectedCategory && !category) {
-        const matched = categories.find((cat) => cat.id === selectedCategory);
-        if (matched) setCategory(matched);
+        } catch(e) {
+          localStorage.removeItem('loan_draft_v1');
+        }
       }
     }
   }, [location.search, categories]);
 
-  const watchedData = methods.watch();
+  // Save draft without causing re-renders (subscription-based)
   useEffect(() => {
-    if (!editId && step < 8) {
+    if (editId || step >= 8) return;
+    const subscription = methods.watch((formData) => {
       const draft = {
         step,
         categoryId: category?.id,
         amount,
         tenure,
-        formData: watchedData
+        formData
       };
       localStorage.setItem('loan_draft_v1', JSON.stringify(draft));
-    }
-  }, [step, category, amount, tenure, watchedData, editId]);
+    });
+    return () => subscription.unsubscribe();
+  }, [step, category, amount, tenure, editId]);
 
   // Auto-adjusted tenure state
   const handleAmountChange = (val: number) => {
@@ -338,8 +211,18 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
         return;
       }
 
-      setStep(s => s + 1);
+      const newStep = step + 1;
+      setStep(newStep);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      const draftStr = localStorage.getItem('loan_draft_v1');
+      if (draftStr) {
+        try {
+          const draft = JSON.parse(draftStr);
+          draft.step = newStep;
+          localStorage.setItem('loan_draft_v1', JSON.stringify(draft));
+        } catch (e) {}
+      }
     }
   };
 
@@ -454,8 +337,18 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
 
   const prevStep = () => {
     if (step > 1) {
-      setStep(s => s - 1);
+      const newStep = step - 1;
+      setStep(newStep);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      const draftStr = localStorage.getItem('loan_draft_v1');
+      if (draftStr) {
+        try {
+          const draft = JSON.parse(draftStr);
+          draft.step = newStep;
+          localStorage.setItem('loan_draft_v1', JSON.stringify(draft));
+        } catch (e) {}
+      }
     }
   };
 
@@ -465,22 +358,20 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
     <div className="space-y-4">
       <div className="mb-6">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors">{isBn ? "লোনের ধরন নির্বাচন করুন" : "Select Loan Type"}</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors">{isBn ? "আপনার পেশা অনুযায়ী সঠিক লোন নির্বাচন করুন" : "Select the right loan based on your profession"}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors">{isBn ? "আপনার পেশা অনুযায়ী সঠিক লোন নির্বাচন করুন" : "Select the right loan based on your profession"}</p>
       </div>
       <div className="grid grid-cols-1 gap-4">
         {categories.map((cat) => {
           const isActive = category?.id === cat.id;
           return (
             <button
+              type="button"
               key={cat.id}
               onClick={() => {
-                setCategory(cat);
                 const [minT] = getAllowedTenure(amount);
+                setCategory(cat);
                 setTenure(minT);
-                setTimeout(() => {
-                  setStep((s) => s + 1);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }, 200);
+                setStep(2);
               }}
               className={`rounded-2xl p-5 text-left relative overflow-hidden ${getColorStyles(cat.color, isActive)}`}
             >
@@ -585,13 +476,13 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
                   onClick={() => setTenure(months)}
                   className={btnClass}
                 >
-                  {months}
+                  {convertDigits(months, isBn)}
                 </button>
               );
             })}
           </div>
           <p className="text-xs text-gray-400 mt-3 font-medium text-center">
-            {amount.toLocaleString()} {isBn ? "টাকার জন্য" : "Taka allows"} {getAllowedTenure(amount)[0]} - {getAllowedTenure(amount)[1]} {isBn ? "মাস অনুমোদিত" : "months"}
+            {formatCurrency(amount, isBn)} {isBn ? "টাকার জন্য" : "Taka allows"} {convertDigits(getAllowedTenure(amount)[0], isBn)} - {convertDigits(getAllowedTenure(amount)[1], isBn)} {isBn ? "মাস অনুমোদিত" : "months"}
           </p>
         </div>
 
@@ -603,26 +494,26 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
             <div className="flex justify-between items-center pb-4 border-b border-white/10">
                <div>
                  <p className="text-gray-400 text-xs font-medium mb-1 uppercase tracking-wider">{isBn ? "মাসিক কিস্তি" : "Monthly EMI"}</p>
-                 <p className="text-3xl font-black">৳ {calculateEMI().toLocaleString()}</p>
+                 <p className="text-3xl font-black">{formatCurrency(calculateEMI(), isBn)}</p>
                </div>
                <div className="text-right">
                  <p className="text-gray-400 text-xs font-medium mb-1 uppercase tracking-wider">{isBn ? "মোট পরিশোধ" : "Total Payable"}</p>
-                 <p className="text-xl font-bold text-emerald-400">৳ {(calculateEMI() * tenure).toLocaleString()}</p>
+                 <p className="text-xl font-bold text-emerald-400">{formatCurrency(calculateEMI() * tenure, isBn)}</p>
                </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{isBn ? "সুদ হার" : "Interest Rate"}</p>
-                <p className="font-semibold text-sm">{category.intRates}</p>
+                <p className="font-semibold text-sm">{convertDigits(category.intRates, isBn)}</p>
               </div>
               <div>
                 <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{isBn ? "প্রসেসিং ফি (১%)" : "Processing Fee (1%)"}</p>
-                <p className="font-semibold text-sm">৳ {(amount * category.procFee).toLocaleString()}</p>
+                <p className="font-semibold text-sm">{formatCurrency(amount * category.procFee, isBn)}</p>
               </div>
               <div>
                 <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{isBn ? "সিকিউরিটি মানি (১০%)" : "Security Deposit (10%)"}</p>
-                <p className="font-semibold text-sm">৳ {(amount * category.secDeposit).toLocaleString()}</p>
+                <p className="font-semibold text-sm">{formatCurrency(amount * category.secDeposit, isBn)}</p>
               </div>
             </div>
           </div>
@@ -889,13 +780,13 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
           <input type="text" {...register("nomineeNid")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nomineeNid ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="নমিনির এনআইডি নম্বর" /><ErrorText field="nomineeNid" />
         </div>
         <div>
-           <FileUploader id="nominee_photo" title={isBn ? "নমিনির ছবি (ঐচ্ছিক)" : "Nominee Photo (Optional)"} />
+           {renderFileUploader("nominee_photo", isBn ? "নমিনির ছবি (ঐচ্ছিক)" : "Nominee Photo (Optional)")}
         </div>
       </div>
     </div>
   );
 
-  const FileUploader = ({ id, title }: { id: string, title: string }) => {
+  const renderFileUploader = (id: string, title: string) => {
     return (
       <div className="relative">
         <input 
@@ -952,12 +843,12 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
       <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors p-5 shadow-sm space-y-4">
         <h3 className="font-bold text-gray-800 text-sm border-b border-gray-100 dark:border-gray-700 transition-colors pb-2">{isBn ? "পরিচয়পত্র ও ছবি (সবার জন্য)" : "ID & Photo (For All)"}</h3>
         <div className="grid grid-cols-2 gap-3">
-          <FileUploader id="nid_front" title={isBn ? "NID সামনের অংশ" : "NID Front"} />
-          <FileUploader id="nid_back" title={isBn ? "NID পেছনের অংশ" : "NID Back"} />
+          {renderFileUploader("nid_front", isBn ? "NID সামনের অংশ" : "NID Front")}
+          {renderFileUploader("nid_back", isBn ? "NID পেছনের অংশ" : "NID Back")}
         </div>
         <div className="grid grid-cols-2 gap-3 mt-3">
-          <FileUploader id="selfie" title={isBn ? "সেলফি (NID সহ)" : "Selfie (with NID)"} />
-          <FileUploader id="photo" title={isBn ? "পাসপোর্ট সাইজ ছবি" : "Passport Size Photo"} />
+          {renderFileUploader("selfie", isBn ? "সেলফি (NID সহ)" : "Selfie (with NID)")}
+          {renderFileUploader("photo", isBn ? "পাসপোর্ট সাইজ ছবি" : "Passport Size Photo")}
         </div>
       </div>
 
@@ -966,9 +857,9 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
         <div className="grid grid-cols-1 gap-3">
           {category?.id === 'personal' && (
             <>
-              <FileUploader id="office_id" title={isBn ? "অফিস আইডি কার্ড (Job ID)" : "Office ID Card"} />
-              <FileUploader id="salary_cert" title={isBn ? "বেতনের প্রমাণপত্র" : "Salary Certificate"} />
-              <FileUploader id="appointment_letter" title={isBn ? "অ্যাপয়েন্টমেন্ট লেটার" : "Appointment Letter"} />
+              {renderFileUploader("office_id", isBn ? "অফিস আইডি কার্ড (Job ID)" : "Office ID Card")}
+              {renderFileUploader("salary_cert", isBn ? "বেতনের প্রমাণপত্র" : "Salary Certificate")}
+              {renderFileUploader("appointment_letter", isBn ? "অ্যাপয়েন্টমেন্ট লেটার" : "Appointment Letter")}
             </>
           )}
 
@@ -1064,15 +955,15 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
         <div className="p-4 divide-y divide-gray-50">
           <div className="py-2.5 flex justify-between">
             <span className="text-gray-500 text-sm">{isBn ? "লোনের পরিমাণ" : "Loan Amount"}</span>
-            <span className="font-bold text-gray-900 dark:text-white transition-colors">৳ {amount.toLocaleString()}</span>
+            <span className="font-bold text-gray-900 dark:text-white transition-colors">{formatCurrency(amount, isBn)}</span>
           </div>
           <div className="py-2.5 flex justify-between">
-            <span className="text-gray-500 text-sm">সময়কাল</span>
-            <span className="font-bold text-gray-900 dark:text-white transition-colors">{tenure} মাস</span>
+            <span className="text-gray-500 text-sm">{isBn ? "সময়কাল" : "Duration"}</span>
+            <span className="font-bold text-gray-900 dark:text-white transition-colors">{convertDigits(tenure, isBn)} {isBn ? 'মাস' : 'Months'}</span>
           </div>
           <div className="py-2.5 flex justify-between">
             <span className="text-gray-500 text-sm">{isBn ? "মাসিক কিস্তি (EMI)" : "Monthly EMI"}</span>
-            <span className="font-bold text-primary-600">৳ {calculateEMI().toLocaleString()}</span>
+            <span className="font-bold text-primary-600">{formatCurrency(calculateEMI(), isBn)}</span>
           </div>
         </div>
       </div>
@@ -1181,10 +1072,10 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
           >
             {step === 1 && Step1Category()}
             {step === 2 && Step2Calculator()}
@@ -1198,15 +1089,31 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
         </AnimatePresence>
       </div>
 
-      {/* Bottom Action Bar */}
+      {/* Bottom Action Bar - Compact */}
       {step < 8 && (
-        <div className="sticky bottom-0 left-0 right-0 p-5 bg-white dark:bg-gray-800 transition-colors border-t border-gray-100 dark:border-gray-700 transition-colors z-40">
+        <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-white dark:bg-gray-800 transition-colors border-t border-gray-100 dark:border-gray-700 z-40 flex gap-2">
+          {step > 1 && (
+            <button
+              type="button"
+              onClick={prevStep}
+              className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 active:scale-95 transition-all shrink-0"
+            >
+              <ChevronLeft size={16} /> {isBn ? 'পিছনে' : 'Back'}
+            </button>
+          )}
           <button
+            type="button"
             onClick={nextStep}
             disabled={(step === 1 && !category) || (step === 7 && !acceptedTerms) || isSubmitting}
-            className="w-full bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none text-white py-4 rounded-2xl font-bold text-[15px] shadow-lg shadow-blue-600/30 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2"
+            className="flex-1 bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none text-white py-2.5 rounded-xl font-bold text-sm shadow-md shadow-blue-600/30 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-1"
           >
-            {isSubmitting ? (isBn ? 'অপেক্ষা করুন...' : 'Please wait...') : step === 7 ? (isBn ? "সাবমিট করুন" : "Submit") : (isBn ? "পরবর্তী ধাপ" : "Next Step")} {!isSubmitting && <ChevronRight size={18} />}
+            {isSubmitting
+              ? (isBn ? 'অপেক্ষা করুন...' : 'Please wait...')
+              : step === 7
+              ? (isBn ? 'সাবমিট করুন' : 'Submit')
+              : (isBn ? 'পরবর্তী ধাপ' : 'Next Step')
+            }
+            {!isSubmitting && <ChevronRight size={16} />}
           </button>
         </div>
       )}

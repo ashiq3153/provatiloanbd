@@ -1,4 +1,4 @@
-import { ArrowLeft, MessageCircle, Send, UploadCloud, AlertCircle, Landmark, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Send, UploadCloud, AlertCircle, Landmark, CheckCircle2, ShieldCheck, CreditCard } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -8,11 +8,11 @@ import { getTelegramUser } from '../lib/telegram';
 import { createTransaction, uploadDocument } from '../lib/api';
 
 const paymentMethods = [
-  { id: 'bkash', name: 'bKash', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e1/Bkash_logo.svg', color: 'bg-[#e2136e]', text: 'text-[#e2136e]', bgLight: 'bg-[#e2136e]/10', border: 'border-[#e2136e]/30' },
-  { id: 'nagad', name: 'Nagad', logo: 'https://upload.wikimedia.org/wikipedia/commons/d/d1/Nagad_Logo.svg', color: 'bg-[#f7931e]', text: 'text-[#f7931e]', bgLight: 'bg-[#f7931e]/10', border: 'border-[#f7931e]/30' },
-  { id: 'rocket', name: 'Rocket', logo: 'https://seeklogo.com/images/D/dutch-bangla-rocket-logo-B4D104E752-seeklogo.com.png', color: 'bg-[#8c1596]', text: 'text-[#8c1596]', bgLight: 'bg-[#8c1596]/10', border: 'border-[#8c1596]/30' },
-  { id: 'bank', name: 'Bank Account', icon: true, color: 'bg-blue-600', text: 'text-blue-600', bgLight: 'bg-blue-50', border: 'border-blue-200' },
-  { id: 'visa', name: 'Visa Card', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg', color: 'bg-indigo-600', text: 'text-indigo-600', bgLight: 'bg-indigo-50', border: 'border-indigo-200' },
+  { id: 'bkash', name: 'bKash', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e1/Bkash_logo.svg', color: 'bg-[#e2136e]', text: 'text-[#e2136e]', bgLight: 'bg-[#e2136e]/10 dark:bg-[#e2136e]/20', border: 'border-[#e2136e]/30' },
+  { id: 'nagad', name: 'Nagad', logo: 'https://upload.wikimedia.org/wikipedia/commons/d/d1/Nagad_Logo.svg', color: 'bg-[#f7931e]', text: 'text-[#f7931e]', bgLight: 'bg-[#f7931e]/10 dark:bg-[#f7931e]/20', border: 'border-[#f7931e]/30' },
+  { id: 'rocket', name: 'Rocket', logo: 'https://seeklogo.com/images/D/dutch-bangla-rocket-logo-B4D104E752-seeklogo.com.png', color: 'bg-[#8c1596]', text: 'text-[#8c1596]', bgLight: 'bg-[#8c1596]/10 dark:bg-[#8c1596]/20', border: 'border-[#8c1596]/30' },
+  { id: 'bank', name: 'Bank Account', icon: true, color: 'bg-blue-600', text: 'text-blue-600', bgLight: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800' },
+  { id: 'visa', name: 'Visa Card', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg', color: 'bg-indigo-600', text: 'text-indigo-600', bgLight: 'bg-indigo-50 dark:bg-indigo-900/20', border: 'border-indigo-200 dark:border-indigo-800' },
 ];
 
 export default function Deposit() {
@@ -40,9 +40,6 @@ export default function Deposit() {
     const whatsapp = useAppStore.getState().systemSettings?.whatsappSupport || 'https://wa.me/8801700000000';
     window.open(whatsapp, '_blank');
   };
-
-  const selectedMethod = paymentMethods.find((m) => m.id === method);
-
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,54 +80,41 @@ export default function Deposit() {
     }
   };
 
-
   if (isSuccess) {
     return (
-      <div className="min-h-full bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-6 text-center transition-colors">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-6 text-center transition-colors">
         <motion.div
-           initial={{ scale: 0.8, opacity: 0 }}
-           animate={{ scale: 1, opacity: 1 }}
-           className="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 max-w-sm w-full transition-colors"
+           initial={{ scale: 0.8, opacity: 0, y: 20 }}
+           animate={{ scale: 1, opacity: 1, y: 0 }}
+           className="bg-white dark:bg-gray-800 p-8 rounded-[32px] shadow-xl border border-gray-100 dark:border-gray-700 max-w-sm w-full transition-colors relative overflow-hidden"
         >
-          <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-              <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
+          <div className="absolute top-0 right-0 w-40 h-40 bg-green-500/10 blur-3xl rounded-full -mr-10 -mt-10 pointer-events-none"></div>
+          
+          <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500 ring-8 ring-green-50 dark:ring-green-900/10 relative z-10">
+            <CheckCircle2 size={48} strokeWidth={2.5} />
           </div>
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 tracking-tight transition-colors">
+          <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-3 tracking-tight transition-colors relative z-10">
             {isBn ? 'ধন্যবাদ!' : 'Thank You!'}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 font-medium text-sm leading-relaxed mb-6 transition-colors">
+          <p className="text-gray-500 dark:text-gray-400 font-medium text-sm leading-relaxed mb-6 transition-colors relative z-10">
             {isBn 
               ? 'আপনার ডিপোজিট রিকুয়েস্ট সফলভাবে সাবমিট হয়েছে। আমাদের এডমিন প্যানেল এটি ভেরিফাই করছে।' 
               : 'Your deposit request has been submitted successfully. Our admin panel is verifying it.'}
           </p>
           
-          <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-xl border border-orange-100 dark:border-orange-900/40 mb-6 transition-colors">
-            <p className="text-sm font-bold text-orange-800 dark:text-orange-300 transition-colors">
-              {isBn ? 'আপডেট সময়' : 'Estimated Update Time'}
+          <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-2xl border border-orange-100 dark:border-orange-900/40 mb-6 transition-colors relative z-10">
+            <p className="text-xs uppercase tracking-wider font-bold text-orange-800 dark:text-orange-300 mb-1 transition-colors">
+              {isBn ? 'আপডেট সময়' : 'Estimated Time'}
             </p>
-            <p className="text-xs font-medium text-orange-600 dark:text-orange-400 mt-1 transition-colors">
-              {isBn ? 'সাধারণত ২০-৩০ মিনিটের মধ্যে আপডেট হয়ে যাবে।' : 'Usually updates within 20-30 minutes.'}
+            <p className="font-bold text-orange-600 dark:text-orange-400 transition-colors flex items-center justify-center gap-2">
+               <ShieldCheck size={18} />
+              {isBn ? '২০-৩০ মিনিট' : '20-30 Minutes'}
             </p>
-          </div>
-
-          <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-100 dark:border-red-900/40 mb-6 transition-colors flex gap-3 text-left">
-            <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={20} />
-            <div>
-              <p className="text-sm font-bold text-red-800 dark:text-red-300 transition-colors">
-                {isBn ? 'গুরুত্বপূর্ণ সতর্কতা' : 'Important Warning'}
-              </p>
-              <p className="text-xs font-medium text-red-600 dark:text-red-400 mt-1 transition-colors">
-                {isBn ? 'আপনার TrxID এবং সেন্ডার নাম্বারটি সংরক্ষণ করে রাখুন। ভুয়া বা এডিট করা স্ক্রিনশট দিলে একাউন্ট সাসপেন্ড করা হবে।' : 'Keep your TrxID and Sender Number safe. Submitting fake or edited screenshots will result in account suspension.'}
-              </p>
-            </div>
           </div>
 
           <button 
             onClick={() => navigate('/')}
-            className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-3.5 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all"
+            className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-4 rounded-[20px] font-bold shadow-lg shadow-gray-900/20 hover:shadow-xl active:scale-95 transition-all text-lg relative z-10"
           >
             {isBn ? 'হোম পেজে ফিরে যান' : 'Back to Home'}
           </button>
@@ -140,220 +124,279 @@ export default function Deposit() {
   }
 
   return (
-    <div className="min-h-full bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors">
-      <div className="bg-white dark:bg-gray-800 px-5 pt-5 pb-4 sticky top-0 z-20 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-2 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full active:scale-95 transition-all">
-            <ArrowLeft size={20} />
-          </button>
-          <div>
-            <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-tight transition-colors">
-              {isBn ? 'ডিপোজিট করুন' : 'Deposit'}
-            </h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">
-              {isBn ? 'সিকিউরিটি মানি বা ফি প্রদান' : 'Pay Security Money or Fee'}
-            </p>
-          </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors pb-24">
+      {/* Premium Header */}
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl px-5 py-4 sticky top-0 z-30 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors flex items-center gap-4">
+        <button 
+          onClick={() => navigate(-1)}
+          className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 active:scale-95 transition-all"
+        >
+          <ArrowLeft size={20} />
+        </button>
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white leading-tight transition-colors">
+            {isBn ? 'ডিপোজিট করুন' : 'Deposit'}
+          </h1>
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 transition-colors">
+            {isBn ? 'সিকিউরিটি মানি বা ফি প্রদান' : 'Pay Security Money or Fee'}
+          </p>
         </div>
       </div>
 
-      <div className="flex-1 p-5 pb-6 space-y-6">
+      <div className="flex-1 p-5 space-y-6">
         
         {/* Step 1: Select Method */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
-          <div className="mb-4">
-            <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-1 transition-colors">
-              {isBn ? '১. পেমেন্ট মেথড নির্বাচন করুন' : '1. Select Payment Method'}
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">
-              {isBn ? 'যেকোনো একটি মাধ্যম নির্বাচন করুন' : 'Choose any one of the methods'}
-            </p>
+        <motion.section 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white dark:bg-gray-800 rounded-[24px] p-5 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
+        >
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-gray-900 dark:text-white text-base transition-colors">
+                {isBn ? 'পেমেন্ট মেথড' : 'Payment Method'}
+              </h3>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 transition-colors mt-0.5">
+                {isBn ? '১. যেকোনো একটি মাধ্যম নির্বাচন করুন' : '1. Choose any one of the methods'}
+              </p>
+            </div>
           </div>
+          
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {paymentMethods.map((m) => (
               <button
                 key={m.id}
                 onClick={() => setMethod(m.id)}
-                className={`py-3 px-2 rounded-xl text-sm font-bold border-2 transition-all flex flex-col items-center justify-center gap-2 ${
-                  method === m.id ? `${m.border} ${m.bgLight} ${m.text}` : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400'
+                className={`py-4 px-3 rounded-[20px] text-sm font-bold border-2 transition-all flex flex-col items-center justify-center gap-3 relative overflow-hidden ${
+                  method === m.id 
+                    ? `border-primary-500 shadow-md shadow-primary-500/10` 
+                    : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-600'
                 }`}
               >
+                {method === m.id && (
+                  <div className={`absolute inset-0 ${m.bgLight} pointer-events-none`}></div>
+                )}
+                
                 {m.logo ? (
-                  <img src={m.logo} alt={m.name} className="h-8 object-contain mix-blend-multiply dark:mix-blend-normal rounded-sm" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                  <img src={m.logo} alt={m.name} className="h-8 object-contain mix-blend-multiply dark:mix-blend-normal rounded-sm relative z-10" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                 ) : (
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${method === m.id ? m.bgLight : 'bg-gray-200 dark:bg-gray-600'}`}>
-                    <Landmark size={18} />
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center relative z-10 ${method === m.id ? m.bgLight : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}`}>
+                    {m.id === 'bank' ? <Landmark size={20} /> : <CreditCard size={20} />}
                   </div>
                 )}
-                <span>{m.name}</span>
+                <span className={`relative z-10 ${method === m.id ? m.text : 'text-gray-600 dark:text-gray-300'}`}>{m.name}</span>
+                
+                {method === m.id && (
+                  <div className="absolute top-2 right-2 text-primary-500">
+                    <CheckCircle2 size={16} className="fill-primary-100 dark:fill-primary-900/50" />
+                  </div>
+                )}
               </button>
             ))}
           </div>
-        </section>
+        </motion.section>
 
         {/* Step 2: Contact Support */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
-          <div className="mb-4">
-            <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-1 transition-colors">
-              {isBn ? '২. পেমেন্ট নাম্বার সংগ্রহ করুন' : '2. Get Payment Number'}
+        <motion.section 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[24px] p-6 shadow-xl border border-white/10 relative overflow-hidden text-white"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+          
+          <div className="relative z-10 mb-5">
+            <h3 className="font-bold text-lg mb-1">
+              {isBn ? 'পেমেন্ট নাম্বার সংগ্রহ করুন' : 'Get Payment Number'}
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">
-              {isBn ? 'পেমেন্ট নাম্বার পেতে সাপোর্ট টিমের সাথে যোগাযোগ করুন' : 'Contact Support team for Payment Number'}
+            <p className="text-xs font-medium text-blue-100">
+              {isBn ? '২. সাপোর্ট টিমের সাথে যোগাযোগ করে নাম্বার নিন' : '2. Contact support team to get the number'}
             </p>
           </div>
-          <div className="flex gap-3">
-            <button onClick={openWhatsApp} type="button" className="flex-1 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm active:scale-95 transition-all">
-              <MessageCircle size={18} /> {isBn ? 'হোয়াটসঅ্যাপ' : 'WhatsApp Support'}
+          
+          <div className="flex gap-3 relative z-10">
+            <button onClick={openWhatsApp} type="button" className="flex-1 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 py-3.5 rounded-xl flex items-center justify-center gap-2 font-bold text-sm active:scale-95 transition-all">
+              <MessageCircle size={18} className="text-green-400" /> WhatsApp
             </button>
-            <button onClick={openTelegram} type="button" className="flex-1 bg-[#0088cc]/10 hover:bg-[#0088cc]/20 text-[#0088cc] py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm active:scale-95 transition-all">
-              <Send size={18} /> {isBn ? 'টেলিগ্রাম' : 'Telegram Support'}
+            <button onClick={openTelegram} type="button" className="flex-1 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 py-3.5 rounded-xl flex items-center justify-center gap-2 font-bold text-sm active:scale-95 transition-all">
+              <Send size={18} className="text-sky-400" /> Telegram
             </button>
           </div>
-          <div className="mt-4 bg-orange-50 dark:bg-orange-900/20 p-3 rounded-xl border border-orange-100 dark:border-orange-900/40 flex items-start gap-3 transition-colors">
-              <AlertCircle size={16} className="text-orange-500 mt-0.5 shrink-0" />
-              <p className="text-xs text-orange-800 dark:text-orange-300 leading-tight font-medium transition-colors">
-                {isBn ? 'সাপোর্ট টিম থেকে নাম্বার সংগ্রহ করে পেমেন্ট সম্পূর্ণ করুন এবং নিচের ফর্মটি পূরণ করুন।' : 'Complete your payment to the number provided by support, then fill out the form below.'}
+          
+          <div className="mt-5 bg-black/20 backdrop-blur-md p-3 rounded-xl border border-white/10 flex items-start gap-3 relative z-10">
+              <AlertCircle size={16} className="text-blue-200 mt-0.5 shrink-0" />
+              <p className="text-xs text-blue-100 leading-tight font-medium">
+                {isBn ? 'সাপোর্ট টিম থেকে নাম্বার নিয়ে পেমেন্ট সম্পূর্ণ করুন এবং নিচের ফর্মটি পূরণ করুন।' : 'Complete payment to the provided number, then fill out the form below.'}
               </p>
           </div>
-        </section>
+        </motion.section>
 
-        {/* Step 3: Payment Details */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
-          <div className="mb-5 border-b border-gray-100 dark:border-gray-700 pb-3 transition-colors">
-             <h3 className="font-bold text-gray-900 dark:text-white mb-1 transition-colors">
-               {isBn ? '৩. পেমেন্ট তথ্য দিন' : '3. Provide Payment Info'}
+        {/* Step 3: Payment Details Form */}
+        <motion.section 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white dark:bg-gray-800 rounded-[24px] p-5 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
+        >
+          <div className="mb-6">
+             <h3 className="font-bold text-gray-900 dark:text-white text-base transition-colors">
+               {isBn ? 'পেমেন্ট তথ্য দিন' : 'Provide Payment Info'}
              </h3>
-             <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">
-               {isBn ? 'পেমেন্ট করার পর তথ্যগুলো দিন' : 'Enter details after successful payment'}
+             <p className="text-xs font-medium text-gray-500 dark:text-gray-400 transition-colors mt-0.5">
+               {isBn ? '৩. পেমেন্ট করার পর তথ্যগুলো দিন' : '3. Enter details after successful payment'}
              </p>
           </div>
 
-          <form id="deposit-form" onSubmit={handleSubmit} className="space-y-4">
+          <form id="deposit-form" onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 transition-colors">
+              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 transition-colors">
                 {isBn ? 'ডিপোজিটের ধরন' : 'Deposit Type'}
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setDepositType('processing')}
-                  className={`py-3 rounded-xl text-sm font-bold border-2 transition-all ${depositType === 'processing' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400' : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400'}`}
+                  className={`py-3.5 rounded-[16px] text-sm font-bold border-2 transition-all flex items-center justify-center gap-2 ${depositType === 'processing' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 shadow-sm' : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-600 text-gray-500 dark:text-gray-400'}`}
                 >
+                  {depositType === 'processing' && <CheckCircle2 size={16} />}
                   {isBn ? 'প্রসেসিং ফি' : 'Processing Fee'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setDepositType('security')}
-                  className={`py-3 rounded-xl text-sm font-bold border-2 transition-all ${depositType === 'security' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400' : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400'}`}
+                  className={`py-3.5 rounded-[16px] text-sm font-bold border-2 transition-all flex items-center justify-center gap-2 ${depositType === 'security' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 shadow-sm' : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-600 text-gray-500 dark:text-gray-400'}`}
                 >
+                  {depositType === 'security' && <CheckCircle2 size={16} />}
                   {isBn ? 'সিকিউরিটি মানি' : 'Security Money'}
                 </button>
               </div>
             </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1 transition-colors">
-                {isBn ? 'ডিপোজিটের পরিমাণ (৳)' : 'Deposit Amount (৳)'}
-              </label>
-              <input 
-                type="number" 
-                required
-                min="1"
-                step="any"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-lg font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none transition-colors" 
-                placeholder="500" 
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1 transition-colors">
-                {isBn ? 'যে নাম্বার থেকে টাকা পাঠিয়েছেন' : 'Sender Number'}
-              </label>
-              <input 
-                type="text" 
-                required
-                value={senderNo}
-                onChange={(e) => setSenderNo(e.target.value)}
-                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none transition-colors" 
-                placeholder="01XXXXXXXXX" 
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1 transition-colors">
-                {isBn ? 'ট্রানজেকশন আইডি (TrxID)' : 'Transaction ID (TrxID)'}
-              </label>
-              <input 
-                type="text" 
-                required
-                value={trxId}
-                onChange={(e) => setTrxId(e.target.value)}
-                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none uppercase font-mono transition-colors" 
-                placeholder="A8B9C7D6E5" 
-              />
-            </div>
-            <div>
-               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1 transition-colors">
-                 {isBn ? 'স্ক্রিনশট (ঐচ্ছিক)' : 'Screenshot (Optional)'}
-               </label>
-               
-               <div className="relative">
-                 <input 
-                   type="file" 
-                   id="screenshot-upload"
-                   className="hidden" 
-                   accept="image/*"
-                   onChange={async (e) => {
-                     const file = e.target.files?.[0];
-                     if (!file) return;
-                     setUploading(true);
-                     const url = await uploadDocument(file, user.id, 'deposit_screenshot');
-                     if (url) {
-                       setScreenshotUrl(url);
-                     } else {
-                       toast.error(isBn ? 'ফাইল আপলোড ব্যর্থ হয়েছে' : 'File upload failed');
-                     }
-                     setUploading(false);
-                   }}
-                 />
-                 <label 
-                   htmlFor="screenshot-upload" 
-                   className="w-full bg-gray-50 dark:bg-gray-900 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl py-4 flex flex-col items-center justify-center gap-2 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-800 transition-colors cursor-pointer"
-                 >
-                   {uploading ? (
-                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mb-1"></div>
-                   ) : screenshotUrl ? (
-                     <div className="flex flex-col items-center gap-1">
-                       <CheckCircle2 size={24} className="text-green-500" />
-                       <span className="text-xs font-bold text-green-600 dark:text-green-400">
-                         {isBn ? 'স্ক্রিনশট আপলোড হয়েছে' : 'Screenshot Uploaded'}
-                       </span>
-                     </div>
-                   ) : (
-                     <>
-                       <UploadCloud size={24} className="text-gray-400 dark:text-gray-500 transition-colors" />
-                       <span className="text-xs font-bold text-gray-600 dark:text-gray-400 transition-colors">
-                         {isBn ? 'পেমেন্টের স্ক্রিনশট আপলোড করুন' : 'Upload payment screenshot'}
-                       </span>
-                     </>
-                   )}
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 transition-colors uppercase tracking-wider">
+                  {isBn ? 'ডিপোজিটের পরিমাণ' : 'Deposit Amount'}
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-bold text-gray-400">৳</span>
+                  <input 
+                    type="number" 
+                    required
+                    min="1"
+                    step="any"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    className="w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-100 dark:border-gray-700 rounded-2xl py-4 pl-10 pr-4 text-xl font-black text-gray-900 dark:text-white focus:border-primary-500 focus:ring-0 transition-all outline-none" 
+                    placeholder="0" 
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 transition-colors uppercase tracking-wider">
+                  {isBn ? 'যে নাম্বার থেকে টাকা পাঠিয়েছেন' : 'Sender Number'}
+                </label>
+                <input 
+                  type="text" 
+                  required
+                  value={senderNo}
+                  onChange={(e) => setSenderNo(e.target.value)}
+                  className="w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-100 dark:border-gray-700 rounded-2xl px-4 py-4 text-base font-bold text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all" 
+                  placeholder="01XXXXXXXXX" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 transition-colors uppercase tracking-wider">
+                  {isBn ? 'ট্রানজেকশন আইডি' : 'Transaction ID (TrxID)'}
+                </label>
+                <input 
+                  type="text" 
+                  required
+                  value={trxId}
+                  onChange={(e) => setTrxId(e.target.value)}
+                  className="w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-100 dark:border-gray-700 rounded-2xl px-4 py-4 text-base font-bold text-gray-900 dark:text-white focus:border-primary-500 outline-none uppercase font-mono tracking-wider transition-all" 
+                  placeholder="A8B9C7D6E5" 
+                />
+              </div>
+
+              <div>
+                 <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 transition-colors uppercase tracking-wider">
+                   {isBn ? 'স্ক্রিনশট (ঐচ্ছিক)' : 'Screenshot (Optional)'}
                  </label>
-               </div>
+                 
+                 <div className="relative">
+                   <input 
+                     type="file" 
+                     id="screenshot-upload"
+                     className="hidden" 
+                     accept="image/*"
+                     onChange={async (e) => {
+                       const file = e.target.files?.[0];
+                       if (!file) return;
+                       setUploading(true);
+                       const url = await uploadDocument(file, user.id, 'deposit_screenshot');
+                       if (url) {
+                         setScreenshotUrl(url);
+                       } else {
+                         toast.error(isBn ? 'ফাইল আপলোড ব্যর্থ হয়েছে' : 'File upload failed');
+                       }
+                       setUploading(false);
+                     }}
+                   />
+                   <label 
+                     htmlFor="screenshot-upload" 
+                     className="w-full bg-gray-50 dark:bg-gray-900 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl py-6 flex flex-col items-center justify-center gap-3 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-400 dark:hover:border-primary-800 transition-all cursor-pointer"
+                   >
+                     {uploading ? (
+                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mb-1"></div>
+                     ) : screenshotUrl ? (
+                       <div className="flex flex-col items-center gap-2">
+                         <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                           <CheckCircle2 size={24} className="text-green-600 dark:text-green-400" />
+                         </div>
+                         <span className="text-sm font-bold text-green-600 dark:text-green-400">
+                           {isBn ? 'স্ক্রিনশট আপলোড হয়েছে' : 'Screenshot Uploaded'}
+                         </span>
+                       </div>
+                     ) : (
+                       <>
+                         <div className="w-12 h-12 bg-white dark:bg-gray-800 shadow-sm rounded-full flex items-center justify-center">
+                           <UploadCloud size={24} className="text-gray-400 dark:text-gray-500" />
+                         </div>
+                         <span className="text-sm font-bold text-gray-600 dark:text-gray-400">
+                           {isBn ? 'স্ক্রিনশট আপলোড করতে ক্লিক করুন' : 'Click to upload screenshot'}
+                         </span>
+                       </>
+                     )}
+                   </label>
+                 </div>
+              </div>
             </div>
           </form>
-        </section>
+        </motion.section>
 
       </div>
 
-      <div className="sticky bottom-0 left-0 right-0 p-5 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 z-40 transition-colors">
+      {/* Floating Action Button */}
+      <motion.div 
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        className="fixed bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent dark:from-gray-900 dark:via-gray-900 pb-8 z-40 transition-colors"
+      >
         <button
           form="deposit-form"
           type="submit"
           disabled={!amount || Number(amount) <= 0 || !senderNo || !trxId || submitted}
-          className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none text-white py-4 rounded-2xl font-bold text-[15px] shadow-lg shadow-primary-600/30 active:scale-95 transition-all flex items-center justify-center gap-2"
+          className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-70 disabled:active:scale-100 text-white py-4 rounded-[20px] font-bold text-lg shadow-[0_10px_20px_-10px_rgba(37,99,235,0.5)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
-          {submitted ? (isBn ? 'অপেক্ষা করুন...' : 'Please wait...') : (isBn ? 'সাবমিট করুন' : 'Submit')}
+          {submitted ? (
+            <span className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+          ) : (
+            isBn ? 'সাবমিট করুন' : 'Submit Deposit'
+          )}
         </button>
-      </div>
+      </motion.div>
 
       {/* Confirmation Modal */}
       {showConfirmModal && (
@@ -394,4 +437,3 @@ export default function Deposit() {
     </div>
   );
 }
-

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronDown, MessageCircle, Send, Phone, Mail, FileText } from 'lucide-react';
+import { ChevronDown, MessageCircle, Send, FileText, HelpCircle, PhoneCall } from 'lucide-react';
 import { useAppStore } from '../lib/store';
 
 export default function Support() {
@@ -38,96 +38,147 @@ export default function Support() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-950 transition-colors pt-6 pb-24 px-5">
-      <div className="mb-6 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-          <MessageCircle className="text-blue-600 dark:text-blue-400" size={20} />
-        </div>
-        <div>
-          <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight transition-colors">
-            {isBn ? 'সাপোর্ট ও সাহায্য' : 'Support & Help'}
-          </h1>
-          <p className="text-sm text-gray-500 font-medium">
-            {isBn ? 'যেকোনো প্রয়োজনে আমরা আছি' : "We're here to help"}
-          </p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 mb-8">
-        <button onClick={openWhatsApp} className="flex flex-col items-center justify-center gap-2 bg-white dark:bg-gray-900 border border-[#25D366]/20 p-4 rounded-2xl shadow-sm hover:bg-[#25D366]/5 transition-colors">
-          <div className="w-10 h-10 rounded-full bg-[#25D366]/10 flex items-center justify-center">
-            <MessageCircle size={18} className="text-[#25D366]" />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors pb-24">
+      {/* Premium Header */}
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl px-5 py-4 sticky top-0 z-30 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400">
+            <HelpCircle size={20} />
           </div>
-          <span className="text-sm font-bold text-[#25D366]">{isBn ? 'হোয়াটসঅ্যাপ' : 'WhatsApp'}</span>
-        </button>
-        <button onClick={openTelegram} className="flex flex-col items-center justify-center gap-2 bg-white dark:bg-gray-900 border border-[#0088cc]/20 p-4 rounded-2xl shadow-sm hover:bg-[#0088cc]/5 transition-colors">
-          <div className="w-10 h-10 rounded-full bg-[#0088cc]/10 flex items-center justify-center">
-            <Send size={18} className="text-[#0088cc]" />
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white leading-tight transition-colors">
+              {isBn ? 'সাপোর্ট ও সাহায্য' : 'Support & Help'}
+            </h1>
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 transition-colors">
+              {isBn ? 'যেকোনো প্রয়োজনে আমরা আছি' : "We're here to help"}
+            </p>
           </div>
-          <span className="text-sm font-bold text-[#0088cc]">{isBn ? 'টেলিগ্রাম' : 'Telegram'}</span>
-        </button>
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-          <FileText size={18} />
-          {isBn ? 'সাধারণ জিজ্ঞাসা (FAQ)' : 'Frequently Asked Questions'}
-        </h2>
-
-        <div className="space-y-3">
-          {faqs.map((faq, index) => (
-            <div 
-              key={index} 
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm transition-colors"
-            >
-              <button 
-                onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                className="w-full flex items-center justify-between p-4 text-left focus:outline-none"
-              >
-                <span className="font-bold text-gray-800 dark:text-gray-200 text-sm pr-4">
-                  {faq.q}
-                </span>
-                <ChevronDown 
-                  size={18} 
-                  className={`text-gray-400 shrink-0 transition-transform duration-300 ${openFaq === index ? 'rotate-180' : ''}`} 
-                />
-              </button>
-              
-              <AnimatePresence>
-                {openFaq === index && (
-                  <motion.div 
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="p-4 pt-0 text-sm text-gray-500 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800 mt-2">
-                      {faq.a}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
         </div>
       </div>
 
-      <div className="bg-gray-900 dark:bg-gray-800 rounded-2xl p-5 text-center relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/20 blur-2xl rounded-full" />
-        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/20 blur-2xl rounded-full" />
+      <div className="flex-1 p-5 space-y-6">
         
-        <h3 className="text-white font-bold mb-2 relative z-10">
-          {isBn ? 'আরও তথ্য জানতে' : 'Need more info?'}
-        </h3>
-        <p className="text-gray-400 text-xs mb-4 relative z-10">
-          {isBn ? 'আমাদের সাপোর্ট টিমের সাথে কথা বলুন, আমরা ২৪/৭ আছি আপনার সেবায়।' : 'Talk to our support team, we are available 24/7 at your service.'}
-        </p>
-        <button onClick={openTelegram} className="w-full bg-white text-gray-900 font-bold py-3 rounded-xl flex items-center justify-center gap-2 relative z-10 hover:bg-gray-100 transition-colors">
-          <Send size={16} />
-          {isBn ? 'ম্যাসেজ পাঠান' : 'Send Message'}
-        </button>
-      </div>
+        {/* Contact Channels */}
+        <div className="grid grid-cols-2 gap-4">
+          <motion.button 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={openWhatsApp} 
+            className="flex flex-col items-center justify-center gap-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-6 rounded-[24px] shadow-sm hover:shadow-md transition-all group overflow-hidden relative"
+          >
+            <div className="absolute top-0 right-0 w-24 h-24 bg-[#25D366]/5 rounded-bl-full -mr-10 -mt-10 z-0"></div>
+            <div className="w-14 h-14 rounded-full bg-[#25D366]/10 flex items-center justify-center relative z-10 group-hover:scale-110 transition-transform">
+              <MessageCircle size={24} className="text-[#25D366]" />
+            </div>
+            <div className="relative z-10 text-center">
+              <span className="text-base font-bold text-gray-900 dark:text-white block mb-0.5">{isBn ? 'হোয়াটসঅ্যাপ' : 'WhatsApp'}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">{isBn ? 'মেসেজ করুন' : 'Send message'}</span>
+            </div>
+          </motion.button>
+          
+          <motion.button 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={openTelegram} 
+            className="flex flex-col items-center justify-center gap-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-6 rounded-[24px] shadow-sm hover:shadow-md transition-all group overflow-hidden relative"
+          >
+            <div className="absolute top-0 right-0 w-24 h-24 bg-[#0088cc]/5 rounded-bl-full -mr-10 -mt-10 z-0"></div>
+            <div className="w-14 h-14 rounded-full bg-[#0088cc]/10 flex items-center justify-center relative z-10 group-hover:scale-110 transition-transform">
+              <Send size={24} className="text-[#0088cc] ml-1" />
+            </div>
+            <div className="relative z-10 text-center">
+              <span className="text-base font-bold text-gray-900 dark:text-white block mb-0.5">{isBn ? 'টেলিগ্রাম' : 'Telegram'}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">{isBn ? 'সাপোর্ট চ্যাট' : 'Support chat'}</span>
+            </div>
+          </motion.button>
+        </div>
 
+        {/* Support Banner */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className="bg-gradient-to-r from-primary-600 to-indigo-700 rounded-[24px] p-6 text-white shadow-lg relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 blur-3xl rounded-full -mr-20 -mt-20 z-0"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/30 blur-2xl rounded-full -ml-10 -mb-10 z-0"></div>
+          
+          <div className="relative z-10 flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center shrink-0">
+              <PhoneCall size={24} className="text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg mb-1">
+                {isBn ? '২৪/৭ লাইভ সাপোর্ট' : '24/7 Live Support'}
+              </h3>
+              <p className="text-primary-100 text-xs leading-relaxed">
+                {isBn ? 'আমাদের এক্সপার্ট টিম সবসময় প্রস্তুত আপনার যেকোনো সমস্যা সমাধানে।' : 'Our expert team is always ready to solve any of your problems.'}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* FAQs */}
+        <motion.div
+           initial={{ opacity: 0, y: 10 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.2 }}
+        >
+          <div className="flex items-center gap-2 mb-4 px-1">
+            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
+              <FileText size={16} className="text-gray-600 dark:text-gray-400" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              {isBn ? 'সাধারণ জিজ্ঞাসা (FAQ)' : 'Frequently Asked Questions'}
+            </h2>
+          </div>
+
+          <div className="space-y-3">
+            {faqs.map((faq, index) => (
+              <div 
+                key={index} 
+                className={`bg-white dark:bg-gray-800 border transition-all duration-300 rounded-[20px] overflow-hidden shadow-sm ${openFaq === index ? 'border-primary-300 dark:border-primary-700 ring-4 ring-primary-50 dark:ring-primary-900/20' : 'border-gray-100 dark:border-gray-700'}`}
+              >
+                <button 
+                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                  className="w-full flex items-center justify-between p-5 text-left focus:outline-none"
+                >
+                  <span className={`font-bold text-sm pr-4 transition-colors ${openFaq === index ? 'text-primary-600 dark:text-primary-400' : 'text-gray-800 dark:text-gray-200'}`}>
+                    {faq.q}
+                  </span>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${openFaq === index ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' : 'bg-gray-50 dark:bg-gray-700 text-gray-400'}`}>
+                    <ChevronDown 
+                      size={18} 
+                      className={`transition-transform duration-300 ${openFaq === index ? 'rotate-180' : ''}`} 
+                    />
+                  </div>
+                </button>
+                
+                <AnimatePresence>
+                  {openFaq === index && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="p-5 pt-0 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                        {faq.a}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+      </div>
     </div>
   );
 }

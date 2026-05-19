@@ -13,6 +13,7 @@ import Withdraw from './pages/Withdraw';
 import Transactions from './pages/Transactions';
 import Loans from './pages/Loans';
 import PlaceholderPage from './pages/PlaceholderPage';
+import PayEMI from './pages/PayEMI';
 import ApplicationDetails from './pages/ApplicationDetails';
 import Profile from './pages/Profile';
 import Support from './pages/Support';
@@ -75,7 +76,7 @@ export default function App() {
               <Route path="/application/:id" element={<ApplicationDetails />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/support" element={<Support />} />
-              <Route path="/pay" element={<PlaceholderPage title="Pay EMI" />} />
+              <Route path="/pay" element={<PayEMI />} />
             </Routes>
           </Layout>
         } />
