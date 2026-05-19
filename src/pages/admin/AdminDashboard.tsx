@@ -27,7 +27,7 @@ export default function AdminDashboard() {
     avatar_url: ''
   });
   
-  const { systemSettings, setSystemSettings, language, toggleLanguage } = useAppStore();
+  const { systemSettings, setSystemSettings, language, setLanguage } = useAppStore();
   const isBn = language === 'bn';
   const [config, setConfig] = useState({
     processingFee: 1,
@@ -253,7 +253,7 @@ export default function AdminDashboard() {
           
           <div className="flex items-center gap-4">
              <button 
-               onClick={toggleLanguage}
+               onClick={() => setLanguage(language === 'bn' ? 'en' : 'bn')}
                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 rounded-full px-4.5 py-2 text-sm font-bold text-gray-700 dark:text-gray-300 shadow-sm flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all cursor-pointer"
              >
                🌐 {isBn ? 'English' : 'বাংলা'}
