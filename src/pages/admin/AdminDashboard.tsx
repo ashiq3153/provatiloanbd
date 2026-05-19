@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useAppStore } from '../../lib/store';
 import { convertDigits, formatCurrency } from '../../lib/translation';
 import { motion, AnimatePresence } from 'motion/react';
+import { sendTelegramNotification } from '../../lib/telegram';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings'>('overview');
@@ -39,7 +40,8 @@ export default function AdminDashboard() {
     minRateEmergency: 2.0,
     minRateWomen: 0.8,
     telegramSupport: 'https://t.me/Provati_Loan',
-    whatsappSupport: 'https://wa.me/8801700000000'
+    whatsappSupport: 'https://wa.me/8801700000000',
+    telegramBotToken: ''
   });
 
   useEffect(() => {
@@ -54,7 +56,8 @@ export default function AdminDashboard() {
         minRateEmergency: systemSettings.minRateEmergency ? systemSettings.minRateEmergency * 100 : 2.0,
         minRateWomen: systemSettings.minRateWomen ? systemSettings.minRateWomen * 100 : 0.8,
         telegramSupport: systemSettings.telegramSupport || 'https://t.me/Provati_Loan',
-        whatsappSupport: systemSettings.whatsappSupport || 'https://wa.me/8801700000000'
+        whatsappSupport: systemSettings.whatsappSupport || 'https://wa.me/8801700000000',
+        telegramBotToken: systemSettings.telegramBotToken || ''
       });
     }
   }, [systemSettings]);
@@ -95,7 +98,8 @@ export default function AdminDashboard() {
       minRateEmergency: config.minRateEmergency / 100,
       minRateWomen: config.minRateWomen / 100,
       telegramSupport: config.telegramSupport,
-      whatsappSupport: config.whatsappSupport
+      whatsappSupport: config.whatsappSupport,
+      telegramBotToken: config.telegramBotToken
     };
     
     const success = await updateSystemSettings('global_loan_config', newSettings);
@@ -112,6 +116,33 @@ export default function AdminDashboard() {
     if (success) {
       toast.success(`Loan marked as ${status.replace('_', ' ')}`);
       setLoans(loans.map(l => l.id === id ? { ...l, status, admin_feedback: feedback || l.admin_feedback } : l));
+
+      // Trigger Telegram notification
+      const loan = loans.find(l => l.id === id);
+      if (loan) {
+        let msg = "";
+        const catName = loan.loan_category === 'personal' ? 'ব্যক্তিগত' :
+                        loan.loan_category === 'business' ? 'ব্যবসায়িক' :
+                        loan.loan_category === 'expat' ? 'প্রবাসী' :
+                        loan.loan_category === 'student' ? 'শিক্ষা' :
+                        loan.loan_category === 'emergency' ? 'জরুরি' : 'বাড়ি';
+        
+        const formattedAmount = formatCurrency(loan.amount, isBn);
+        
+        if (status === 'approved') {
+          msg = `🎉 <b>অভিনন্দন ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটি অনুমোদিত হয়েছে।\n\n💰 লোনের পরিমাণ: <b>${formattedAmount}</b>\n📅 মেয়াদ: <b>${convertDigits(loan.tenure_months, isBn)} মাস</b>\n\nআমাদের পক্ষ থেকে শীঘ্রই আপনার সাথে যোগাযোগ করা হবে। ধন্যবাদ!`;
+        } else if (status === 'rejected') {
+          msg = `❌ <b>দুঃখিত ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটি বাতিল করা হয়েছে।\n\n${feedback ? `📝 কারণ: <i>${feedback}</i>\n\n` : ''}ভবিষ্যতে পুনরায় আবেদন করার জন্য অনুরোধ করা হলো। ধন্যবাদ।`;
+        } else if (status === 'action_required') {
+          msg = `⚠️ <b>মনোযোগ দিন ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটিতে কিছু সংশোধনী প্রয়োজন।\n\n📝 মন্তব্য: <b>${feedback}</b>\n\nঅনুগ্রহ করে প্রোফাইল থেকে প্রয়োজনীয় তথ্য ও ডকুমেন্ট আপডেট করুন। ধন্যবাদ!`;
+        } else if (status === 'completed') {
+          msg = `✅ <b>অভিনন্দন ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোনটি</b> সফলভাবে সম্পূর্ণ বা পরিশোধ হয়েছে।\n\nআমাদের সাথে থাকার জন্য ধন্যবাদ!`;
+        }
+
+        if (msg) {
+          sendTelegramNotification(loan.chat_id, msg, config.telegramBotToken);
+        }
+      }
     } else {
       toast.error('Failed to update loan status');
     }
@@ -122,6 +153,33 @@ export default function AdminDashboard() {
     if (success) {
       toast.success(`Transaction marked as ${status}`);
       setTransactions(transactions.map(t => t.id === id ? { ...t, status } : t));
+
+      // Trigger Telegram Notification
+      const txn = transactions.find(t => t.id === id);
+      if (txn) {
+        let msg = "";
+        const formattedAmount = formatCurrency(txn.amount, isBn);
+        const method = txn.payment_method?.toUpperCase();
+        
+        if (txn.type === 'deposit') {
+          const depType = txn.deposit_type === 'processing_fee' ? 'প্রসেসিং ফি' : 'সিকিউরিটি ডিপোজিট';
+          if (status === 'completed') {
+            msg = `✅ <b>ডিপোজিট সফল!</b>\n\nআপনার <b>${depType}</b> ডিপোজিট সফলভাবে সম্পন্ন হয়েছে।\n\n💰 পরিমাণ: <b>${formattedAmount}</b>\n💳 মাধ্যম: <b>${method}</b>\n🆔 TrxID: <code>${txn.trx_id}</code>\n\nআপনার অ্যাকাউন্টে ব্যালেন্স যোগ করা হয়েছে। ধন্যবাদ!`;
+          } else if (status === 'failed') {
+            msg = `❌ <b>ডিপোজিট ব্যর্থ!</b>\n\nআপনার <b>${depType}</b> ডিপোজিট অনুরোধটি বাতিল বা ব্যর্থ হয়েছে।\n\n💰 পরিমাণ: <b>${formattedAmount}</b>\n🆔 TrxID: <code>${txn.trx_id || 'N/A'}</code>\n\nসঠিক তথ্য সহ পুনরায় চেষ্টা করার জন্য অনুরোধ করা হলো। কোনো সমস্যা হলে আমাদের সাপোর্টে যোগাযোগ করুন।`;
+          }
+        } else if (txn.type === 'withdraw') {
+          if (status === 'completed') {
+            msg = `✅ <b>উত্তোলন সফল!</b>\n\nআপনার উত্তোলনের অনুরোধটি সফলভাবে সম্পন্ন হয়েছে।\n\n💰 পরিমাণ: <b>${formattedAmount}</b>\n💳 মাধ্যম: <b>${method}</b>\n\nটাকা আপনার দেওয়া অ্যাকাউন্টে পাঠানো হয়েছে। আমাদের সাথে থাকার জন্য ধন্যবাদ!`;
+          } else if (status === 'failed') {
+            msg = `❌ <b>উত্তোলন ব্যর্থ!</b>\n\nআপনার উত্তোলনের অনুরোধটি বাতিল বা ব্যর্থ হয়েছে।\n\n💰 পরিমাণ: <b>${formattedAmount}</b>\n\nদয়া করে সঠিক তথ্য দিয়ে পুনরায় চেষ্টা করুন অথবা সাপোর্টে যোগাযোগ করুন।`;
+          }
+        }
+
+        if (msg) {
+          sendTelegramNotification(txn.chat_id, msg, config.telegramBotToken);
+        }
+      }
     } else {
       toast.error('Failed to update transaction status');
     }
@@ -716,6 +774,26 @@ export default function AdminDashboard() {
                           <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">WhatsApp Link</label>
                           <input type="text" value={config.whatsappSupport || ''} onChange={e => setConfig({...config, whatsappSupport: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm font-mono text-sm" />
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Telegram Bot Settings */}
+                    <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[20px] border border-gray-100 dark:border-gray-700">
+                      <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                        <ShieldAlert size={18} className="text-primary-500" /> Telegram Bot Notifications
+                      </h3>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Telegram Bot Token</label>
+                        <input 
+                          type="password" 
+                          placeholder="e.g. 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ" 
+                          value={config.telegramBotToken || ''} 
+                          onChange={e => setConfig({...config, telegramBotToken: e.target.value})} 
+                          className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm font-mono text-sm" 
+                        />
+                        <p className="text-[11px] text-gray-500 mt-2">
+                          টেলিগ্রাম বটের মাধ্যমে ইউজারদের লোনের আবেদন ও ট্রানজেকশন স্ট্যাটাস আপডেট নোটিফিকেশন পাঠাতে এটি ব্যবহার করা হয়।
+                        </p>
                       </div>
                     </div>
 

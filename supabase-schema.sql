@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS loan_applications (
   email TEXT,
   current_address TEXT NOT NULL,
   permanent_address TEXT NOT NULL,
+  nid_number TEXT,
   -- Professional info (JSON - varies by category)
   professional_info JSONB,
   -- Bank info

@@ -22,3 +22,44 @@ export const getTelegramUser = (): TelegramUser => {
     photo_url: 'https://i.pravatar.cc/150?u=arif_hossain',
   };
 };
+
+/**
+ * Sends a notification message to a user via the Telegram Bot API.
+ */
+export async function sendTelegramNotification(
+  chatId: number,
+  message: string,
+  botToken?: string
+): Promise<boolean> {
+  const token = botToken || import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
+  if (!token) {
+    console.warn("⚠️ Telegram Bot Token is missing. Notification not sent.");
+    return false;
+  }
+
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: message,
+        parse_mode: "HTML",
+      }),
+    });
+
+    if (!response.ok) {
+      const errData = await response.json();
+      console.error("Telegram API Error:", errData);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error sending Telegram notification:", error);
+    return false;
+  }
+}
+
