@@ -8,14 +8,33 @@ import {
 } from "lucide-react";
 import { convertDigits } from "../lib/translation";
 
+const getLimitText = (amount: number, isBn: boolean) => {
+  if (amount >= 10000000) {
+    const crore = amount / 10000000;
+    return isBn ? `${convertDigits(crore.toString(), true)} কোটি` : `${crore} Crore`;
+  }
+  if (amount >= 100000) {
+    const lakhs = amount / 100000;
+    return isBn ? `${convertDigits(lakhs.toString(), true)} লক্ষ` : `${lakhs} Lac`;
+  }
+  const thousands = amount / 1000;
+  return isBn ? `${convertDigits(thousands.toString(), true)} হাজার` : `${thousands}k`;
+};
+
+const getTenureText = (min: number, max: number, isBn: boolean) => {
+  return isBn ? `${convertDigits(min.toString(), true)}-${convertDigits(max.toString(), true)} মাস` : `${min}-${max} months`;
+};
+
 export const getCategories = (isBn: boolean, settings?: any) => [
   {
     id: "personal",
     title: isBn ? "চাকরিজীবী" : "Salaried",
     icon: Briefcase,
-    limit: isBn ? "৫ লক্ষ" : "5 Lac",
-    maxAmount: 500000,
-    tenureRange: isBn ? "১২-৬০ মাস" : "12-60 months",
+    limit: getLimitText(settings?.categories?.personal?.maxAmount ?? 500000, isBn),
+    maxAmount: settings?.categories?.personal?.maxAmount ?? 500000,
+    minTenure: settings?.categories?.personal?.minTenure ?? 12,
+    maxTenure: settings?.categories?.personal?.maxTenure ?? 60,
+    tenureRange: getTenureText(settings?.categories?.personal?.minTenure ?? 12, settings?.categories?.personal?.maxTenure ?? 60, isBn),
     intRates: settings?.minRatePersonal ? convertDigits(`${(settings.minRatePersonal * 100).toFixed(1)}% - ${(settings.minRatePersonal * 100 + 0.8).toFixed(1)}%`, isBn) : (isBn ? "১.২% - ২.০%" : "1.2% - 2.0%"),
     procTime: isBn ? "২-৩ দিন" : "2-3 days",
     color: "blue",
@@ -28,9 +47,11 @@ export const getCategories = (isBn: boolean, settings?: any) => [
     id: "business",
     title: isBn ? "ব্যবসায়ী" : "Business",
     icon: Store,
-    limit: isBn ? "৫০ লক্ষ" : "50 Lac",
-    maxAmount: 5000000,
-    tenureRange: isBn ? "১২-১২০ মাস" : "12-120 months",
+    limit: getLimitText(settings?.categories?.business?.maxAmount ?? 5000000, isBn),
+    maxAmount: settings?.categories?.business?.maxAmount ?? 5000000,
+    minTenure: settings?.categories?.business?.minTenure ?? 12,
+    maxTenure: settings?.categories?.business?.maxTenure ?? 120,
+    tenureRange: getTenureText(settings?.categories?.business?.minTenure ?? 12, settings?.categories?.business?.maxTenure ?? 120, isBn),
     intRates: settings?.minRateBusiness ? convertDigits(`${(settings.minRateBusiness * 100).toFixed(1)}% - ${(settings.minRateBusiness * 100 + 1.0).toFixed(1)}%`, isBn) : (isBn ? "১.৫% - ২.৫%" : "1.5% - 2.5%"),
     procTime: isBn ? "৩-৫ দিন" : "3-5 days",
     color: "green",
@@ -43,9 +64,11 @@ export const getCategories = (isBn: boolean, settings?: any) => [
     id: "expat",
     title: isBn ? "প্রবাসী" : "Expatriate",
     icon: Plane,
-    limit: isBn ? "১০ লক্ষ" : "10 Lac",
-    maxAmount: 1000000,
-    tenureRange: isBn ? "২৪-৭২ মাস" : "24-72 months",
+    limit: getLimitText(settings?.categories?.expat?.maxAmount ?? 1000000, isBn),
+    maxAmount: settings?.categories?.expat?.maxAmount ?? 1000000,
+    minTenure: settings?.categories?.expat?.minTenure ?? 24,
+    maxTenure: settings?.categories?.expat?.maxTenure ?? 72,
+    tenureRange: getTenureText(settings?.categories?.expat?.minTenure ?? 24, settings?.categories?.expat?.maxTenure ?? 72, isBn),
     intRates: settings?.minRateExpat ? convertDigits(`${(settings.minRateExpat * 100).toFixed(1)}% - ${(settings.minRateExpat * 100 + 0.8).toFixed(1)}%`, isBn) : (isBn ? "১.০% - ১.৮%" : "1.0% - 1.8%"),
     procTime: isBn ? "১-২ দিন" : "1-2 days",
     color: "purple",
@@ -58,9 +81,11 @@ export const getCategories = (isBn: boolean, settings?: any) => [
     id: "student",
     title: isBn ? "শিক্ষার্থী" : "Student",
     icon: GraduationCap,
-    limit: isBn ? "৫ লক্ষ" : "5 Lac",
-    maxAmount: 500000,
-    tenureRange: isBn ? "১২-৪৮ মাস" : "12-48 months",
+    limit: getLimitText(settings?.categories?.student?.maxAmount ?? 500000, isBn),
+    maxAmount: settings?.categories?.student?.maxAmount ?? 500000,
+    minTenure: settings?.categories?.student?.minTenure ?? 12,
+    maxTenure: settings?.categories?.student?.maxTenure ?? 48,
+    tenureRange: getTenureText(settings?.categories?.student?.minTenure ?? 12, settings?.categories?.student?.maxTenure ?? 48, isBn),
     intRates: settings?.minRateStudent ? convertDigits(`${(settings.minRateStudent * 100).toFixed(1)}% - ${(settings.minRateStudent * 100 + 0.4).toFixed(1)}%`, isBn) : (isBn ? "০.৮% - ১.২%" : "0.8% - 1.2%"),
     procTime: isBn ? "২-৩ দিন" : "2-3 days",
     color: "orange",
@@ -73,9 +98,11 @@ export const getCategories = (isBn: boolean, settings?: any) => [
     id: "emergency",
     title: isBn ? "জরুরি ঋণ" : "Emergency",
     icon: AlertCircle,
-    limit: isBn ? "১ লক্ষ" : "1 Lac",
-    maxAmount: 100000,
-    tenureRange: isBn ? "৬-২৪ মাস" : "6-24 months",
+    limit: getLimitText(settings?.categories?.emergency?.maxAmount ?? 100000, isBn),
+    maxAmount: settings?.categories?.emergency?.maxAmount ?? 100000,
+    minTenure: settings?.categories?.emergency?.minTenure ?? 6,
+    maxTenure: settings?.categories?.emergency?.maxTenure ?? 24,
+    tenureRange: getTenureText(settings?.categories?.emergency?.minTenure ?? 6, settings?.categories?.emergency?.maxTenure ?? 24, isBn),
     intRates: settings?.minRateEmergency ? convertDigits(`${(settings.minRateEmergency * 100).toFixed(1)}% - ${(settings.minRateEmergency * 100 + 1.0).toFixed(1)}%`, isBn) : (isBn ? "২.০% - ৩.০%" : "2.0% - 3.0%"),
     procTime: isBn ? "২-৬ ঘণ্টা" : "2-6 hours",
     color: "rose",
@@ -88,9 +115,11 @@ export const getCategories = (isBn: boolean, settings?: any) => [
     id: "women",
     title: isBn ? "নারী উদ্যোক্তা" : "Women Entrepreneur",
     icon: Award,
-    limit: isBn ? "২০ লক্ষ" : "20 Lac",
-    maxAmount: 2000000,
-    tenureRange: isBn ? "১২-৮৪ মাস" : "12-84 months",
+    limit: getLimitText(settings?.categories?.women?.maxAmount ?? 2000000, isBn),
+    maxAmount: settings?.categories?.women?.maxAmount ?? 2000000,
+    minTenure: settings?.categories?.women?.minTenure ?? 12,
+    maxTenure: settings?.categories?.women?.maxTenure ?? 84,
+    tenureRange: getTenureText(settings?.categories?.women?.minTenure ?? 12, settings?.categories?.women?.maxTenure ?? 84, isBn),
     intRates: settings?.minRateWomen ? convertDigits(`${(settings.minRateWomen * 100).toFixed(1)}% - ${(settings.minRateWomen * 100 + 0.7).toFixed(1)}%`, isBn) : (isBn ? "০.৮% - ১.৫%" : "0.8% - 1.5%"),
     procTime: isBn ? "৩-৫ দিন" : "3-5 days",
     color: "pink",

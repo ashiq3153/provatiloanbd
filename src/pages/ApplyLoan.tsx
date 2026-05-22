@@ -36,7 +36,10 @@ export default function ApplyLoan() {
   const { language, systemSettings } = useAppStore();
   const isBn = language === "bn";
   const user = getTelegramUser();
-  const categories = React.useMemo(() => getCategories(isBn, systemSettings), [isBn, systemSettings]);
+  const categories = React.useMemo(() => {
+    const allCats = getCategories(isBn, systemSettings);
+    return allCats.filter(cat => systemSettings?.categories?.[cat.id]?.enabled !== false);
+  }, [isBn, systemSettings]);
 
   const methods = useForm<LoanFormData>({
     resolver: zodResolver(getLoanSchema(isBn)),
@@ -156,7 +159,9 @@ export default function ApplyLoan() {
   // Auto-adjusted tenure state
   const handleAmountChange = (val: number) => {
     setAmount(val);
-    const [minAllowed, maxAllowed] = getAllowedTenure(val);
+    const rawAllowed = getAllowedTenure(val);
+    const minAllowed = Math.max(rawAllowed[0], category?.minTenure ?? 12);
+    const maxAllowed = Math.min(rawAllowed[1], category?.maxTenure ?? 60);
     if (tenure < minAllowed) setTenure(minAllowed);
     if (tenure > maxAllowed) setTenure(maxAllowed);
   };
@@ -368,9 +373,10 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
               type="button"
               key={cat.id}
               onClick={() => {
-                const [minT] = getAllowedTenure(amount);
+                const rawAllowed = getAllowedTenure(amount);
+                const minAllowed = Math.max(rawAllowed[0], cat.minTenure ?? 12);
                 setCategory(cat);
-                setTenure(minT);
+                setTenure(minAllowed);
                 setStep(2);
               }}
               className={`rounded-2xl p-5 text-left relative overflow-hidden ${getColorStyles(cat.color, isActive)}`}
@@ -456,7 +462,9 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
           
           <div className="flex flex-wrap gap-2">
             {snapPoints.map(months => {
-              const [minAllowed, maxAllowed] = getAllowedTenure(amount);
+              const rawAllowed = getAllowedTenure(amount);
+              const minAllowed = Math.max(rawAllowed[0], category?.minTenure ?? 12);
+              const maxAllowed = Math.min(rawAllowed[1], category?.maxTenure ?? 60);
               const isAllowed = months >= minAllowed && months <= maxAllowed;
               const isSelected = tenure === months;
               
@@ -865,65 +873,32 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
 
           {(category?.id === 'business' || category?.id === 'women') && (
             <>
-              <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-primary-50 hover:border-primary-300 transition-colors text-left">
-                 <UploadCloud size={18} className="text-gray-500 shrink-0" />
-                 <span className="text-xs font-bold text-gray-600 flex-1">{isBn ? "ট্রেড লাইসেন্স কপি" : "Trade License Copy"}</span>
-              </button>
-              <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-primary-50 hover:border-primary-300 transition-colors text-left">
-                 <UploadCloud size={18} className="text-gray-500 shrink-0" />
-                 <span className="text-xs font-bold text-gray-600 flex-1">{isBn ? "দোকান/প্রতিষ্ঠানের ছবি" : "Shop/Institution Photo"}</span>
-              </button>
-              <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-primary-50 hover:border-primary-300 transition-colors text-left">
-                 <UploadCloud size={18} className="text-gray-500 shrink-0" />
-                 <span className="text-xs font-bold text-gray-600 flex-1">{isBn ? "ব্যবসায়িক ডকুমেন্টস" : "Business Documents"}</span>
-              </button>
+              {renderFileUploader("trade_license", isBn ? "ট্রেড লাইসেন্স কপি" : "Trade License Copy")}
+              {renderFileUploader("shop_photo", isBn ? "দোকান/প্রতিষ্ঠানের ছবি" : "Shop/Institution Photo")}
+              {renderFileUploader("business_docs", isBn ? "ব্যবসায়িক ডকুমেন্টস" : "Business Documents")}
             </>
           )}
 
           {category?.id === 'expat' && (
             <>
-              <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-primary-50 hover:border-primary-300 transition-colors text-left">
-                 <UploadCloud size={18} className="text-gray-500 shrink-0" />
-                 <span className="text-xs font-bold text-gray-600 flex-1">{isBn ? "পাসপোর্ট কপি" : "Passport Copy"}</span>
-              </button>
-              <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-primary-50 hover:border-primary-300 transition-colors text-left">
-                 <UploadCloud size={18} className="text-gray-500 shrink-0" />
-                 <span className="text-xs font-bold text-gray-600 flex-1">{isBn ? "ভিসা কপি" : "Visa Copy"}</span>
-              </button>
-              <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-primary-50 hover:border-primary-300 transition-colors text-left">
-                 <UploadCloud size={18} className="text-gray-500 shrink-0" />
-                 <span className="text-xs font-bold text-gray-600 flex-1">{isBn ? "ওয়ার্ক পারমিট / ওভারসিস আইডি" : "Work Permit / Overseas ID"}</span>
-              </button>
+              {renderFileUploader("passport_copy", isBn ? "পাসপোর্ট কপি" : "Passport Copy")}
+              {renderFileUploader("visa_copy", isBn ? "ভিসা কপি" : "Visa Copy")}
+              {renderFileUploader("work_permit", isBn ? "ওয়ার্ক পারমিট / ওভারসিস আইডি" : "Work Permit / Overseas ID")}
             </>
           )}
 
           {category?.id === 'student' && (
             <>
-              <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-primary-50 hover:border-primary-300 transition-colors text-left">
-                 <UploadCloud size={18} className="text-gray-500 shrink-0" />
-                 <span className="text-xs font-bold text-gray-600 flex-1">{isBn ? "স্টুডেন্ট আইডি" : "Student ID"} কার্ড</span>
-              </button>
-              <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-primary-50 hover:border-primary-300 transition-colors text-left">
-                 <UploadCloud size={18} className="text-gray-500 shrink-0" />
-                 <span className="text-xs font-bold text-gray-600 flex-1">{isBn ? "অভিভাবকের NID কপি" : "Guardian's NID Copy"}</span>
-              </button>
-              <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-primary-50 hover:border-primary-300 transition-colors text-left">
-                 <UploadCloud size={18} className="text-gray-500 shrink-0" />
-                 <span className="text-xs font-bold text-gray-600 flex-1">{isBn ? "অভিভাবকের আয়ের প্রমাণপত্র" : "Guardian's Income Proof"}</span>
-              </button>
+              {renderFileUploader("student_id", isBn ? "স্টুডেন্ট আইডি কার্ড" : "Student ID Card")}
+              {renderFileUploader("guardian_nid", isBn ? "অভিভাবকের NID কপি" : "Guardian's NID Copy")}
+              {renderFileUploader("guardian_income", isBn ? "অভিভাবকের আয়ের প্রমাণপত্র" : "Guardian's Income Proof")}
             </>
           )}
 
           {category?.id === 'emergency' && (
             <>
-              <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-primary-50 hover:border-primary-300 transition-colors text-left">
-                 <UploadCloud size={18} className="text-gray-500 shrink-0" />
-                 <span className="text-xs font-bold text-gray-600 flex-1">{isBn ? "আয়ের প্রমাণপত্র / ব্যাংক স্টেটমেন্ট" : "Income Proof / Bank Statement"}</span>
-              </button>
-              <button className="bg-gray-50 dark:bg-gray-900 transition-colors border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-primary-50 hover:border-primary-300 transition-colors text-left">
-                 <UploadCloud size={18} className="text-gray-500 shrink-0" />
-                 <span className="text-xs font-bold text-gray-600 flex-1">{isBn ? "মেডিকেল বা জরুরি ডকুমেন্টস (যদি থাকে)" : "Medical or Emergency Documents (if any)"}</span>
-              </button>
+              {renderFileUploader("income_proof", isBn ? "আয়ের প্রমাণপত্র / ব্যাংক স্টেটমেন্ট" : "Income Proof / Bank Statement")}
+              {renderFileUploader("emergency_docs", isBn ? "মেডিকেল বা জরুরি ডকুমেন্টস (যদি থাকে)" : "Medical or Emergency Documents (if any)")}
             </>
           )}
         </div>

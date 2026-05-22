@@ -6,8 +6,9 @@ import { useState, useEffect } from 'react';
 import { useAppStore } from '../lib/store';
 import { convertDigits, formatCurrency } from '../lib/translation';
 import { getTelegramUser } from '../lib/telegram';
-import { getDepositStatus, createTransaction, getDashboardStats } from '../lib/api';
+import { getDepositStatus, createTransaction, getDashboardStats, getActiveLoans } from '../lib/api';
 import type { DepositStatus } from '../lib/api';
+import type { LoanApplication } from '../types/database';
 
 export default function Withdraw() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export default function Withdraw() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [availableBalance, setAvailableBalance] = useState(0);
+  const [activeLoan, setActiveLoan] = useState<LoanApplication | null>(null);
 
   // Real deposit status from Supabase
   const [depositStatus, setDepositStatus] = useState<DepositStatus>({
@@ -29,12 +31,20 @@ export default function Withdraw() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [depStatus, stats] = await Promise.all([
-        getDepositStatus(user.id),
-        getDashboardStats(user.id),
-      ]);
-      setDepositStatus(depStatus);
-      setAvailableBalance(stats.totalBalance);
+      try {
+        const [depStatus, stats, activeLoans] = await Promise.all([
+          getDepositStatus(user.id),
+          getDashboardStats(user.id),
+          getActiveLoans(user.id),
+        ]);
+        setDepositStatus(depStatus);
+        setAvailableBalance(stats.totalBalance);
+        if (activeLoans.length > 0) {
+          setActiveLoan(activeLoans[0]);
+        }
+      } catch (err) {
+        console.error('Error fetching withdrawal details:', err);
+      }
     };
     fetchData();
   }, [user.id]);
@@ -295,7 +305,7 @@ export default function Withdraw() {
                           {isBn ? 'প্রসেসিং ফি' : 'Processing Fee'}
                         </p>
                         <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5">
-                          {formatCurrency(1250, isBn)}
+                          {formatCurrency(activeLoan?.processing_fee ?? 1250, isBn)}
                         </p>
                       </div>
                     </div>
@@ -314,7 +324,7 @@ export default function Withdraw() {
                           {isBn ? 'সিকিউরিটি ডিপোজিট' : 'Security Deposit'}
                         </p>
                         <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5">
-                          {formatCurrency(41600, isBn)}
+                          {formatCurrency(activeLoan?.security_deposit ?? 41600, isBn)}
                         </p>
                       </div>
                     </div>

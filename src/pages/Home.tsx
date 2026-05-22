@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { Skeleton } from '../components/Skeleton';
 import { toast } from 'sonner';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { getDashboardStats, getActiveLoans, getSuccessStories } from '../lib/api';
+import { getDashboardStats, getActiveLoans, getSuccessStories, getTransactions } from '../lib/api';
 import type { DashboardStats } from '../lib/api';
 import type { LoanApplication, SuccessStory } from '../types/database';
 
@@ -18,11 +18,12 @@ export default function Home() {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activeLoan, setActiveLoan] = useState<LoanApplication | null>(null);
+  const [completedEmisCount, setCompletedEmisCount] = useState(0);
   const [stories, setStories] = useState<SuccessStory[]>([]);
 
   const user = getTelegramUser();
   const navigate = useNavigate();
-  const { language } = useAppStore();
+  const { language, systemSettings } = useAppStore();
   const isBn = language === 'bn';
 
   // Fetch real data from Supabase
@@ -30,14 +31,22 @@ export default function Home() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [dashStats, activeLoans, successStoriesData] = await Promise.all([
+        const [dashStats, activeLoans, successStoriesData, allTransactions] = await Promise.all([
           getDashboardStats(user.id),
           getActiveLoans(user.id),
           getSuccessStories(),
+          getTransactions(user.id),
         ]);
 
         setStats(dashStats);
-        setActiveLoan(activeLoans.length > 0 ? activeLoans[0] : null);
+        const loan = activeLoans.length > 0 ? activeLoans[0] : null;
+        setActiveLoan(loan);
+        if (loan) {
+          const completedCount = allTransactions.filter(
+            t => t.type === 'emi_payment' && t.loan_id === loan.id && t.status === 'completed'
+          ).length;
+          setCompletedEmisCount(completedCount);
+        }
         setStories(successStoriesData.length > 0 ? successStoriesData : []);
       } catch (err) {
         console.error('Dashboard fetch error:', err);
@@ -84,17 +93,15 @@ export default function Home() {
   const safeStoryIndex = currentStoryIndex % Math.max(displayStories.length, 1);
 
   const allLoanCategories = [
-    { id: 'business', name: isBn ? 'ব্যবসা' : 'Business', icon: '🏢', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-    { id: 'personal', name: isBn ? 'ব্যক্তিগত' : 'Personal', icon: '👤', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-    { id: 'home', name: isBn ? 'বাড়ি' : 'Home', icon: '🏠', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-    { id: 'car', name: isBn ? 'গাড়ি' : 'Car', icon: '🚗', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-    { id: 'medical', name: isBn ? 'চিকিৎসা' : 'Medical', icon: '🏥', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-    { id: 'freelancer', name: isBn ? 'ফ্রিল্যান্সার' : 'Freelancer', icon: '💻', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-    { id: 'probashi', name: isBn ? 'প্রবাসী' : 'Probashi', icon: '✈️', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-    { id: 'education', name: isBn ? 'শিক্ষা' : 'Education', icon: '🎓', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+    { id: 'business', name: isBn ? 'ব্যবসায়ী ঋণ' : 'Business', icon: '🏢', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+    { id: 'personal', name: isBn ? 'চাকরিজীবী' : 'Salaried (Personal)', icon: '👤', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+    { id: 'expat', name: isBn ? 'প্রবাসী ঋণ' : 'Expatriate', icon: '✈️', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+    { id: 'student', name: isBn ? 'শিক্ষার্থী ঋণ' : 'Student', icon: '🎓', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+    { id: 'emergency', name: isBn ? 'জরুরি ঋণ' : 'Emergency', icon: '🚨', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+    { id: 'women', name: isBn ? 'নারী উদ্যোক্তা' : 'Women Entrepreneur', icon: '🏆', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
   ];
 
-  const displayCategories = allLoanCategories.slice(0, 4);
+  const displayCategories = allLoanCategories.filter(cat => systemSettings?.categories?.[cat.id]?.enabled !== false);
 
   const chartData = [
     { name: isBn ? 'জানু' : 'Jan', amount: 45000 },
@@ -143,6 +150,21 @@ export default function Home() {
           <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-700 shadow-sm shadow-red-500/50 transition-colors"></span>
         </div>
       </div>
+
+      {/* Notice Board Marquee */}
+      {systemSettings?.announcementActive && (
+        <div className="bg-primary-50 dark:bg-primary-950/30 border border-primary-100 dark:border-primary-900/40 rounded-2xl py-3 px-4 overflow-hidden relative flex items-center gap-3 shadow-sm transition-all">
+          <span className="bg-primary-500 text-white text-[10px] uppercase font-bold py-1 px-2.5 rounded shrink-0 relative z-10 shadow-sm flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+            {isBn ? 'বিজ্ঞপ্তি' : 'Notice'}
+          </span>
+          <div className="overflow-hidden flex-1 relative w-full h-5">
+            <div className="whitespace-nowrap absolute animate-marquee font-bold text-xs text-primary-700 dark:text-primary-400 leading-normal hover:[animation-play-state:paused] cursor-pointer">
+              {isBn ? systemSettings.announcementBn : systemSettings.announcementEn}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Balance Card */}
       <div className="relative mb-16">
@@ -266,63 +288,130 @@ export default function Home() {
               <Skeleton className="h-2 w-full rounded-full" />
             </div>
           </div>
-        ) : (<div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-[24px] p-5 shadow-[0_20px_40px_-15px_rgb(0,0,0,0.1)] dark:shadow-[0_20px_40px_-15px_rgb(0,0,0,0.3)] border border-gray-100 dark:border-gray-700 flex items-center gap-4 relative overflow-hidden transition-colors">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 dark:bg-blue-900/20 rounded-bl-full -mr-10 -mt-10 z-0 transition-colors"></div>
-          <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 rounded-[18px] flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 relative z-10 shadow-inner transition-colors">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
-          </div>
-          <div className="flex-1 relative z-10">
-            <div className="flex justify-between items-start mb-1">
-              <div>
-                <h4 className="font-bold text-gray-900 dark:text-white transition-colors">
-                  {isBn ? 'বাড়ি লোন' : 'Home Loan'}
-                  <span className="inline-block ml-2 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] rounded-full uppercase tracking-wide transition-colors">
-                    {isBn ? 'সক্রিয়' : 'Active'}
-                  </span>
-                </h4>
-                <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">
-                  {isBn ? 'লোন আইডি' : 'Loan ID'}: {convertDigits('HL1234567', isBn)}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5 transition-colors">
-                  {isBn ? 'বকেয়া' : 'Outstanding'}
-                </p>
-                <p className="font-bold text-gray-900 dark:text-white transition-colors">{formatCurrency(745000, isBn)}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 mt-4">
-              <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full flex-1 overflow-hidden shadow-inner transition-colors">
-                <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full w-[62%]"></div>
-              </div>
-              <span className="text-[11px] font-bold text-primary-600 dark:text-primary-400 transition-colors">{convertDigits('62%', isBn)}</span>
-            </div>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1.5 font-medium transition-colors">
-              {isBn ? 'পরবর্তী ইএমআই' : 'Next EMI'}: <span className="text-gray-700 dark:text-gray-300 transition-colors">{isBn ? '২৫ মে ২০২৪' : '25 May 2024'}</span>
-            </p>
+        ) : activeLoan ? (
+          (() => {
+            const progressPercent = Math.min(Math.round((completedEmisCount / activeLoan.tenure_months) * 100), 100);
+            const outstanding = Math.max(activeLoan.amount - (completedEmisCount * activeLoan.emi_amount), 0);
+            
+            const getCategoryName = (category: string) => {
+              switch (category) {
+                case 'business': return isBn ? 'ব্যবসায়িক লোন' : 'Business Loan';
+                case 'personal': return isBn ? 'ব্যক্তিগত লোন' : 'Personal Loan';
+                case 'home': return isBn ? 'বাড়ি লোন' : 'Home Loan';
+                case 'car': return isBn ? 'গাড়ি লোন' : 'Car Loan';
+                case 'medical': return isBn ? 'চিকিৎসা লোন' : 'Medical Loan';
+                case 'freelancer': return isBn ? 'ফ্রিল্যান্সার লোন' : 'Freelancer Loan';
+                case 'probashi': return isBn ? 'প্রবাসী লোন' : 'Probashi Loan';
+                case 'education': return isBn ? 'শিক্ষা লোন' : 'Education Loan';
+                case 'women': return isBn ? 'নারী উদ্যোক্তা লোন' : 'Women Entrepreneur Loan';
+                case 'student': return isBn ? 'স্টুডেন্ট লোন' : 'Student Loan';
+                case 'emergency': return isBn ? 'জরুরি লোন' : 'Emergency Loan';
+                default: return isBn ? 'লোন' : 'Loan';
+              }
+            };
 
-            {/* Chart Section within Active Loan */}
-            <div className="mt-6 h-[120px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <Tooltip
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}
-                    labelStyle={{ fontWeight: 'bold', color: '#6b7280', marginBottom: '4px' }}
-                    itemStyle={{ fontWeight: '900', color: '#111827' }}
-                    formatter={(value) => [formatCurrency(value as number, isBn), isBn ? 'ব্যালেন্স' : 'Balance']}
-                  />
-                  <Area type="monotone" dataKey="amount" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorAmount)" />
-                </AreaChart>
-              </ResponsiveContainer>
+            const getCategoryIcon = (category: string) => {
+              const cat = allLoanCategories.find(c => c.id === category);
+              return cat ? cat.icon : '🏢';
+            };
+
+            const getNextEmiDate = () => {
+              const today = new Date();
+              let dueMonth = today.getMonth();
+              let dueYear = today.getFullYear();
+              if (today.getDate() > 25) {
+                dueMonth += 1;
+                if (dueMonth > 11) {
+                  dueMonth = 0;
+                  dueYear += 1;
+                }
+              }
+              const dueDate = new Date(dueYear, dueMonth, 25);
+              return dueDate.toLocaleDateString(isBn ? 'bn-BD' : 'en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+            };
+
+            return (
+              <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-[24px] p-5 shadow-[0_20px_40px_-15px_rgb(0,0,0,0.1)] dark:shadow-[0_20px_40px_-15px_rgb(0,0,0,0.3)] border border-gray-100 dark:border-gray-700 flex items-center gap-4 relative overflow-hidden transition-colors">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 dark:bg-blue-900/20 rounded-bl-full -mr-10 -mt-10 z-0 transition-colors"></div>
+                <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 rounded-[18px] flex items-center justify-center text-2xl shrink-0 relative z-10 shadow-inner transition-colors">
+                  {getCategoryIcon(activeLoan.loan_category)}
+                </div>
+                <div className="flex-1 relative z-10">
+                  <div className="flex justify-between items-start mb-1">
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white transition-colors flex items-center gap-1.5 flex-wrap">
+                        {getCategoryName(activeLoan.loan_category)}
+                        <span className="inline-block px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] rounded-full uppercase tracking-wide transition-colors font-bold">
+                          {isBn ? 'সক্রিয়' : 'Active'}
+                        </span>
+                      </h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">
+                        {isBn ? 'লোন আইডি' : 'Loan ID'}: {convertDigits(`LN-${activeLoan.id.slice(0, 8).toUpperCase()}`, isBn)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5 transition-colors">
+                        {isBn ? 'বকেয়া' : 'Outstanding'}
+                      </p>
+                      <p className="font-bold text-gray-900 dark:text-white transition-colors">{formatCurrency(outstanding, isBn)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 mt-4">
+                    <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full flex-1 overflow-hidden shadow-inner transition-colors">
+                      <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }}></div>
+                    </div>
+                    <span className="text-[11px] font-bold text-primary-600 dark:text-primary-400 transition-colors">{convertDigits(`${progressPercent}%`, isBn)}</span>
+                  </div>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1.5 font-medium transition-colors">
+                    {isBn ? 'পরবর্তী ইএমআই' : 'Next EMI'}: <span className="text-gray-700 dark:text-gray-300 transition-colors">{getNextEmiDate()}</span>
+                  </p>
+
+                  {/* Chart Section within Active Loan */}
+                  <div className="mt-6 h-[120px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <Tooltip
+                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}
+                          labelStyle={{ fontWeight: 'bold', color: '#6b7280', marginBottom: '4px' }}
+                          itemStyle={{ fontWeight: '900', color: '#111827' }}
+                          formatter={(value) => [formatCurrency(value as number, isBn), isBn ? 'ব্যালেন্স' : 'Balance']}
+                        />
+                        <Area type="monotone" dataKey="amount" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorAmount)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            );
+          })()
+        ) : (
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-[24px] p-6 shadow-[0_20px_40px_-15px_rgb(0,0,0,0.06)] dark:shadow-[0_20px_40px_-15px_rgb(0,0,0,0.2)] border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center relative overflow-hidden transition-colors">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary-50/50 dark:bg-primary-900/10 rounded-bl-full -mr-10 -mt-10 z-0"></div>
+            <div className="w-16 h-16 bg-primary-50 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center text-primary-600 dark:text-primary-400 mb-4 shrink-0 relative z-10 shadow-inner">
+              <FileText size={32} />
             </div>
+            <h4 className="font-bold text-gray-900 dark:text-white text-lg mb-1 relative z-10">
+              {isBn ? 'কোনো সক্রিয় লোন নেই' : 'No Active Loan'}
+            </h4>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-5 max-w-[280px] relative z-10 leading-relaxed">
+              {isBn 
+                ? 'সহজ শর্তে লোন পেতে এবং আপনার স্বপ্নের প্রজেক্ট শুরু করতে এখনই আবেদন করুন!' 
+                : 'Apply now to get low-interest loans easily and start your dream project!'}
+            </p>
+            <Link 
+              to="/apply" 
+              className="w-full bg-primary-600 hover:bg-primary-700 text-white py-3.5 rounded-xl font-bold text-sm shadow-md shadow-primary-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 relative z-10"
+            >
+              {isBn ? 'লোনের জন্য আবেদন করুন' : 'Apply for a Loan'}
+              <ArrowRight size={16} />
+            </Link>
           </div>
-        </div>
         )}
       </div>
 

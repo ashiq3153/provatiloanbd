@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload } from 'lucide-react';
+import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight } from 'lucide-react';
 import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
@@ -7,9 +7,11 @@ import { useAppStore } from '../../lib/store';
 import { convertDigits, formatCurrency } from '../../lib/translation';
 import { motion, AnimatePresence } from 'motion/react';
 import { sendTelegramNotification } from '../../lib/telegram';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings'>('overview');
+  const [settingsSubTab, setSettingsSubTab] = useState<'general' | 'payments' | 'announcements' | 'categories'>('general');
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loans, setLoans] = useState<LoanApplication[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -30,6 +32,7 @@ export default function AdminDashboard() {
   
   const { systemSettings, setSystemSettings, language, setLanguage } = useAppStore();
   const isBn = language === 'bn';
+  
   const [config, setConfig] = useState({
     processingFee: 1,
     securityDeposit: 10,
@@ -41,7 +44,58 @@ export default function AdminDashboard() {
     minRateWomen: 0.8,
     telegramSupport: 'https://t.me/Provati_Loan',
     whatsappSupport: 'https://wa.me/8801700000000',
-    telegramBotToken: ''
+    telegramBotToken: '',
+
+    // Announcement settings
+    announcementActive: false,
+    announcementBn: '',
+    announcementEn: '',
+
+    // Payment numbers settings
+    bkashNo: '',
+    bkashType: 'Personal',
+    nagadNo: '',
+    nagadType: 'Personal',
+    rocketNo: '',
+    rocketType: 'Personal',
+    bankName: '',
+    bankAccName: '',
+    bankAccNo: '',
+    bankBranch: '',
+    bankRouting: '',
+    visaNo: '',
+    visaName: '',
+
+    // Category bounds settings
+    catPersonalEnabled: true,
+    catPersonalMax: 500000,
+    catPersonalMinTenure: 12,
+    catPersonalMaxTenure: 60,
+
+    catBusinessEnabled: true,
+    catBusinessMax: 5000000,
+    catBusinessMinTenure: 12,
+    catBusinessMaxTenure: 120,
+
+    catExpatEnabled: true,
+    catExpatMax: 1000000,
+    catExpatMinTenure: 24,
+    catExpatMaxTenure: 72,
+
+    catStudentEnabled: true,
+    catStudentMax: 500000,
+    catStudentMinTenure: 12,
+    catStudentMaxTenure: 48,
+
+    catEmergencyEnabled: true,
+    catEmergencyMax: 100000,
+    catEmergencyMinTenure: 6,
+    catEmergencyMaxTenure: 24,
+
+    catWomenEnabled: true,
+    catWomenMax: 2000000,
+    catWomenMinTenure: 12,
+    catWomenMaxTenure: 84
   });
 
   useEffect(() => {
@@ -57,7 +111,55 @@ export default function AdminDashboard() {
         minRateWomen: systemSettings.minRateWomen ? systemSettings.minRateWomen * 100 : 0.8,
         telegramSupport: systemSettings.telegramSupport || 'https://t.me/Provati_Loan',
         whatsappSupport: systemSettings.whatsappSupport || 'https://wa.me/8801700000000',
-        telegramBotToken: systemSettings.telegramBotToken || ''
+        telegramBotToken: systemSettings.telegramBotToken || '',
+
+        announcementActive: !!systemSettings.announcementActive,
+        announcementBn: systemSettings.announcementBn || '',
+        announcementEn: systemSettings.announcementEn || '',
+
+        bkashNo: systemSettings.paymentNumbers?.bkash?.number || '',
+        bkashType: systemSettings.paymentNumbers?.bkash?.type || 'Personal',
+        nagadNo: systemSettings.paymentNumbers?.nagad?.number || '',
+        nagadType: systemSettings.paymentNumbers?.nagad?.type || 'Personal',
+        rocketNo: systemSettings.paymentNumbers?.rocket?.number || '',
+        rocketType: systemSettings.paymentNumbers?.rocket?.type || 'Personal',
+        bankName: systemSettings.paymentNumbers?.bank?.name || '',
+        bankAccName: systemSettings.paymentNumbers?.bank?.accName || '',
+        bankAccNo: systemSettings.paymentNumbers?.bank?.accNo || '',
+        bankBranch: systemSettings.paymentNumbers?.bank?.branch || '',
+        bankRouting: systemSettings.paymentNumbers?.bank?.routing || '',
+        visaNo: systemSettings.paymentNumbers?.visa?.number || '',
+        visaName: systemSettings.paymentNumbers?.visa?.name || '',
+
+        catPersonalEnabled: systemSettings.categories?.personal?.enabled !== false,
+        catPersonalMax: systemSettings.categories?.personal?.maxAmount || 500000,
+        catPersonalMinTenure: systemSettings.categories?.personal?.minTenure || 12,
+        catPersonalMaxTenure: systemSettings.categories?.personal?.maxTenure || 60,
+
+        catBusinessEnabled: systemSettings.categories?.business?.enabled !== false,
+        catBusinessMax: systemSettings.categories?.business?.maxAmount || 5000000,
+        catBusinessMinTenure: systemSettings.categories?.business?.minTenure || 12,
+        catBusinessMaxTenure: systemSettings.categories?.business?.maxTenure || 120,
+
+        catExpatEnabled: systemSettings.categories?.expat?.enabled !== false,
+        catExpatMax: systemSettings.categories?.expat?.maxAmount || 1000000,
+        catExpatMinTenure: systemSettings.categories?.expat?.minTenure || 24,
+        catExpatMaxTenure: systemSettings.categories?.expat?.maxTenure || 72,
+
+        catStudentEnabled: systemSettings.categories?.student?.enabled !== false,
+        catStudentMax: systemSettings.categories?.student?.maxAmount || 500000,
+        catStudentMinTenure: systemSettings.categories?.student?.minTenure || 12,
+        catStudentMaxTenure: systemSettings.categories?.student?.maxTenure || 48,
+
+        catEmergencyEnabled: systemSettings.categories?.emergency?.enabled !== false,
+        catEmergencyMax: systemSettings.categories?.emergency?.maxAmount || 100000,
+        catEmergencyMinTenure: systemSettings.categories?.emergency?.minTenure || 6,
+        catEmergencyMaxTenure: systemSettings.categories?.emergency?.maxTenure || 24,
+
+        catWomenEnabled: systemSettings.categories?.women?.enabled !== false,
+        catWomenMax: systemSettings.categories?.women?.maxAmount || 2000000,
+        catWomenMinTenure: systemSettings.categories?.women?.minTenure || 12,
+        catWomenMaxTenure: systemSettings.categories?.women?.maxTenure || 84
       });
     }
   }, [systemSettings]);
@@ -99,7 +201,28 @@ export default function AdminDashboard() {
       minRateWomen: config.minRateWomen / 100,
       telegramSupport: config.telegramSupport,
       whatsappSupport: config.whatsappSupport,
-      telegramBotToken: config.telegramBotToken
+      telegramBotToken: config.telegramBotToken,
+
+      announcementActive: config.announcementActive,
+      announcementBn: config.announcementBn,
+      announcementEn: config.announcementEn,
+
+      paymentNumbers: {
+        bkash: { number: config.bkashNo, type: config.bkashType },
+        nagad: { number: config.nagadNo, type: config.nagadType },
+        rocket: { number: config.rocketNo, type: config.rocketType },
+        bank: { name: config.bankName, accName: config.bankAccName, accNo: config.bankAccNo, branch: config.bankBranch, routing: config.bankRouting },
+        visa: { number: config.visaNo, name: config.visaName }
+      },
+
+      categories: {
+        personal: { enabled: config.catPersonalEnabled, maxAmount: config.catPersonalMax, minTenure: config.catPersonalMinTenure, maxTenure: config.catPersonalMaxTenure },
+        business: { enabled: config.catBusinessEnabled, maxAmount: config.catBusinessMax, minTenure: config.catBusinessMinTenure, maxTenure: config.catBusinessMaxTenure },
+        expat: { enabled: config.catExpatEnabled, maxAmount: config.catExpatMax, minTenure: config.catExpatMinTenure, maxTenure: config.catExpatMaxTenure },
+        student: { enabled: config.catStudentEnabled, maxAmount: config.catStudentMax, minTenure: config.catStudentMinTenure, maxTenure: config.catStudentMaxTenure },
+        emergency: { enabled: config.catEmergencyEnabled, maxAmount: config.catEmergencyMax, minTenure: config.catEmergencyMinTenure, maxTenure: config.catEmergencyMaxTenure },
+        women: { enabled: config.catWomenEnabled, maxAmount: config.catWomenMax, minTenure: config.catWomenMinTenure, maxTenure: config.catWomenMaxTenure }
+      }
     };
     
     const success = await updateSystemSettings('global_loan_config', newSettings);
@@ -174,6 +297,12 @@ export default function AdminDashboard() {
           } else if (status === 'failed') {
             msg = `❌ <b>উত্তোলন ব্যর্থ!</b>\n\nআপনার উত্তোলনের অনুরোধটি বাতিল বা ব্যর্থ হয়েছে।\n\n💰 পরিমাণ: <b>${formattedAmount}</b>\n\nদয়া করে সঠিক তথ্য দিয়ে পুনরায় চেষ্টা করুন অথবা সাপোর্টে যোগাযোগ করুন।`;
           }
+        } else if (txn.type === 'emi_payment') {
+          if (status === 'completed') {
+            msg = `✅ <b>ইএমআই পেমেন্ট সফল!</b>\n\nআপনার লোনের ইএমআই (কিস্তি) পেমেন্টটি সফলভাবে সম্পন্ন হয়েছে।\n\n💰 পরিমাণ: <b>${formattedAmount}</b>\n💳 মাধ্যম: <b>${method}</b>\n🆔 TrxID: <code>${txn.trx_id}</code>\n\nআমাদের সাথে থাকার জন্য ধন্যবাদ!`;
+          } else if (status === 'failed') {
+            msg = `❌ <b>ইএমআই পেমেন্ট ব্যর্থ!</b>\n\nআপনার লোনের ইএমআই (কিস্তি) পেমেন্ট অনুরোধটি বাতিল বা ব্যর্থ হয়েছে।\n\n💰 পরিমাণ: <b>${formattedAmount}</b>\n🆔 TrxID: <code>${txn.trx_id || 'N/A'}</code>\n\nসঠিক তথ্য সহ পুনরায় চেষ্টা করার জন্য অনুরোধ করা হলো। কোনো সমস্যা হলে আমাদের সাপোর্টে যোগাযোগ করুন।`;
+          }
         }
 
         if (msg) {
@@ -210,6 +339,53 @@ export default function AdminDashboard() {
 
   const filteredLoans = loans.filter(l => (l.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || l.id.includes(searchTerm));
   const filteredTxns = transactions.filter(t => (t.trx_id?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || t.chat_id.toString().includes(searchTerm));
+
+  const getTrendData = () => {
+    const completedTxns = transactions.filter(t => t.status === 'completed');
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      return d.toISOString().split('T')[0];
+    }).reverse();
+
+    return last7Days.map(date => {
+      const dayTxns = completedTxns.filter(t => t.created_at.startsWith(date));
+      const deposits = dayTxns.filter(t => t.type === 'deposit' || t.type === 'emi_payment').reduce((sum, t) => sum + (t.amount || 0), 0);
+      const withdrawals = dayTxns.filter(t => t.type === 'withdraw').reduce((sum, t) => sum + (t.amount || 0), 0);
+      
+      const dateObj = new Date(date);
+      const formattedDate = dateObj.toLocaleDateString(isBn ? 'bn-BD' : 'en-US', { month: 'short', day: 'numeric' });
+      
+      return {
+        date: formattedDate,
+        [isBn ? 'ডিপোজিট' : 'Deposits']: deposits,
+        [isBn ? 'উত্তোলন' : 'Withdrawals']: withdrawals
+      };
+    });
+  };
+
+  const getGatewayData = () => {
+    const completedTxns = transactions.filter(t => t.status === 'completed');
+    const gateways = [
+      { id: 'bkash', name: 'bKash', color: '#e2136e' },
+      { id: 'nagad', name: 'Nagad', color: '#f7931e' },
+      { id: 'rocket', name: 'Rocket', color: '#8c1596' },
+      { id: 'bank', name: isBn ? 'ব্যাংক' : 'Bank', color: '#2563eb' },
+      { id: 'visa', name: 'Visa', color: '#4f46e5' }
+    ];
+
+    return gateways.map(g => {
+      const volume = completedTxns
+        .filter(t => (t.payment_method || '').toLowerCase() === g.id)
+        .reduce((sum, t) => sum + (t.amount || 0), 0);
+      
+      return {
+        name: g.name,
+        [isBn ? 'ভলিউম' : 'Volume']: volume,
+        color: g.color
+      };
+    });
+  };
 
   if (loading) return <div className="p-8 text-center text-gray-500 flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900"><Activity className="animate-spin text-primary-500 mr-2" /> {isBn ? 'অ্যাডমিন প্যানেল লোড হচ্ছে...' : 'Loading admin panel...'}</div>;
 
@@ -335,30 +511,118 @@ export default function AdminDashboard() {
               className="max-w-7xl mx-auto space-y-6"
             >
               {activeTab === 'overview' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="bg-white dark:bg-gray-800 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                    <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 dark:bg-blue-900/10 rounded-full blur-2xl group-hover:bg-blue-100 dark:group-hover:bg-blue-900/20 transition-colors"></div>
-                    <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-5 relative z-10 border border-blue-100 dark:border-blue-800/50"><Users size={28} /></div>
-                    <h3 className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider relative z-10">{isBn ? 'মোট ইউজার' : 'Total Users'}</h3>
-                    <p className="text-4xl font-black text-gray-900 dark:text-white mt-1 relative z-10">{convertDigits(profiles.length, isBn)}</p>
+                <div className="space-y-8">
+                  {/* Grid stats */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {/* Card 1 */}
+                    <div className="relative group overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.15)] hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(59,130,246,0.1)] transition-all duration-300">
+                      <div className="absolute -right-6 -top-6 w-28 h-28 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all duration-500"></div>
+                      <div className="flex justify-between items-start relative z-10">
+                        <div className="w-14 h-14 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center border border-blue-100/50 dark:border-blue-500/20 shadow-inner"><Users size={28} /></div>
+                        <span className="text-[10px] font-bold text-blue-500 bg-blue-500/10 px-2.5 py-1 rounded-full uppercase tracking-wider font-sans">{isBn ? 'সক্রিয়' : 'Active'}</span>
+                      </div>
+                      <h3 className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mt-5 relative z-10">{isBn ? 'মোট ইউজার' : 'Total Users'}</h3>
+                      <p className="text-3xl font-black text-slate-800 dark:text-white mt-1.5 relative z-10 tracking-tight">{convertDigits(profiles.length, isBn)}</p>
+                    </div>
+
+                    {/* Card 2 */}
+                    <div className="relative group overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.15)] hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(16,185,129,0.1)] transition-all duration-300">
+                      <div className="absolute -right-6 -top-6 w-28 h-28 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500"></div>
+                      <div className="flex justify-between items-start relative z-10">
+                        <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center border border-emerald-100/50 dark:border-emerald-500/20 shadow-inner"><FileText size={28} /></div>
+                        <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full uppercase tracking-wider font-sans">{isBn ? 'আবেদন' : 'Applied'}</span>
+                      </div>
+                      <h3 className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mt-5 relative z-10">{isBn ? 'ঋণ আবেদনসমূহ' : 'Loan Applications'}</h3>
+                      <p className="text-3xl font-black text-slate-800 dark:text-white mt-1.5 relative z-10 tracking-tight">{convertDigits(loans.length, isBn)}</p>
+                    </div>
+
+                    {/* Card 3 */}
+                    <div className="relative group overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.15)] hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] transition-all duration-300">
+                      <div className="absolute -right-6 -top-6 w-28 h-28 bg-amber-500/5 dark:bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all duration-500"></div>
+                      <div className="flex justify-between items-start relative z-10">
+                        <div className="w-14 h-14 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center border border-amber-100/50 dark:border-amber-500/20 shadow-inner"><Activity size={28} /></div>
+                        <span className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-full uppercase tracking-wider font-sans">{isBn ? 'অপেক্ষমাণ' : 'Pending'}</span>
+                      </div>
+                      <h3 className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mt-5 relative z-10">{isBn ? 'অপেক্ষমাণ ঋণ' : 'Pending Loans'}</h3>
+                      <p className="text-3xl font-black text-slate-800 dark:text-white mt-1.5 relative z-10 tracking-tight">{convertDigits(loans.filter(l => l.status === 'pending').length, isBn)}</p>
+                    </div>
+
+                    {/* Card 4 */}
+                    <div className="relative group overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.15)] hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(168,85,247,0.1)] transition-all duration-300">
+                      <div className="absolute -right-6 -top-6 w-28 h-28 bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-all duration-500"></div>
+                      <div className="flex justify-between items-start relative z-10">
+                        <div className="w-14 h-14 bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-2xl flex items-center justify-center border border-purple-100/50 dark:border-purple-500/20 shadow-inner"><DollarSign size={28} /></div>
+                        <span className="text-[10px] font-bold text-purple-500 bg-purple-500/10 px-2.5 py-1 rounded-full uppercase tracking-wider font-sans">{isBn ? 'ফি ও ডিপোজিট' : 'Pending Deposits'}</span>
+                      </div>
+                      <h3 className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mt-5 relative z-10">{isBn ? 'অপেক্ষমাণ ডিপোজিট' : 'Pending Deposits'}</h3>
+                      <p className="text-3xl font-black text-slate-800 dark:text-white mt-1.5 relative z-10 tracking-tight">{convertDigits(transactions.filter(t => t.type === 'deposit' && t.status === 'pending').length, isBn)}</p>
+                    </div>
                   </div>
-                  <div className="bg-white dark:bg-gray-800 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                    <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 dark:bg-emerald-900/10 rounded-full blur-2xl group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/20 transition-colors"></div>
-                    <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mb-5 relative z-10 border border-emerald-100 dark:border-emerald-800/50"><FileText size={28} /></div>
-                    <h3 className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider relative z-10">{isBn ? 'ঋণ আবেদনসমূহ' : 'Loan Applications'}</h3>
-                    <p className="text-4xl font-black text-gray-900 dark:text-white mt-1 relative z-10">{convertDigits(loans.length, isBn)}</p>
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                    <div className="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 dark:bg-amber-900/10 rounded-full blur-2xl group-hover:bg-amber-100 dark:group-hover:bg-amber-900/20 transition-colors"></div>
-                    <div className="w-14 h-14 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center mb-5 relative z-10 border border-amber-100 dark:border-amber-800/50"><Activity size={28} /></div>
-                    <h3 className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider relative z-10">{isBn ? 'অপেক্ষমাণ ঋণ' : 'Pending Loans'}</h3>
-                    <p className="text-4xl font-black text-gray-900 dark:text-white mt-1 relative z-10">{convertDigits(loans.filter(l => l.status === 'pending').length, isBn)}</p>
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                    <div className="absolute -right-4 -top-4 w-24 h-24 bg-purple-50 dark:bg-purple-900/10 rounded-full blur-2xl group-hover:bg-purple-100 dark:group-hover:bg-purple-900/20 transition-colors"></div>
-                    <div className="w-14 h-14 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-2xl flex items-center justify-center mb-5 relative z-10 border border-purple-100 dark:border-purple-800/50"><DollarSign size={28} /></div>
-                    <h3 className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider relative z-10">{isBn ? 'অপেক্ষমাণ ডিপোজিট' : 'Pending Deposits'}</h3>
-                    <p className="text-4xl font-black text-gray-900 dark:text-white mt-1 relative z-10">{convertDigits(transactions.filter(t => t.type === 'deposit' && t.status === 'pending').length, isBn)}</p>
+
+                  {/* Visual charts */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Transaction Trends chart */}
+                    <div className="lg:col-span-2 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[32px] shadow-sm flex flex-col justify-between">
+                      <div className="mb-4">
+                        <h4 className="font-bold text-slate-800 dark:text-white text-lg tracking-tight">{isBn ? 'লেনদেন ভলিউম ট্রেন্ড (বিগত ৭ দিন)' : 'Transaction Volume Trends (Last 7 Days)'}</h4>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{isBn ? 'সম্পন্নকৃত ডিপোজিট ও উত্তোলনের দৈনিক অনুপাত।' : 'Daily ratio of completed deposits vs withdrawals.'}</p>
+                      </div>
+                      <div className="h-[280px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={getTrendData()} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                            <defs>
+                              <linearGradient id="colorDeposits" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
+                                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                              </linearGradient>
+                              <linearGradient id="colorWithdrawals" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2} />
+                                <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#cbd5e120" />
+                            <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 'bold' }} />
+                            <YAxis tickLine={false} axisLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 'bold' }} tickFormatter={(val: any) => `৳${val}`} />
+                            <Tooltip
+                              contentStyle={{ borderRadius: '16px', border: 'none', background: 'rgba(15, 23, 42, 0.95)', color: '#fff', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)' }}
+                              labelStyle={{ fontWeight: 'black', color: '#94a3b8', marginBottom: '6px' }}
+                              itemStyle={{ fontSize: 12, fontWeight: 'bold' }}
+                              formatter={(value) => [formatCurrency(value as number, isBn), '']}
+                            />
+                            <Area type="monotone" dataKey={isBn ? 'ডিপোজিট' : 'Deposits'} stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorDeposits)" />
+                            <Area type="monotone" dataKey={isBn ? 'উত্তোলন' : 'Withdrawals'} stroke="#f43f5e" strokeWidth={3} fillOpacity={1} fill="url(#colorWithdrawals)" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+
+                    {/* Payment gateway volume chart */}
+                    <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[32px] shadow-sm flex flex-col justify-between">
+                      <div className="mb-4">
+                        <h4 className="font-bold text-slate-800 dark:text-white text-lg tracking-tight">{isBn ? 'গেটওয়ে ভিত্তিক লেনদেন ভলিউম' : 'Gateway Transaction Volume'}</h4>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{isBn ? 'পেমেন্ট মেথড সমূহের মোট লেনদেনের হিসেব।' : 'Cumulative volumes processed per payment channel.'}</p>
+                      </div>
+                      <div className="h-[280px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={getGatewayData()} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#cbd5e120" />
+                            <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 'bold' }} />
+                            <YAxis tickLine={false} axisLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 'bold' }} tickFormatter={(val: any) => `৳${val}`} />
+                            <Tooltip
+                              contentStyle={{ borderRadius: '16px', border: 'none', background: 'rgba(15, 23, 42, 0.95)', color: '#fff', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)' }}
+                              labelStyle={{ fontWeight: 'black', color: '#94a3b8', marginBottom: '6px' }}
+                              itemStyle={{ fontSize: 12, fontWeight: 'bold' }}
+                              formatter={(value) => [formatCurrency(value as number, isBn), '']}
+                            />
+                            <Bar dataKey={isBn ? 'ভলিউম' : 'Volume'} radius={[10, 10, 0, 0]}>
+                              {getGatewayData().map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -496,12 +760,17 @@ export default function AdminDashboard() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                        {filteredTxns.filter(t => t.type === (activeTab === 'deposits' ? 'deposit' : 'withdraw')).map(txn => (
+                        {filteredTxns.filter(t => activeTab === 'deposits' ? (t.type === 'deposit' || t.type === 'emi_payment') : t.type === 'withdraw').map(txn => (
                           <tr key={txn.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                             <td className="px-6 py-4 font-mono text-gray-900 dark:text-white text-xs">{txn.chat_id}</td>
                             <td className="px-6 py-4">
                               <div className="font-bold text-gray-900 dark:text-white capitalize">
-                                {txn.type === 'deposit' && txn.deposit_type ? txn.deposit_type.replace('_', ' ') : txn.type.replace('_', ' ')}
+                                {txn.type === 'deposit' && txn.deposit_type 
+                                  ? (txn.deposit_type === 'processing_fee' ? (isBn ? 'প্রসেসিং ফি' : 'Processing Fee') : (isBn ? 'সিকিউরিটি ডিপোজিট' : 'Security Deposit')) 
+                                  : txn.type === 'emi_payment' 
+                                    ? (isBn ? 'ইএমআই পেমেন্ট' : 'EMI Payment') 
+                                    : (isBn ? 'অর্থ উত্তোলন' : 'Withdrawal')
+                                }
                               </div>
                               <div className="text-[10px] bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded uppercase font-bold text-gray-600 dark:text-gray-300 w-max mt-1">{txn.payment_method}</div>
                             </td>
@@ -709,97 +978,385 @@ export default function AdminDashboard() {
               )}
 
               {activeTab === 'settings' && (
-                <div className="bg-white dark:bg-gray-800 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm p-8">
-                  <div className="mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
-                    <h2 className="font-bold text-gray-900 dark:text-white text-xl">System Settings</h2>
-                    <p className="text-sm text-gray-500 mt-1">Configure global application parameters.</p>
-                  </div>
-
-                  <div className="max-w-3xl space-y-8">
-                    {/* Global Fees */}
-                    <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[20px] border border-gray-100 dark:border-gray-700">
-                      <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <DollarSign size={18} className="text-primary-500" /> Global Fees
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <div>
-                          <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Processing Fee (%)</label>
-                          <input type="number" step="0.1" value={config.processingFee} onChange={e => setConfig({...config, processingFee: parseFloat(e.target.value) || 0})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm" />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Security Deposit (%)</label>
-                          <input type="number" step="0.1" value={config.securityDeposit} onChange={e => setConfig({...config, securityDeposit: parseFloat(e.target.value) || 0})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm" />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Interest Rates */}
-                    <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[20px] border border-gray-100 dark:border-gray-700">
-                      <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <Activity size={18} className="text-primary-500" /> Minimum Interest Rates (%)
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-                        {[
-                          { label: 'Personal Loan', key: 'minRatePersonal' },
-                          { label: 'Business Loan', key: 'minRateBusiness' },
-                          { label: 'Expatriate Loan', key: 'minRateExpat' },
-                          { label: 'Student Loan', key: 'minRateStudent' },
-                          { label: 'Emergency Loan', key: 'minRateEmergency' },
-                          { label: 'Women Entrep.', key: 'minRateWomen' },
-                        ].map((item) => (
-                          <div key={item.key}>
-                            <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{item.label}</label>
-                            <input 
-                              type="number" step="0.1" 
-                              value={(config as any)[item.key]} 
-                              onChange={e => setConfig({...config, [item.key]: parseFloat(e.target.value) || 0})} 
-                              className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm" 
-                            />
-                          </div>
-                        ))}
-                      </div>
+                <div className="bg-white dark:bg-gray-800 rounded-[32px] border border-gray-100 dark:border-gray-700 shadow-xl overflow-hidden transition-all">
+                  
+                  {/* Settings Page Header & Sub-tab Navigation */}
+                  <div className="p-6 sm:p-8 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col gap-6">
+                    <div>
+                      <h2 className="font-black text-gray-900 dark:text-white text-2xl tracking-tight">{isBn ? 'সিস্টেম কন্ট্রোল প্যানেল' : 'System Control Panel'}</h2>
+                      <p className="text-sm text-gray-500 mt-1">{isBn ? 'ইউজার অ্যাপের সকল ফিচার, পেমেন্ট নাম্বার ও লিমিট ডাইনামিকলি নিয়ন্ত্রণ করুন।' : 'Dynamically control all user app features, payment numbers, and limits.'}</p>
                     </div>
                     
-                    {/* Support Links */}
-                    <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[20px] border border-gray-100 dark:border-gray-700">
-                      <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <Users size={18} className="text-primary-500" /> Support Links
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <div>
-                          <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Telegram Link</label>
-                          <input type="text" value={config.telegramSupport || ''} onChange={e => setConfig({...config, telegramSupport: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm font-mono text-sm" />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">WhatsApp Link</label>
-                          <input type="text" value={config.whatsappSupport || ''} onChange={e => setConfig({...config, whatsappSupport: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm font-mono text-sm" />
-                        </div>
-                      </div>
+                    {/* Settings Sub-Tabs */}
+                    <div className="flex flex-wrap gap-2 p-1.5 bg-gray-100 dark:bg-gray-900 rounded-2xl w-max border border-gray-200/30 dark:border-gray-700/30">
+                      {[
+                        { id: 'general', label: isBn ? 'ফি ও সাধারণ সেটিংস' : 'General & Fees', icon: DollarSign },
+                        { id: 'payments', label: isBn ? 'পেমেন্ট গেটওয়ে' : 'Payment Gateways', icon: CreditCard },
+                        { id: 'announcements', label: isBn ? 'নোটিশ বোর্ড' : 'Notice Board', icon: Megaphone },
+                        { id: 'categories', label: isBn ? 'লোন প্রডাক্টস' : 'Loan Products', icon: Activity },
+                      ].map(subTab => {
+                        const Icon = subTab.icon;
+                        const isSubActive = settingsSubTab === subTab.id;
+                        return (
+                          <button
+                            key={subTab.id}
+                            onClick={() => setSettingsSubTab(subTab.id as any)}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                              isSubActive 
+                                ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm border border-gray-200/50 dark:border-gray-700/50' 
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white'
+                            }`}
+                          >
+                            <Icon size={14} />
+                            {subTab.label}
+                          </button>
+                        );
+                      })}
                     </div>
+                  </div>
 
-                    {/* Telegram Bot Settings */}
-                    <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[20px] border border-gray-100 dark:border-gray-700">
-                      <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <ShieldAlert size={18} className="text-primary-500" /> Telegram Bot Notifications
-                      </h3>
-                      <div>
-                        <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Telegram Bot Token</label>
-                        <input 
-                          type="password" 
-                          placeholder="e.g. 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ" 
-                          value={config.telegramBotToken || ''} 
-                          onChange={e => setConfig({...config, telegramBotToken: e.target.value})} 
-                          className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm font-mono text-sm" 
-                        />
-                        <p className="text-[11px] text-gray-500 mt-2">
-                          টেলিগ্রাম বটের মাধ্যমে ইউজারদের লোনের আবেদন ও ট্রানজেকশন স্ট্যাটাস আপডেট নোটিফিকেশন পাঠাতে এটি ব্যবহার করা হয়।
-                        </p>
-                      </div>
-                    </div>
+                  <div className="p-6 sm:p-8">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={settingsSubTab}
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        transition={{ duration: 0.15 }}
+                        className="space-y-8"
+                      >
+                        {/* Sub-tab 1: General & Fees */}
+                        {settingsSubTab === 'general' && (
+                          <div className="space-y-6">
+                            {/* Global Fees */}
+                            <div className="bg-gray-50 dark:bg-gray-900/40 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700/60 shadow-sm">
+                              <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-primary-600 dark:text-primary-400">
+                                <DollarSign size={16} /> {isBn ? 'গ্লোবাল ফি এবং পার্সেন্টেজ' : 'Global Fees & Percentages'}
+                              </h3>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                  <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'প্রসেসিং ফি (%)' : 'Processing Fee (%)'}</label>
+                                  <input type="number" step="0.1" value={config.processingFee} onChange={e => setConfig({...config, processingFee: parseFloat(e.target.value) || 0})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm transition-all" />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'সিকিউরিটি ডিপোজিট (%)' : 'Security Deposit (%)'}</label>
+                                  <input type="number" step="0.1" value={config.securityDeposit} onChange={e => setConfig({...config, securityDeposit: parseFloat(e.target.value) || 0})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm transition-all" />
+                                </div>
+                              </div>
+                            </div>
 
-                    <div className="pt-4 flex justify-end">
-                      <button onClick={handleSaveSettings} className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-primary-600/30 flex items-center gap-2 active:scale-95">
-                        <Settings size={18} /> Save Settings
+                            {/* Interest Rates */}
+                            <div className="bg-gray-50 dark:bg-gray-900/40 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700/60 shadow-sm">
+                              <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-primary-600 dark:text-primary-400">
+                                <Activity size={16} /> {isBn ? 'সর্বনিম্ন সুদের হার (%)' : 'Minimum Interest Rates (%)'}
+                              </h3>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                                {[
+                                  { label: isBn ? 'চাকরিজীবী লোন' : 'Personal Loan', key: 'minRatePersonal' },
+                                  { label: isBn ? 'ব্যবসায়ী লোন' : 'Business Loan', key: 'minRateBusiness' },
+                                  { label: isBn ? 'প্রবাসী লোন' : 'Expatriate Loan', key: 'minRateExpat' },
+                                  { label: isBn ? 'শিক্ষার্থী লোন' : 'Student Loan', key: 'minRateStudent' },
+                                  { label: isBn ? 'জরুরি ঋণ' : 'Emergency Loan', key: 'minRateEmergency' },
+                                  { label: isBn ? 'নারী উদ্যোক্তা লোন' : 'Women Entrepreneur', key: 'minRateWomen' },
+                                ].map((item) => (
+                                  <div key={item.key}>
+                                    <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{item.label}</label>
+                                    <input 
+                                      type="number" step="0.1" 
+                                      value={(config as any)[item.key]} 
+                                      onChange={e => setConfig({...config, [item.key]: parseFloat(e.target.value) || 0})} 
+                                      className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm transition-all" 
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Support Links */}
+                            <div className="bg-gray-50 dark:bg-gray-900/40 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700/60 shadow-sm">
+                              <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-primary-600 dark:text-primary-400">
+                                <Users size={16} /> {isBn ? 'কাস্টমার সাপোর্ট লিংক' : 'Customer Support Links'}
+                              </h3>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                  <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Telegram Link</label>
+                                  <input type="text" value={config.telegramSupport || ''} onChange={e => setConfig({...config, telegramSupport: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm font-mono text-sm" />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">WhatsApp Link</label>
+                                  <input type="text" value={config.whatsappSupport || ''} onChange={e => setConfig({...config, whatsappSupport: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm font-mono text-sm" />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Telegram Bot Settings */}
+                            <div className="bg-gray-50 dark:bg-gray-900/40 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700/60 shadow-sm">
+                              <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-primary-600 dark:text-primary-400">
+                                <ShieldAlert size={16} /> {isBn ? 'টেলিগ্রাম নোটিফিকেশন বট' : 'Telegram Notification Bot'}
+                              </h3>
+                              <div>
+                                <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Telegram Bot Token</label>
+                                <input 
+                                  type="password" 
+                                  placeholder="e.g. 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ" 
+                                  value={config.telegramBotToken || ''} 
+                                  onChange={e => setConfig({...config, telegramBotToken: e.target.value})} 
+                                  className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm font-mono text-sm" 
+                                />
+                                <p className="text-[11px] text-gray-500 mt-2">
+                                  {isBn ? 'টেলিগ্রাম বটের মাধ্যমে ইউজারদের লোনের আবেদন ও ট্রানজেকশন স্ট্যাটাস আপডেট নোটিফিকেশন পাঠাতে এটি ব্যবহার করা হয়।' : 'Used to send status updates and alerts directly to users via Telegram WebApp integration.'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Sub-tab 2: Payment Gateways */}
+                        {settingsSubTab === 'payments' && (
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            
+                            {/* Mobile Banking Gateways */}
+                            <div className="space-y-6 lg:col-span-1">
+                              <div className="bg-gray-50 dark:bg-gray-900/40 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700/60 shadow-sm space-y-5">
+                                <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wider text-[#e2136e]">
+                                  <span className="w-2.5 h-2.5 rounded-full bg-[#e2136e]"></span> bKash Configuration
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1.5">{isBn ? 'বিকাশ নাম্বার' : 'bKash Number'}</label>
+                                    <input type="text" placeholder="e.g. 017XXXXXXXX" value={config.bkashNo} onChange={e => setConfig({...config, bkashNo: e.target.value})} className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#e2136e]/30 shadow-sm" />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1.5">{isBn ? 'হিসাবের ধরন' : 'Account Type'}</label>
+                                    <select value={config.bkashType} onChange={e => setConfig({...config, bkashType: e.target.value})} className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#e2136e]/30 font-bold">
+                                      <option value="Personal">Personal</option>
+                                      <option value="Agent">Agent</option>
+                                      <option value="Merchant">Merchant</option>
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="bg-gray-50 dark:bg-gray-900/40 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700/60 shadow-sm space-y-5">
+                                <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wider text-[#f7931e]">
+                                  <span className="w-2.5 h-2.5 rounded-full bg-[#f7931e]"></span> Nagad Configuration
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1.5">{isBn ? 'নগদ নাম্বার' : 'Nagad Number'}</label>
+                                    <input type="text" placeholder="e.g. 018XXXXXXXX" value={config.nagadNo} onChange={e => setConfig({...config, nagadNo: e.target.value})} className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#f7931e]/30 shadow-sm" />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1.5">{isBn ? 'হিসাবের ধরন' : 'Account Type'}</label>
+                                    <select value={config.nagadType} onChange={e => setConfig({...config, nagadType: e.target.value})} className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#f7931e]/30 font-bold">
+                                      <option value="Personal">Personal</option>
+                                      <option value="Agent">Agent</option>
+                                      <option value="Merchant">Merchant</option>
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="bg-gray-50 dark:bg-gray-900/40 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700/60 shadow-sm space-y-5">
+                                <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wider text-[#8c1596]">
+                                  <span className="w-2.5 h-2.5 rounded-full bg-[#8c1596]"></span> Rocket Configuration
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1.5">{isBn ? 'রকেট নাম্বার' : 'Rocket Number'}</label>
+                                    <input type="text" placeholder="e.g. 019XXXXXXXXX" value={config.rocketNo} onChange={e => setConfig({...config, rocketNo: e.target.value})} className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#8c1596]/30 shadow-sm" />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1.5">{isBn ? 'হিসাবের ধরন' : 'Account Type'}</label>
+                                    <select value={config.rocketType} onChange={e => setConfig({...config, rocketType: e.target.value})} className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#8c1596]/30 font-bold">
+                                      <option value="Personal">Personal</option>
+                                      <option value="Agent">Agent</option>
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Direct Bank & Visa Gateways */}
+                            <div className="space-y-6 lg:col-span-1">
+                              <div className="bg-gray-50 dark:bg-gray-900/40 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700/60 shadow-sm space-y-4">
+                                <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                                  <Landmark size={18} /> {isBn ? 'সরাসরি ব্যাংক অ্যাকাউন্ট' : 'Bank Account Details'}
+                                </h3>
+                                <div className="space-y-3">
+                                  <div>
+                                    <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">{isBn ? 'ব্যাংকের নাম' : 'Bank Name'}</label>
+                                    <input type="text" placeholder="e.g. Brac Bank PLC" value={config.bankName} onChange={e => setConfig({...config, bankName: e.target.value})} className="w-full px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">{isBn ? 'হিসাবধারীর নাম' : 'Account Name'}</label>
+                                    <input type="text" placeholder="e.g. Provati Micro Finance" value={config.bankAccName} onChange={e => setConfig({...config, bankAccName: e.target.value})} className="w-full px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">{isBn ? 'অ্যাকাউন্ট নাম্বার' : 'Account Number'}</label>
+                                    <input type="text" placeholder="e.g. 150120XXXXXXXX" value={config.bankAccNo} onChange={e => setConfig({...config, bankAccNo: e.target.value})} className="w-full px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 font-mono" />
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                      <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">{isBn ? 'শাখা' : 'Branch'}</label>
+                                      <input type="text" placeholder="e.g. Mirpur Branch" value={config.bankBranch} onChange={e => setConfig({...config, bankBranch: e.target.value})} className="w-full px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                                    </div>
+                                    <div>
+                                      <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">{isBn ? 'রাউটিং নাম্বার' : 'Routing Number'}</label>
+                                      <input type="text" placeholder="e.g. 125271465" value={config.bankRouting} onChange={e => setConfig({...config, bankRouting: e.target.value})} className="w-full px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 font-mono" />
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="bg-gray-50 dark:bg-gray-900/40 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700/60 shadow-sm space-y-4">
+                                <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                                  <CreditCard size={18} /> {isBn ? 'ভিসা বা ক্রেডিট কার্ড' : 'Visa Card Details'}
+                                </h3>
+                                <div className="space-y-3">
+                                  <div>
+                                    <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">{isBn ? 'কার্ড নম্বর' : 'Card Number'}</label>
+                                    <input type="text" placeholder="e.g. 4111 2222 3333 4444" value={config.visaNo} onChange={e => setConfig({...config, visaNo: e.target.value})} className="w-full px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 font-mono" />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">{isBn ? 'কার্ডের নাম' : 'Name on Card'}</label>
+                                    <input type="text" placeholder="e.g. Provati Finance" value={config.visaName} onChange={e => setConfig({...config, visaName: e.target.value})} className="w-full px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30" />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Sub-tab 3: Notices & Announcements */}
+                        {settingsSubTab === 'announcements' && (
+                          <div className="space-y-6">
+                            <div className="bg-gray-50 dark:bg-gray-900/40 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700/60 shadow-sm space-y-6">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <Megaphone className="text-primary-500" size={20} />
+                                  <h3 className="font-bold text-gray-900 dark:text-white text-base">{isBn ? 'হোম পেজ স্ক্রলিং নোটিশ' : 'Home Page Scrolling Notice'}</h3>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => setConfig({...config, announcementActive: !config.announcementActive})}
+                                  className="focus:outline-none text-primary-600 transition-colors"
+                                >
+                                  {config.announcementActive ? <ToggleRight size={44} strokeWidth={1.5} /> : <ToggleLeft size={44} className="text-gray-400" strokeWidth={1.5} />}
+                                </button>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                  <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'নোটিশ টেক্সট (বাংলা)' : 'Notice Text (Bengali)'}</label>
+                                  <textarea rows={3} placeholder="যেমন: আমাদের নতুন লোন কিস্তি সেবা চালু হয়েছে। বিস্তারিত জানতে প্রোফাইল চেক করুন।" value={config.announcementBn} onChange={e => setConfig({...config, announcementBn: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm" />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'নোটিশ টেক্সট (ইংরেজি)' : 'Notice Text (English)'}</label>
+                                  <textarea rows={3} placeholder="e.g. Our new low-interest loan packages are now active. Check your profile to review details." value={config.announcementEn} onChange={e => setConfig({...config, announcementEn: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm" />
+                                </div>
+                              </div>
+
+                              {/* Live Preview Block */}
+                              <div className="pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
+                                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{isBn ? 'লাইভ প্রিভিউ (ইউজার হোম পেজ)' : 'Live Preview (User Home Page)'}</p>
+                                {config.announcementActive ? (
+                                  <div className="bg-primary-50 dark:bg-primary-950/30 border border-primary-100 dark:border-primary-900/40 rounded-xl py-3 px-4 overflow-hidden relative flex items-center gap-3">
+                                    <span className="bg-primary-500 text-white text-[10px] uppercase font-bold py-1 px-2 rounded shrink-0 relative z-10">{isBn ? 'বিজ্ঞপ্তি' : 'Notice'}</span>
+                                    <div className="overflow-hidden flex-1 relative w-full h-5">
+                                      <div className="whitespace-nowrap absolute animate-marquee font-bold text-xs text-primary-700 dark:text-primary-400 leading-normal">
+                                        {isBn ? config.announcementBn || 'কোনো নোটিশ সেট করা নেই!' : config.announcementEn || 'No notice configured yet!'}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="bg-gray-100 dark:bg-gray-900 py-4 px-4 text-center rounded-xl text-xs text-gray-400 font-bold border border-dashed border-gray-200 dark:border-gray-800">
+                                    {isBn ? 'নোটিশ ব্যানার বর্তমানে বন্ধ রয়েছে।' : 'Notice banner is currently disabled.'}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Sub-tab 4: Loan Products (Categories) */}
+                        {settingsSubTab === 'categories' && (
+                          <div className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                              {[
+                                { id: 'Personal', stateKey: 'catPersonal', label: isBn ? 'চাকরিজীবী ঋণ' : 'Salaried (Personal)', defaultMax: 500000 },
+                                { id: 'Business', stateKey: 'catBusiness', label: isBn ? 'ব্যবসায়ী ঋণ' : 'Business Loan', defaultMax: 5000000 },
+                                { id: 'Expat', stateKey: 'catExpat', label: isBn ? 'প্রবাসী ঋণ' : 'Expatriate Loan', defaultMax: 1000000 },
+                                { id: 'Student', stateKey: 'catStudent', label: isBn ? 'শিক্ষার্থী ঋণ' : 'Student Loan', defaultMax: 500000 },
+                                { id: 'Emergency', stateKey: 'catEmergency', label: isBn ? 'জরুরি ঋণ' : 'Emergency Loan', defaultMax: 100000 },
+                                { id: 'Women', stateKey: 'catWomen', label: isBn ? 'নারী উদ্যোক্তা ঋণ' : 'Women Entrepreneur', defaultMax: 2000000 },
+                              ].map(item => {
+                                const isEnabled = (config as any)[`${item.stateKey}Enabled`];
+                                return (
+                                  <div key={item.id} className={`p-6 rounded-[24px] border transition-all ${
+                                    isEnabled 
+                                      ? 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 shadow-sm' 
+                                      : 'bg-gray-50/50 dark:bg-gray-900/10 border-dashed border-gray-200 dark:border-gray-800'
+                                  }`}>
+                                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-700/50">
+                                      <span className="font-bold text-gray-900 dark:text-white text-sm">{item.label}</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setConfig({...config, [`${item.stateKey}Enabled`]: !isEnabled})}
+                                        className="focus:outline-none text-primary-600"
+                                      >
+                                        {isEnabled ? <ToggleRight size={36} strokeWidth={1.5} /> : <ToggleLeft size={36} className="text-gray-400" strokeWidth={1.5} />}
+                                      </button>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                      <div>
+                                        <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1.5">{isBn ? 'সর্বোচ্চ লোন সীমা (৳)' : 'Max Loan Limit (৳)'}</label>
+                                        <input 
+                                          type="number" 
+                                          disabled={!isEnabled}
+                                          value={(config as any)[`${item.stateKey}Max`]} 
+                                          onChange={e => setConfig({...config, [`${item.stateKey}Max`]: parseInt(e.target.value) || 0})}
+                                          className="w-full px-4.5 py-2 bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-40" 
+                                        />
+                                      </div>
+                                      
+                                      <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                          <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1.5">{isBn ? 'নূন্যতম মেয়াদ' : 'Min Tenure'}</label>
+                                          <input 
+                                            type="number" 
+                                            disabled={!isEnabled}
+                                            value={(config as any)[`${item.stateKey}MinTenure`]} 
+                                            onChange={e => setConfig({...config, [`${item.stateKey}MinTenure`]: parseInt(e.target.value) || 0})}
+                                            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-40 text-center font-bold" 
+                                          />
+                                        </div>
+                                        <div>
+                                          <label className="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1.5">{isBn ? 'সর্বোচ্চ মেয়াদ' : 'Max Tenure'}</label>
+                                          <input 
+                                            type="number" 
+                                            disabled={!isEnabled}
+                                            value={(config as any)[`${item.stateKey}MaxTenure`]} 
+                                            onChange={e => setConfig({...config, [`${item.stateKey}MaxTenure`]: parseInt(e.target.value) || 0})}
+                                            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-40 text-center font-bold" 
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    </AnimatePresence>
+
+                    {/* Submit Settings Button Row */}
+                    <div className="pt-6 border-t border-gray-100 dark:border-gray-700/60 mt-8 flex justify-end">
+                      <button onClick={handleSaveSettings} className="bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 text-white px-8 py-3.5 rounded-[20px] font-bold transition-all shadow-lg shadow-primary-500/20 flex items-center gap-2 active:scale-95 text-sm uppercase tracking-wide cursor-pointer">
+                        <Settings size={16} /> {isBn ? 'সেটিংস সংরক্ষণ করুন' : 'Save System Settings'}
                       </button>
                     </div>
                   </div>
