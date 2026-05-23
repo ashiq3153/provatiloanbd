@@ -1,4 +1,4 @@
-import { ArrowUpFromLine, AlertCircle, X, CheckCircle, Landmark, Smartphone, ArrowRight } from 'lucide-react';
+import { ArrowUpFromLine, AlertCircle, X, CheckCircle, Landmark, Smartphone, ArrowRight, Plus, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -20,6 +20,57 @@ export default function Withdraw() {
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [availableBalance, setAvailableBalance] = useState(0);
   const [activeLoan, setActiveLoan] = useState<LoanApplication | null>(null);
+
+  const [bankAccount, setBankAccount] = useState<{
+    bankName: string;
+    accountName: string;
+    accountNumber: string;
+    routingNumber?: string;
+  } | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newBankName, setNewBankName] = useState('');
+  const [newAccountName, setNewAccountName] = useState('');
+  const [newAccountNumber, setNewAccountNumber] = useState('');
+  const [newRoutingNumber, setNewRoutingNumber] = useState('');
+
+  useEffect(() => {
+    const savedBank = localStorage.getItem('provati_user_bank');
+    if (savedBank) {
+      try {
+        setBankAccount(JSON.parse(savedBank));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
+
+  const saveBankAccount = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newBankName || !newAccountName || !newAccountNumber) {
+      toast.error(isBn ? 'অনুগ্রহ করে সকল প্রয়োজনীয় তথ্য পূরণ করুন' : 'Please fill all required details');
+      return;
+    }
+    const newAcc = {
+      bankName: newBankName,
+      accountName: newAccountName,
+      accountNumber: newAccountNumber,
+      routingNumber: newRoutingNumber || undefined
+    };
+    localStorage.setItem('provati_user_bank', JSON.stringify(newAcc));
+    setBankAccount(newAcc);
+    setShowAddForm(false);
+    toast.success(isBn ? 'ব্যাংক একাউন্ট সফলভাবে সংরক্ষিত হয়েছে' : 'Bank account saved successfully');
+  };
+
+  const deleteBankAccount = () => {
+    localStorage.removeItem('provati_user_bank');
+    setBankAccount(null);
+    setNewBankName('');
+    setNewAccountName('');
+    setNewAccountNumber('');
+    setNewRoutingNumber('');
+    toast.success(isBn ? 'ব্যাংক একাউন্ট ডিলিট করা হয়েছে' : 'Bank account deleted');
+  };
 
   // Real deposit status from Supabase
   const [depositStatus, setDepositStatus] = useState<DepositStatus>({
@@ -60,6 +111,11 @@ export default function Withdraw() {
       return;
     }
 
+    if (!bankAccount) {
+      toast.error(isBn ? 'অনুগ্রহ করে ব্যাংক একাউন্ট যুক্ত করুন' : 'Please add a bank account first');
+      return;
+    }
+
     // Check if processing fee and security deposit are completed
     if (!depositStatus.processingFee || !depositStatus.securityDeposit) {
       setShowDepositModal(true);
@@ -77,8 +133,8 @@ export default function Withdraw() {
         deposit_type: null,
         amount: Number(amount),
         payment_method: 'bank',
-        sender_number: null,
-        trx_id: null,
+        sender_number: bankAccount.accountNumber,
+        trx_id: `${bankAccount.bankName} - ${bankAccount.accountName}${bankAccount.routingNumber ? ` (Routing: ${bankAccount.routingNumber})` : ''}`,
         screenshot_url: null,
         status: 'pending',
       });
@@ -192,23 +248,109 @@ export default function Withdraw() {
           </div>
           
           <div className="pt-4 border-t border-gray-100 dark:border-gray-700 transition-colors">
-            <p className="text-xs uppercase tracking-wider font-bold text-gray-500 dark:text-gray-400 mb-3 transition-colors">
-              {isBn ? 'সেভ করা একাউন্ট' : 'Saved Account'}
-            </p>
-            <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-900 p-4 rounded-[16px] border border-gray-100 dark:border-gray-700 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl flex items-center justify-center transition-colors">
-                  <Landmark className="text-blue-600 dark:text-blue-400" size={24} />
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-xs uppercase tracking-wider font-bold text-gray-500 dark:text-gray-400 transition-colors">
+                {isBn ? 'সেভ করা একাউন্ট' : 'Saved Account'}
+              </p>
+              {bankAccount && (
+                <button 
+                  onClick={deleteBankAccount}
+                  className="text-xs font-bold text-red-500 hover:text-red-600 dark:text-red-400/80 dark:hover:text-red-400 flex items-center gap-1 active:scale-95 transition-all"
+                >
+                  <Trash2 size={13} /> {isBn ? 'মুছে ফেলুন' : 'Delete'}
+                </button>
+              )}
+            </div>
+
+            {bankAccount ? (
+              <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-900 p-4 rounded-[16px] border border-gray-100 dark:border-gray-700 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl flex items-center justify-center transition-colors">
+                    <Landmark className="text-blue-600 dark:text-blue-400" size={24} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-900 dark:text-white text-sm transition-colors">{bankAccount.bankName}</p>
+                    <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 transition-colors mt-0.5">{bankAccount.accountName} • {bankAccount.accountNumber}</p>
+                    {bankAccount.routingNumber && (
+                      <p className="text-[9px] font-mono text-gray-400 mt-0.5">{isBn ? 'রাউটিং' : 'Routing'}: {bankAccount.routingNumber}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                  <CheckCircle size={14} className="text-primary-600 dark:text-primary-400" />
+                </div>
+              </div>
+            ) : showAddForm ? (
+              <form onSubmit={saveBankAccount} className="space-y-3 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 transition-all">
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">{isBn ? 'ব্যাংকের নাম *' : 'Bank Name *'}</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={newBankName} 
+                    onChange={e => setNewBankName(e.target.value)} 
+                    placeholder={isBn ? 'যেমন: ইসলামী ব্যাংক' : 'e.g. Islami Bank'}
+                    className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs font-bold text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
+                  />
                 </div>
                 <div>
-                  <p className="font-bold text-gray-900 dark:text-white text-sm transition-colors">Islami Bank BD</p>
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 transition-colors mt-0.5">**** **** 1234</p>
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">{isBn ? 'একাউন্টের নাম *' : 'Account Name *'}</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={newAccountName} 
+                    onChange={e => setNewAccountName(e.target.value)} 
+                    placeholder={isBn ? 'যেমন: আরিফ হোসেন' : 'e.g. Arif Hossain'}
+                    className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs font-bold text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
+                  />
                 </div>
-              </div>
-              <div className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                <CheckCircle size={14} className="text-primary-600 dark:text-primary-400" />
-              </div>
-            </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">{isBn ? 'একাউন্ট নম্বর *' : 'Account Number *'}</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={newAccountNumber} 
+                    onChange={e => setNewAccountNumber(e.target.value)} 
+                    placeholder="1234567890"
+                    className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs font-mono text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">{isBn ? 'রাউটিং নম্বর (ঐচ্ছিক)' : 'Routing Number (Optional)'}</label>
+                  <input 
+                    type="text" 
+                    value={newRoutingNumber} 
+                    onChange={e => setNewRoutingNumber(e.target.value)} 
+                    placeholder="123456"
+                    className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs font-mono text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
+                  />
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <button 
+                    type="button" 
+                    onClick={() => setShowAddForm(false)} 
+                    className="flex-1 py-2 rounded-xl text-xs font-bold bg-gray-200/80 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    {isBn ? 'বাতিল' : 'Cancel'}
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="flex-1 py-2 rounded-xl text-xs font-bold bg-primary-600 hover:bg-primary-700 text-white transition-colors"
+                  >
+                    {isBn ? 'সেভ করুন' : 'Save Account'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <button 
+                type="button"
+                onClick={() => setShowAddForm(true)}
+                className="w-full py-4 border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-primary-400 dark:hover:border-primary-800 bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl flex items-center justify-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all active:scale-[0.99]"
+              >
+                <Plus size={16} />
+                {isBn ? 'ব্যাংক একাউন্ট যুক্ত করুন' : 'Add Bank Account'}
+              </button>
+            )}
           </div>
         </motion.div>
 
