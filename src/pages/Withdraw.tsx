@@ -98,7 +98,7 @@ export default function Withdraw() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors pb-24">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors pb-10">
       {/* Premium Header */}
       <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl px-5 py-4 sticky top-0 z-30 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors flex items-center gap-4">
         <button 
@@ -227,18 +227,10 @@ export default function Withdraw() {
           </p>
         </motion.div>
 
-      </div>
-
-      {/* Floating Action Button */}
-      <motion.div 
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        className="fixed bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent dark:from-gray-900 dark:via-gray-900 pb-8 z-40 transition-colors"
-      >
         <button 
           onClick={handleWithdraw} 
           disabled={isSubmitting || !amount || Number(amount) <= 0 || Number(amount) > availableBalance} 
-          className="w-full bg-gray-900 hover:bg-black dark:bg-primary-600 dark:hover:bg-primary-700 disabled:opacity-50 disabled:active:scale-100 text-white py-4 rounded-[20px] font-bold text-lg shadow-xl shadow-gray-900/20 dark:shadow-primary-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          className="w-full mt-2 bg-gray-900 hover:bg-black dark:bg-primary-600 dark:hover:bg-primary-700 disabled:opacity-50 disabled:active:scale-100 text-white py-4 rounded-[20px] font-bold text-lg shadow-xl shadow-gray-900/20 dark:shadow-primary-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
             <span className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -249,7 +241,8 @@ export default function Withdraw() {
             </>
           )}
         </button>
-      </motion.div>
+
+      </div>
 
       {/* Deposit Requirements Modal */}
       <AnimatePresence>

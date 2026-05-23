@@ -214,7 +214,7 @@ export default function PayEMI() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors pb-28">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors pb-10">
       {/* Premium Header */}
       <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl px-5 py-4 sticky top-0 z-30 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors flex items-center gap-4">
         <button 
@@ -474,29 +474,21 @@ export default function PayEMI() {
                  </div>
               </div>
             </div>
+            
+            <button
+              type="submit"
+              disabled={!amount || Number(amount) <= 0 || !senderNo || !trxId || submitted}
+              className="w-full mt-6 bg-primary-600 hover:bg-primary-700 disabled:opacity-70 disabled:active:scale-100 text-white py-4 rounded-[20px] font-bold text-lg shadow-[0_10px_20px_-10px_rgba(37,99,235,0.5)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+              {submitted ? (
+                <span className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              ) : (
+                isBn ? 'পেমেন্ট সাবমিট করুন' : 'Submit Payment'
+              )}
+            </button>
           </form>
         </motion.section>
       </div>
-
-      {/* Floating Action Button */}
-      <motion.div 
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        className="fixed bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent dark:from-gray-900 dark:via-gray-900 pb-8 z-40 transition-colors"
-      >
-        <button
-          form="pay-emi-form"
-          type="submit"
-          disabled={!amount || Number(amount) <= 0 || !senderNo || !trxId || submitted}
-          className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-70 disabled:active:scale-100 text-white py-4 rounded-[20px] font-bold text-lg shadow-[0_10px_20px_-10px_rgba(37,99,235,0.5)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 animate-none"
-        >
-          {submitted ? (
-            <span className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-          ) : (
-            isBn ? 'পেমেন্ট সাবমিট করুন' : 'Submit Payment'
-          )}
-        </button>
-      </motion.div>
 
       {/* Confirmation Modal */}
       {showConfirmModal && (
