@@ -65,32 +65,7 @@ export default function Home() {
     return () => clearInterval(slideTimer);
   }, [stories.length]);
 
-  // Fallback success stories if DB is empty
-  const fallbackStories = [
-    {
-      id: '1',
-      name: 'Nusrat Jahan',
-      loan_type: isBn ? 'ব্যবসায়িক লোন' : 'Business Loan',
-      amount: 300000,
-      approval_time: isBn ? '২৪ ঘন্টায় অনুমোদিত' : 'Approved in 24 Hours',
-      rating: 5,
-      is_verified: true,
-      avatar_url: 'https://i.pravatar.cc/150?u=nusrat'
-    },
-    {
-      id: '2',
-      name: 'Rashed Alam',
-      loan_type: isBn ? 'ব্যক্তিগত লোন' : 'Personal Loan',
-      amount: 150000,
-      approval_time: isBn ? '১২ ঘন্টায় অনুমোদিত' : 'Approved in 12 Hours',
-      rating: 5,
-      is_verified: true,
-      avatar_url: 'https://i.pravatar.cc/150?u=rashed'
-    }
-  ];
-
-  const displayStories = stories.length > 0 ? stories : fallbackStories;
-  const safeStoryIndex = currentStoryIndex % Math.max(displayStories.length, 1);
+  const safeStoryIndex = currentStoryIndex % Math.max(stories.length, 1);
 
   const allLoanCategories = [
     { id: 'business', name: isBn ? 'ব্যবসায়ী ঋণ' : 'Business', icon: '🏢', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
@@ -416,66 +391,68 @@ export default function Home() {
       </div>
 
       {/* Success Stories */}
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-gray-900 dark:text-white text-lg transition-colors">
-            {isBn ? 'সাফল্যের গল্প' : 'Success Stories'}
-          </h3>
-        </div>
-        <div className="relative pb-6 px-1 h-[210px]">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentStoryIndex}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-              className="absolute inset-0 px-1"
-            >
-              <div className="relative rounded-[26px] p-[3px] overflow-hidden shadow-lg">
-                {/* Rainbow spinning background */}
-                <div className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,red,orange,yellow,green,blue,indigo,violet,red)] animate-[spin_4s_linear_infinite]" />
+      {stories.length > 0 && (
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold text-gray-900 dark:text-white text-lg transition-colors">
+              {isBn ? 'সাফল্যের গল্প' : 'Success Stories'}
+            </h3>
+          </div>
+          <div className="relative pb-6 px-1 h-[210px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentStoryIndex}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="absolute inset-0 px-1"
+              >
+                <div className="relative rounded-[26px] p-[3px] overflow-hidden shadow-lg">
+                  {/* Rainbow spinning background */}
+                  <div className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,red,orange,yellow,green,blue,indigo,violet,red)] animate-[spin_4s_linear_infinite]" />
 
-                {/* Inner Card content */}
-                <div className="relative w-full h-full bg-white dark:bg-gray-800 rounded-[23px] p-5 border border-gray-100 dark:border-gray-700 transition-colors">
-                  <div className="absolute top-4 right-4 text-blue-100 dark:text-blue-900/50 transition-colors">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg>
-                  </div>
-                  <div className="flex gap-3 mb-3 relative z-10 w-full overflow-hidden">
-                    <img
-                      src={displayStories[safeStoryIndex].avatar_url || `https://ui-avatars.com/api/?name=${displayStories[safeStoryIndex].name}&background=random`}
-                      alt={displayStories[safeStoryIndex].name}
-                      onError={(e) => {
-                        const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayStories[safeStoryIndex].name)}&background=random`;
-                        if (e.currentTarget.src !== fallback) {
-                          e.currentTarget.src = fallback;
-                        }
-                      }}
-                      className="w-12 h-12 rounded-full object-cover shrink-0"
-                    />
-                    <div className="min-w-0">
-                      <h4 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-1 transition-colors truncate">
-                        {displayStories[safeStoryIndex].name}
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#3b82f6" className="shrink-0"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
-                      </h4>
-                      <p className="text-[11px] text-gray-500 dark:text-gray-400 transition-colors truncate">{displayStories[safeStoryIndex].loan_type}</p>
+                  {/* Inner Card content */}
+                  <div className="relative w-full h-full bg-white dark:bg-gray-800 rounded-[23px] p-5 border border-gray-100 dark:border-gray-700 transition-colors">
+                    <div className="absolute top-4 right-4 text-blue-100 dark:text-blue-900/50 transition-colors">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg>
+                    </div>
+                    <div className="flex gap-3 mb-3 relative z-10 w-full overflow-hidden">
+                      <img
+                        src={stories[safeStoryIndex].avatar_url || `https://ui-avatars.com/api/?name=${stories[safeStoryIndex].name}&background=random`}
+                        alt={stories[safeStoryIndex].name}
+                        onError={(e) => {
+                          const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(stories[safeStoryIndex].name)}&background=random`;
+                          if (e.currentTarget.src !== fallback) {
+                            e.currentTarget.src = fallback;
+                          }
+                        }}
+                        className="w-12 h-12 rounded-full object-cover shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <h4 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-1 transition-colors truncate">
+                          {stories[safeStoryIndex].name}
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="#3b82f6" className="shrink-0"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
+                        </h4>
+                        <p className="text-[11px] text-gray-500 dark:text-gray-400 transition-colors truncate">{stories[safeStoryIndex].loan_type}</p>
+                      </div>
+                    </div>
+                    <div className="mb-2">
+                      <p className="text-lg font-bold text-primary-600 dark:text-primary-400 transition-colors">{formatCurrency(stories[safeStoryIndex].amount || 0, isBn)}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors truncate">{convertDigits(stories[safeStoryIndex].approval_time, isBn)}</p>
+                    </div>
+                    <div className="flex gap-1 text-yellow-400">
+                      {[...Array(stories[safeStoryIndex].rating || 5)].map((_, i) => (
+                        <Star key={i} size={12} fill="currentColor" />
+                      ))}
                     </div>
                   </div>
-                  <div className="mb-2">
-                    <p className="text-lg font-bold text-primary-600 dark:text-primary-400 transition-colors">{formatCurrency(displayStories[safeStoryIndex].amount || 0, isBn)}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors truncate">{convertDigits(displayStories[safeStoryIndex].approval_time, isBn)}</p>
-                  </div>
-                  <div className="flex gap-1 text-yellow-400">
-                    {[...Array(displayStories[safeStoryIndex].rating || 5)].map((_, i) => (
-                      <Star key={i} size={12} fill="currentColor" />
-                    ))}
-                  </div>
                 </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Loan Categories */}
       <div className="pb-8">
