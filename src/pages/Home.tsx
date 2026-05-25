@@ -1,4 +1,4 @@
-import { Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight, Star, FileText, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight, Star, FileText, Eye, EyeOff, Loader2, Clock, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import { getTelegramUser } from '../lib/telegram';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -8,9 +8,9 @@ import { useState, useEffect } from 'react';
 import { Skeleton } from '../components/Skeleton';
 import { toast } from 'sonner';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { getDashboardStats, getActiveLoans, getSuccessStories, getTransactions } from '../lib/api';
+import { getDashboardStats, getActiveLoans, getSuccessStories, getTransactions, getLoanApplications } from '../lib/api';
 import type { DashboardStats } from '../lib/api';
-import type { LoanApplication, SuccessStory } from '../types/database';
+import type { LoanApplication, SuccessStory, Transaction } from '../types/database';
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -20,6 +20,11 @@ export default function Home() {
   const [activeLoan, setActiveLoan] = useState<LoanApplication | null>(null);
   const [completedEmisCount, setCompletedEmisCount] = useState(0);
   const [stories, setStories] = useState<SuccessStory[]>([]);
+  
+  // Dynamic Notifications State
+  const [userLoans, setUserLoans] = useState<LoanApplication[]>([]);
+  const [userTransactions, setUserTransactions] = useState<Transaction[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const user = getTelegramUser();
   const navigate = useNavigate();
@@ -31,14 +36,17 @@ export default function Home() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [dashStats, activeLoans, successStoriesData, allTransactions] = await Promise.all([
+        const [dashStats, activeLoans, successStoriesData, allTransactions, allLoans] = await Promise.all([
           getDashboardStats(user.id),
           getActiveLoans(user.id),
           getSuccessStories(),
           getTransactions(user.id),
+          getLoanApplications(user.id),
         ]);
 
         setStats(dashStats);
+        setUserLoans(allLoans);
+        setUserTransactions(allTransactions);
         const loan = activeLoans.length > 0 ? activeLoans[0] : null;
         setActiveLoan(loan);
         if (loan) {
@@ -86,6 +94,122 @@ export default function Home() {
     { name: isBn ? 'মে' : 'May', amount: stats?.totalBalance || 0 },
   ];
 
+  const getNotifications = () => {
+    const list: { id: string; title: string; time: string; type: string; status: string; link?: string }[] = [];
+
+    userLoans.forEach(loan => {
+      const cat = loan.loan_category === 'personal' ? (isBn ? 'ব্যক্তিগত' : 'Salaried') :
+                  loan.loan_category === 'business' ? (isBn ? 'ব্যবসায়িক' : 'Business') :
+                  loan.loan_category === 'expat' ? (isBn ? 'প্রবাসী' : 'Expatriate') :
+                  loan.loan_category === 'student' ? (isBn ? 'শিক্ষা' : 'Student') :
+                  loan.loan_category === 'emergency' ? (isBn ? 'জরুরি' : 'Emergency') : (isBn ? 'নারী উদ্যোক্তা' : 'Women Entrepreneur');
+
+      const amountText = formatCurrency(loan.amount, isBn);
+      const appliedDate = new Date(loan.applied_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-US');
+
+      if (loan.status === 'under_review') {
+        list.push({
+          id: `loan-review-${loan.id}`,
+          title: isBn 
+            ? `আপনার ${amountText} (${cat}) লোন আবেদনটির রিভিউ চলছে।` 
+            : `Your ${amountText} (${cat}) loan application is under review.`,
+          time: appliedDate,
+          type: 'loan',
+          status: 'under_review',
+          link: `/application/${loan.id}`
+        });
+      } else if (loan.status === 'approved') {
+        list.push({
+          id: `loan-approved-${loan.id}`,
+          title: isBn 
+            ? `🎉 অভিনন্দন! আপনার ${amountText} (${cat}) লোন আবেদনটি অনুমোদিত হয়েছে।` 
+            : `🎉 Congratulations! Your ${amountText} (${cat}) loan application has been approved.`,
+          time: appliedDate,
+          type: 'loan',
+          status: 'approved',
+          link: `/application/${loan.id}`
+        });
+      } else if (loan.status === 'rejected') {
+        list.push({
+          id: `loan-rejected-${loan.id}`,
+          title: isBn 
+            ? `দুঃখিত, আপনার ${amountText} (${cat}) লোন আবেদনটি বাতিল করা হয়েছে।` 
+            : `Sorry, your ${amountText} (${cat}) loan application has been rejected.`,
+          time: appliedDate,
+          type: 'loan',
+          status: 'rejected',
+          link: `/application/${loan.id}`
+        });
+      } else if (loan.status === 'action_required') {
+        list.push({
+          id: `loan-action-${loan.id}`,
+          title: isBn 
+            ? `⚠️ আপনার ${amountText} (${cat}) লোন আবেদনে সংশোধন প্রয়োজন: ${loan.admin_feedback}` 
+            : `⚠️ Your ${amountText} (${cat}) loan requires updates: ${loan.admin_feedback}`,
+          time: appliedDate,
+          type: 'loan',
+          status: 'action_required',
+          link: `/apply?edit=${loan.id}`
+        });
+      }
+    });
+
+    userTransactions.slice(0, 5).forEach(txn => {
+      const amountText = formatCurrency(txn.amount, isBn);
+      const date = new Date(txn.created_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-US');
+      const method = txn.payment_method?.toUpperCase() || '';
+      
+      if (txn.type === 'deposit') {
+        const depType = txn.deposit_type === 'processing_fee' ? (isBn ? 'প্রসেসিং ফি' : 'Processing Fee') : (isBn ? 'সিকিউরিটি ডিপোজিট' : 'Security Deposit');
+        if (txn.status === 'completed') {
+          list.push({
+            id: `txn-${txn.id}`,
+            title: isBn 
+              ? `✅ ${amountText} (${depType}) ডিপোজিট সফলভাবে জমা হয়েছে।` 
+              : `✅ ${amountText} (${depType}) deposit completed successfully.`,
+            time: date,
+            type: 'txn',
+            status: 'completed'
+          });
+        } else if (txn.status === 'failed') {
+          list.push({
+            id: `txn-${txn.id}`,
+            title: isBn 
+              ? `❌ ${amountText} (${depType}) ডিপোজিট অনুরোধটি বাতিল বা ব্যর্থ হয়েছে।` 
+              : `❌ ${amountText} (${depType}) deposit failed or was rejected.`,
+            time: date,
+            type: 'txn',
+            status: 'failed'
+          });
+        }
+      } else if (txn.type === 'withdraw') {
+        if (txn.status === 'completed') {
+          list.push({
+            id: `txn-${txn.id}`,
+            title: isBn 
+              ? `✅ ${amountText} অর্থ উত্তোলন সফল হয়েছে।` 
+              : `✅ ${amountText} withdrawal completed successfully.`,
+            time: date,
+            type: 'txn',
+            status: 'completed'
+          });
+        } else if (txn.status === 'failed') {
+          list.push({
+            id: `txn-${txn.id}`,
+            title: isBn 
+              ? `❌ ${amountText} অর্থ উত্তোলন ব্যর্থ হয়েছে।` 
+              : `❌ ${amountText} withdrawal failed.`,
+            time: date,
+            type: 'txn',
+            status: 'failed'
+          });
+        }
+      }
+    });
+
+    return list;
+  };
+
   return (
     <div className="p-5 pb-10 space-y-6 transition-colors">
       {/* Header */}
@@ -115,14 +239,81 @@ export default function Home() {
             </h1>
           </div>
         </div>
-        <div
-          onClick={() => {
-            toast.info(isBn ? 'নতুন কোন নোটিফিকেশন নেই' : 'No new notifications');
-          }}
-          className="relative p-2.5 bg-gray-50 dark:bg-gray-700 rounded-2xl shadow-inner cursor-pointer active:scale-95 transition-all"
-        >
-          <Bell className="w-5 h-5 text-gray-700 dark:text-gray-300 transition-colors" />
-          <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-700 shadow-sm shadow-red-500/50 transition-colors"></span>
+        <div className="relative">
+          <div
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="p-2.5 bg-gray-50 dark:bg-gray-700 rounded-2xl shadow-inner cursor-pointer active:scale-95 transition-all flex items-center justify-center relative"
+          >
+            <Bell className="w-5 h-5 text-gray-700 dark:text-gray-300 transition-colors" />
+            {getNotifications().length > 0 && (
+              <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-700 shadow-sm shadow-red-500/50 transition-colors animate-pulse"></span>
+            )}
+          </div>
+
+          {/* Premium Glassmorphic Notifications Panel */}
+          <AnimatePresence>
+            {showNotifications && (
+              <>
+                {/* Backdrop overlay to close when clicked outside */}
+                <div 
+                  className="fixed inset-0 z-45" 
+                  onClick={() => setShowNotifications(false)}
+                />
+                
+                <motion.div
+                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 15, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 mt-3 w-80 sm:w-96 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-gray-100 dark:border-gray-700 rounded-[24px] shadow-2xl p-5 z-50 overflow-hidden"
+                >
+                  <div className="flex justify-between items-center pb-3 border-b border-gray-100 dark:border-gray-700 mb-3">
+                    <h4 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Bell size={18} className="text-primary-500" />
+                      {isBn ? 'নোটিফিকেশন সমূহ' : 'Notifications'}
+                    </h4>
+                    <span className="text-[10px] font-bold bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      {convertDigits(getNotifications().length, isBn)} {isBn ? 'টি' : 'Items'}
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
+                    {getNotifications().length === 0 ? (
+                      <div className="py-10 text-center">
+                        <p className="text-gray-400 dark:text-gray-500 text-sm font-bold">{isBn ? 'নতুন কোনো নোটিফিকেশন নেই' : 'No new notifications'}</p>
+                      </div>
+                    ) : (
+                      getNotifications().map((notif) => (
+                        <div 
+                          key={notif.id}
+                          onClick={() => {
+                            if (notif.link) {
+                              navigate(notif.link);
+                              setShowNotifications(false);
+                            }
+                          }}
+                          className={`p-3.5 rounded-xl border flex gap-3 transition-all ${
+                            notif.link ? 'hover:bg-primary-50/20 dark:hover:bg-primary-900/10 cursor-pointer active:scale-98' : ''
+                          } ${
+                            notif.status === 'under_review' ? 'bg-purple-50/50 dark:bg-purple-950/10 border-purple-100 dark:border-purple-900/30 text-purple-950 dark:text-purple-300' :
+                            notif.status === 'approved' || notif.status === 'completed' ? 'bg-emerald-50/50 dark:bg-emerald-950/10 border-emerald-100 dark:border-emerald-900/30 text-emerald-950 dark:text-emerald-300' :
+                            notif.status === 'rejected' || notif.status === 'failed' ? 'bg-rose-50/50 dark:bg-rose-950/10 border-rose-100 dark:border-rose-900/30 text-rose-950 dark:text-rose-300' :
+                            notif.status === 'action_required' ? 'bg-orange-50/50 dark:bg-orange-950/10 border-orange-100 dark:border-orange-900/30 text-orange-950 dark:text-orange-300' :
+                            'bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 text-gray-900 dark:text-gray-100'
+                          }`}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold leading-normal mb-1.5 break-words text-gray-900 dark:text-white">{notif.title}</p>
+                            <span className="text-[10px] opacity-60 font-medium text-gray-500 dark:text-gray-400">{notif.time}</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 

@@ -237,22 +237,40 @@ export async function getDashboardStats(chatId: number): Promise<DashboardStats>
 
   let depositBalance = 0;
   let withdrawBalance = 0;
+  let completedDepositBalance = 0;
+  let completedWithdrawBalance = 0;
 
   for (const txn of transactions) {
-    if (txn.status !== 'completed') continue;
-    switch (txn.type) {
-      case 'deposit':
-      case 'disbursement':
-        depositBalance += txn.amount;
-        break;
-      case 'withdraw':
-      case 'emi_payment':
-        withdrawBalance += txn.amount;
-        break;
+    // Sum completed and pending transactions for deposit/withdraw dashboard stats cards
+    if (txn.status === 'completed' || txn.status === 'pending') {
+      switch (txn.type) {
+        case 'deposit':
+        case 'disbursement':
+          depositBalance += txn.amount;
+          break;
+        case 'withdraw':
+        case 'emi_payment':
+          withdrawBalance += txn.amount;
+          break;
+      }
+    }
+
+    // Only count completed transactions towards the active total balance
+    if (txn.status === 'completed') {
+      switch (txn.type) {
+        case 'deposit':
+        case 'disbursement':
+          completedDepositBalance += txn.amount;
+          break;
+        case 'withdraw':
+        case 'emi_payment':
+          completedWithdrawBalance += txn.amount;
+          break;
+      }
     }
   }
 
-  const totalBalance = depositBalance - withdrawBalance;
+  const totalBalance = completedDepositBalance - completedWithdrawBalance;
   const totalOutstanding = activeLoans.reduce((sum, l) => sum + (l.amount || 0), 0);
 
   return {

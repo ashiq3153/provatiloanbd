@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { getLoanApplicationById } from '../lib/api';
 import type { LoanApplication } from '../types/database';
 
-type LoanAppStatus = 'pending' | 'approved' | 'rejected' | 'action_required' | 'active' | 'completed';
+type LoanAppStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'action_required' | 'active' | 'completed';
 
 export default function ApplicationDetails() {
   const { id } = useParams();
@@ -54,6 +54,7 @@ export default function ApplicationDetails() {
   const getAppStatusStyles = (status: LoanAppStatus) => {
     switch (status) {
       case 'pending': return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/50';
+      case 'under_review': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800/50';
       case 'approved': return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50';
       case 'active': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/50';
       case 'rejected': return 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800/50';
@@ -66,6 +67,7 @@ export default function ApplicationDetails() {
   const getAppStatusIcon = (status: LoanAppStatus) => {
     switch (status) {
       case 'pending': return <Clock size={20} className="text-amber-600 dark:text-amber-400" />;
+      case 'under_review': return <Clock size={20} className="text-purple-600 dark:text-purple-400" />;
       case 'approved': return <CheckCircle2 size={20} className="text-emerald-600 dark:text-emerald-400" />;
       case 'active': return <CheckCircle2 size={20} className="text-blue-600 dark:text-blue-400" />;
       case 'rejected': return <XCircle size={20} className="text-rose-600 dark:text-rose-400" />;
@@ -91,6 +93,7 @@ export default function ApplicationDetails() {
     if (isBn) {
       switch (status) {
         case 'pending': return 'অপেক্ষমান';
+        case 'under_review': return 'রিভিউ চলছে';
         case 'approved': return 'অনুমোদিত';
         case 'active': return 'সক্রিয়';
         case 'rejected': return 'বাতিল';
@@ -99,7 +102,16 @@ export default function ApplicationDetails() {
         default: return status;
       }
     }
-    return status;
+    switch (status) {
+      case 'pending': return 'Pending';
+      case 'under_review': return 'Under Review';
+      case 'approved': return 'Approved';
+      case 'active': return 'Active';
+      case 'rejected': return 'Rejected';
+      case 'action_required': return 'Action Required';
+      case 'completed': return 'Completed';
+      default: return status;
+    }
   };
 
   return (

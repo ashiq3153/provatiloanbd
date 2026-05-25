@@ -29,6 +29,7 @@ export default function Loans() {
   const getStatusDisplay = (status: string) => {
     switch (status) {
       case 'pending': return { text: isBn ? 'অপেক্ষমান' : 'Pending', color: 'text-amber-700 bg-amber-100 dark:bg-amber-900/30 border-amber-200', icon: Clock };
+      case 'under_review': return { text: isBn ? 'রিভিউ চলছে' : 'Under Review', color: 'text-purple-700 bg-purple-100 dark:bg-purple-900/30 border-purple-200', icon: Clock };
       case 'approved': return { text: isBn ? 'অনুমোদিত' : 'Approved', color: 'text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200', icon: CheckCircle2 };
       case 'active': return { text: isBn ? 'সক্রিয়' : 'Active', color: 'text-blue-700 bg-blue-100 dark:bg-blue-900/30 border-blue-200', icon: CheckCircle2 };
       case 'rejected': return { text: isBn ? 'বাতিল' : 'Rejected', color: 'text-rose-700 bg-rose-100 dark:bg-rose-900/30 border-rose-200', icon: XCircle };

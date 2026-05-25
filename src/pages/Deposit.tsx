@@ -1,6 +1,6 @@
 import { ArrowLeft, MessageCircle, Send, UploadCloud, AlertCircle, Landmark, CheckCircle2, ShieldCheck, CreditCard } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
 import { toast } from 'sonner';
@@ -22,6 +22,7 @@ export default function Deposit() {
   const user = getTelegramUser();
   const [method, setMethod] = useState(paymentMethods[0].id);
   const [depositType, setDepositType] = useState('processing');
+  const [loanAmount, setLoanAmount] = useState('');
   const [amount, setAmount] = useState('');
   const [senderNo, setSenderNo] = useState('');
   const [trxId, setTrxId] = useState('');
@@ -30,6 +31,44 @@ export default function Deposit() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [screenshotUrl, setScreenshotUrl] = useState<string>('');
   const [uploading, setUploading] = useState(false);
+
+  // Auto-calculate deposit amount when loanAmount or depositType changes
+  useEffect(() => {
+    if (!loanAmount) {
+      setAmount('');
+      return;
+    }
+    const lAmt = Number(loanAmount);
+    if (isNaN(lAmt) || lAmt <= 0) {
+      setAmount('');
+      return;
+    }
+
+    let calculated = 0;
+    if (depositType === 'processing') {
+      // Fees: 50,000 BDT to 10 Lakh BDT (1,000,000) = 1%
+      // 10 Lakh BDT up to 50 Lakh BDT (5,000,000) = 0.5%
+      if (lAmt >= 50000 && lAmt <= 1000000) {
+        calculated = lAmt * 0.01;
+      } else if (lAmt > 1000000 && lAmt <= 5000000) {
+        calculated = lAmt * 0.005;
+      }
+    } else {
+      // Security deposit: 50,000 BDT to 5 Lakh BDT (500,000) = 10%
+      // 5 Lakh BDT up to 50 Lakh BDT (5,000,000) = 5%
+      if (lAmt >= 50000 && lAmt <= 500000) {
+        calculated = lAmt * 0.10;
+      } else if (lAmt > 500000 && lAmt <= 5000000) {
+        calculated = lAmt * 0.05;
+      }
+    }
+
+    if (calculated > 0) {
+      setAmount(calculated.toFixed(2).replace(/\.00$/, '')); // Format nicely without decimal if it is integer
+    } else {
+      setAmount('');
+    }
+  }, [loanAmount, depositType]);
 
   // Handlers for social
   const openTelegram = () => {
@@ -275,9 +314,33 @@ export default function Deposit() {
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 transition-colors uppercase tracking-wider">
+                  {isBn ? 'লোনের পরিমাণ (টাকা)' : 'Loan Amount (BDT)'}
+                </label>
+                <div className="relative font-bold">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-bold text-gray-400">৳</span>
+                  <input 
+                    type="number" 
+                    value={loanAmount}
+                    onChange={(e) => setLoanAmount(e.target.value)}
+                    className="w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-100 dark:border-gray-700 rounded-2xl py-4 pl-10 pr-4 text-xl font-black text-gray-900 dark:text-white focus:border-primary-500 focus:ring-0 transition-all outline-none" 
+                    placeholder={isBn ? "লোনের পরিমাণ লিখুন (উদাঃ ১০০০০০)" : "Enter loan amount (e.g. 100000)"} 
+                  />
+                </div>
+                {/* Visual Rate Info badge */}
+                <div className="mt-2 text-xs font-semibold flex items-center gap-1.5 text-primary-600 dark:text-primary-400 bg-primary-50/50 dark:bg-primary-950/20 px-3 py-1.5 rounded-xl border border-primary-100/50 dark:border-primary-900/30 font-sans">
+                  <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+                  {depositType === 'processing' 
+                    ? (isBn ? 'ফি হার: ৫০ হাজার - ১০ লাখ = ১% | ১০ লাখ - ৫০ লাখ = ০.৫%' : 'Fee rate: 50k - 10L = 1% | 10L - 50L = 0.5%')
+                    : (isBn ? 'ডিপোজিট হার: ৫০ হাজার - ৫ লাখ = ১০% | ৫ লাখ - ৫০ লাখ = ৫%' : 'Deposit rate: 50k - 5L = 10% | 5L - 50L = 5%')
+                  }
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 transition-colors uppercase tracking-wider">
                   {isBn ? 'ডিপোজিটের পরিমাণ' : 'Deposit Amount'}
                 </label>
-                <div className="relative">
+                <div className="relative font-bold">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-bold text-gray-400">৳</span>
                   <input 
                     type="number" 
@@ -286,7 +349,12 @@ export default function Deposit() {
                     step="any"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-100 dark:border-gray-700 rounded-2xl py-4 pl-10 pr-4 text-xl font-black text-gray-900 dark:text-white focus:border-primary-500 focus:ring-0 transition-all outline-none" 
+                    readOnly={!!loanAmount}
+                    className={`w-full border-2 border-gray-100 dark:border-gray-700 rounded-2xl py-4 pl-10 pr-4 text-xl font-black text-gray-900 dark:text-white focus:border-primary-500 focus:ring-0 transition-all outline-none ${
+                      loanAmount 
+                        ? 'bg-gray-100/50 dark:bg-gray-800/50 cursor-not-allowed opacity-75' 
+                        : 'bg-gray-50 dark:bg-gray-900'
+                    }`} 
                     placeholder="0" 
                   />
                 </div>

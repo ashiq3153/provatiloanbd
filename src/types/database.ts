@@ -54,7 +54,7 @@ export interface LoanApplication {
   nominee_mobile: string;
   nominee_nid: string;
   // Status
-  status: 'pending' | 'approved' | 'rejected' | 'active' | 'completed' | 'action_required';
+  status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'active' | 'completed' | 'action_required';
   admin_feedback: string | null;
   applied_at: string;
   approved_at: string | null;

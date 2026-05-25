@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight } from 'lucide-react';
+import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock } from 'lucide-react';
 import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
@@ -7,6 +7,7 @@ import { useAppStore } from '../../lib/store';
 import { convertDigits, formatCurrency } from '../../lib/translation';
 import { motion, AnimatePresence } from 'motion/react';
 import { sendTelegramNotification } from '../../lib/telegram';
+import { sendEmailNotification } from '../../lib/email';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 
 export default function AdminDashboard() {
@@ -19,6 +20,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedLoan, setSelectedLoan] = useState<LoanApplication | null>(null);
   
   // New Story Form State
   const [newStory, setNewStory] = useState({
@@ -36,6 +38,9 @@ export default function AdminDashboard() {
   const [config, setConfig] = useState({
     processingFee: 1,
     securityDeposit: 10,
+    emailEnabled: false,
+    resendApiKey: '',
+    senderEmail: 'Provati Loan <noreply@provatiloanbd.com>',
     minRatePersonal: 1.2,
     minRateBusiness: 1.5,
     minRateExpat: 1.0,
@@ -103,6 +108,9 @@ export default function AdminDashboard() {
       setConfig({
         processingFee: systemSettings.procFee ? systemSettings.procFee * 100 : 1,
         securityDeposit: systemSettings.secDeposit ? systemSettings.secDeposit * 100 : 10,
+        emailEnabled: !!systemSettings.emailEnabled,
+        resendApiKey: systemSettings.resendApiKey || '',
+        senderEmail: systemSettings.senderEmail || 'Provati Loan <noreply@provatiloanbd.com>',
         minRatePersonal: systemSettings.minRatePersonal ? systemSettings.minRatePersonal * 100 : 1.2,
         minRateBusiness: systemSettings.minRateBusiness ? systemSettings.minRateBusiness * 100 : 1.5,
         minRateExpat: systemSettings.minRateExpat ? systemSettings.minRateExpat * 100 : 1.0,
@@ -193,6 +201,9 @@ export default function AdminDashboard() {
     const newSettings = {
       procFee: config.processingFee / 100,
       secDeposit: config.securityDeposit / 100,
+      emailEnabled: config.emailEnabled,
+      resendApiKey: config.resendApiKey,
+      senderEmail: config.senderEmail,
       minRatePersonal: config.minRatePersonal / 100,
       minRateBusiness: config.minRateBusiness / 100,
       minRateExpat: config.minRateExpat / 100,
@@ -240,7 +251,7 @@ export default function AdminDashboard() {
       toast.success(`Loan marked as ${status.replace('_', ' ')}`);
       setLoans(loans.map(l => l.id === id ? { ...l, status, admin_feedback: feedback || l.admin_feedback } : l));
 
-      // Trigger Telegram notification
+      // Trigger Notifications
       const loan = loans.find(l => l.id === id);
       if (loan) {
         let msg = "";
@@ -252,7 +263,9 @@ export default function AdminDashboard() {
         
         const formattedAmount = formatCurrency(loan.amount, isBn);
         
-        if (status === 'approved') {
+        if (status === 'under_review') {
+          msg = `🔍 <b>প্রিয় ${loan.full_name},</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটি বর্তমানে আমাদের অ্যাডমিন প্যানেলে রিভিউ করা হচ্ছে।\n\n💰 লোনের পরিমাণ: <b>${formattedAmount}</b>\n📅 মেয়াদ: <b>${convertDigits(loan.tenure_months, isBn)} মাস</b>\n\nঅতি শীঘ্রই পরবর্তী আপডেট জানানো হবে। ধন্যবাদ!`;
+        } else if (status === 'approved') {
           msg = `🎉 <b>অভিনন্দন ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটি অনুমোদিত হয়েছে।\n\n💰 লোনের পরিমাণ: <b>${formattedAmount}</b>\n📅 মেয়াদ: <b>${convertDigits(loan.tenure_months, isBn)} মাস</b>\n\nআমাদের পক্ষ থেকে শীঘ্রই আপনার সাথে যোগাযোগ করা হবে। ধন্যবাদ!`;
         } else if (status === 'rejected') {
           msg = `❌ <b>দুঃখিত ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটি বাতিল করা হয়েছে।\n\n${feedback ? `📝 কারণ: <i>${feedback}</i>\n\n` : ''}ভবিষ্যতে পুনরায় আবেদন করার জন্য অনুরোধ করা হলো। ধন্যবাদ।`;
@@ -264,6 +277,17 @@ export default function AdminDashboard() {
 
         if (msg) {
           sendTelegramNotification(loan.chat_id, msg, config.telegramBotToken);
+        }
+
+        // Email Notification
+        if (config.emailEnabled && loan.email) {
+          sendEmailNotification(
+            { ...loan, status, admin_feedback: feedback || null },
+            status,
+            feedback || null,
+            { apiKey: config.resendApiKey, senderEmail: config.senderEmail, enabled: config.emailEnabled },
+            isBn
+          );
         }
       }
     } else {
@@ -670,28 +694,46 @@ export default function AdminDashboard() {
                             </td>
                             <td className="px-6 py-4 font-black text-gray-900 dark:text-white text-base">{formatCurrency(loan.amount || 0, isBn)}</td>
                             <td className="px-6 py-4">
-                              <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
+                                   <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
                                 loan.status === 'approved' || loan.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800/30' :
                                 loan.status === 'rejected' ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border border-rose-200 dark:border-rose-800/30' :
+                                loan.status === 'under_review' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-200 dark:border-purple-800/30' :
                                 loan.status === 'action_required' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-200 dark:border-orange-800/30' :
                                 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/30'
                               }`}>
                                 {loan.status.replace('_', ' ')}
                               </span>
                             </td>
-                            <td className="px-6 py-4 flex flex-col gap-3">
+                            <td className="px-6 py-4 flex flex-col gap-2.5">
+                              {/* View Details Button */}
+                              <button 
+                                onClick={() => setSelectedLoan(loan)}
+                                className="w-max px-3.5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-primary-500/10 active:scale-95 cursor-pointer"
+                              >
+                                <Eye size={14} /> View Details
+                              </button>
+
                               {loan.status === 'pending' && (
-                                <div className="flex gap-2">
-                                  <button onClick={() => handleLoanStatus(loan.id, 'approved')} className="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-xl transition-colors font-bold text-xs flex items-center gap-1" title="Approve"><CheckCircle size={14} /> Approve</button>
-                                  <button onClick={() => handleLoanStatus(loan.id, 'rejected')} className="px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl transition-colors font-bold text-xs flex items-center gap-1" title="Reject"><XCircle size={14} /> Reject</button>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                  <button onClick={() => handleLoanStatus(loan.id, 'under_review')} className="px-3 py-2 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border border-purple-200/50 rounded-xl transition-colors font-bold text-xs flex items-center gap-1 cursor-pointer" title="Start Review"><Clock size={14} /> Start Review</button>
+                                  <button onClick={() => handleLoanStatus(loan.id, 'approved')} className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200/50 rounded-xl transition-colors font-bold text-xs flex items-center gap-1 cursor-pointer" title="Approve"><CheckCircle size={14} /> Approve</button>
+                                  <button onClick={() => handleLoanStatus(loan.id, 'rejected')} className="px-3 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-200/50 rounded-xl transition-colors font-bold text-xs flex items-center gap-1 cursor-pointer" title="Reject"><XCircle size={14} /> Reject</button>
                                 </div>
                               )}
-                              {(loan.status === 'pending' || loan.status === 'action_required') && (
-                                <div className="flex flex-col gap-2">
+
+                              {loan.status === 'under_review' && (
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                  <button onClick={() => handleLoanStatus(loan.id, 'approved')} className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200/50 rounded-xl transition-colors font-bold text-xs flex items-center gap-1 cursor-pointer" title="Approve"><CheckCircle size={14} /> Approve</button>
+                                  <button onClick={() => handleLoanStatus(loan.id, 'rejected')} className="px-3 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-200/50 rounded-xl transition-colors font-bold text-xs flex items-center gap-1 cursor-pointer" title="Reject"><XCircle size={14} /> Reject</button>
+                                </div>
+                              )}
+
+                              {(loan.status === 'pending' || loan.status === 'under_review' || loan.status === 'action_required') && (
+                                <div className="flex flex-col gap-2 mt-1 max-w-xs">
                                    <input 
                                      type="text" 
                                      placeholder="Add feedback note..." 
-                                     className="px-3 py-2 text-xs border rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 w-full focus:ring-2 focus:ring-primary-500 focus:outline-none"
+                                     className="px-3 py-2 text-xs border rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 w-full focus:ring-2 focus:ring-primary-500 focus:outline-none font-medium"
                                      id={`feedback-${loan.id}`}
                                      defaultValue={loan.admin_feedback || ''}
                                    />
@@ -701,14 +743,14 @@ export default function AdminDashboard() {
                                        if(!fb) return toast.error('Please enter feedback');
                                        handleLoanStatus(loan.id, 'action_required', fb);
                                      }}
-                                     className="text-xs px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-xl font-bold w-full transition-colors"
+                                     className="text-xs px-3 py-2 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-400 border border-amber-200/50 rounded-xl font-bold w-full transition-colors cursor-pointer"
                                    >
                                      Request Revision
                                    </button>
                                 </div>
                               )}
                               {(loan.status === 'approved' || loan.status === 'active') && (
-                                 <button onClick={() => handleLoanStatus(loan.id, 'completed')} className="text-xs px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl font-bold transition-colors w-max">Mark Completed</button>
+                                 <button onClick={() => handleLoanStatus(loan.id, 'completed')} className="text-xs px-3.5 py-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200/50 rounded-xl font-bold transition-colors w-max cursor-pointer">Mark Completed</button>
                               )}
                               {loan.documents && Object.keys(loan.documents).length > 0 && (
                                 <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
@@ -1108,6 +1150,58 @@ export default function AdminDashboard() {
                                 </p>
                               </div>
                             </div>
+
+                            {/* Email Settings Panel */}
+                            <div className="bg-gray-50 dark:bg-gray-900/40 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700/60 shadow-sm space-y-5">
+                              <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-primary-600 dark:text-primary-400">
+                                ✉️ {isBn ? 'ইমেইল নোটিফিকেশন সেটিংস (Resend)' : 'Email Notifications Settings (Resend)'}
+                              </h3>
+                              
+                              <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700">
+                                <div>
+                                  <h4 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-1">{isBn ? 'ইমেইল নোটিফিকেশন সক্রিয়' : 'Enable Email Notifications'}</h4>
+                                  <p className="text-[10px] text-gray-500">{isBn ? 'লোনের স্ট্যাটাস পরিবর্তনের সাথে সাথে ইউজারদের ইমেইল নোটিফিকেশন পাঠাতে এটি চালু করুন।' : 'Enable transactional status updates sent to applicants via email.'}</p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => setConfig({...config, emailEnabled: !config.emailEnabled})}
+                                  className="text-primary-600 dark:text-primary-400 focus:outline-none hover:scale-105 transition-transform"
+                                >
+                                  {config.emailEnabled ? <ToggleRight size={44} /> : <ToggleLeft size={44} />}
+                                </button>
+                              </div>
+
+                              {config.emailEnabled && (
+                                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 pt-2">
+                                  <div>
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'রিসেন্ড এপিআই কি (Resend API Key)' : 'Resend API Key'}</label>
+                                    <input 
+                                      type="password" 
+                                      placeholder="re_xxxxxxxxxxxxxxxxxxxxxxxx" 
+                                      value={config.resendApiKey || ''} 
+                                      onChange={e => setConfig({...config, resendApiKey: e.target.value})} 
+                                      className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm font-mono text-sm" 
+                                    />
+                                    <p className="text-[10px] text-gray-500 mt-1">
+                                      {isBn ? 'Resend.com ড্যাশবোর্ড থেকে প্রাপ্ত API Key দিন।' : 'Go to Resend.com to generate your API key.'}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'প্রেরক ইমেইল (Sender Email)' : 'Sender Email'}</label>
+                                    <input 
+                                      type="text" 
+                                      placeholder="Provati Loan <support@yourdomain.com>" 
+                                      value={config.senderEmail || ''} 
+                                      onChange={e => setConfig({...config, senderEmail: e.target.value})} 
+                                      className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm text-sm" 
+                                    />
+                                    <p className="text-[10px] text-gray-500 mt-1">
+                                      {isBn ? 'আপনার ভেরিফাইড ডোমেনের প্রেরক ইমেইল এড্রেস।' : 'Enter a sender identity verified in your Resend account.'}
+                                    </p>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </div>
                           </div>
                         )}
 
@@ -1364,6 +1458,336 @@ export default function AdminDashboard() {
               )}
             </motion.div>
           </AnimatePresence>
+      {/* Stunning Loan Details Modal */}
+      <AnimatePresence>
+        {selectedLoan && (
+          <>
+            {/* Backdrop Blur Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 overflow-y-auto p-4 sm:p-6 md:p-10 flex items-center justify-center animate-fade-in"
+              onClick={() => setSelectedLoan(null)}
+            >
+              {/* Modal Container */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 30 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+                className="w-full max-w-5xl bg-white dark:bg-gray-800 rounded-[32px] shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col h-full max-h-[85vh] relative"
+                onClick={e => e.stopPropagation()}
+              >
+                {/* Header */}
+                <div className="p-6 sm:p-8 bg-gradient-to-r from-primary-600 to-indigo-700 text-white flex justify-between items-center relative shrink-0">
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-2.5 py-1 rounded-full text-white/90">
+                      {selectedLoan.loan_category} Loan Review
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-black mt-2 leading-none">{selectedLoan.full_name}</h3>
+                    <p className="text-xs text-blue-100/70 font-mono mt-1.5">Application ID: #{selectedLoan.id}</p>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedLoan(null)}
+                    className="p-2.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors focus:outline-none cursor-pointer"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                {/* Body Content - Scrollable */}
+                <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 custom-scrollbar">
+                  
+                  {/* Status Indicator Bar */}
+                  <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{isBn ? 'বর্তমান স্ট্যাটাস:' : 'Current Status:'}</span>
+                      <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
+                        selectedLoan.status === 'approved' || selectedLoan.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200' :
+                        selectedLoan.status === 'rejected' ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border border-rose-200' :
+                        selectedLoan.status === 'under_review' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-200 animate-pulse' :
+                        selectedLoan.status === 'action_required' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-200' :
+                        'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200'
+                      }`}>
+                        {selectedLoan.status.replace('_', ' ')}
+                      </span>
+                    </div>
+                    
+                    {/* Inline Status Actions */}
+                    <div className="flex flex-wrap gap-2">
+                      {selectedLoan.status === 'pending' && (
+                        <button onClick={() => { handleLoanStatus(selectedLoan.id, 'under_review'); setSelectedLoan({...selectedLoan, status: 'under_review'}); }} className="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"><Clock size={14} /> Start Review</button>
+                      )}
+                      {(selectedLoan.status === 'pending' || selectedLoan.status === 'under_review') && (
+                        <>
+                          <button onClick={() => { handleLoanStatus(selectedLoan.id, 'approved'); setSelectedLoan({...selectedLoan, status: 'approved'}); }} className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"><CheckCircle size={14} /> Approve Application</button>
+                          <button onClick={() => { handleLoanStatus(selectedLoan.id, 'rejected'); setSelectedLoan({...selectedLoan, status: 'rejected'}); }} className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"><XCircle size={14} /> Reject Application</button>
+                        </>
+                      )}
+                      {(selectedLoan.status === 'approved' || selectedLoan.status === 'active') && (
+                        <button onClick={() => { handleLoanStatus(selectedLoan.id, 'completed'); setSelectedLoan({...selectedLoan, status: 'completed'}); }} className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm">Mark Completed</button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 2 Column Details Sections */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    
+                    {/* Column 1: Personal & Nominee Info */}
+                    <div className="space-y-6">
+                      
+                      {/* Personal Info Card */}
+                      <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 shadow-sm space-y-4">
+                        <h4 className="font-extrabold text-sm text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-50 dark:border-gray-700 pb-2 flex items-center gap-2">
+                          👤 {isBn ? 'ব্যক্তিগত তথ্য বিবরণী' : 'Personal Information'}
+                        </h4>
+                        <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'পিতার নাম' : "Father's Name"}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.father_name}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'মাতার নাম' : "Mother's Name"}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.mother_name}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'জন্ম তারিখ' : 'Date of Birth'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.dob}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'লিঙ্গ' : 'Gender'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.gender}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'মোবাইল' : 'Mobile'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.mobile}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'হোয়াটসঅ্যাপ' : 'WhatsApp'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.whatsapp || 'N/A'}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'ইমেইল' : 'Email Address'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200 font-mono">{selectedLoan.email || 'N/A'}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'বর্তমান ঠিকানা' : 'Current Address'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200 leading-normal">{selectedLoan.current_address}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'স্থায়ী ঠিকানা' : 'Permanent Address'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200 leading-normal">{selectedLoan.permanent_address}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'এনআইডি কার্ড নম্বর' : 'NID Card Number'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200 font-mono">{selectedLoan.nid_number}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Nominee Details Card */}
+                      <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 shadow-sm space-y-4">
+                        <h4 className="font-extrabold text-sm text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-50 dark:border-gray-700 pb-2 flex items-center gap-2">
+                          👥 {isBn ? 'নমিনি বিবরণী' : 'Nominee Information'}
+                        </h4>
+                        <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'নমিনির নাম' : "Nominee's Name"}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.nominee_name}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'সম্পর্ক' : 'Relationship'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.nominee_relation}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'নমিনির মোবাইল' : "Nominee's Mobile"}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.nominee_mobile}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'নমিনির এনআইডি' : "Nominee's NID"}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200 font-mono">{selectedLoan.nominee_nid}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+
+                    {/* Column 2: Financial, Professional & Bank Account */}
+                    <div className="space-y-6">
+
+                      {/* Loan Specifications Card */}
+                      <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 shadow-sm space-y-4">
+                        <h4 className="font-extrabold text-sm text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-50 dark:border-gray-700 pb-2 flex items-center gap-2">
+                          💰 {isBn ? 'লোনের বিবরণী' : 'Loan Specifications'}
+                        </h4>
+                        <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'লোন বিভাগ' : 'Loan Category'}</span>
+                            <span className="font-bold text-gray-900 dark:text-white text-sm capitalize">{selectedLoan.loan_category}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'পরিমাণ' : 'Amount'}</span>
+                            <span className="font-black text-primary-600 dark:text-primary-400 text-base">{formatCurrency(selectedLoan.amount, isBn)}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'মেয়াদকাল' : 'Tenure'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{convertDigits(selectedLoan.tenure_months, isBn)} {isBn ? 'মাস' : 'Months'}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'সুদ হার' : 'Interest Rate'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{(selectedLoan.interest_rate * 100).toFixed(1)}%</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'মাসিক কিস্তি (EMI)' : 'Monthly EMI'}</span>
+                            <span className="font-bold text-emerald-600 text-sm">{formatCurrency(selectedLoan.emi_amount, isBn)}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'প্রসেসিং ফি' : 'Processing Fee'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{formatCurrency(selectedLoan.processing_fee, isBn)}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'সিকিউরিটি ডিপোজিট' : 'Security Deposit'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{formatCurrency(selectedLoan.security_deposit, isBn)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Bank Details Card */}
+                      <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 shadow-sm space-y-4">
+                        <h4 className="font-extrabold text-sm text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-50 dark:border-gray-700 pb-2 flex items-center gap-2">
+                          🏦 {isBn ? 'ব্যাংক একাউন্ট বিবরণী' : 'Bank Account Information'}
+                        </h4>
+                        <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'ব্যাংকের নাম' : 'Bank Name'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.bank_name}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'একাউন্ট নাম' : 'Account Name'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.account_name}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'একাউন্ট নাম্বার' : 'Account Number'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200 font-mono">{selectedLoan.account_number}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'রাউটিং নাম্বার' : 'Routing Number'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200 font-mono">{selectedLoan.routing_number || 'N/A'}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'মোবাইল ব্যাংকিং নাম্বার' : 'Mobile Banking Number'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200 font-mono">{selectedLoan.mobile_banking || 'N/A'}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Dynamic Professional Info Card */}
+                      {selectedLoan.professional_info && Object.keys(selectedLoan.professional_info).length > 0 && (
+                        <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 shadow-sm space-y-4">
+                          <h4 className="font-extrabold text-sm text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-50 dark:border-gray-700 pb-2 flex items-center gap-2">
+                            💼 {isBn ? 'পেশাগত তথ্য বিবরণী' : 'Professional Details'}
+                          </h4>
+                          <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
+                            {Object.entries(selectedLoan.professional_info).map(([key, val]) => {
+                              const friendlyKey = key === 'companyName' ? (isBn ? 'কোম্পানির নাম' : 'Company Name') :
+                                                  key === 'designation' ? (isBn ? 'পদবী' : 'Designation') :
+                                                  key === 'workDuration' ? (isBn ? 'কাজের মেয়াদ' : 'Work Duration') :
+                                                  key === 'monthlyIncome' ? (isBn ? 'মাসিক আয়' : 'Monthly Income') :
+                                                  key === 'businessName' ? (isBn ? 'ব্যবসার নাম' : 'Business Name') :
+                                                  key === 'shopAddress' ? (isBn ? 'দোকানের ঠিকানা' : 'Shop Address') :
+                                                  key === 'tradeLicense' ? (isBn ? 'ট্রেড লাইসেন্স' : 'Trade License') :
+                                                  key === 'workingCountry' ? (isBn ? 'কর্মরত দেশ' : 'Working Country') :
+                                                  key === 'visaType' ? (isBn ? 'ভিসার ধরন' : 'Visa Type') :
+                                                  key === 'passportNumber' ? (isBn ? 'পাসপোর্ট নম্বর' : 'Passport Number') :
+                                                  key === 'institutionName' ? (isBn ? 'শিক্ষা প্রতিষ্ঠান' : 'Institution Name') :
+                                                  key === 'studentId' ? (isBn ? 'স্টুডেন্ট আইডি' : 'Student ID') :
+                                                  key === 'guardianIncome' ? (isBn ? 'অভিভাবকের আয়' : "Guardian's Income") :
+                                                  key === 'professionName' ? (isBn ? 'পেশা' : 'Profession') :
+                                                  key === 'emergencyReason' ? (isBn ? 'জরুরি কারণ' : 'Emergency Reason') : key;
+
+                              return (
+                                <div key={key} className={key === 'shopAddress' || key === 'emergencyReason' ? 'col-span-2' : ''}>
+                                  <span className="text-gray-400 font-semibold block mb-0.5">{friendlyKey}</span>
+                                  <span className="font-bold text-gray-800 dark:text-gray-200">{val as string}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                    </div>
+                  </div>
+
+                  {/* Documents Section */}
+                  {selectedLoan.documents && Object.keys(selectedLoan.documents).length > 0 && (
+                    <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 shadow-sm space-y-4">
+                      <h4 className="font-extrabold text-sm text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-50 dark:border-gray-700 pb-2 flex items-center gap-2">
+                        📎 {isBn ? 'আপলোডকৃত কাগজপত্র (ডকুমেন্টস)' : 'Attached Application Documents'}
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {Object.entries(selectedLoan.documents).map(([key, url]) => (
+                          <div key={key} className="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-700 flex flex-col justify-between gap-3 group relative overflow-hidden">
+                            <div>
+                              <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">
+                                {key.replace('_', ' ')}
+                              </span>
+                              <span className="text-xs font-bold text-gray-800 dark:text-gray-200 line-clamp-1">
+                                {url.split('/').pop() || 'document_file'}
+                              </span>
+                            </div>
+                            <a 
+                              href={url} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="px-3 py-2 bg-primary-50 hover:bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 dark:hover:bg-primary-900/50 rounded-lg text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                            >
+                              <Eye size={14} /> {isBn ? 'ডকুমেন্ট দেখুন' : 'View Document'}
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Revision Section (within Modal) */}
+                  {(selectedLoan.status === 'pending' || selectedLoan.status === 'under_review' || selectedLoan.status === 'action_required') && (
+                    <div className="bg-amber-50/50 dark:bg-amber-950/10 border border-amber-200/50 rounded-2xl p-5 space-y-4">
+                      <h4 className="font-extrabold text-sm text-amber-900 dark:text-amber-300 uppercase tracking-wider flex items-center gap-2">
+                        📝 {isBn ? 'সংশোধন অনুরোধ (Revision Feedback Notes)' : 'Request Revision Notes'}
+                      </h4>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <input 
+                          type="text" 
+                          placeholder="Provide descriptive feedback for the applicant..." 
+                          className="flex-1 px-4 py-3 text-sm border rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-500 focus:outline-none font-medium text-gray-800 dark:text-gray-100"
+                          id={`modal-feedback-${selectedLoan.id}`}
+                          defaultValue={selectedLoan.admin_feedback || ''}
+                        />
+                        <button 
+                          onClick={() => {
+                            const fb = (document.getElementById(`modal-feedback-${selectedLoan.id}`) as HTMLInputElement).value;
+                            if(!fb) return toast.error('Please enter feedback');
+                            handleLoanStatus(selectedLoan.id, 'action_required', fb);
+                            setSelectedLoan({...selectedLoan, status: 'action_required', admin_feedback: fb});
+                          }}
+                          className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm transition-colors cursor-pointer shrink-0"
+                        >
+                          Send Revision Request
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+              </motion.div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
         </main>
       </div>
     </div>

@@ -40,15 +40,72 @@ export async function getAllLoanApplications(): Promise<LoanApplication[]> {
 }
 
 export async function updateLoanApplicationStatus(id: string, status: LoanApplication['status'], feedback?: string): Promise<boolean> {
-  const { error } = await supabase
-    .from('loan_applications')
-    .update({ status, admin_feedback: feedback, approved_at: status === 'approved' ? new Date().toISOString() : null })
-    .eq('id', id);
-  if (error) {
-    console.error('updateLoanApplicationStatus error:', error);
-    return false;
+  if (status === 'approved') {
+    // 1. Fetch loan details first to get chat_id and amount
+    const { data: loan, error: fetchError } = await supabase
+      .from('loan_applications')
+      .select('chat_id, amount, id, loan_category, account_number')
+      .eq('id', id)
+      .single();
+    
+    if (fetchError || !loan) {
+      console.error('Error fetching loan for disbursement:', fetchError);
+      return false;
+    }
+
+    // 2. Update status of loan
+    const { error: updateError } = await supabase
+      .from('loan_applications')
+      .update({ status, admin_feedback: feedback, approved_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (updateError) {
+      console.error('updateLoanApplicationStatus error:', updateError);
+      return false;
+    }
+
+    // 3. Check if a disbursement transaction already exists for this loan
+    const { data: existingTxn, error: checkError } = await supabase
+      .from('transactions')
+      .select('id')
+      .eq('loan_id', loan.id)
+      .eq('type', 'disbursement')
+      .maybeSingle();
+
+    if (!checkError && !existingTxn) {
+      // 4. Create completed disbursement transaction to credit the user's balance
+      const { error: txnError } = await supabase
+        .from('transactions')
+        .insert({
+          chat_id: loan.chat_id,
+          loan_id: loan.id,
+          type: 'disbursement',
+          deposit_type: null,
+          amount: loan.amount,
+          payment_method: 'bank',
+          sender_number: loan.account_number,
+          trx_id: `DISB-${loan.id.slice(0, 8).toUpperCase()}`,
+          screenshot_url: null,
+          status: 'completed'
+        });
+
+      if (txnError) {
+        console.error('Error creating disbursement transaction:', txnError);
+      }
+    }
+    return true;
+  } else {
+    // Standard update for non-approved statuses
+    const { error } = await supabase
+      .from('loan_applications')
+      .update({ status, admin_feedback: feedback, approved_at: null })
+      .eq('id', id);
+    if (error) {
+      console.error('updateLoanApplicationStatus error:', error);
+      return false;
+    }
+    return true;
   }
-  return true;
 }
 
 export async function getAllTransactions(): Promise<Transaction[]> {
