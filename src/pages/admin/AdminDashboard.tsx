@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock } from 'lucide-react';
+import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, MessageCircle, Copy } from 'lucide-react';
 import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
@@ -9,9 +9,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { sendTelegramNotification } from '../../lib/telegram';
 import { sendEmailNotification } from '../../lib/email';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
+import { supabase } from '../../lib/supabase';
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings' | 'chat'>('overview');
   const [settingsSubTab, setSettingsSubTab] = useState<'general' | 'payments' | 'announcements' | 'categories'>('general');
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loans, setLoans] = useState<LoanApplication[]>([]);
@@ -21,6 +22,12 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<LoanApplication | null>(null);
+
+  // Support Chat admin state
+  const [chatUsers, setChatUsers] = useState<any[]>([]);
+  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [adminReplyText, setAdminReplyText] = useState('');
   
   // New Story Form State
   const [newStory, setNewStory] = useState({
@@ -34,6 +41,12 @@ export default function AdminDashboard() {
   
   const { systemSettings, setSystemSettings, language, setLanguage } = useAppStore();
   const isBn = language === 'bn';
+  
+  const copyToClipboard = (text: string | null | undefined) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    toast.success(isBn ? 'ক্লিপবোর্ডে কপি করা হয়েছে!' : 'Copied to clipboard!');
+  };
   
   const [config, setConfig] = useState({
     processingFee: 1,
@@ -196,6 +209,96 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchAllChatData = async () => {
+    try {
+      const { data: allMsgs, error } = await supabase
+        .from('support_messages')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (!error && allMsgs) {
+        // Group messages by chat_id to get users list
+        const userGroups: Record<number, any> = {};
+        for (const msg of allMsgs) {
+          if (!userGroups[msg.chat_id]) {
+            const prof = profiles.find(p => p.chat_id === msg.chat_id);
+            userGroups[msg.chat_id] = {
+              chat_id: msg.chat_id,
+              name: prof ? `${prof.first_name} ${prof.last_name || ''}` : `User #${msg.chat_id}`,
+              avatar: prof?.photo_url || '',
+              messages: [],
+              latestMessageTime: msg.created_at
+            };
+          }
+          userGroups[msg.chat_id].messages.push(msg);
+          if (new Date(msg.created_at) > new Date(userGroups[msg.chat_id].latestMessageTime)) {
+            userGroups[msg.chat_id].latestMessageTime = msg.created_at;
+          }
+        }
+
+        // Sort user list by latest message time descending
+        const sortedUsers = Object.values(userGroups).sort((a: any, b: any) => 
+          new Date(b.latestMessageTime).getTime() - new Date(a.latestMessageTime).getTime()
+        );
+
+        setChatUsers(sortedUsers);
+
+        // If there's a selected user, update their messages
+        if (selectedChatId) {
+          const selectedGroup = userGroups[selectedChatId];
+          if (selectedGroup) {
+            setChatMessages(selectedGroup.messages);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching admin support chat:', err);
+    }
+  };
+
+  const handleSendAdminReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedChatId || !adminReplyText.trim()) return;
+
+    const replyMsg = adminReplyText;
+    setAdminReplyText('');
+
+    try {
+      const { error } = await supabase.from('support_messages').insert({
+        chat_id: selectedChatId,
+        sender: 'admin',
+        message: replyMsg
+      });
+
+      if (!error) {
+        setChatMessages(prev => [
+          ...prev,
+          {
+            id: Math.random().toString(),
+            chat_id: selectedChatId,
+            sender: 'admin',
+            message: replyMsg,
+            created_at: new Date().toISOString()
+          }
+        ]);
+      } else {
+        console.error('Error sending admin reply:', error);
+      }
+    } catch (err) {
+      console.error('Error sending admin reply:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'chat') {
+      fetchAllChatData();
+      const interval = setInterval(() => {
+        fetchAllChatData();
+      }, 4000);
+      return () => clearInterval(interval);
+    }
+  }, [activeTab, selectedChatId, profiles]);
+
   const handleSaveSettings = async () => {
     const loadingId = toast.loading('Saving settings...');
     const newSettings = {
@@ -299,7 +402,8 @@ export default function AdminDashboard() {
     const success = await updateTransactionStatus(id, status);
     if (success) {
       toast.success(`Transaction marked as ${status}`);
-      setTransactions(transactions.map(t => t.id === id ? { ...t, status } : t));
+      const updatedTxns = transactions.map(t => t.id === id ? { ...t, status } : t);
+      setTransactions(updatedTxns);
 
       // Trigger Telegram Notification
       const txn = transactions.find(t => t.id === id);
@@ -312,6 +416,23 @@ export default function AdminDashboard() {
           const depType = txn.deposit_type === 'processing_fee' ? 'প্রসেসিং ফি' : 'সিকিউরিটি ডিপোজিট';
           if (status === 'completed') {
             msg = `✅ <b>ডিপোজিট সফল!</b>\n\nআপনার <b>${depType}</b> ডিপোজিট সফলভাবে সম্পন্ন হয়েছে।\n\n💰 পরিমাণ: <b>${formattedAmount}</b>\n💳 মাধ্যম: <b>${method}</b>\n🆔 TrxID: <code>${txn.trx_id}</code>\n\nআপনার অ্যাকাউন্টে ব্যালেন্স যোগ করা হয়েছে। ধন্যবাদ!`;
+            
+            if (txn.loan_id) {
+              const loanTxns = updatedTxns.filter(t => t.loan_id === txn.loan_id && t.type === 'deposit');
+              const hasCompletedProcessingFee = loanTxns.some(t => t.deposit_type === 'processing_fee' && t.status === 'completed');
+              const hasCompletedSecurityDeposit = loanTxns.some(t => t.deposit_type === 'security_deposit' && t.status === 'completed');
+              
+              if (hasCompletedProcessingFee && hasCompletedSecurityDeposit) {
+                const loan = loans.find(l => l.id === txn.loan_id);
+                if (loan && (loan.status === 'pending' || loan.status === 'action_required')) {
+                  toast.info(isBn 
+                    ? 'প্রসেসিং ফি এবং সিকিউরিটি ডিপোজিট সফলভাবে ভেরিফাই করা হয়েছে। লোন আবেদনটি স্বয়ংক্রিয়ভাবে "রিভিউ" স্ট্যাটাসে স্থানান্তরিত হচ্ছে।' 
+                    : 'Processing fee and security deposit verified. Auto-transitioning loan to Under Review.'
+                  );
+                  handleLoanStatus(txn.loan_id, 'under_review');
+                }
+              }
+            }
           } else if (status === 'failed') {
             msg = `❌ <b>ডিপোজিট ব্যর্থ!</b>\n\nআপনার <b>${depType}</b> ডিপোজিট অনুরোধটি বাতিল বা ব্যর্থ হয়েছে।\n\n💰 পরিমাণ: <b>${formattedAmount}</b>\n🆔 TrxID: <code>${txn.trx_id || 'N/A'}</code>\n\nসঠিক তথ্য সহ পুনরায় চেষ্টা করার জন্য অনুরোধ করা হলো। কোনো সমস্যা হলে আমাদের সাপোর্টে যোগাযোগ করুন।`;
           }
@@ -419,6 +540,7 @@ export default function AdminDashboard() {
     { id: 'deposits', label: isBn ? 'ডিপোজিট সমূহ' : 'Deposits', icon: Download },
     { id: 'withdrawals', label: isBn ? 'উত্তোলন সমূহ' : 'Withdrawals', icon: Upload },
     { id: 'users', label: isBn ? 'ইউজার নিয়ন্ত্রণ' : 'Manage Users', icon: Users },
+    { id: 'chat', label: isBn ? 'লাইভ চ্যাট' : 'Support Chat', icon: MessageCircle },
     { id: 'stories', label: isBn ? 'সফলতার গল্প' : 'Success Stories', icon: Star },
     { id: 'settings', label: isBn ? 'সিস্টেম সেটিংস' : 'System Settings', icon: Settings },
   ] as const;
@@ -684,7 +806,26 @@ export default function AdminDashboard() {
                         {filteredLoans.map(loan => (
                           <tr key={loan.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                             <td className="px-6 py-4">
-                              <div className="font-bold text-gray-900 dark:text-white text-base">{loan.full_name}</div>
+                              <div className="flex items-center gap-1.5">
+                                <div className="font-bold text-gray-900 dark:text-white text-base">{loan.full_name}</div>
+                                {(() => {
+                                  const userProfile = profiles.find(p => p.chat_id === loan.chat_id);
+                                  const username = userProfile?.username;
+                                  return (
+                                    <a 
+                                      href={username ? `https://t.me/${username}` : `tg://user?id=${loan.chat_id}`} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer" 
+                                      className="text-blue-500 hover:text-blue-600 transition-colors inline-flex items-center p-1 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded"
+                                      title={isBn ? "টেলিগ্রামে যোগাযোগ করুন" : "Chat on Telegram"}
+                                    >
+                                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.327-2.95-.924c-.642-.2-1.042-.642-.042-1.032l11.536-4.444c.536-.2 1.002.12.871.745z"/>
+                                      </svg>
+                                    </a>
+                                  );
+                                })()}
+                              </div>
                               <div className="text-xs text-gray-500 font-mono mt-0.5">#{loan.id.split('-')[0]}</div>
                             </td>
                             <td className="px-6 py-4">
@@ -878,11 +1019,42 @@ export default function AdminDashboard() {
                           <motion.tr layout key={user.chat_id} className={`hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors ${user.is_banned ? 'bg-red-50/30 dark:bg-red-900/10' : ''}`}>
                             <td className="px-6 py-4 flex items-center gap-4">
                               <img src={user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name}`} alt="" className="w-10 h-10 rounded-full shadow-sm" />
-                              <span className="font-bold text-gray-900 dark:text-white text-base">{user.first_name} {user.last_name}</span>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-bold text-gray-900 dark:text-white text-base">{user.first_name} {user.last_name}</span>
+                                <a 
+                                  href={user.username ? `https://t.me/${user.username}` : `tg://user?id=${user.chat_id}`} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer" 
+                                  className="text-blue-500 hover:text-blue-600 transition-colors inline-flex items-center p-1 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded"
+                                  title={isBn ? "টেলিগ্রামে যোগাযোগ করুন" : "Chat on Telegram"}
+                                >
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.327-2.95-.924c-.642-.2-1.042-.642-.042-1.032l11.536-4.444c.536-.2 1.002.12.871.745z"/>
+                                  </svg>
+                                </a>
+                              </div>
                             </td>
                             <td className="px-6 py-4 font-mono text-gray-600 dark:text-gray-400 text-xs">{user.chat_id}</td>
-                            <td className="px-6 py-4 font-bold text-primary-600 dark:text-primary-400">@{user.username || '-'}</td>
-                            <td className="px-6 py-4 text-gray-500 dark:text-gray-400 font-medium">{new Date(user.created_at).toLocaleDateString()}</td>
+                            <td className="px-6 py-4 font-bold text-primary-600 dark:text-primary-400">
+                              <div className="flex items-center gap-1">
+                                <span>@{user.username || '-'}</span>
+                                {user.username && (
+                                  <button 
+                                    onClick={() => copyToClipboard(user.username)}
+                                    className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                    title={isBn ? "কপি করুন" : "Copy Username"}
+                                  >
+                                    <Copy size={13} />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-gray-500 dark:text-gray-400 font-medium">
+                              <div>{new Date(user.created_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-US')}</div>
+                              <div className="text-[10px] text-gray-400 dark:text-gray-500">
+                                {new Date(user.created_at).toLocaleTimeString(isBn ? 'bn-BD' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </td>
                             <td className="px-6 py-4">
                               {user.is_banned ? (
                                 <span className="px-3 py-1 bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 rounded-full text-xs font-bold uppercase tracking-wider border border-rose-200 dark:border-rose-800/30">Suspended</span>
@@ -1456,6 +1628,144 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               )}
+
+              {activeTab === 'chat' && (
+                <div className="bg-white dark:bg-gray-800 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden h-[calc(100vh-220px)] flex flex-col md:flex-row">
+                  {/* Left Column: Users List */}
+                  <div className="w-full md:w-80 border-r border-gray-100 dark:border-gray-700 flex flex-col shrink-0">
+                    <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+                      <h3 className="font-bold text-gray-900 dark:text-white text-base">{isBn ? 'গ্রাহক তালিকা' : 'Active Support Chats'}</h3>
+                      <p className="text-xs text-gray-500 mt-1">{isBn ? 'সাপোর্ট চ্যাট এবং সাহায্য বার্তা সমূহ' : 'Select a user to review support logs.'}</p>
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-700/50 custom-scrollbar">
+                      {chatUsers.length === 0 ? (
+                        <div className="p-6 text-center text-gray-400 text-xs font-bold">
+                          {isBn ? 'কোনো একটিভ চ্যাট পাওয়া যায়নি' : 'No active chats found'}
+                        </div>
+                      ) : (
+                        chatUsers.map((chatUser) => {
+                          const isSelected = selectedChatId === chatUser.chat_id;
+                          const latestMsg = chatUser.messages[chatUser.messages.length - 1];
+                          
+                          return (
+                            <button
+                              key={chatUser.chat_id}
+                              onClick={() => {
+                                setSelectedChatId(chatUser.chat_id);
+                                setChatMessages(chatUser.messages);
+                              }}
+                              className={`w-full text-left p-4 transition-all flex items-center gap-3 ${
+                                isSelected
+                                  ? 'bg-primary-50/50 dark:bg-primary-950/20 border-l-4 border-primary-600'
+                                  : 'hover:bg-gray-50 dark:hover:bg-gray-700/30'
+                              }`}
+                            >
+                              <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-600 flex items-center justify-center font-black relative shrink-0">
+                                {chatUser.avatar ? (
+                                  <img src={chatUser.avatar} alt={chatUser.name} className="w-full h-full rounded-full object-cover" />
+                                ) : (
+                                  chatUser.name.charAt(0)
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{chatUser.name}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5 font-medium">
+                                  {latestMsg ? latestMsg.message : ''}
+                                </p>
+                              </div>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right Column: Active Chat Thread */}
+                  <div className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 h-full overflow-hidden">
+                    {selectedChatId ? (
+                      (() => {
+                        const selectedUser = chatUsers.find(u => u.chat_id === selectedChatId);
+                        return (
+                          <>
+                            {/* Chat Header */}
+                            <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3 shrink-0">
+                              <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-600 flex items-center justify-center font-bold">
+                                {selectedUser?.avatar ? (
+                                  <img src={selectedUser.avatar} alt={selectedUser.name} className="w-full h-full rounded-full object-cover" />
+                                ) : (
+                                  selectedUser?.name.charAt(0) || 'U'
+                                )}
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-sm text-gray-900 dark:text-white leading-tight">{selectedUser?.name}</h4>
+                                <p className="text-[10px] text-gray-400 font-mono mt-0.5">Telegram ID: {selectedChatId}</p>
+                              </div>
+                            </div>
+
+                            {/* Messages Scrollbox */}
+                            <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar flex flex-col">
+                              {chatMessages.map((msg) => {
+                                const isUser = msg.sender === 'user';
+                                return (
+                                  <div 
+                                    key={msg.id}
+                                    className={`flex ${isUser ? 'justify-start' : 'justify-end'}`}
+                                  >
+                                    <div className={`max-w-[70%] rounded-[18px] px-4 py-2.5 shadow-sm text-xs font-semibold leading-relaxed ${
+                                      isUser 
+                                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-tl-none border border-gray-100 dark:border-gray-850'
+                                        : 'bg-primary-600 text-white rounded-tr-none'
+                                    }`}>
+                                      <p className="break-words whitespace-pre-wrap">{msg.message}</p>
+                                      <span className={`text-[8px] block text-right mt-1.5 opacity-60 font-mono ${
+                                        isUser ? 'text-gray-400 dark:text-gray-500' : 'text-primary-100'
+                                      }`}>
+                                        {new Date(msg.created_at).toLocaleTimeString(isBn ? 'bn-BD' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {/* Reply Input Form */}
+                            <form 
+                              onSubmit={handleSendAdminReply}
+                              className="bg-white dark:bg-gray-800 p-3 border-t border-gray-100 dark:border-gray-700 flex gap-2 items-center shrink-0"
+                            >
+                              <input
+                                type="text"
+                                value={adminReplyText}
+                                onChange={(e) => setAdminReplyText(e.target.value)}
+                                placeholder={isBn ? 'গ্রাহককে উত্তর লিখুন...' : 'Type a reply...'}
+                                className="flex-1 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-xs font-medium outline-none focus:border-primary-500 text-gray-900 dark:text-white"
+                              />
+                              <button
+                                type="submit"
+                                disabled={!adminReplyText.trim()}
+                                className="bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 px-4 py-2.5 rounded-xl font-bold text-xs shadow active:scale-95 transition-all"
+                              >
+                                {isBn ? 'পাঠান' : 'Reply'}
+                              </button>
+                            </form>
+                          </>
+                        );
+                      })()
+                    ) : (
+                      <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-gray-400">
+                        <MessageCircle size={36} className="text-gray-300 dark:text-gray-700 mb-2" />
+                        <h4 className="font-bold text-sm text-gray-500 dark:text-gray-400">
+                          {isBn ? 'চ্যাট থ্রেড নির্বাচন করুন' : 'No Chat Selected'}
+                        </h4>
+                        <p className="text-xs text-gray-400 max-w-[200px] mt-1">
+                          {isBn ? 'গ্রাহকের চ্যাট ইতিহাস দেখতে বাম দিকের তালিকা থেকে নির্বাচন করুন।' : 'Select a customer chat history on the left to begin.'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </motion.div>
           </AnimatePresence>
       {/* Stunning Loan Details Modal */}
@@ -1486,7 +1796,26 @@ export default function AdminDashboard() {
                     <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-2.5 py-1 rounded-full text-white/90">
                       {selectedLoan.loan_category} Loan Review
                     </span>
-                    <h3 className="text-xl sm:text-2xl font-black mt-2 leading-none">{selectedLoan.full_name}</h3>
+                    <div className="flex items-center gap-2 mt-2">
+                      <h3 className="text-xl sm:text-2xl font-black leading-none">{selectedLoan.full_name}</h3>
+                      {(() => {
+                        const userProfile = profiles.find(p => p.chat_id === selectedLoan.chat_id);
+                        const username = userProfile?.username;
+                        return (
+                          <a 
+                            href={username ? `https://t.me/${username}` : `tg://user?id=${selectedLoan.chat_id}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-white hover:text-blue-200 transition-colors inline-flex items-center p-1 bg-white/10 hover:bg-white/20 rounded"
+                            title={isBn ? "টেলিগ্রামে যোগাযোগ করুন" : "Chat on Telegram"}
+                          >
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.327-2.95-.924c-.642-.2-1.042-.642-.042-1.032l11.536-4.444c.536-.2 1.002.12.871.745z"/>
+                            </svg>
+                          </a>
+                        );
+                      })()}
+                    </div>
                     <p className="text-xs text-blue-100/70 font-mono mt-1.5">Application ID: #{selectedLoan.id}</p>
                   </div>
                   <button 
@@ -1566,11 +1895,33 @@ export default function AdminDashboard() {
                           </div>
                           <div>
                             <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'হোয়াটসঅ্যাপ' : 'WhatsApp'}</span>
-                            <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.whatsapp || 'N/A'}</span>
+                            <div className="flex items-center gap-1">
+                              <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.whatsapp || 'N/A'}</span>
+                              {selectedLoan.whatsapp && (
+                                <button 
+                                  onClick={() => copyToClipboard(selectedLoan.whatsapp)}
+                                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                  title={isBn ? "কপি করুন" : "Copy WhatsApp"}
+                                >
+                                  <Copy size={13} />
+                                </button>
+                              )}
+                            </div>
                           </div>
                           <div className="col-span-2">
                             <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'ইমেইল' : 'Email Address'}</span>
-                            <span className="font-bold text-gray-800 dark:text-gray-200 font-mono">{selectedLoan.email || 'N/A'}</span>
+                            <div className="flex items-center gap-1">
+                              <span className="font-bold text-gray-800 dark:text-gray-200 font-mono">{selectedLoan.email || 'N/A'}</span>
+                              {selectedLoan.email && (
+                                <button 
+                                  onClick={() => copyToClipboard(selectedLoan.email)}
+                                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                  title={isBn ? "কপি করুন" : "Copy Email"}
+                                >
+                                  <Copy size={13} />
+                                </button>
+                              )}
+                            </div>
                           </div>
                           <div className="col-span-2">
                             <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'বর্তমান ঠিকানা' : 'Current Address'}</span>

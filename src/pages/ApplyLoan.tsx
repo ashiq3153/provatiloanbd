@@ -17,7 +17,12 @@ import {
   CheckSquare,
   User,
   Clock,
-  Award
+  Award,
+  Users,
+  Landmark,
+  X,
+  Lock,
+  ShieldAlert
 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from 'sonner';
@@ -49,7 +54,7 @@ export default function ApplyLoan() {
 
 
   const [step, setStep] = useState(1);
-  const totalSteps = 8;
+  const totalSteps = 5;
 
   // Form State
   const [category, setCategory] = useState<ReturnType<typeof getCategories>[0] | null>(null);
@@ -61,6 +66,42 @@ export default function ApplyLoan() {
   const [editId, setEditId] = useState<string | null>(null);
   const [documents, setDocuments] = useState<Record<string, string>>({});
   const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
+
+  // Smart Review System States
+  const [verificationStage, setVerificationStage] = useState<'idle' | 'confirm' | 'verifying' | 'success' | 'failed'>('idle');
+  const [activeCheck, setActiveCheck] = useState(0);
+  const [progressPercent, setProgressPercent] = useState(0);
+  const [verifyingError, setVerifyingError] = useState<string | null>(null);
+
+  // Warnings Checklist Checklist States
+  const [checkAntiFraud, setCheckAntiFraud] = useState(false);
+  const [checkNoRefund, setCheckNoRefund] = useState(false);
+  const [checkSavingsRule, setCheckSavingsRule] = useState(false);
+  const [checkEmiObligation, setCheckEmiObligation] = useState(false);
+
+  // Accordion state for Step 3 combined info form
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({
+    personal: true,
+    professional: false,
+    bank: false,
+    nominee: false
+  });
+
+  // Ban check on mount
+  useEffect(() => {
+    if (user && user.id) {
+      supabase.from('profiles').select('is_banned').eq('chat_id', user.id).single().then(({ data }) => {
+        if (data?.is_banned) {
+          toast.error(isBn ? 'আপনার অ্যাকাউন্ট স্থগিত করা হয়েছে। আপনি লোন আবেদন করতে পারবেন না।' : 'Your account is suspended. You cannot apply for loans.');
+          navigate('/');
+        }
+      });
+    }
+  }, [user, isBn, navigate]);
+
+  const toggleSection = (section: string) => {
+    setExpanded(prev => ({ ...prev, [section]: !prev[section] }));
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -105,7 +146,6 @@ export default function ApplyLoan() {
         }
       });
     } else if (selectedCategory) {
-      // URL param category (from quick links)
       const matched = categories.find((cat) => cat.id === selectedCategory);
       if (matched) {
         setCategory(matched);
@@ -118,7 +158,7 @@ export default function ApplyLoan() {
         try {
           const draft = JSON.parse(draftStr);
           // Only restore if user was past step 1 (mid-application)
-          if (draft.step && draft.step > 1) {
+          if (draft.step && draft.step > 1 && draft.step < 5) {
             setStep(draft.step);
             if (draft.categoryId) {
               const matched = categories.find(cat => cat.id === draft.categoryId);
@@ -130,7 +170,6 @@ export default function ApplyLoan() {
               methods.reset(draft.formData);
             }
           } else {
-            // Draft was at step 1 — clear it, start fresh
             localStorage.removeItem('loan_draft_v1');
           }
         } catch(e) {
@@ -142,7 +181,7 @@ export default function ApplyLoan() {
 
   // Save draft without causing re-renders (subscription-based)
   useEffect(() => {
-    if (editId || step >= 8) return;
+    if (editId || step >= 5) return;
     const subscription = methods.watch((formData) => {
       const draft = {
         step,
@@ -175,44 +214,60 @@ export default function ApplyLoan() {
     return Math.round(emi);
   };
 
-
-const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
-  return errors[field] ? <p className="text-red-500 text-xs mt-1 font-medium transition-opacity animate-in fade-in">{errors[field]?.message}</p> : null;
-};
+  const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
+    return errors[field] ? <p className="text-red-500 text-xs mt-1 font-medium transition-opacity animate-in fade-in">{errors[field]?.message}</p> : null;
+  };
 
   const nextStep = async () => {
     if (step < totalSteps) {
       if (step === 1 && !category) return;
       if (step === 2 && (!amount || !tenure)) return;
+      
       if (step === 3) {
-        const isValid = await trigger(['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'mobile', 'whatsapp', 'email', 'currentAddress', 'permanentAddress', 'nidNumber']);
-        if (!isValid) return;
-      }
-      if (step === 4) {
-        let fields: any = [];
-        if (category?.id === 'personal') fields = ['companyName', 'designation', 'workDuration', 'monthlyIncome'];
-        else if (category?.id === 'business' || category?.id === 'women') fields = ['businessName', 'shopAddress', 'tradeLicense', 'monthlyIncome'];
-        else if (category?.id === 'expat') fields = ['workingCountry', 'visaType', 'passportNumber', 'monthlyIncome'];
-        else if (category?.id === 'student') fields = ['institutionName', 'studentId', 'guardianIncome'];
-        else if (category?.id === 'emergency') fields = ['professionName', 'emergencyReason', 'monthlyIncome'];
+        const personalFields: (keyof LoanFormData)[] = ['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'mobile', 'whatsapp', 'email', 'currentAddress', 'permanentAddress', 'nidNumber'];
         
-        const isValid = await trigger(fields);
-        if (!isValid) return;
-      }
-      if (step === 5) {
-        const isValid = await trigger(['bankName', 'accountName', 'accountNumber', 'routingNumber', 'mobileBanking', 'nomineeName', 'nomineeRelation', 'nomineeMobile', 'nomineeNid']);
-        if (!isValid) return;
-      }
-
-      if (step === 6) {
-        if (!documents.nid_front || !documents.nid_back) {
-          toast.error(isBn ? 'অনুগ্রহ করে NID এর উভয় পিঠ আপলোড করুন' : 'Please upload both sides of NID');
+        let profFields: (keyof LoanFormData)[] = [];
+        if (category?.id === 'personal') profFields = ['companyName', 'designation', 'workDuration', 'monthlyIncome'];
+        else if (category?.id === 'business' || category?.id === 'women') profFields = ['businessName', 'shopAddress', 'tradeLicense', 'monthlyIncome'];
+        else if (category?.id === 'expat') profFields = ['workingCountry', 'visaType', 'passportNumber', 'monthlyIncome'];
+        else if (category?.id === 'student') profFields = ['institutionName', 'studentId', 'guardianIncome'];
+        else if (category?.id === 'emergency') profFields = ['professionName', 'emergencyReason', 'monthlyIncome'];
+        
+        const bankFields: (keyof LoanFormData)[] = ['bankName', 'accountName', 'accountNumber', 'routingNumber', 'mobileBanking'];
+        const nomineeFields: (keyof LoanFormData)[] = ['nomineeName', 'nomineeRelation', 'nomineeMobile', 'nomineeNid'];
+        
+        const allFields = [...personalFields, ...profFields, ...bankFields, ...nomineeFields];
+        const isValid = await trigger(allFields);
+        
+        if (!isValid) {
+          // Auto-expand sections that have validation errors
+          const newExpanded = { ...expanded };
+          const hasPersonalError = personalFields.some(f => errors[f]);
+          const hasProfError = profFields.some(f => errors[f]);
+          const hasBankError = bankFields.some(f => errors[f]);
+          const hasNomineeError = nomineeFields.some(f => errors[f]);
+          
+          if (hasPersonalError) newExpanded.personal = true;
+          if (hasProfError) newExpanded.professional = true;
+          if (hasBankError) newExpanded.bank = true;
+          if (hasNomineeError) newExpanded.nominee = true;
+          
+          setExpanded(newExpanded);
+          toast.error(isBn ? 'অনুগ্রহ করে লাল চিহ্নিত ত্রুটিযুক্ত তথ্যগুলো সঠিকভাবে পূরণ করুন।' : 'Please correct the errors marked in red.');
           return;
         }
       }
 
-      if (step === 7 && acceptedTerms) {
-        setShowConfirmModal(true);
+      if (step === 4) {
+        if (!documents.nid_front || !documents.nid_back) {
+          toast.error(isBn ? 'অনুগ্রহ করে NID এর উভয় পিঠ আপলোড করুন' : 'Please upload both sides of NID');
+          return;
+        }
+        if (!acceptedTerms) {
+          toast.error(isBn ? 'অনুগ্রহ করে শর্তাবলীতে সম্মত হন' : 'Please agree to the terms and conditions');
+          return;
+        }
+        setVerificationStage('confirm');
         return;
       }
 
@@ -272,10 +327,12 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
         professionalInfo.businessName = formData.businessName || '';
         professionalInfo.shopAddress = formData.shopAddress || '';
         professionalInfo.tradeLicense = formData.tradeLicense || '';
+        professionalInfo.monthlyIncome = formData.monthlyIncome || '';
       } else if (category?.id === 'expat') {
         professionalInfo.workingCountry = formData.workingCountry || '';
         professionalInfo.visaType = formData.visaType || '';
         professionalInfo.passportNumber = formData.passportNumber || '';
+        professionalInfo.monthlyIncome = formData.monthlyIncome || '';
       } else if (category?.id === 'student') {
         professionalInfo.institutionName = formData.institutionName || '';
         professionalInfo.studentId = formData.studentId || '';
@@ -283,6 +340,7 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
       } else if (category?.id === 'emergency') {
         professionalInfo.professionName = formData.professionName || '';
         professionalInfo.emergencyReason = formData.emergencyReason || '';
+        professionalInfo.monthlyIncome = formData.monthlyIncome || '';
       }
 
       const payload = {
@@ -328,7 +386,7 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
       if (result) {
         toast.success(isBn ? 'আপনার আবেদন সফলভাবে জমা হয়েছে!' : 'Application successfully submitted!', { id: loadingId });
         localStorage.removeItem('loan_draft_v1');
-        setStep(8);
+        setStep(5);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         toast.error(isBn ? 'সমস্যা হয়েছে, আবার চেষ্টা করুন' : 'Failed, please try again', { id: loadingId });
@@ -354,6 +412,160 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
           localStorage.setItem('loan_draft_v1', JSON.stringify(draft));
         } catch (e) {}
       }
+    }
+  };
+
+  const processSmartVerification = async () => {
+    setVerificationStage('verifying');
+    setVerifyingError(null);
+    setActiveCheck(0);
+    setProgressPercent(0);
+
+    const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+    try {
+      // 1. Profile Completeness (0% -> 25%)
+      setProgressPercent(10);
+      await sleep(500);
+      setProgressPercent(25);
+      setActiveCheck(1);
+      await sleep(400);
+
+      // 2. Anti-Fraud & Duplicate check (25% -> 50%)
+      setProgressPercent(35);
+      await sleep(500);
+      const formData = methods.getValues();
+      const duplicateMatch = await checkDuplicateApplication(
+        formData.mobile,
+        formData.email || null,
+        formData.accountNumber,
+        formData.nomineeNid,
+        formData.nidNumber,
+        formData.passportNumber || null,
+        editId
+      );
+      if (duplicateMatch) {
+        setVerifyingError(
+          isBn 
+            ? `এই ${duplicateMatch} ইতিমধ্যে ব্যবহার করা হয়েছে! Fake Apply Detected.` 
+            : `This ${duplicateMatch} is already used! Fake Apply Detected.`
+        );
+        setVerificationStage('failed');
+        return;
+      }
+      setProgressPercent(50);
+      setActiveCheck(2);
+      await sleep(400);
+
+      // 3. Account integrity check (50% -> 75%)
+      setProgressPercent(60);
+      await sleep(500);
+      const { data: profile } = await supabase.from('profiles').select('is_banned').eq('chat_id', user.id).single();
+      if (profile?.is_banned) {
+        setVerifyingError(
+          isBn 
+            ? 'আপনার অ্যাকাউন্ট স্থগিত করা হয়েছে। আপনি আবেদন করতে পারবেন না।' 
+            : 'Your account is suspended. Submission rejected.'
+        );
+        setVerificationStage('failed');
+        return;
+      }
+      setProgressPercent(75);
+      setActiveCheck(3);
+      await sleep(400);
+
+      // 4. Submission & Database entry (75% -> 100%)
+      setProgressPercent(85);
+      await sleep(500);
+
+      const professionalInfo: Record<string, string> = {};
+      if (category?.id === 'personal') {
+        professionalInfo.companyName = formData.companyName || '';
+        professionalInfo.designation = formData.designation || '';
+        professionalInfo.workDuration = formData.workDuration || '';
+        professionalInfo.monthlyIncome = formData.monthlyIncome || '';
+      } else if (category?.id === 'business' || category?.id === 'women') {
+        professionalInfo.businessName = formData.businessName || '';
+        professionalInfo.shopAddress = formData.shopAddress || '';
+        professionalInfo.tradeLicense = formData.tradeLicense || '';
+        professionalInfo.monthlyIncome = formData.monthlyIncome || '';
+      } else if (category?.id === 'expat') {
+        professionalInfo.workingCountry = formData.workingCountry || '';
+        professionalInfo.visaType = formData.visaType || '';
+        professionalInfo.passportNumber = formData.passportNumber || '';
+        professionalInfo.monthlyIncome = formData.monthlyIncome || '';
+      } else if (category?.id === 'student') {
+        professionalInfo.institutionName = formData.institutionName || '';
+        professionalInfo.studentId = formData.studentId || '';
+        professionalInfo.guardianIncome = formData.guardianIncome || '';
+      } else if (category?.id === 'emergency') {
+        professionalInfo.professionName = formData.professionName || '';
+        professionalInfo.emergencyReason = formData.emergencyReason || '';
+        professionalInfo.monthlyIncome = formData.monthlyIncome || '';
+      }
+
+      const payload = {
+        chat_id: user.id,
+        loan_category: category?.id || 'personal',
+        amount,
+        tenure_months: tenure,
+        interest_rate: category?.minRate || 0,
+        emi_amount: calculateEMI(),
+        processing_fee: amount * (systemSettings?.procFee || 0.01),
+        security_deposit: amount * (systemSettings?.secDeposit || 0.1),
+        full_name: formData.fullName,
+        father_name: formData.fatherName,
+        mother_name: formData.motherName,
+        dob: formData.dob,
+        gender: formData.gender,
+        mobile: formData.mobile,
+        whatsapp: formData.whatsapp || null,
+        email: formData.email || null,
+        current_address: formData.currentAddress,
+        permanent_address: formData.permanentAddress,
+        nid_number: formData.nidNumber,
+        professional_info: professionalInfo,
+        bank_name: formData.bankName,
+        account_name: formData.accountName,
+        account_number: formData.accountNumber,
+        routing_number: formData.routingNumber || null,
+        mobile_banking: formData.mobileBanking || null,
+        nominee_name: formData.nomineeName,
+        nominee_relation: formData.nomineeRelation,
+        nominee_mobile: formData.nomineeMobile,
+        nominee_nid: formData.nomineeNid,
+        documents: documents,
+      };
+
+      let result;
+      if (editId) {
+        result = await updateLoanApplication(editId, payload);
+      } else {
+        result = await submitLoanApplication(payload);
+      }
+
+      if (result) {
+        setProgressPercent(100);
+        setActiveCheck(4);
+        setVerificationStage('success');
+        await sleep(650);
+
+        localStorage.removeItem('loan_draft_v1');
+        setVerificationStage('idle');
+        setStep(5);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        setVerifyingError(
+          isBn 
+            ? 'আবেদন সংরক্ষণ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।' 
+            : 'Failed to submit loan records. Please try again.'
+        );
+        setVerificationStage('failed');
+      }
+    } catch (err) {
+      console.error('Smart verification error:', err);
+      setVerifyingError(isBn ? 'সার্ভার প্রক্রিয়াকরণে সমস্যা হয়েছে।' : 'Internal server error during verification.');
+      setVerificationStage('failed');
     }
   };
 
@@ -530,269 +742,398 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
     );
   };
 
-  const Step3PersonalInfo = () => (
-    <div className="space-y-5 pb-6">
-      <div className="mb-4">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors">{isBn ? "ব্যক্তিগত তথ্য" : "Personal Info"}</h2>
-        <p className="text-sm text-gray-500">{isBn ? "আপনার সঠিক এবং সম্পূর্ণ তথ্য প্রদান করুন" : "Provide correct and complete information"}</p>
-      </div>
+  const getSectionErrorCount = (fields: (keyof LoanFormData)[]) => {
+    return fields.filter(f => errors[f]).length;
+  };
 
-      <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors p-5 shadow-sm space-y-4">
-        <h3 className="font-bold text-gray-800 text-sm border-b border-gray-100 dark:border-gray-700 transition-colors pb-2 mb-3">{isBn ? "প্রাথমিক তথ্য" : "Primary Info"}</h3>
-        <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "পূর্ণ নাম (NID অনুযায়ী)" : "Full Name (as per NID)"}</label>
-          <input type="text" {...register("fullName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.fullName ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500 focus:border-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder={isBn ? "যেমন: মোঃ রহিম উদ্দিন" : "e.g. Md. Rahim Uddin"} /><ErrorText field="fullName" />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "পিতার নাম" : "Father's Name"}</label>
-            <input type="text" {...register("fatherName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.fatherName ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder={isBn ? "পিতার নাম" : "Father's Name"} /><ErrorText field="fatherName" />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "মাতার নাম" : "Mother's Name"}</label>
-            <input type="text" {...register("motherName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.motherName ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder={isBn ? "মাতার নাম" : "Mother's Name"} /><ErrorText field="motherName" />
-          </div>
-        </div>
-        <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "আপনার NID নম্বর" : "Your NID Number"}</label>
-          <input type="text" {...register("nidNumber")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nidNumber ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder={isBn ? "এনআইডি নম্বর লিখুন" : "Enter NID Number"} /><ErrorText field="nidNumber" />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "জন্ম তারিখ" : "Date of Birth"}</label>
-            <input type="date" {...register("dob")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.dob ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} /><ErrorText field="dob" />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "লিঙ্গ" : "Gender"}</label>
-            <select {...register("gender")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.gender ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`}>
-              <option>{isBn ? "পুরুষ" : "Male"}</option>
-              <option>{isBn ? "নারী" : "Female"}</option>
-              <option>{isBn ? "অন্যান্য" : "Other"}</option>
-            </select><ErrorText field="gender" />
-          </div>
-        </div>
-      </div>
+  const AccordionSection = ({
+    sectionKey,
+    title,
+    icon,
+    fields,
+    children
+  }: {
+    sectionKey: string;
+    title: string;
+    icon: React.ReactNode;
+    fields: (keyof LoanFormData)[];
+    children: React.ReactNode;
+  }) => {
+    const isExpanded = expanded[sectionKey];
+    const errorCount = getSectionErrorCount(fields);
+    const hasError = errorCount > 0;
+    const isComplete = !hasError && fields.some(f => methods.getValues(f));
 
-      <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors p-5 shadow-sm space-y-4">
-        <h3 className="font-bold text-gray-800 text-sm border-b border-gray-100 dark:border-gray-700 transition-colors pb-2 mb-3">{isBn ? "যোগাযোগের তথ্য" : "Contact Info"}</h3>
-        <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "মোবাইল নাম্বার" : "Mobile Number"}</label>
-              <input type="tel" {...register("mobile")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.mobile ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all resize-none`} placeholder="01XXXXXXXXX" /><ErrorText field="mobile" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "হোয়াটসঅ্যাপ (যদি থাকে)" : "WhatsApp (If any)"}</label>
-              <input type="tel" {...register("whatsapp")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.whatsapp ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all resize-none`} placeholder="01XXXXXXXXX" /><ErrorText field="whatsapp" />
-            </div>
-        </div>
-        <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "ইমেইল" : "Email"}</label>
-          <input type="email" {...register("email")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.email ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all resize-none`} placeholder="example@email.com" /><ErrorText field="email" />
-        </div>
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors p-5 shadow-sm space-y-4">
-        <h3 className="font-bold text-gray-800 text-sm border-b border-gray-100 dark:border-gray-700 transition-colors pb-2 mb-3">{isBn ? "ঠিকানা" : "Address"}</h3>
-        <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "বর্তমান ঠিকানা" : "Current Address"}</label>
-          <textarea rows={2} {...register("currentAddress")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.currentAddress ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all resize-none`} placeholder={isBn ? "বাসা, রাস্তা, এলাকা..." : "House, Road, Area..."} /><ErrorText field="currentAddress" />
-        </div>
-        <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "স্থায়ী ঠিকানা" : "Permanent Address"}</label>
-          <textarea rows={2} {...register("permanentAddress")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.permanentAddress ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all resize-none`} placeholder={isBn ? "এনআইডি অনুযায়ী সম্পূর্ণ ঠিকানা..." : "Complete address as per NID..."} /><ErrorText field="permanentAddress" />
-        </div>
-      </div>
-    </div>
-  );
-
-  const Step4ProfessionalInfo = () => {
     return (
-      <div className="space-y-5">
-        <div className="mb-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors">{isBn ? "পেশাগত তথ্য" : "Professional Info"}</h2>
-          <p className="text-sm text-gray-500">{isBn ? "আপনার পেশা সম্পর্কিত বিস্তারিত তথ্য" : "Detailed information about your profession"}</p>
-        </div>
-
-        <div className="bg-primary-50 p-4 rounded-xl border border-primary-100 flex items-center gap-3 mb-4">
-          {category?.icon && <category.icon size={24} className="text-primary-600" />}
-          <div>
-             <p className="text-[10px] text-primary-600 font-bold uppercase tracking-wider">{isBn ? "নির্বাচিত পেশা" : "Selected Profession"}</p>
-             <p className="font-bold text-primary-900">{category?.title}</p>
+      <div className="space-y-2">
+        <button
+          type="button"
+          onClick={() => toggleSection(sectionKey)}
+          className={`w-full flex items-center justify-between p-4.5 border transition-all text-left font-bold text-sm select-none cursor-pointer ${
+            isExpanded
+              ? 'bg-primary-50/50 dark:bg-primary-950/20 border-primary-500 text-primary-900 dark:text-primary-100 shadow-sm rounded-t-2xl rounded-b-none'
+              : hasError
+              ? 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-400 rounded-2xl'
+              : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-gray-200 rounded-2xl'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-xl transition-colors ${
+              isExpanded
+                ? 'bg-primary-500 text-white'
+                : hasError
+                ? 'bg-rose-500 text-white'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+            }`}>
+              {icon}
+            </div>
+            <div className="flex items-center gap-2">
+              <span>{title}</span>
+              {sectionKey === 'professional' && category && (
+                <span className="px-2 py-0.5 text-[9px] bg-primary-100 dark:bg-primary-900/60 text-primary-700 dark:text-primary-300 rounded font-black tracking-wide uppercase">
+                  {category.title}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-
-        <div className="space-y-4">
-
-          {category?.id === 'personal' && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "কোম্পানির নাম / পেশা" : "Company/Profession Name"}</label>
-                <input type="text" {...register("companyName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.companyName ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder={isBn ? "কোম্পানি বা পেশার নাম" : "Company or Profession name"} /><ErrorText field="companyName" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "পদবী" : "Designation"}</label>
-                  <input type="text" {...register("designation")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.designation ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="Manager/Worker" /><ErrorText field="designation" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "কাজের মেয়াদ" : "Work Duration"}</label>
-                  <input type="text" {...register("workDuration")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.workDuration ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="যেমন: ৩ বছর" /><ErrorText field="workDuration" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
-                <input type="number" {...register("monthlyIncome")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.monthlyIncome ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="৳" /><ErrorText field="monthlyIncome" />
-              </div>
-            </motion.div>
-          )}
-
-          {(category?.id === 'business' || category?.id === 'women') && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "ব্যবসার নাম" : "Business Name"}</label>
-                <input type="text" {...register("businessName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.businessName ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="আপনার স্টোর বা কোম্পানির নাম" /><ErrorText field="businessName" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "দোকান / অফিসের ঠিকানা" : "Shop / Office Address"}</label>
-                <textarea rows={2} {...register("shopAddress")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.shopAddress ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} resize-none placeholder={isBn ? "ঠিকানা লিখুন" : "Enter Address"} /><ErrorText field="shopAddress" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "ট্রেড লাইসেন্স নম্বর" : "Trade License No"}</label>
-                  <input type="text" {...register("tradeLicense")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.tradeLicense ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="Tr xxx-xxx" /><ErrorText field="tradeLicense" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
-                  <input type="number" {...register("guardianIncome")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.guardianIncome ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="৳" /><ErrorText field="guardianIncome" />
-                </div>
+          <div className="flex items-center gap-2">
+            {hasError ? (
+              <span className="flex items-center gap-1 text-[10px] bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-400 px-2 py-1 rounded-full font-black animate-pulse">
+                <AlertCircle size={10} />
+                {isBn ? `${convertDigits(errorCount.toString(), true)}টি ভুল` : `${errorCount} errors`}
+              </span>
+            ) : isComplete ? (
+              <CheckCircle2 size={16} className="text-green-500" />
+            ) : null}
+            <ChevronRight 
+              size={16} 
+              className={`transition-transform duration-200 text-gray-400 ${isExpanded ? 'rotate-90 text-primary-500' : ''}`}
+            />
+          </div>
+        </button>
+        <AnimatePresence initial={false}>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="p-5 pt-3 bg-white dark:bg-gray-800 border border-t-0 border-gray-100 dark:border-gray-700 rounded-b-2xl space-y-4 shadow-sm">
+                {children}
               </div>
             </motion.div>
           )}
-
-          {category?.id === 'expat' && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "কর্মরত দেশের নাম" : "Working Country"}</label>
-                  <input type="text" {...register("workingCountry")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.workingCountry ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="Dubai / KSA" /><ErrorText field="workingCountry" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "ভিসার ধরন" : "Visa Type"}</label>
-                  <input type="text" {...register("visaType")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.visaType ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="Work Visa" /><ErrorText field="visaType" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "পাসপোর্ট নম্বর" : "Passport Number"}</label>
-                  <input type="text" {...register("passportNumber")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.passportNumber ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="AXXXXXXXX" /><ErrorText field="passportNumber" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
-                  <input type="number" className="w-full bg-gray-50 dark:bg-gray-900 transition-colors border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 outline-none" placeholder="৳" />
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {category?.id === 'student' && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "প্রতিষ্ঠানের নাম" : "Institution Name"}</label>
-                <input type="text" {...register("institutionName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.institutionName ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="University Name" /><ErrorText field="institutionName" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "স্টুডেন্ট আইডি" : "Student ID"}</label>
-                  <input type="text" {...register("studentId")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.studentId ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="201-xx-xx" /><ErrorText field="studentId" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "অভিভাবকের আয়" : "Guardian's Income"}</label>
-                  <input type="number" className="w-full bg-gray-50 dark:bg-gray-900 transition-colors border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 outline-none" placeholder="৳" />
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {category?.id === 'emergency' && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "পেশা" : "Profession"}</label>
-                <input type="text" {...register("professionName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.professionName ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder={isBn ? "পেশা" : "Profession"} /><ErrorText field="professionName" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "জরুরি কারণ" : "Emergency Reason"}</label>
-                <textarea rows={2} {...register("emergencyReason")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.emergencyReason ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} resize-none placeholder="সংক্ষেপে কারণ লিখুন" /><ErrorText field="emergencyReason" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
-                <input type="number" className="w-full bg-gray-50 dark:bg-gray-900 transition-colors border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 outline-none" placeholder="৳" />
-              </div>
-            </motion.div>
-          )}
-        </div>
+        </AnimatePresence>
       </div>
     );
   };
 
-  const Step5BankInfo = () => (
-    <div className="space-y-6 pb-6">
-      <div className="mb-4">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors">{isBn ? "ব্যাংক ও নমিনি" : "Bank & Nominee"}</h2>
-        <p className="text-sm text-gray-500">{isBn ? "আপনার একাউন্ট এবং নমিনির তথ্য" : "Your account and nominee info"}</p>
-      </div>
+  const Step3CombinedInfo = () => {
+    const personalFields: (keyof LoanFormData)[] = ['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'mobile', 'whatsapp', 'email', 'currentAddress', 'permanentAddress', 'nidNumber'];
+    
+    let profFields: (keyof LoanFormData)[] = [];
+    if (category?.id === 'personal') profFields = ['companyName', 'designation', 'workDuration', 'monthlyIncome'];
+    else if (category?.id === 'business' || category?.id === 'women') profFields = ['businessName', 'shopAddress', 'tradeLicense', 'monthlyIncome'];
+    else if (category?.id === 'expat') profFields = ['workingCountry', 'visaType', 'passportNumber', 'monthlyIncome'];
+    else if (category?.id === 'student') profFields = ['institutionName', 'studentId', 'guardianIncome'];
+    else if (category?.id === 'emergency') profFields = ['professionName', 'emergencyReason', 'monthlyIncome'];
+    
+    const bankFields: (keyof LoanFormData)[] = ['bankName', 'accountName', 'accountNumber', 'routingNumber', 'mobileBanking'];
+    const nomineeFields: (keyof LoanFormData)[] = ['nomineeName', 'nomineeRelation', 'nomineeMobile', 'nomineeNid'];
 
-      <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors p-5 shadow-sm space-y-4">
-        <h3 className="font-bold text-gray-800 text-sm border-b border-gray-100 dark:border-gray-700 transition-colors pb-2">{isBn ? "ব্যাংক তথ্য" : "Bank Info"}</h3>
-        <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "ব্যাংকের নাম" : "Bank Name"}</label>
-          <input type="text" {...register("bankName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.bankName ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="DBBL / BRAC Bank / Islami Bank" /><ErrorText field="bankName" />
+    return (
+      <div className="space-y-4 pb-6">
+        <div className="mb-4">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors">{isBn ? "আবেদনকারীর তথ্য বিবরণী" : "Applicant Information"}</h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">{isBn ? "নিচের সবগুলো সেকশন সঠিকভাবে পূরণ করুন" : "Please fill out all the sections below accurately."}</p>
         </div>
-        <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "একাউন্টের নাম" : "Account Name"}</label>
-          <input type="text" {...register("accountName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.accountName ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="Account Holder Name" /><ErrorText field="accountName" />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
+
+        {/* 1. Personal Information */}
+        <AccordionSection
+          sectionKey="personal"
+          title={isBn ? "১. ব্যক্তিগত তথ্য" : "1. Personal Information"}
+          icon={<User size={18} />}
+          fields={personalFields}
+        >
+          <div className="space-y-3.5 text-xs">
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "একাউন্ট নম্বর" : "Account Number"}</label>
-              <input type="text" {...register("accountNumber")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.accountNumber ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="Account Number" /><ErrorText field="accountNumber" />
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পূর্ণ নাম (NID অনুযায়ী)" : "Full Name (as per NID)"}</label>
+              <input type="text" {...register("fullName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.fullName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500 focus:border-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder={isBn ? "যেমন: মোঃ রহিম উদ্দিন" : "e.g. Md. Rahim Uddin"} />
+              <ErrorText field="fullName" />
+            </div>
+            <div className="grid grid-cols-2 gap-3.5">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পিতার নাম" : "Father's Name"}</label>
+                <input type="text" {...register("fatherName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.fatherName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder={isBn ? "পিতার নাম" : "Father's Name"} />
+                <ErrorText field="fatherName" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাতার নাম" : "Mother's Name"}</label>
+                <input type="text" {...register("motherName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.motherName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder={isBn ? "মাতার নাম" : "Mother's Name"} />
+                <ErrorText field="motherName" />
+              </div>
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "রাউটিং নাম্বার (ঐচ্ছিক)" : "Routing Number (Optional)"}</label>
-              <input type="text" {...register("routingNumber")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.routingNumber ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="Routing Number" /><ErrorText field="routingNumber" />
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "আপনার NID নম্বর" : "Your NID Number"}</label>
+              <input type="text" {...register("nidNumber")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nidNumber ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder={isBn ? "এনআইডি নম্বর লিখুন" : "Enter NID Number"} />
+              <ErrorText field="nidNumber" />
             </div>
-        </div>
-        <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "মোবাইল ব্যাংকিং নম্বর (বিকাশ/নগদ)" : "Mobile Banking Number (bKash/Nagad)"}</label>
-          <input type="tel" {...register("mobileBanking")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.mobileBanking ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="01XXXXXXXXX" /><ErrorText field="mobileBanking" />
-        </div>
-      </div>
+            <div className="grid grid-cols-2 gap-3.5">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "জন্ম তারিখ" : "Date of Birth"}</label>
+                <input type="date" {...register("dob")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.dob ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-750 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} />
+                <ErrorText field="dob" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "লিঙ্গ" : "Gender"}</label>
+                <select {...register("gender")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.gender ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`}>
+                  <option>{isBn ? "পুরুষ" : "Male"}</option>
+                  <option>{isBn ? "নারী" : "Female"}</option>
+                  <option>{isBn ? "অন্যান্য" : "Other"}</option>
+                </select>
+                <ErrorText field="gender" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3.5">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল নাম্বার" : "Mobile Number"}</label>
+                <input type="tel" {...register("mobile")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.mobile ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="01XXXXXXXXX" />
+                <ErrorText field="mobile" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "হোয়াটসঅ্যাপ (ঐচ্ছিক)" : "WhatsApp (Optional)"}</label>
+                <input type="tel" {...register("whatsapp")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.whatsapp ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="01XXXXXXXXX" />
+                <ErrorText field="whatsapp" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ইমেইল (ঐচ্ছিক)" : "Email (Optional)"}</label>
+              <input type="email" {...register("email")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.email ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="example@email.com" />
+              <ErrorText field="email" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বর্তমান ঠিকানা" : "Current Address"}</label>
+              <textarea rows={1.5} {...register("currentAddress")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.currentAddress ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all resize-none`} placeholder={isBn ? "বাসা, রাস্তা, এলাকা..." : "House, Road, Area..."} />
+              <ErrorText field="currentAddress" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "স্থায়ী ঠিকানা" : "Permanent Address"}</label>
+              <textarea rows={1.5} {...register("permanentAddress")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.permanentAddress ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all resize-none`} placeholder={isBn ? "এনআইডি অনুযায়ী সম্পূর্ণ ঠিকানা..." : "Complete address as per NID..."} />
+              <ErrorText field="permanentAddress" />
+            </div>
+          </div>
+        </AccordionSection>
 
-      <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors p-5 shadow-sm space-y-4">
-        <h3 className="font-bold text-gray-800 text-sm border-b border-gray-100 dark:border-gray-700 transition-colors pb-2">{isBn ? "নমিনি তথ্য" : "Nominee Info"}</h3>
-        <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "নমিনির নাম" : "Nominee Name"}</label>
-          <input type="text" {...register("nomineeName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nomineeName ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="Nominee Name" /><ErrorText field="nomineeName" />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "সম্পর্ক" : "Relationship"}</label>
-            <input type="text" {...register("nomineeRelation")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nomineeRelation ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="ভাই/স্ত্রী" /><ErrorText field="nomineeRelation" />
+        {/* 2. Professional Details */}
+        <AccordionSection
+          sectionKey="professional"
+          title={isBn ? "২. পেশাগত তথ্য" : "2. Professional Info"}
+          icon={<Briefcase size={18} />}
+          fields={profFields}
+        >
+          <div className="space-y-3.5 text-xs">
+            {category?.id === 'personal' && (
+              <>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কোম্পানির নাম / পেশা" : "Company/Profession Name"}</label>
+                  <input type="text" {...register("companyName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.companyName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder={isBn ? "কোম্পানি বা পেশার নাম" : "Company or Profession name"} />
+                  <ErrorText field="companyName" />
+                </div>
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পদবী" : "Designation"}</label>
+                    <input type="text" {...register("designation")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.designation ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Manager/Worker" />
+                    <ErrorText field="designation" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কাজের মেয়াদ" : "Work Duration"}</label>
+                    <input type="text" {...register("workDuration")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.workDuration ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="যেমন: ৩ বছর" />
+                    <ErrorText field="workDuration" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
+                  <input type="number" {...register("monthlyIncome")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.monthlyIncome ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="৳" />
+                  <ErrorText field="monthlyIncome" />
+                </div>
+              </>
+            )}
+
+            {(category?.id === 'business' || category?.id === 'women') && (
+              <>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্যবসার নাম" : "Business Name"}</label>
+                  <input type="text" {...register("businessName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.businessName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="আপনার স্টোর বা কোম্পানির নাম" />
+                  <ErrorText field="businessName" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "দোকান / অফিসের ঠিকানা" : "Shop / Office Address"}</label>
+                  <textarea rows={1.5} {...register("shopAddress")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.shopAddress ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all resize-none`} placeholder={isBn ? "ঠিকানা লিখুন" : "Enter Address"} />
+                  <ErrorText field="shopAddress" />
+                </div>
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ট্রেড লাইসেন্স নম্বর" : "Trade License No"}</label>
+                    <input type="text" {...register("tradeLicense")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.tradeLicense ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Tr xxx-xxx" />
+                    <ErrorText field="tradeLicense" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
+                    <input type="number" {...register("monthlyIncome")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.monthlyIncome ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="৳" />
+                    <ErrorText field="monthlyIncome" />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {category?.id === 'expat' && (
+              <>
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কর্মরত দেশের নাম" : "Working Country"}</label>
+                    <input type="text" {...register("workingCountry")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.workingCountry ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Dubai / KSA" />
+                    <ErrorText field="workingCountry" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ভিসার ধরন" : "Visa Type"}</label>
+                    <input type="text" {...register("visaType")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.visaType ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Work Visa" />
+                    <ErrorText field="visaType" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পাসপোর্ট নম্বর" : "Passport Number"}</label>
+                    <input type="text" {...register("passportNumber")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.passportNumber ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="AXXXXXXXX" />
+                    <ErrorText field="passportNumber" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
+                    <input type="number" {...register("monthlyIncome")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.monthlyIncome ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="৳" />
+                    <ErrorText field="monthlyIncome" />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {category?.id === 'student' && (
+              <>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "প্রতিষ্ঠানের নাম" : "Institution Name"}</label>
+                  <input type="text" {...register("institutionName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.institutionName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="University Name" />
+                  <ErrorText field="institutionName" />
+                </div>
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "স্টুডেন্ট আইডি" : "Student ID"}</label>
+                    <input type="text" {...register("studentId")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.studentId ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="201-xx-xx" />
+                    <ErrorText field="studentId" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "অভিভাবকের আয়" : "Guardian's Income"}</label>
+                    <input type="number" {...register("guardianIncome")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.guardianIncome ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="৳" />
+                    <ErrorText field="guardianIncome" />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {category?.id === 'emergency' && (
+              <>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পেশা" : "Profession"}</label>
+                  <input type="text" {...register("professionName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.professionName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-855 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder={isBn ? "পেশা" : "Profession"} />
+                  <ErrorText field="professionName" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "জরুরি কারণ" : "Emergency Reason"}</label>
+                  <textarea rows={1.5} {...register("emergencyReason")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.emergencyReason ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all resize-none`} placeholder="জরুরি লোন কেন প্রয়োজন?" />
+                  <ErrorText field="emergencyReason" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
+                  <input type="number" {...register("monthlyIncome")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.monthlyIncome ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="৳" />
+                  <ErrorText field="monthlyIncome" />
+                </div>
+              </>
+            )}
           </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "মোবাইল নাম্বার" : "Mobile Number"}</label>
-            <input type="text" {...register("nomineeMobile")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nomineeMobile ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="01XXXXXXXXX" /><ErrorText field="nomineeMobile" />
+        </AccordionSection>
+
+        {/* 3. Bank Account Details */}
+        <AccordionSection
+          sectionKey="bank"
+          title={isBn ? "৩. ব্যাংক একাউন্ট তথ্য" : "3. Bank Account Details"}
+          icon={<Landmark size={18} />}
+          fields={bankFields}
+        >
+          <div className="space-y-3.5 text-xs">
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্যাংকের নাম" : "Bank Name"}</label>
+              <input type="text" {...register("bankName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.bankName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="DBBL / BRAC Bank / Islami Bank" />
+              <ErrorText field="bankName" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "একাউন্টের নাম" : "Account Name"}</label>
+              <input type="text" {...register("accountName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.accountName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Account Holder Name" />
+              <ErrorText field="accountName" />
+            </div>
+            <div className="grid grid-cols-2 gap-3.5">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "একাউন্ট নম্বর" : "Account Number"}</label>
+                <input type="text" {...register("accountNumber")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.accountNumber ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-855 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Account Number" />
+                <ErrorText field="accountNumber" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রাউটিং নাম্বার (ঐচ্ছিক)" : "Routing Number (Optional)"}</label>
+                <input type="text" {...register("routingNumber")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.routingNumber ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Routing Number" />
+                <ErrorText field="routingNumber" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল ব্যাংকিং নম্বর (বিকাশ/নগদ) (ঐচ্ছিক)" : "Mobile Banking Number (bKash/Nagad) (Optional)"}</label>
+              <input type="tel" {...register("mobileBanking")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.mobileBanking ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="01XXXXXXXXX" />
+              <ErrorText field="mobileBanking" />
+            </div>
           </div>
-        </div>
-        <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">{isBn ? "NID নম্বর" : "NID Number"}</label>
-          <input type="text" {...register("nomineeNid")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nomineeNid ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary-500"} rounded-xl px-4 py-3 text-sm focus:ring-2 outline-none transition-all`} placeholder="নমিনির এনআইডি নম্বর" /><ErrorText field="nomineeNid" />
-        </div>
-        <div>
-           {renderFileUploader("nominee_photo", isBn ? "নমিনির ছবি (ঐচ্ছিক)" : "Nominee Photo (Optional)")}
-        </div>
+        </AccordionSection>
+
+        {/* 4. Nominee Information */}
+        <AccordionSection
+          sectionKey="nominee"
+          title={isBn ? "৪. নমিনি তথ্য" : "4. Nominee Details"}
+          icon={<Users size={18} />}
+          fields={nomineeFields}
+        >
+          <div className="space-y-3.5 text-xs">
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নমিনির নাম" : "Nominee Name"}</label>
+              <input type="text" {...register("nomineeName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nomineeName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Nominee Name" />
+              <ErrorText field="nomineeName" />
+            </div>
+            <div className="grid grid-cols-2 gap-3.5">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "সম্পর্ক" : "Relationship"}</label>
+                <input type="text" {...register("nomineeRelation")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nomineeRelation ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="যেমন: ভাই / স্ত্রী" />
+                <ErrorText field="nomineeRelation" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল নাম্বার" : "Mobile Number"}</label>
+                <input type="text" {...register("nomineeMobile")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nomineeMobile ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="01XXXXXXXXX" />
+                <ErrorText field="nomineeMobile" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "NID নম্বর" : "NID Number"}</label>
+              <input type="text" {...register("nomineeNid")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nomineeNid ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="নমিনির এনআইডি নম্বর" />
+              <ErrorText field="nomineeNid" />
+            </div>
+          </div>
+        </AccordionSection>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderFileUploader = (id: string, title: string) => {
     return (
@@ -819,7 +1160,7 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
           onClick={() => document.getElementById(`file-${id}`)?.click()}
           disabled={uploadingDoc === id}
           type="button"
-          className={`w-full bg-gray-50 dark:bg-gray-900 transition-colors border-2 ${documents[id] ? 'border-solid border-green-500' : 'border-dashed border-gray-200 dark:border-gray-700'} rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-primary-50 hover:border-primary-300 transition-colors`}
+          className={`w-full bg-gray-50 dark:bg-gray-900 transition-colors border-2 ${documents[id] ? 'border-solid border-green-500' : 'border-dashed border-gray-200 dark:border-gray-700'} rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-primary-50 hover:border-primary-300 transition-colors cursor-pointer select-none`}
         >
            <div className={`w-10 h-10 ${documents[id] ? 'bg-green-100 dark:bg-green-900' : 'bg-white dark:bg-gray-800'} transition-colors rounded-full flex items-center justify-center shadow-sm`}>
              {uploadingDoc === id ? (
@@ -830,10 +1171,10 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
                <UploadCloud size={18} className="text-gray-500 dark:text-gray-400" />
              )}
            </div>
-           <span className="text-xs font-bold text-gray-600 text-center">{title}</span>
+           <span className="text-xs font-bold text-gray-600 dark:text-gray-300 text-center leading-tight">{title}</span>
            {documents[id] && (
              <span className="text-[10px] text-green-600 font-bold">
-               {isBn ? 'আপলোড হয়েছে (পরিবর্তন করতে ক্লিক করুন)' : 'Uploaded (Click to change)'}
+               {isBn ? 'আপলোড হয়েছে' : 'Uploaded'}
              </span>
            )}
         </button>
@@ -841,48 +1182,55 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
     );
   };
 
-  const Step6Documents = () => (
-    <div className="space-y-6 pb-6">
+  const Step4Documents = () => (
+    <div className="space-y-5 pb-6 text-xs">
       <div className="mb-4">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors">{isBn ? "প্রয়োজনীয় কাগজপত্র" : "Required Documents"}</h2>
-        <p className="text-sm text-gray-500">{isBn ? "অনুমোদনের জন্য ডকুমেন্টস আপলোড করুন" : "Upload documents for approval"}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">{isBn ? "আবেদন রিভিউ ও অনুমোদনের জন্য প্রয়োজনীয় ডকুমেন্টস আপলোড করুন" : "Upload documents for profile verification and approval."}</p>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors p-5 shadow-sm space-y-4">
-        <h3 className="font-bold text-gray-800 text-sm border-b border-gray-100 dark:border-gray-700 transition-colors pb-2">{isBn ? "পরিচয়পত্র ও ছবি (সবার জন্য)" : "ID & Photo (For All)"}</h3>
-        <div className="grid grid-cols-2 gap-3">
+      {/* Uploads Block */}
+      <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors p-4.5 shadow-sm space-y-4">
+        <h3 className="font-bold text-gray-805 dark:text-gray-200 text-sm border-b border-gray-100 dark:border-gray-700 transition-colors pb-2">{isBn ? "পরিচয়পত্র ও ছবি" : "Identity Documents & Photos"}</h3>
+        
+        {/* Upload Slot Grid */}
+        <div className="grid grid-cols-2 gap-3.5">
           {renderFileUploader("nid_front", isBn ? "NID সামনের অংশ" : "NID Front")}
           {renderFileUploader("nid_back", isBn ? "NID পেছনের অংশ" : "NID Back")}
-        </div>
-        <div className="grid grid-cols-2 gap-3 mt-3">
           {renderFileUploader("selfie", isBn ? "সেলফি (NID সহ)" : "Selfie (with NID)")}
           {renderFileUploader("photo", isBn ? "পাসপোর্ট সাইজ ছবি" : "Passport Size Photo")}
         </div>
+        <div className="mt-3.5 border-t border-gray-100 dark:border-gray-700/50 pt-3.5">
+          {renderFileUploader("nominee_photo", isBn ? "নমিনির ছবি (ঐচ্ছিক)" : "Nominee Photo (Optional)")}
+        </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors p-5 shadow-sm space-y-4">
-        <h3 className="font-bold text-gray-800 text-sm border-b border-gray-100 dark:border-gray-700 transition-colors pb-2">{isBn ? "আয়ের প্রমাণপত্র" : "Income Proof"} ({category?.title})</h3>
-        <div className="grid grid-cols-1 gap-3">
+      {/* Income Proofs Block */}
+      <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors p-4.5 shadow-sm space-y-4">
+        <h3 className="font-bold text-gray-805 dark:text-gray-200 text-sm border-b border-gray-100 dark:border-gray-700 transition-colors pb-2">
+          {isBn ? "আয়ের প্রমাণপত্র" : "Income Proof"} ({category?.title})
+        </h3>
+        <div className="grid grid-cols-1 gap-3.5">
           {category?.id === 'personal' && (
             <>
               {renderFileUploader("office_id", isBn ? "অফিস আইডি কার্ড (Job ID)" : "Office ID Card")}
-              {renderFileUploader("salary_cert", isBn ? "বেতনের প্রমাণপত্র" : "Salary Certificate")}
-              {renderFileUploader("appointment_letter", isBn ? "অ্যাপয়েন্টমেন্ট লেটার" : "Appointment Letter")}
+              {renderFileUploader("salary_cert", isBn ? "বেতনের প্রমাণপত্র (Salary Certificate)" : "Salary Certificate")}
+              {renderFileUploader("appointment_letter", isBn ? "অ্যাপয়েন্টমেন্ট লেটার (Appointment Letter)" : "Appointment Letter")}
             </>
           )}
 
           {(category?.id === 'business' || category?.id === 'women') && (
             <>
-              {renderFileUploader("trade_license", isBn ? "ট্রেড লাইসেন্স কপি" : "Trade License Copy")}
+              {renderFileUploader("trade_license", isBn ? "ট্রেড লাইসেন্স কপি (Trade License Copy)" : "Trade License Copy")}
               {renderFileUploader("shop_photo", isBn ? "দোকান/প্রতিষ্ঠানের ছবি" : "Shop/Institution Photo")}
-              {renderFileUploader("business_docs", isBn ? "ব্যবসায়িক ডকুমেন্টস" : "Business Documents")}
+              {renderFileUploader("business_docs", isBn ? "ব্যবসায়িক অন্যান্য ডকুমেন্টস" : "Business Documents")}
             </>
           )}
 
           {category?.id === 'expat' && (
             <>
-              {renderFileUploader("passport_copy", isBn ? "পাসপোর্ট কপি" : "Passport Copy")}
-              {renderFileUploader("visa_copy", isBn ? "ভিসা কপি" : "Visa Copy")}
+              {renderFileUploader("passport_copy", isBn ? "পাসপোর্ট কপি (Passport Copy)" : "Passport Copy")}
+              {renderFileUploader("visa_copy", isBn ? "ভিসা কপি (Visa Copy)" : "Visa Copy")}
               {renderFileUploader("work_permit", isBn ? "ওয়ার্ক পারমিট / ওভারসিস আইডি" : "Work Permit / Overseas ID")}
             </>
           )}
@@ -904,36 +1252,30 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
         </div>
       </div>
 
-      <div className="bg-orange-50 p-3 rounded-xl border border-orange-100 flex items-start gap-3 mt-4">
-          <AlertCircle size={16} className="text-orange-500 mt-0.5 shrink-0" />
-          <p className="text-xs text-orange-800 leading-tight font-medium">{isBn ? "অতিরিক্ত ডকুমেন্টস (যেমন: TIN Certificate, Utility Bill) এডমিন আপনার প্রোফাইল যাচাই করার পর সাবমিট করতে হতে পারে।" : "Additional documents (e.g. TIN, Utility Bill) may be required after admin reviews your profile."}</p>
-      </div>
-    </div>
-  );
-
-  const Step7Review = () => (
-    <div className="space-y-6">
-      <div className="mb-4">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors">{isBn ? "আবেদন পর্যালোচনা" : "Application Review"}</h2>
-        <p className="text-sm text-gray-500">{isBn ? "জমা দেওয়ার আগে বিস্তারিত চেক করুন" : "Check details before submission"}</p>
+      <div className="bg-amber-50 dark:bg-amber-950/20 p-3.5 rounded-2xl border border-amber-100 dark:border-amber-900/40 flex items-start gap-3 transition-colors">
+        <AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" />
+        <p className="text-xs text-amber-800 dark:text-amber-300 leading-normal font-medium">
+          {isBn ? "অতিরিক্ত ডকুমেন্টস (যেমন: TIN Certificate, Utility Bill) এডমিন আপনার প্রোফাইল যাচাই করার পর সাবমিট করতে হতে পারে।" : "Additional documents (e.g. TIN, Utility Bill) may be required after admin reviews your profile."}
+        </p>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors shadow-sm overflow-hidden">
+      {/* Review Details Summary Card */}
+      <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors shadow-sm overflow-hidden mt-4">
         <div className="bg-gray-50 dark:bg-gray-900 transition-colors p-4 border-b border-gray-100 dark:border-gray-700 transition-colors flex justify-between items-center">
           <div className="flex items-center gap-2">
             {category?.icon && <category.icon size={18} className="text-gray-500" />}
-            <span className="font-bold text-sm text-gray-700">{category?.title} লোন</span>
+            <span className="font-bold text-sm text-gray-850 dark:text-gray-200">{category?.title} লোন</span>
           </div>
-          <span className="text-xs font-bold bg-primary-100 text-primary-700 px-2.5 py-1 rounded-full">New</span>
+          <span className="text-xs font-bold bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 px-2.5 py-1 rounded-full">New</span>
         </div>
         
-        <div className="p-4 divide-y divide-gray-50">
+        <div className="p-4 divide-y divide-gray-50 dark:divide-gray-700/50">
           <div className="py-2.5 flex justify-between">
             <span className="text-gray-500 text-sm">{isBn ? "লোনের পরিমাণ" : "Loan Amount"}</span>
             <span className="font-bold text-gray-900 dark:text-white transition-colors">{formatCurrency(amount, isBn)}</span>
           </div>
           <div className="py-2.5 flex justify-between">
-            <span className="text-gray-500 text-sm">{isBn ? "সময়কাল" : "Duration"}</span>
+            <span className="text-gray-500 text-sm">{isBn ? "সময়কাল" : "Duration"}</span>
             <span className="font-bold text-gray-900 dark:text-white transition-colors">{convertDigits(tenure, isBn)} {isBn ? 'মাস' : 'Months'}</span>
           </div>
           <div className="py-2.5 flex justify-between">
@@ -943,37 +1285,42 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
         </div>
       </div>
 
-      <label className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-900 transition-colors rounded-2xl border border-gray-200 cursor-pointer group">
+      {/* Terms and Declaration Checkbox */}
+      <label className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-900/50 transition-colors rounded-2xl border border-gray-200 dark:border-gray-750 cursor-pointer group mt-4">
         <div className="pt-0.5">
           <input 
             type="checkbox" 
             checked={acceptedTerms}
             onChange={(e) => setAcceptedTerms(e.target.checked)}
-            className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
           />
         </div>
-        <p className="text-xs text-gray-600 font-medium leading-relaxed">
-          {isBn ? "আমি ঘোষণা করছি যে, আমার দেওয়া সকল তথ্য সঠিক। আমি" : "I declare that all provided information is correct. I agree to the"} <span className="text-primary-600 font-bold hover:underline">{isBn ? "শর্তাবলীতে" : "Terms & Conditions"}</span> {isBn ? "সম্মত আছি এবং লোন অনুমোদনের ক্ষেত্রে কর্তৃপক্ষের সিদ্ধান্ত চূড়ান্ত বলে গণ্য হবে।" : "and authority decision will be considered final regarding loan approval."}
+        <p className="text-xs text-gray-650 dark:text-gray-400 font-medium leading-relaxed">
+          {isBn ? "আমি ঘোষণা করছি যে, আমার দেওয়া সকল তথ্য সঠিক। আমি " : "I declare that all provided information is correct. I agree to the "} 
+          <Link to="/terms" target="_blank" className="text-primary-600 font-bold hover:underline">
+            {isBn ? "শর্তাবলীতে" : "Terms & Conditions"}
+          </Link> 
+          {isBn ? " সম্মত আছি এবং লোন অনুমোদনের ক্ষেত্রে Authorities এর সিদ্ধান্ত চূড়ান্ত বলে গণ্য হবে।" : " and authority decision will be considered final regarding loan approval."}
         </p>
       </label>
     </div>
   );
 
-  const Step8Success = () => (
+  const Step5Success = () => (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       className="text-center py-10 px-5 space-y-6"
     >
-      <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500 ring-8 ring-green-50/50">
+      <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500 dark:text-green-400 ring-8 ring-green-50/50 dark:ring-green-950/20">
         <CheckCircle2 size={48} strokeWidth={2.5} />
       </div>
       <div>
         <h2 className="text-3xl font-black text-gray-900 dark:text-white transition-colors mb-2">{isBn ? "আবেদন সফল!" : "Application Successful!"}</h2>
-        <p className="text-gray-600 text-sm">{isBn ? "আপনার আবেদনটি পর্যালোচনার জন্য পাঠানো হয়েছে।" : "Your application has been submitted for review."}</p>
+        <p className="text-gray-600 dark:text-gray-400 text-sm">{isBn ? "আপনার আবেদনটি পর্যালোচনার জন্য পাঠানো হয়েছে।" : "Your application has been submitted for review."}</p>
       </div>
 
-      <div className="bg-gray-50 dark:bg-gray-900 transition-colors rounded-2xl border border-gray-200 p-5 text-left max-w-xs mx-auto">
+      <div className="bg-gray-50 dark:bg-gray-900 transition-colors rounded-2xl border border-gray-200 dark:border-gray-700 p-5 text-left max-w-xs mx-auto">
         <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">{isBn ? "ট্র্যাকিং আইডি" : "Tracking ID"}</p>
         <p className="text-lg font-mono font-black text-gray-900 dark:text-white transition-colors mb-4">#LN-{(Math.random()*100000).toFixed(0).padStart(6,'0')}</p>
         
@@ -991,7 +1338,7 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
             {isBn ? 'গুরুত্বপূর্ণ নোটিশ' : 'Important Notice'}
           </h3>
           <p className="text-xs font-medium text-red-600 dark:text-red-400 mt-1 transition-colors">
-            {isBn ? 'আপনার লোন আবেদনটি প্রসেস করার জন্য "প্রসেসিং ফি" ডিপোজিট করা বাধ্যতামূলক। ফি প্রদান ছাড়া ফাইলটি রিভিউ করা হবে না।' : 'To begin processing your application, you must deposit the "Processing Fee". Files without fee will not be reviewed.'}
+            {isBn ? 'আপনার লোন আবেদনটি প্রসেস করার জন্য "প্রসেসিং ফি" ডিপোজিট করা বাধ্যতামুলক। ফি প্রদান ছাড়া ফাইলটি রিভিউ করা হবে না।' : 'To begin processing your application, you must deposit the "Processing Fee". Files without fee will not be reviewed.'}
           </p>
         </div>
       </div>
@@ -1016,7 +1363,7 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
   return (
     <div className="min-h-full bg-white dark:bg-gray-800 transition-colors flex flex-col relative">
       {/* Dynamic Header */}
-      {step < 8 && (
+      {step < 5 && (
         <div className="bg-white dark:bg-gray-800 transition-colors px-5 pt-6 pb-4 sticky top-0 z-30 shadow-sm flex items-center justify-between">
            {step > 1 ? (
              <button onClick={prevStep} className="p-2 -ml-2 rounded-full bg-gray-50 dark:bg-gray-900 transition-colors hover:bg-gray-100 text-gray-700 transition-colors">
@@ -1027,12 +1374,12 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
            )}
            
            <div className="flex flex-col items-center">
-             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Step {step} of {totalSteps - 1}</p>
+             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Step {step} of 4</p>
              <div className="flex gap-1 h-1.5 w-32 bg-gray-100 rounded-full overflow-hidden">
                <motion.div 
                  className="bg-primary-500 h-full rounded-full"
                  initial={{ width: 0 }}
-                 animate={{ width: `${(step / (totalSteps-1)) * 100}%` }}
+                 animate={{ width: `${(step / 4) * 100}%` }}
                  transition={{ duration: 0.3 }}
                />
              </div>
@@ -1054,18 +1401,15 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
           >
             {step === 1 && Step1Category()}
             {step === 2 && Step2Calculator()}
-            {step === 3 && Step3PersonalInfo()}
-            {step === 4 && Step4ProfessionalInfo()}
-            {step === 5 && Step5BankInfo()}
-            {step === 6 && Step6Documents()}
-            {step === 7 && Step7Review()}
-            {step === 8 && Step8Success()}
+            {step === 3 && Step3CombinedInfo()}
+            {step === 4 && Step4Documents()}
+            {step === 5 && Step5Success()}
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* Bottom Action Bar - Compact */}
-      {step < 8 && (
+      {step < 5 && (
         <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-white dark:bg-gray-800 transition-colors border-t border-gray-100 dark:border-gray-700 z-40 flex gap-2">
           {step > 1 && (
             <button
@@ -1079,12 +1423,12 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
           <button
             type="button"
             onClick={nextStep}
-            disabled={(step === 1 && !category) || (step === 7 && !acceptedTerms) || isSubmitting}
+            disabled={(step === 1 && !category) || (step === 4 && !acceptedTerms) || isSubmitting}
             className="flex-1 bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none text-white py-2.5 rounded-xl font-bold text-sm shadow-md shadow-blue-600/30 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-1"
           >
             {isSubmitting
               ? (isBn ? 'অপেক্ষা করুন...' : 'Please wait...')
-              : step === 7
+              : step === 4
               ? (isBn ? 'সাবমিট করুন' : 'Submit')
               : (isBn ? 'পরবর্তী ধাপ' : 'Next Step')
             }
@@ -1093,38 +1437,288 @@ const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
         </div>
       )}
 
-      {/* Confirmation Modal */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      {/* Smart Review System Modal Overlay */}
+      {verificationStage !== 'idle' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
           <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-gray-100 dark:border-gray-700"
+            className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full shadow-2xl border border-gray-150 dark:border-gray-700 overflow-hidden my-8"
           >
-            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500">
-              <FileText size={32} />
+            {/* Header */}
+            <div className="bg-gray-50 dark:bg-gray-900 px-6 py-4.5 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="text-primary-600 dark:text-primary-400" size={20} />
+                <h3 className="text-base font-black text-gray-900 dark:text-white">
+                  {isBn ? 'স্মার্ট আবেদন যাচাইকরণ' : 'Smart Application Review'}
+                </h3>
+              </div>
+              {verificationStage === 'confirm' && (
+                <button 
+                  onClick={() => setVerificationStage('idle')}
+                  className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              )}
             </div>
-            <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">
-              {isBn ? 'আবেদন সাবমিট করবেন?' : 'Submit Application?'}
-            </h3>
-            <p className="text-sm text-center text-gray-600 dark:text-gray-400 mb-6">
-              {isBn 
-                ? 'আবেদন সাবমিট করার পর কোনো তথ্য পরিবর্তন করা যাবে না (শুধু এডমিন চাইলে পারবে)। আপনি কি নিশ্চিত?' 
-                : 'You will not be able to change information after submitting (unless admin allows). Are you sure?'}
-            </p>
-            <div className="flex gap-3">
-              <button 
-                onClick={() => setShowConfirmModal(false)}
-                className="flex-1 py-3 rounded-xl font-bold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              >
-                {isBn ? 'বাতিল' : 'Cancel'}
-              </button>
-              <button 
-                onClick={processLoanApplication}
-                className="flex-1 py-3 rounded-xl font-bold bg-primary-600 text-white hover:bg-primary-700 transition-colors"
-              >
-                {isBn ? 'হ্যাঁ, সাবমিট' : 'Yes, Submit'}
-              </button>
+
+            <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto custom-scrollbar text-xs">
+              {/* STAGE 1: Confirmation & Warnings checklist */}
+              {verificationStage === 'confirm' && (
+                <>
+                  <div className="bg-primary-50/50 dark:bg-primary-950/10 p-4 rounded-2xl border border-primary-100/50 dark:border-primary-900/30 space-y-2.5">
+                    <h4 className="font-bold text-gray-900 dark:text-white text-xs">
+                      {isBn ? 'লোন ও আবেদনকারী সারসংক্ষেপ' : 'Loan & Applicant Summary'}
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-600 dark:text-gray-400">
+                      <div>
+                        <span className="block text-[10px] text-gray-400">{isBn ? 'ঋণ ক্যাটাগরি' : 'Category'}</span>
+                        <span className="font-bold text-gray-805 dark:text-gray-200 capitalize">{category?.title}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[10px] text-gray-400">{isBn ? 'ঋণের পরিমাণ' : 'Amount'}</span>
+                        <span className="font-bold text-primary-600 dark:text-primary-400">{formatCurrency(amount, isBn)}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[10px] text-gray-400">{isBn ? 'সময়কাল' : 'Tenure'}</span>
+                        <span className="font-bold text-gray-805 dark:text-gray-200">{convertDigits(tenure, isBn)} {isBn ? 'মাস' : 'Months'}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[10px] text-gray-400">{isBn ? 'মাসিক কিস্তি' : 'Monthly EMI'}</span>
+                        <span className="font-bold text-emerald-600">{formatCurrency(calculateEMI(), isBn)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Summary Warnings Checklist */}
+                  <div className="space-y-3 pt-2">
+                    <h4 className="font-bold text-gray-800 dark:text-gray-200 text-xs border-b border-gray-100 dark:border-gray-700 pb-2">
+                      {isBn ? 'আইনি ঘোষণা ও সতর্কবার্তা চেকলিস্ট' : 'Legal Declaration & Warnings Checklist'}
+                    </h4>
+                    <p className="text-[10px] text-gray-400 leading-normal">
+                      {isBn 
+                        ? 'স্মার্ট রিভিউ শুরু করার আগে প্রতিটি আইনি সতর্কবার্তা মনোযোগ দিয়ে পড়ুন এবং সম্মতি দিন:' 
+                        : 'Please review and accept each legal warning before starting smart review:'}
+                    </p>
+
+                    <div className="space-y-2.5">
+                      {/* Check 1 */}
+                      <label className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer select-none group">
+                        <input 
+                          type="checkbox" 
+                          checked={checkAntiFraud}
+                          onChange={(e) => setCheckAntiFraud(e.target.checked)}
+                          className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer mt-0.5"
+                        />
+                        <span className="text-[11px] text-gray-600 dark:text-gray-300 font-medium leading-tight group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                          {isBn 
+                            ? 'আমি ঘোষণা করছি যে আমি কোনো ভুয়া বা ডুপ্লিকেট তথ্য প্রদান করিনি। জালিয়াতি সনাক্ত হলে আইডি আজীবন নিষিদ্ধ (Banned) করা হবে।' 
+                            : 'I declare that I have not provided fake or duplicate details. Fraud will lead to a permanent ban.'}
+                        </span>
+                      </label>
+
+                      {/* Check 2 */}
+                      <label className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer select-none group">
+                        <input 
+                          type="checkbox" 
+                          checked={checkNoRefund}
+                          onChange={(e) => setCheckNoRefund(e.target.checked)}
+                          className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer mt-0.5"
+                        />
+                        <span className="text-[11px] text-gray-600 dark:text-gray-300 font-medium leading-tight group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                          {isBn 
+                            ? 'আমি জানি যে ঋণ ফাইল রিভিউর জন্য নির্ধারিত "প্রসেসিং ফি" বাধ্যতামূলক এবং এটি সম্পূর্ণ অফেরতযোগ্য (Non-Refundable)।' 
+                            : 'I acknowledge that the required loan processing fee is mandatory and fully non-refundable.'}
+                        </span>
+                      </label>
+
+                      {/* Check 3 */}
+                      <label className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer select-none group">
+                        <input 
+                          type="checkbox" 
+                          checked={checkSavingsRule}
+                          onChange={(e) => setCheckSavingsRule(e.target.checked)}
+                          className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer mt-0.5"
+                        />
+                        <span className="text-[11px] text-gray-600 dark:text-gray-300 font-medium leading-tight group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                          {isBn 
+                            ? 'আমি জানি লোন অনুমোদনের পর তা উত্তোলনের পূর্বে লোন অংকের ১০% / ৫% সঞ্চয় আমানত ডিপোজিট করতে হবে যা আমার একাউন্টে থাকবে।' 
+                            : 'I understand that a 10% / 5% savings deposit is required after loan approval to enable withdrawal permissions.'}
+                        </span>
+                      </label>
+
+                      {/* Check 4 */}
+                      <label className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer select-none group">
+                        <input 
+                          type="checkbox" 
+                          checked={checkEmiObligation}
+                          onChange={(e) => setCheckEmiObligation(e.target.checked)}
+                          className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer mt-0.5"
+                        />
+                        <span className="text-[11px] text-gray-600 dark:text-gray-300 font-medium leading-tight group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                          {isBn 
+                            ? 'আমি প্রতি মাসের নির্ধারিত মেয়াদের মধ্যে ঋণের ইএমআই (EMI) কিস্তি পরিশোধ করতে প্রতিশ্রুতিবদ্ধ।' 
+                            : 'I commit to paying all monthly loan EMI installments on or before their due dates.'}
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex gap-3 pt-3">
+                    <button 
+                      onClick={() => setVerificationStage('idle')}
+                      className="flex-1 py-3 rounded-xl font-bold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                    >
+                      {isBn ? 'বাতিল' : 'Cancel'}
+                    </button>
+                    <button 
+                      disabled={!checkAntiFraud || !checkNoRefund || !checkSavingsRule || !checkEmiObligation}
+                      onClick={processSmartVerification}
+                      className="flex-1 py-3 rounded-xl font-bold bg-primary-600 disabled:bg-gray-200 disabled:text-gray-400 text-white hover:bg-primary-700 transition-colors shadow shadow-primary-500/10 cursor-pointer"
+                    >
+                      {isBn ? 'যাচাইকরণ শুরু করুন' : 'Start Verification'}
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {/* STAGE 2: Automated Verification Loader */}
+              {verificationStage === 'verifying' && (
+                <div className="text-center py-6 space-y-6">
+                  {/* Transparent Logo Spinner */}
+                  <div className="relative w-28 h-28 mx-auto flex items-center justify-center">
+                    {/* Glowing outer spin */}
+                    <div className="absolute inset-0 rounded-full border-4 border-t-emerald-500 border-r-emerald-400 border-b-transparent border-l-transparent animate-spin duration-1000"></div>
+                    {/* Glowing inner spin reverse */}
+                    <div className="absolute inset-2 rounded-full border-4 border-t-transparent border-r-transparent border-b-blue-500 border-l-blue-400 animate-spin duration-1500" style={{ animationDirection: 'reverse' }}></div>
+                    {/* Glass Circle + Gradient SVG "P" Logo */}
+                    <div className="w-20 h-20 bg-white/10 dark:bg-gray-900/40 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg border border-white/20">
+                      <svg className="w-9 h-9 text-emerald-500 filter drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                        <path d="M8 20V4h6a4 4 0 0 1 0 8H8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-base font-black text-gray-900 dark:text-white">
+                      {isBn ? 'স্বয়ংক্রিয় ঋণ যাচাইকরণ চলছে...' : 'Automated Smart Review in Progress...'}
+                    </p>
+                    <p className="text-[10px] text-gray-400 mt-1 uppercase font-bold tracking-widest">
+                      {isBn ? `প্রগতি: ${convertDigits(progressPercent, true)}%` : `Progress: ${progressPercent}%`}
+                    </p>
+                  </div>
+
+                  {/* Horizontal mini progress bar */}
+                  <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-900 rounded-full overflow-hidden">
+                    <motion.div 
+                      className="bg-emerald-500 h-full rounded-full"
+                      animate={{ width: `${progressPercent}%` }}
+                      transition={{ duration: 0.2 }}
+                    />
+                  </div>
+
+                  {/* Checklist of steps */}
+                  <div className="text-left space-y-3.5 bg-gray-50 dark:bg-gray-900/50 p-4.5 rounded-2xl border border-gray-150 dark:border-gray-750">
+                    {/* Check 1 */}
+                    <div className="flex items-center justify-between text-[11px] font-bold">
+                      <span className={activeCheck >= 1 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500'}>
+                        {isBn ? '১. আবেদনপত্র সম্পূর্ণতা যাচাই (Profile Completeness)' : '1. Profile Completeness Auditing'}
+                      </span>
+                      {activeCheck >= 1 ? (
+                        <CheckCircle2 size={15} className="text-emerald-500 shrink-0" />
+                      ) : (
+                        <div className="w-3.5 h-3.5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin shrink-0"></div>
+                      )}
+                    </div>
+
+                    {/* Check 2 */}
+                    <div className="flex items-center justify-between text-[11px] font-bold">
+                      <span className={activeCheck >= 2 ? 'text-emerald-600 dark:text-emerald-400' : activeCheck === 1 ? 'text-gray-950 dark:text-white' : 'text-gray-400'}>
+                        {isBn ? '২. জাল আবেদন ও ডুপ্লিকেট পরীক্ষণ (Anti-Fraud Check)' : '2. Anti-Fraud & Duplicate Scan'}
+                      </span>
+                      {activeCheck >= 2 ? (
+                        <CheckCircle2 size={15} className="text-emerald-500 shrink-0" />
+                      ) : activeCheck === 1 ? (
+                        <div className="w-3.5 h-3.5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin shrink-0"></div>
+                      ) : (
+                        <span className="text-gray-300 font-normal shrink-0">-</span>
+                      )}
+                    </div>
+
+                    {/* Check 3 */}
+                    <div className="flex items-center justify-between text-[11px] font-bold">
+                      <span className={activeCheck >= 3 ? 'text-emerald-600 dark:text-emerald-400' : activeCheck === 2 ? 'text-gray-950 dark:text-white' : 'text-gray-400'}>
+                        {isBn ? '৩. অ্যাকাউন্ট ও নিষেধাজ্ঞা যাচাই (Integrity Check)' : '3. Account Integrity & Ban Scan'}
+                      </span>
+                      {activeCheck >= 3 ? (
+                        <CheckCircle2 size={15} className="text-emerald-500 shrink-0" />
+                      ) : activeCheck === 2 ? (
+                        <div className="w-3.5 h-3.5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin shrink-0"></div>
+                      ) : (
+                        <span className="text-gray-300 font-normal shrink-0">-</span>
+                      )}
+                    </div>
+
+                    {/* Check 4 */}
+                    <div className="flex items-center justify-between text-[11px] font-bold">
+                      <span className={activeCheck >= 4 ? 'text-emerald-600 dark:text-emerald-400' : activeCheck === 3 ? 'text-gray-950 dark:text-white' : 'text-gray-400'}>
+                        {isBn ? '৪. লোন ফাইল প্রসেসিং ও ডাটাবেস এন্ট্রি (Submission)' : '4. Final Database Entry & Cryptography'}
+                      </span>
+                      {activeCheck >= 4 ? (
+                        <CheckCircle2 size={15} className="text-emerald-500 shrink-0" />
+                      ) : activeCheck === 3 ? (
+                        <div className="w-3.5 h-3.5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin shrink-0"></div>
+                      ) : (
+                        <span className="text-gray-300 font-normal shrink-0">-</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* STAGE 3: Success Visuals */}
+              {verificationStage === 'success' && (
+                <div className="text-center py-8 space-y-4">
+                  <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto text-green-500 ring-8 ring-green-50 dark:ring-green-950/20">
+                    <CheckCircle2 size={44} strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-black text-gray-900 dark:text-white">
+                      {isBn ? 'যাচাইকরণ সফল!' : 'Verification Passed!'}
+                    </h4>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {isBn ? 'আপনার ঋণ আবেদন ফাইলটি সফলভাবে প্রস্তুত হয়েছে।' : 'Your loan application profile has been fully prepared.'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* STAGE 4: Failed Visuals */}
+              {verificationStage === 'failed' && (
+                <div className="text-center py-6 space-y-5">
+                  <div className="w-20 h-20 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mx-auto text-rose-500 ring-8 ring-rose-50 dark:ring-rose-950/20">
+                    <X size={40} strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-black text-rose-600 dark:text-rose-450">
+                      {isBn ? 'যাচাইকরণ ব্যর্থ!' : 'Verification Failed'}
+                    </h4>
+                    <div className="bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-450 p-4 rounded-2xl border border-rose-100 dark:border-rose-900/40 text-left mt-4 text-[11px] leading-relaxed font-semibold">
+                      <p className="flex items-center gap-1 mb-1 font-black uppercase tracking-wider text-[9px]"><AlertCircle size={12} /> {isBn ? 'ব্যর্থতার কারণ:' : 'Error details:'}</p>
+                      {verifyingError}
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={() => setVerificationStage('idle')}
+                    className="w-full py-3.5 rounded-xl font-bold bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 transition-colors shadow cursor-pointer"
+                  >
+                    {isBn ? 'তথ্য সংশোধন করতে ফিরে যান' : 'Go Back to Edit Details'}
+                  </button>
+                </div>
+              )}
             </div>
           </motion.div>
         </div>

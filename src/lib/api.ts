@@ -221,6 +221,7 @@ export interface DashboardStats {
   totalBalance: number;
   depositBalance: number;
   withdrawBalance: number;
+  savingsBalance: number;
   activeLoansCount: number;
   pendingApplications: number;
   totalOutstanding: number;
@@ -235,48 +236,39 @@ export async function getDashboardStats(chatId: number): Promise<DashboardStats>
   const activeLoans = loans.filter(l => l.status === 'active' || l.status === 'approved');
   const pendingApplications = loans.filter(l => l.status === 'pending');
 
-  let depositBalance = 0;
-  let withdrawBalance = 0;
-  let completedDepositBalance = 0;
-  let completedWithdrawBalance = 0;
+  // 1. Calculate approved loan amount
+  const approvedLoanAmount = activeLoans.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
 
-  for (const txn of transactions) {
-    // Sum completed and pending transactions for deposit/withdraw dashboard stats cards
-    if (txn.status === 'completed' || txn.status === 'pending') {
-      switch (txn.type) {
-        case 'deposit':
-        case 'disbursement':
-          depositBalance += txn.amount;
-          break;
-        case 'withdraw':
-        case 'emi_payment':
-          withdrawBalance += txn.amount;
-          break;
-      }
-    }
+  // 2. Calculate savings balance (completed security_deposit transactions)
+  const savingsBalance = transactions
+    .filter(t => t.type === 'deposit' && t.deposit_type === 'security_deposit' && t.status === 'completed')
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
-    // Only count completed transactions towards the active total balance
-    if (txn.status === 'completed') {
-      switch (txn.type) {
-        case 'deposit':
-        case 'disbursement':
-          completedDepositBalance += txn.amount;
-          break;
-        case 'withdraw':
-        case 'emi_payment':
-          completedWithdrawBalance += txn.amount;
-          break;
-      }
-    }
-  }
+  // 3. Calculate deposit balance (completed deposits: processing fees, security deposits, other deposits)
+  const depositBalance = transactions
+    .filter(t => t.type === 'deposit' && t.status === 'completed')
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
-  const totalBalance = completedDepositBalance - completedWithdrawBalance;
-  const totalOutstanding = activeLoans.reduce((sum, l) => sum + (l.amount || 0), 0);
+  // 4. Calculate withdraw balance (completed withdrawals)
+  const withdrawBalance = transactions
+    .filter(t => t.type === 'withdraw' && t.status === 'completed')
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+  // 5. Calculate total withdrawn loan amount (both completed and pending withdrawals to reduce available balance)
+  const totalWithdrawnLoanAmount = transactions
+    .filter(t => t.type === 'withdraw' && (t.status === 'completed' || t.status === 'pending'))
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+  // 6. Calculate total balance (available for withdrawal)
+  const totalBalance = Math.max(0, approvedLoanAmount - totalWithdrawnLoanAmount);
+  
+  const totalOutstanding = activeLoans.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
 
   return {
     totalBalance,
     depositBalance,
     withdrawBalance,
+    savingsBalance,
     activeLoansCount: activeLoans.length,
     pendingApplications: pendingApplications.length,
     totalOutstanding,

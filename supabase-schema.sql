@@ -120,3 +120,19 @@ CREATE INDEX IF NOT EXISTS idx_loan_apps_status ON loan_applications(status);
 CREATE INDEX IF NOT EXISTS idx_transactions_chat_id ON transactions(chat_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON transactions(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_transactions_deposit_type ON transactions(deposit_type);
+
+-- 7. Support Messages (in-app live chat)
+CREATE TABLE IF NOT EXISTS support_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chat_id BIGINT REFERENCES profiles(chat_id) ON DELETE CASCADE,
+  sender TEXT NOT NULL, -- 'user' or 'admin'
+  message TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE support_messages ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read support_messages" ON support_messages FOR SELECT USING (true);
+CREATE POLICY "Public insert support_messages" ON support_messages FOR INSERT WITH CHECK (true);
+
+CREATE INDEX IF NOT EXISTS idx_support_messages_chat_id ON support_messages(chat_id);
+CREATE INDEX IF NOT EXISTS idx_support_messages_created_at ON support_messages(created_at ASC);

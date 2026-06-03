@@ -210,6 +210,87 @@ export default function Home() {
     return list;
   };
 
+  // Helper to compute the loan/savings status configuration
+  const getStatusConfig = () => {
+    if (!activeLoan) {
+      return {
+        title: isBn ? 'সক্রিয় কোনো লোন নেই' : 'No Active Loan',
+        description: isBn 
+          ? 'নতুন লোনের জন্য এখনই আবেদন করুন এবং সহজ কিস্তিতে ঋণ সুবিধা উপভোগ করুন।'
+          : 'Apply now for a loan and enjoy low-interest, easy installment plans.',
+        icon: FileText,
+        iconBg: 'bg-gray-100 dark:bg-gray-700',
+        iconColor: 'text-gray-500 dark:text-gray-400',
+        iconClass: '',
+        textColor: 'text-gray-800 dark:text-gray-200',
+        badgeBg: 'bg-gray-100 dark:bg-gray-700',
+        badgeColor: 'text-gray-500 dark:text-gray-400',
+        badgeText: isBn ? 'উপলব্ধ নেই' : 'N/A'
+      };
+    }
+
+    // Check if security deposit has been made (completed transaction of deposit_type === 'security_deposit')
+    const hasSecurityDeposit = userTransactions.some(
+      t => t.type === 'deposit' && t.deposit_type === 'security_deposit' && t.status === 'completed'
+    );
+
+    // Check if loan has already been withdrawn (completed transaction of type === 'withdraw')
+    const hasWithdrawn = userTransactions.some(
+      t => t.type === 'withdraw' && t.status === 'completed'
+    );
+
+    if (!hasSecurityDeposit) {
+      return {
+        title: isBn ? 'লোন উত্তোলনের জন্য সঞ্চয় জমা প্রয়োজন' : 'Savings Deposit Required',
+        description: isBn 
+          ? 'আপনার লোনটি অনুমোদিত হয়েছে। অর্থ উত্তোলনের জন্য প্রসেসিং ফি এবং সঞ্চয় ডিপোজিট সম্পূর্ণ করুন।'
+          : 'Your loan is approved. Please deposit the processing fee and required savings to withdraw.',
+        icon: AlertCircle,
+        iconBg: 'bg-amber-100 dark:bg-amber-900/30',
+        iconColor: 'text-amber-600 dark:text-amber-400',
+        iconClass: 'animate-pulse',
+        textColor: 'text-amber-800 dark:text-amber-300',
+        badgeBg: 'bg-amber-100 dark:bg-amber-900/30',
+        badgeColor: 'text-amber-700 dark:text-amber-400',
+        badgeText: isBn ? 'সঞ্চয় জমা প্রয়োজন' : 'Deposit Required'
+      };
+    }
+
+    if (!hasWithdrawn) {
+      return {
+        title: isBn ? 'সঞ্চয় যাচাই সম্পন্ন — উত্তোলন উপলব্ধ' : 'Savings Verified — Withdrawal Available',
+        description: isBn 
+          ? 'আপনার সঞ্চয় ডিপোজিট সফলভাবে যাচাই করা হয়েছে। আপনি এখন সম্পূর্ণ অর্থ উত্তোলন করতে পারেন।'
+          : 'Your savings deposit has been successfully verified. You can now withdraw the full amount.',
+        icon: CheckCircle2,
+        iconBg: 'bg-emerald-100 dark:bg-emerald-900/30',
+        iconColor: 'text-emerald-600 dark:text-emerald-400',
+        iconClass: '',
+        textColor: 'text-emerald-800 dark:text-emerald-300',
+        badgeBg: 'bg-emerald-100 dark:bg-emerald-900/30',
+        badgeColor: 'text-emerald-700 dark:text-emerald-400',
+        badgeText: isBn ? 'উত্তোলন উপলব্ধ' : 'Available'
+      };
+    }
+
+    return {
+      title: isBn ? 'লোন বিতরণ সম্পন্ন' : 'Loan Disbursement Completed',
+      description: isBn 
+        ? 'আপনার লোনের অর্থ সফলভাবে বিতরণ করা হয়েছে। নির্ধারিত সময়ে ইএমআই পরিশোধ করুন।'
+        : 'Your loan has been successfully disbursed. Please pay your EMIs on time.',
+      icon: CheckCircle2,
+      iconBg: 'bg-blue-100 dark:bg-blue-900/30',
+      iconColor: 'text-blue-600 dark:text-blue-400',
+      iconClass: '',
+      textColor: 'text-blue-800 dark:text-blue-300',
+      badgeBg: 'bg-blue-100 dark:bg-blue-900/30',
+      badgeColor: 'text-blue-700 dark:text-blue-400',
+      badgeText: isBn ? 'বিতরণ সম্পন্ন' : 'Disbursed'
+    };
+  };
+
+  const statusConfig = getStatusConfig();
+
   return (
     <div className="p-5 pb-10 space-y-6 transition-colors">
       {/* Header */}
@@ -332,77 +413,128 @@ export default function Home() {
         </div>
       )}
 
-      {/* Balance Card */}
-      <div className="relative mb-16">
-        {/* Main blue card */}
-        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[24px] px-5 pt-5 pb-14 text-white shadow-lg relative overflow-hidden">
-          {/* Header row */}
-          <div className="flex justify-between items-start mb-2">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-blue-100">{isBn ? 'মোট ব্যালেন্স' : 'Total Balance'}</span>
-              <button onClick={() => setBalanceVisible(!balanceVisible)} className="text-blue-200 hover:text-white transition-colors">
-                {balanceVisible ? <Eye size={15} /> : <EyeOff size={15} />}
-              </button>
+      {/* Balance and Status Section Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch mb-16">
+        {/* Balance Card Wrapper */}
+        <div className="md:col-span-2 relative mb-12 md:mb-0">
+          {/* Main blue card */}
+          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[24px] px-6 pt-6 pb-16 text-white shadow-lg relative overflow-hidden h-full flex flex-col justify-between">
+            {/* Header row */}
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+                <span className="text-xs font-bold text-blue-50">{isBn ? 'পোর্টফোলিও ব্যালেন্স' : 'Portfolio Balances'}</span>
+                <button onClick={() => setBalanceVisible(!balanceVisible)} className="text-blue-200 hover:text-white transition-colors">
+                  {balanceVisible ? <Eye size={14} /> : <EyeOff size={14} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Grid of Balances */}
+            <div className="grid grid-cols-2 gap-4 relative z-10 my-auto pb-6">
+              <div>
+                <p className="text-xs text-blue-200 font-semibold mb-1.5 uppercase tracking-wider">{isBn ? 'মোট ব্যালেন্স' : 'Total Balance'}</p>
+                <h2 className="text-3xl font-black tracking-tight">
+                  {balanceVisible
+                    ? formatCurrency(stats?.totalBalance || 0, isBn)
+                    : (isBn ? '৳•••••' : '৳•••••')
+                  }
+                </h2>
+              </div>
+              
+              <div className="border-l border-white/10 pl-4">
+                <p className="text-xs text-blue-200 font-semibold mb-1.5 uppercase tracking-wider">{isBn ? 'সঞ্চয় ব্যালেন্স' : 'Savings Balance'}</p>
+                <h2 className="text-3xl font-black tracking-tight">
+                  {balanceVisible
+                    ? formatCurrency(stats?.savingsBalance || 0, isBn)
+                    : (isBn ? '৳•••••' : '৳•••••')
+                  }
+                </h2>
+              </div>
+            </div>
+
+            {/* Decorative building */}
+            <div className="absolute top-4 right-4 opacity-10 pointer-events-none">
+              <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                <rect x="10" y="20" width="20" height="60" fill="white" />
+                <rect x="35" y="5" width="20" height="75" fill="white" />
+                <rect x="60" y="30" width="15" height="50" fill="white" />
+              </svg>
             </div>
           </div>
 
-          {/* Balance amount - always show digits */}
-          <h1 className="text-5xl font-black tracking-tight mb-1">
-            {balanceVisible
-              ? formatCurrency(stats?.totalBalance || 0, isBn)
-              : (isBn ? '৳ • • • • •' : '৳ • • • • •')
-            }
-          </h1>
-          <p className="text-sm text-blue-200">
-            {isBn ? 'বিদ্যমান' : 'Available'}: {balanceVisible ? formatCurrency(stats?.totalBalance || 0, isBn) : '৳•••'}
-          </p>
+          {/* Floating Deposit & Withdraw cards */}
+          <div className="absolute -bottom-10 left-4 right-4 flex gap-4">
+            <Link
+              to="/deposit"
+              className="flex-1 bg-emerald-500 rounded-2xl p-4 flex items-center gap-3 shadow-[0_8px_30px_rgba(16,185,129,0.45)] active:scale-95 hover:scale-105 hover:-translate-y-1 hover:shadow-[0_14px_40px_rgba(16,185,129,0.55)] transition-all duration-300"
+            >
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                <ArrowDownToLine size={20} className="text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] text-emerald-100 uppercase tracking-widest font-bold leading-none mb-1">
+                  {isBn ? 'ডিপোজিট' : 'DEPOSIT'}
+                </p>
+                <p className="text-lg font-black text-white leading-none">
+                  {balanceVisible ? formatCurrency(stats?.depositBalance || 0, isBn) : '৳•••'}
+                </p>
+              </div>
+            </Link>
 
-          {/* Decorative building */}
-          <div className="absolute top-3 right-3 opacity-10">
-            <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-              <rect x="10" y="20" width="20" height="60" fill="white" />
-              <rect x="35" y="5" width="20" height="75" fill="white" />
-              <rect x="60" y="30" width="15" height="50" fill="white" />
-            </svg>
+            <Link
+              to="/withdraw"
+              className="flex-1 bg-rose-500 rounded-2xl p-4 flex items-center gap-3 shadow-[0_8px_30px_rgba(244,63,94,0.45)] active:scale-95 hover:scale-105 hover:-translate-y-1 hover:shadow-[0_14px_40px_rgba(244,63,94,0.55)] transition-all duration-300"
+            >
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                <ArrowUpFromLine size={20} className="text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] text-rose-100 uppercase tracking-widest font-bold leading-none mb-1">
+                  {isBn ? 'উত্তোলন' : 'WITHDRAW'}
+                </p>
+                <p className="text-lg font-black text-white leading-none">
+                  {balanceVisible ? formatCurrency(stats?.withdrawBalance || 0, isBn) : '৳•••'}
+                </p>
+              </div>
+            </Link>
           </div>
         </div>
 
-        {/* Floating Deposit & Withdraw cards */}
-        <div className="absolute -bottom-10 left-4 right-4 flex gap-4">
-          <Link
-            to="/deposit"
-            className="flex-1 bg-emerald-500 rounded-2xl p-4 flex items-center gap-3 shadow-[0_8px_30px_rgba(16,185,129,0.45)] active:scale-95 hover:scale-105 hover:-translate-y-1 hover:shadow-[0_14px_40px_rgba(16,185,129,0.55)] transition-all duration-300"
-          >
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-              <ArrowDownToLine size={20} className="text-white" />
+        {/* Status Card */}
+        {(() => {
+          const StatusIcon = statusConfig.icon;
+          return (
+            <div className="bg-white dark:bg-gray-800 rounded-[24px] p-5 shadow-lg border border-gray-100 dark:border-gray-700 flex flex-col justify-between transition-all relative overflow-hidden">
+              {/* Decorative subtle background icon */}
+              <div className="absolute top-0 right-0 w-24 h-24 bg-primary-50/30 dark:bg-primary-900/10 rounded-bl-full -mr-6 -mt-6 z-0"></div>
+              
+              <div className="relative z-10 flex flex-col h-full justify-between gap-4">
+                <div>
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-extrabold block mb-1">
+                    {isBn ? 'লোন স্ট্যাটাস' : 'Loan Status'}
+                  </span>
+                  <h4 className={`text-base font-black ${statusConfig.textColor} leading-snug mb-2`}>
+                    {statusConfig.title}
+                  </h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+                    {statusConfig.description}
+                  </p>
+                </div>
+                
+                <div className="flex items-center gap-3 mt-2">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${statusConfig.iconBg} ${statusConfig.iconColor}`}>
+                    <StatusIcon size={20} className={statusConfig.iconClass} />
+                  </div>
+                  <div className="min-w-0">
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${statusConfig.badgeBg} ${statusConfig.badgeColor}`}>
+                      {statusConfig.badgeText}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-[10px] text-emerald-100 uppercase tracking-widest font-bold leading-none mb-1">
-                {isBn ? 'ডিপোজিট' : 'DEPOSIT'}
-              </p>
-              <p className="text-lg font-black text-white leading-none">
-                {balanceVisible ? formatCurrency(stats?.depositBalance || 0, isBn) : '৳•••'}
-              </p>
-            </div>
-          </Link>
-
-          <Link
-            to="/withdraw"
-            className="flex-1 bg-rose-500 rounded-2xl p-4 flex items-center gap-3 shadow-[0_8px_30px_rgba(244,63,94,0.45)] active:scale-95 hover:scale-105 hover:-translate-y-1 hover:shadow-[0_14px_40px_rgba(244,63,94,0.55)] transition-all duration-300"
-          >
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-              <ArrowUpFromLine size={20} className="text-white" />
-            </div>
-            <div>
-              <p className="text-[10px] text-rose-100 uppercase tracking-widest font-bold leading-none mb-1">
-                {isBn ? 'উত্তোলন' : 'WITHDRAW'}
-              </p>
-              <p className="text-lg font-black text-white leading-none">
-                {balanceVisible ? formatCurrency(stats?.withdrawBalance || 0, isBn) : '৳•••'}
-              </p>
-            </div>
-          </Link>
-        </div>
+          );
+        })()}
       </div>
 
       {/* Quick Actions - Original Style */}

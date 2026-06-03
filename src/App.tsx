@@ -17,6 +17,7 @@ import PayEMI from './pages/PayEMI';
 import ApplicationDetails from './pages/ApplicationDetails';
 import Profile from './pages/Profile';
 import Support from './pages/Support';
+import Terms from './pages/Terms';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import { Toaster } from 'sonner';
 import { useAppStore } from './lib/store';
@@ -64,6 +65,7 @@ export default function App() {
       <Toaster position="top-center" richColors theme={theme === 'dark' ? 'dark' : 'light'} />
       <Routes>
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/terms" element={<Terms />} />
         <Route path="/*" element={
           <Layout>
             <Routes>

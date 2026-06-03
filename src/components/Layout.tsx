@@ -53,9 +53,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           `}</style>
           <Link
             to="/support"
-            className="absolute bottom-28 right-5 bg-red-600 rounded-xl px-3 py-2 z-40 active:scale-90 transition-transform live-badge flex items-center justify-center"
+            className="absolute bottom-28 right-5 bg-red-600 rounded-xl px-4 py-2.5 z-40 active:scale-90 transition-transform live-badge flex items-center justify-center"
           >
-            <span className="text-white text-xs font-black tracking-[0.2em] select-none">LIVE</span>
+            <span className="text-white text-xs font-black select-none flex items-center gap-1">
+              {isBn ? '💬 লাইভ চ্যাট' : '💬 Live Chat'}
+            </span>
           </Link>
         </>
       )}
