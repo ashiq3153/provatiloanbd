@@ -7,12 +7,18 @@ import { toast } from 'sonner';
 import { getTelegramUser } from '../lib/telegram';
 import { createTransaction, uploadDocument, getLoanApplications } from '../lib/api';
 
+import bkashLogo from '../assets/bkash.png';
+import nagadLogo from '../assets/nagad.png';
+import rocketLogo from '../assets/rocket.png';
+import bankLogo from '../assets/bank.png';
+import visaLogo from '../assets/visa.png';
+
 const paymentMethods = [
-  { id: 'bkash', name: 'bKash', logo: '/bkash.png', color: 'bg-[#e2136e]', text: 'text-[#e2136e]', bgLight: 'bg-[#e2136e]/10 dark:bg-[#e2136e]/20', border: 'border-[#e2136e]/30' },
-  { id: 'nagad', name: 'Nagad', logo: 'https://upload.wikimedia.org/wikipedia/commons/d/d1/Nagad_Logo.svg', color: 'bg-[#f7931e]', text: 'text-[#f7931e]', bgLight: 'bg-[#f7931e]/10 dark:bg-[#f7931e]/20', border: 'border-[#f7931e]/30' },
-  { id: 'rocket', name: 'Rocket', logo: 'https://seeklogo.com/images/D/dutch-bangla-rocket-logo-B4D104E752-seeklogo.com.png', color: 'bg-[#8c1596]', text: 'text-[#8c1596]', bgLight: 'bg-[#8c1596]/10 dark:bg-[#8c1596]/20', border: 'border-[#8c1596]/30' },
-  { id: 'bank', name: 'Bank Account', icon: true, color: 'bg-blue-600', text: 'text-blue-600', bgLight: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800' },
-  { id: 'visa', name: 'Visa Card', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg', color: 'bg-indigo-600', text: 'text-indigo-600', bgLight: 'bg-indigo-50 dark:bg-indigo-900/20', border: 'border-indigo-200 dark:border-indigo-800' },
+  { id: 'bkash', name: 'bKash', logo: bkashLogo, color: 'bg-[#e2136e]', text: 'text-[#e2136e]', bgLight: 'bg-[#e2136e]/10 dark:bg-[#e2136e]/20', border: 'border-[#e2136e]/30' },
+  { id: 'nagad', name: 'Nagad', logo: nagadLogo, color: 'bg-[#f7931e]', text: 'text-[#f7931e]', bgLight: 'bg-[#f7931e]/10 dark:bg-[#f7931e]/20', border: 'border-[#f7931e]/30' },
+  { id: 'rocket', name: 'Rocket', logo: rocketLogo, color: 'bg-[#8c1596]', text: 'text-[#8c1596]', bgLight: 'bg-[#8c1596]/10 dark:bg-[#8c1596]/20', border: 'border-[#8c1596]/30' },
+  { id: 'bank', name: 'Bank Account', logo: bankLogo, color: 'bg-blue-600', text: 'text-blue-600', bgLight: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800' },
+  { id: 'visa', name: 'Visa Card', logo: visaLogo, color: 'bg-indigo-600', text: 'text-indigo-600', bgLight: 'bg-indigo-50 dark:bg-indigo-900/20', border: 'border-indigo-200 dark:border-indigo-800' },
 ];
 
 const presetAmounts = [50000, 100000, 200000, 500000];
@@ -360,9 +366,7 @@ export default function Deposit() {
                 {method === m.id && (
                   <div className={`absolute inset-0 ${m.bgLight} pointer-events-none`}></div>
                 )}
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center relative z-10 ${method === m.id ? m.bgLight : 'bg-gray-100 dark:bg-gray-700 text-gray-500'}`}>
-                  {m.id === 'bank' ? <Landmark size={15} /> : <CreditCard size={15} />}
-                </div>
+                <img src={m.logo} alt={m.name} className="h-6 object-contain mix-blend-multiply dark:mix-blend-normal rounded-sm relative z-10" />
                 <span className={`text-[10px] relative z-10 ${method === m.id ? m.text : 'text-gray-600 dark:text-gray-300'}`}>{m.name}</span>
               </button>
             ))}
