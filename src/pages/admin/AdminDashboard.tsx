@@ -23,6 +23,50 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<LoanApplication | null>(null);
 
+  // States for revision request flagged sections
+  const [flaggedPersonal, setFlaggedPersonal] = useState(false);
+  const [flaggedProfessional, setFlaggedProfessional] = useState(false);
+  const [flaggedBank, setFlaggedBank] = useState(false);
+  const [flaggedNominee, setFlaggedNominee] = useState(false);
+  const [flaggedDocuments, setFlaggedDocuments] = useState(false);
+
+  useEffect(() => {
+    if (selectedLoan) {
+      let flagged = {
+        personal: false,
+        professional: false,
+        bank: false,
+        nominee: false,
+        documents: false
+      };
+      if (selectedLoan.admin_feedback && selectedLoan.admin_feedback.trim().startsWith('{')) {
+        try {
+          const parsed = JSON.parse(selectedLoan.admin_feedback);
+          if (parsed.flagged) {
+            flagged = {
+              personal: !!parsed.flagged.personal,
+              professional: !!parsed.flagged.professional,
+              bank: !!parsed.flagged.bank,
+              nominee: !!parsed.flagged.nominee,
+              documents: !!parsed.flagged.documents
+            };
+          }
+        } catch (e) {}
+      }
+      setFlaggedPersonal(flagged.personal);
+      setFlaggedProfessional(flagged.professional);
+      setFlaggedBank(flagged.bank);
+      setFlaggedNominee(flagged.nominee);
+      setFlaggedDocuments(flagged.documents);
+    } else {
+      setFlaggedPersonal(false);
+      setFlaggedProfessional(false);
+      setFlaggedBank(false);
+      setFlaggedNominee(false);
+      setFlaggedDocuments(false);
+    }
+  }, [selectedLoan]);
+
   // Support Chat admin state
   const [chatUsers, setChatUsers] = useState<any[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
@@ -292,10 +336,21 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (activeTab === 'chat') {
       fetchAllChatData();
-      const interval = setInterval(() => {
-        fetchAllChatData();
-      }, 4000);
-      return () => clearInterval(interval);
+
+      const channel = supabase
+        .channel('admin_support_messages')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'support_messages' },
+          () => {
+            fetchAllChatData();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [activeTab, selectedChatId, profiles]);
 
@@ -2103,26 +2158,177 @@ export default function AdminDashboard() {
                     </div>
                   )}
 
+                  {/* Revision History Timeline */}
+                  {(() => {
+                    const parsedFeedback = (() => {
+                      if (selectedLoan.admin_feedback && selectedLoan.admin_feedback.trim().startsWith('{')) {
+                        try {
+                          return JSON.parse(selectedLoan.admin_feedback);
+                        } catch (e) {}
+                      }
+                      return null;
+                    })();
+                    const historyList = parsedFeedback?.history || [];
+                    if (historyList.length === 0) return null;
+
+                    return (
+                      <div className="bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/40 rounded-3xl p-6 space-y-4">
+                        <h4 className="font-extrabold text-sm text-gray-800 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                          ⏳ {isBn ? 'সংশোধন ও পরিবর্তন ইতিহাস' : 'Revision & Changes History Log'}
+                        </h4>
+                        <div className="relative border-l-2 border-primary-200 dark:border-primary-900 ml-3 pl-6 space-y-6 text-xs">
+                          {historyList.map((entry: any, index: number) => (
+                            <div key={index} className="relative">
+                              <div className="absolute -left-[31px] top-1 w-4.5 h-4.5 rounded-full bg-primary-100 dark:bg-primary-950 border-2 border-primary-500 flex items-center justify-center">
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary-600 dark:bg-primary-400"></span>
+                              </div>
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-gray-800 dark:text-gray-200">
+                                    {isBn ? 'সংশোধন সেশন' : 'Revision Session'} #{index + 1}
+                                  </span>
+                                  <span className="text-[10px] text-gray-400 font-mono">
+                                    {new Date(entry.date).toLocaleString(isBn ? 'bn-BD' : 'en-US')}
+                                  </span>
+                                </div>
+                                {entry.note && (
+                                  <p className="text-gray-500 dark:text-gray-400 italic">
+                                    "{entry.note}"
+                                  </p>
+                                )}
+                                {entry.changes && entry.changes.length > 0 ? (
+                                  <div className="mt-2 bg-white dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-xl p-3 space-y-1">
+                                    <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                                      {isBn ? 'গ্রাহক দ্বারা পরিবর্তিত তথ্যাদি:' : 'Customer Field Modifications:'}
+                                    </p>
+                                    <ul className="list-disc pl-4.5 text-gray-700 dark:text-gray-300 font-medium space-y-1">
+                                      {entry.changes.map((change: string, cIdx: number) => (
+                                        <li key={cIdx}>{change}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                ) : (
+                                  <p className="text-[10px] text-gray-450 dark:text-gray-550 font-medium mt-1">
+                                    {isBn ? 'কোনো নির্দিষ্ট তথ্য পরিবর্তন সনাক্ত করা যায়নি।' : 'No field changes logged in this step.'}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   {/* Revision Section (within Modal) */}
                   {(selectedLoan.status === 'pending' || selectedLoan.status === 'under_review' || selectedLoan.status === 'action_required') && (
                     <div className="bg-amber-50/50 dark:bg-amber-950/10 border border-amber-200/50 rounded-2xl p-5 space-y-4">
                       <h4 className="font-extrabold text-sm text-amber-900 dark:text-amber-300 uppercase tracking-wider flex items-center gap-2">
                         📝 {isBn ? 'সংশোধন অনুরোধ (Revision Feedback Notes)' : 'Request Revision Notes'}
                       </h4>
+
+                      {/* Section Flag Checklist */}
+                      <div className="bg-white dark:bg-gray-900/60 p-4 rounded-xl border border-amber-250/20 space-y-3">
+                        <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                          {isBn ? 'সংশোধনযোগ্য সেকশনসমূহ সিলেক্ট করুন:' : 'Select sections requiring revision:'}
+                        </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs font-bold text-gray-750 dark:text-gray-300">
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input 
+                              type="checkbox" 
+                              checked={flaggedPersonal} 
+                              onChange={(e) => setFlaggedPersonal(e.target.checked)}
+                              className="w-4.5 h-4.5 accent-amber-500 rounded cursor-pointer"
+                            />
+                            <span>{isBn ? 'ব্যক্তিগত তথ্য' : 'Personal Info'}</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input 
+                              type="checkbox" 
+                              checked={flaggedProfessional} 
+                              onChange={(e) => setFlaggedProfessional(e.target.checked)}
+                              className="w-4.5 h-4.5 accent-amber-500 rounded cursor-pointer"
+                            />
+                            <span>{isBn ? 'পেশাগত তথ্য' : 'Professional Info'}</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input 
+                              type="checkbox" 
+                              checked={flaggedBank} 
+                              onChange={(e) => setFlaggedBank(e.target.checked)}
+                              className="w-4.5 h-4.5 accent-amber-500 rounded cursor-pointer"
+                            />
+                            <span>{isBn ? 'ব্যাংক তথ্য' : 'Bank Info'}</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input 
+                              type="checkbox" 
+                              checked={flaggedNominee} 
+                              onChange={(e) => setFlaggedNominee(e.target.checked)}
+                              className="w-4.5 h-4.5 accent-amber-500 rounded cursor-pointer"
+                            />
+                            <span>{isBn ? 'নমিনি তথ্য' : 'Nominee Info'}</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input 
+                              type="checkbox" 
+                              checked={flaggedDocuments} 
+                              onChange={(e) => setFlaggedDocuments(e.target.checked)}
+                              className="w-4.5 h-4.5 accent-amber-500 rounded cursor-pointer"
+                            />
+                            <span>{isBn ? 'ডকুমেন্টস' : 'Documents'}</span>
+                          </label>
+                        </div>
+                      </div>
+
                       <div className="flex flex-col sm:flex-row gap-3">
                         <input 
                           type="text" 
                           placeholder="Provide descriptive feedback for the applicant..." 
                           className="flex-1 px-4 py-3 text-sm border rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-500 focus:outline-none font-medium text-gray-800 dark:text-gray-100"
                           id={`modal-feedback-${selectedLoan.id}`}
-                          defaultValue={selectedLoan.admin_feedback || ''}
+                          defaultValue={(() => {
+                            const feedbackStr = selectedLoan.admin_feedback;
+                            if (!feedbackStr) return '';
+                            if (feedbackStr.trim().startsWith('{')) {
+                              try {
+                                const parsed = JSON.parse(feedbackStr);
+                                return parsed.note || '';
+                              } catch (e) {}
+                            }
+                            return feedbackStr;
+                          })()}
                         />
                         <button 
                           onClick={() => {
-                            const fb = (document.getElementById(`modal-feedback-${selectedLoan.id}`) as HTMLInputElement).value;
-                            if(!fb) return toast.error('Please enter feedback');
-                            handleLoanStatus(selectedLoan.id, 'action_required', fb);
-                            setSelectedLoan({...selectedLoan, status: 'action_required', admin_feedback: fb});
+                            const fbText = (document.getElementById(`modal-feedback-${selectedLoan.id}`) as HTMLInputElement).value;
+                            if(!fbText) return toast.error('Please enter feedback');
+
+                            let existingHistory: any[] = [];
+                            if (selectedLoan.admin_feedback && selectedLoan.admin_feedback.trim().startsWith('{')) {
+                              try {
+                                const parsed = JSON.parse(selectedLoan.admin_feedback);
+                                if (Array.isArray(parsed.history)) {
+                                  existingHistory = parsed.history;
+                                }
+                              } catch (e) {}
+                            }
+
+                            const feedbackObj = {
+                              note: fbText,
+                              flagged: {
+                                personal: flaggedPersonal,
+                                professional: flaggedProfessional,
+                                bank: flaggedBank,
+                                nominee: flaggedNominee,
+                                documents: flaggedDocuments
+                              },
+                              history: existingHistory
+                            };
+
+                            const serializedFeedback = JSON.stringify(feedbackObj);
+                            handleLoanStatus(selectedLoan.id, 'action_required', serializedFeedback);
+                            setSelectedLoan({...selectedLoan, status: 'action_required', admin_feedback: serializedFeedback});
                           }}
                           className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm transition-colors cursor-pointer shrink-0"
                         >

@@ -34,6 +34,222 @@ import { getLoanSchema, LoanFormData } from "./ApplyLoanSchema";
 
 import { getCategories, snapPoints, amountPackages, formatAmount, getAllowedTenure, getColorStyles, getIconColor } from "./apply-loan-utils";
 
+const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
+  const { formState: { errors } } = useFormContext<LoanFormData>();
+  const error = errors[field];
+  return error ? (
+    <p className="text-red-500 text-xs mt-1 font-medium transition-opacity animate-in fade-in flex items-center gap-1">
+      <AlertCircle size={12} className="shrink-0" />
+      <span>{error.message}</span>
+    </p>
+  ) : null;
+};
+
+const AccordionSection = ({
+  sectionKey,
+  title,
+  icon,
+  fields,
+  isExpanded,
+  onToggle,
+  isBn,
+  category,
+  flagged,
+  children
+}: {
+  sectionKey: string;
+  title: string;
+  icon: React.ReactNode;
+  fields: (keyof LoanFormData)[];
+  isExpanded: boolean;
+  onToggle: () => void;
+  isBn: boolean;
+  category: any;
+  flagged?: boolean;
+  children: React.ReactNode;
+}) => {
+  const { formState: { errors }, getValues } = useFormContext<LoanFormData>();
+  const errorCount = fields.filter(f => errors[f]).length;
+  const hasError = errorCount > 0;
+  const isComplete = !hasError && fields.some(f => getValues(f));
+
+  return (
+    <div id={`accordion-section-${sectionKey}`} className="space-y-2 scroll-mt-20">
+      <button
+        type="button"
+        onClick={onToggle}
+        className={`w-full flex items-center justify-between p-4.5 border transition-all text-left font-bold text-sm select-none cursor-pointer ${
+          isExpanded
+            ? flagged
+              ? "bg-amber-50/50 dark:bg-amber-950/20 border-amber-500 text-amber-900 dark:text-amber-100 shadow-sm rounded-t-2xl rounded-b-none ring-2 ring-amber-500/20"
+              : "bg-primary-50/50 dark:bg-primary-950/20 border-primary-500 text-primary-900 dark:text-primary-100 shadow-sm rounded-t-2xl rounded-b-none"
+            : flagged
+            ? "bg-amber-50/40 dark:bg-amber-950/10 border-amber-400 dark:border-amber-900/60 text-amber-800 dark:text-amber-400 rounded-2xl ring-2 ring-amber-500/10 animate-pulse"
+            : hasError
+            ? "bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-455 rounded-2xl"
+            : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-gray-200 rounded-2xl"
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-xl transition-colors ${
+            isExpanded
+              ? flagged ? "bg-amber-500 text-white" : "bg-primary-500 text-white"
+              : flagged
+              ? "bg-amber-500 text-white animate-bounce"
+              : hasError
+              ? "bg-rose-500 text-white"
+              : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+          }`}>
+            {icon}
+          </div>
+          <div className="flex items-center gap-2">
+            <span>{title}</span>
+            {sectionKey === "professional" && category && (
+              <span className="px-2 py-0.5 text-[9px] bg-primary-100 dark:bg-primary-900/60 text-primary-700 dark:text-primary-300 rounded font-black tracking-wide uppercase">
+                {category.title}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {flagged ? (
+            <span className="flex items-center gap-1 text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-2 py-1 rounded-full font-black animate-pulse border border-amber-300 dark:border-amber-800">
+              <AlertCircle size={10} className="text-amber-600 dark:text-amber-450" />
+              {isBn ? "সংশোধন প্রয়োজন" : "Needs Revision"}
+            </span>
+          ) : hasError ? (
+            <span className="flex items-center gap-1 text-[10px] bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-455 px-2 py-1 rounded-full font-black animate-pulse">
+              <AlertCircle size={10} />
+              {isBn ? `${convertDigits(errorCount.toString(), true)}টি ভুল` : `${errorCount} errors`}
+            </span>
+          ) : isComplete ? (
+            <CheckCircle2 size={16} className="text-green-500" />
+          ) : null}
+          <ChevronRight 
+            size={16} 
+            className={`transition-transform duration-200 text-gray-400 ${isExpanded ? "rotate-90 text-primary-500" : ""}`}
+          />
+        </div>
+      </button>
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="p-5 pt-3 bg-white dark:bg-gray-800 border border-t-0 border-gray-100 dark:border-gray-700 rounded-b-2xl space-y-4 shadow-sm">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const computeChangesDiff = (original: any, current: any, isBn: boolean): string[] => {
+  const changes: string[] = [];
+  if (!original) return changes;
+
+  const originalForm = original.formData || {};
+  const currentForm = current || {};
+
+  const fieldLabels: Record<string, { bn: string; en: string }> = {
+    fullName: { bn: "পূর্ণ নাম", en: "Full Name" },
+    fatherName: { bn: "পিতার নাম", en: "Father's Name" },
+    motherName: { bn: "Mother's Name", en: "Mother's Name" },
+    dob: { bn: "জন্ম তারিখ", en: "Date of Birth" },
+    gender: { bn: "লিঙ্গ", en: "Gender" },
+    mobile: { bn: "মোবাইল নম্বর", en: "Mobile Number" },
+    whatsapp: { bn: "হোয়াটসঅ্যাপ নম্বর", en: "WhatsApp Number" },
+    email: { bn: "ইমেইল এড্রেস", en: "Email Address" },
+    currentAddress: { bn: "বর্তমান ঠিকানা", en: "Current Address" },
+    permanentAddress: { bn: "স্থায়ী ঠিকানা", en: "Permanent Address" },
+    nidNumber: { bn: "এনআইডি নম্বর", en: "NID Number" },
+    
+    companyName: { bn: "কোম্পানির নাম", en: "Company Name" },
+    designation: { bn: "পদবী", en: "Designation" },
+    workDuration: { bn: "কাজের মেয়াদ", en: "Work Duration" },
+    monthlyIncome: { bn: "মাসিক আয়", en: "Monthly Income" },
+    businessName: { bn: "ব্যবসার নাম", en: "Business Name" },
+    shopAddress: { bn: "দোকানের ঠিকানা", en: "Shop Address" },
+    tradeLicense: { bn: "ট্রেড লাইসেন্স নম্বর", en: "Trade License Number" },
+    workingCountry: { bn: "কর্মরত দেশ", en: "Working Country" },
+    visaType: { bn: "ভিসার ধরণ", en: "Visa Type" },
+    passportNumber: { bn: "পাসপোর্ট নম্বর", en: "Passport Number" },
+    institutionName: { bn: "প্রতিষ্ঠানের নাম", en: "Institution Name" },
+    studentId: { bn: "স্টুডেন্ট আইডি", en: "Student ID" },
+    guardianIncome: { bn: "অভিভাবকের আয়", en: "Guardian's Income" },
+    professionName: { bn: "পেশার নাম", en: "Profession Name" },
+    emergencyReason: { bn: "জরুরি কারণ", en: "Emergency Reason" },
+
+    bankName: { bn: "ব্যাংকের নাম", en: "Bank Name" },
+    accountName: { bn: "হিসাবের নাম", en: "Account Name" },
+    accountNumber: { bn: "হিসাব নম্বর", en: "Account Number" },
+    routingNumber: { bn: "রাউটিং নম্বর", en: "Routing Number" },
+    mobileBanking: { bn: "মোবাইল ব্যাংকিং", en: "Mobile Banking Number" },
+
+    nomineeName: { bn: "নমিনির নাম", en: "Nominee Name" },
+    nomineeRelation: { bn: "সম্পর্ক", en: "Nominee Relation" },
+    nomineeMobile: { bn: "নমিনির মোবাইল", en: "Nominee Mobile" },
+    nomineeNid: { bn: "নমিনির এনআইডি", en: "Nominee NID" },
+  };
+
+  for (const key of Object.keys(fieldLabels)) {
+    const origVal = originalForm[key] !== undefined ? String(originalForm[key]).trim() : "";
+    const currVal = currentForm[key] !== undefined ? String(currentForm[key]).trim() : "";
+    if (origVal !== currVal) {
+      const label = isBn ? fieldLabels[key].bn : fieldLabels[key].en;
+      if (isBn) {
+        changes.push(`${label} সংশোধন করা হয়েছে (পূর্বের মান: '${origVal || "খালি"}', নতুন মান: '${currVal || "খালি"}')`);
+      } else {
+        changes.push(`${label} changed from '${origVal || "empty"}' to '${currVal || "empty"}'`);
+      }
+    }
+  }
+
+  const origDocs = original.documents || {};
+  const currDocs = currentForm.documents || {};
+  const docLabels: Record<string, { bn: string; en: string }> = {
+    nid_front: { bn: "এনআইডি সামনের অংশ ছবি", en: "NID Front Side Photo" },
+    nid_back: { bn: "এনআইডি পেছনের অংশ ছবি", en: "NID Back Side Photo" },
+    selfie: { bn: "সেলফি ছবি", en: "Selfie Image" },
+    photo: { bn: "পাসপোর্ট সাইজ ছবি", en: "Passport Size Photo" },
+    nominee_photo: { bn: "নমিনির ছবি", en: "Nominee Photo" },
+    office_id: { bn: "অফিস আইডি কার্ড", en: "Office ID Card" },
+    salary_cert: { bn: "বেতনের প্রমাণপত্র", en: "Salary Certificate" },
+    appointment_letter: { bn: "অ্যাপয়েন্টমেন্ট লেটার", en: "Appointment Letter" },
+    trade_license: { bn: "ট্রেড লাইসেন্স কপি", en: "Trade License Copy" },
+    shop_photo: { bn: "দোকান/প্রতিষ্ঠানের ছবি", en: "Shop/Institution Photo" },
+    business_docs: { bn: "ব্যবসায়িক অন্যান্য ডকুমেন্টস", en: "Business Documents" },
+    passport_copy: { bn: "পাসপোর্ট কপি", en: "Passport Copy" },
+    visa_copy: { bn: "ভিসা কপি", en: "Visa Copy" },
+    work_permit: { bn: "ওয়ার্ক পারমিট / ওভারসিস আইডি", en: "Work Permit" },
+    student_id: { bn: "স্টুডেন্ট আইডি কার্ড", en: "Student ID Card" },
+    guardian_nid: { bn: "অভিভাবকের NID কপি", en: "Guardian's NID Copy" },
+    guardian_income: { bn: "অভিভাবকের আয়ের প্রমাণপত্র", en: "Guardian's Income Proof" },
+    income_proof: { bn: "আয়ের প্রমাণপত্র / ব্যাংক স্টেটমেন্ট", en: "Income Proof / Bank Statement" },
+    emergency_docs: { bn: "মেডিকেল বা জরুরি ডকুমেন্টস", en: "Medical/Emergency Documents" },
+  };
+
+  for (const key of Object.keys(docLabels)) {
+    const origDoc = origDocs[key] || "";
+    const currDoc = currDocs[key] || "";
+    if (origDoc !== currDoc) {
+      const label = isBn ? docLabels[key].bn : docLabels[key].en;
+      if (isBn) {
+        changes.push(`${label} পুনরায় আপলোড করা হয়েছে`);
+      } else {
+        changes.push(`${label} has been re-uploaded`);
+      }
+    }
+  }
+
+  return changes;
+};
 
 export default function ApplyLoan() {
   const navigate = useNavigate();
@@ -87,6 +303,17 @@ export default function ApplyLoan() {
     nominee: false
   });
 
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [feedbackNote, setFeedbackNote] = useState<string | null>(null);
+  const [flaggedSections, setFlaggedSections] = useState<Record<string, boolean>>({
+    personal: false,
+    professional: false,
+    bank: false,
+    nominee: false,
+    documents: false
+  });
+  const [originalData, setOriginalData] = useState<any>(null);
+
   // Ban check on mount
   useEffect(() => {
     if (user && user.id) {
@@ -100,7 +327,16 @@ export default function ApplyLoan() {
   }, [user, isBn, navigate]);
 
   const toggleSection = (section: string) => {
-    setExpanded(prev => ({ ...prev, [section]: !prev[section] }));
+    const nextState = !expanded[section];
+    setExpanded(prev => ({ ...prev, [section]: nextState }));
+    if (nextState) {
+      setTimeout(() => {
+        const el = document.getElementById(`accordion-section-${section}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 250);
+    }
   };
 
   useEffect(() => {
@@ -120,7 +356,7 @@ export default function ApplyLoan() {
             setDocuments(loan.documents);
           }
 
-          methods.reset({
+          const defaultFields = {
             fullName: loan.full_name,
             fatherName: loan.father_name,
             motherName: loan.mother_name,
@@ -131,6 +367,7 @@ export default function ApplyLoan() {
             email: loan.email || '',
             currentAddress: loan.current_address,
             permanentAddress: loan.permanent_address,
+            nidNumber: loan.nid_number || '',
             bankName: loan.bank_name,
             accountName: loan.account_name,
             accountNumber: loan.account_number,
@@ -141,8 +378,64 @@ export default function ApplyLoan() {
             nomineeMobile: loan.nominee_mobile,
             nomineeNid: loan.nominee_nid,
             ...(loan.professional_info as any)
-          });
+          };
+
+          methods.reset(defaultFields);
           if (loan.documents) setDocuments(loan.documents);
+
+          // Parse admin feedback JSON for flagged sections
+          let feedbackText = loan.admin_feedback || '';
+          let flagged = {
+            personal: false,
+            professional: false,
+            bank: false,
+            nominee: false,
+            documents: false
+          };
+
+          if (loan.status === 'action_required' && loan.admin_feedback) {
+            try {
+              if (loan.admin_feedback.trim().startsWith('{')) {
+                const parsed = JSON.parse(loan.admin_feedback);
+                feedbackText = parsed.note || '';
+                if (parsed.flagged) {
+                  flagged = {
+                    personal: !!parsed.flagged.personal,
+                    professional: !!parsed.flagged.professional,
+                    bank: !!parsed.flagged.bank,
+                    nominee: !!parsed.flagged.nominee,
+                    documents: !!parsed.flagged.documents
+                  };
+                }
+              }
+            } catch (e) {
+              console.error("Error parsing admin_feedback JSON", e);
+            }
+          }
+
+          setFeedbackNote(feedbackText);
+          setFlaggedSections(flagged);
+          setOriginalData({
+            formData: defaultFields,
+            documents: loan.documents || {}
+          });
+
+          if (loan.status === 'action_required') {
+            // Auto expand flagged sections in step 3
+            setExpanded({
+              personal: flagged.personal,
+              professional: flagged.professional,
+              bank: flagged.bank,
+              nominee: flagged.nominee
+            });
+
+            // Auto navigate step
+            if (flagged.personal || flagged.professional || flagged.bank || flagged.nominee) {
+              setStep(3);
+            } else if (flagged.documents) {
+              setStep(4);
+            }
+          }
         }
       });
     } else if (selectedCategory) {
@@ -214,9 +507,7 @@ export default function ApplyLoan() {
     return Math.round(emi);
   };
 
-  const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
-    return errors[field] ? <p className="text-red-500 text-xs mt-1 font-medium transition-opacity animate-in fade-in">{errors[field]?.message}</p> : null;
-  };
+
 
   const nextStep = async () => {
     if (step < totalSteps) {
@@ -343,6 +634,55 @@ export default function ApplyLoan() {
         professionalInfo.monthlyIncome = formData.monthlyIncome || '';
       }
 
+      let updatedFeedbackJson = '';
+      if (editId) {
+        try {
+          const { data: currentLoan } = await supabase
+            .from('loan_applications')
+            .select('admin_feedback, status')
+            .eq('id', editId)
+            .single();
+
+          if (currentLoan) {
+            let existingHistory: any[] = [];
+            if (currentLoan.admin_feedback && currentLoan.admin_feedback.trim().startsWith('{')) {
+              try {
+                const parsed = JSON.parse(currentLoan.admin_feedback);
+                if (Array.isArray(parsed.history)) {
+                  existingHistory = parsed.history;
+                }
+              } catch (e) {}
+            }
+
+            const currentFormData = { ...formData, documents: documents };
+            const changes = computeChangesDiff(originalData, currentFormData, isBn);
+
+            if (changes.length > 0 || feedbackNote) {
+              const historyEntry = {
+                date: new Date().toISOString(),
+                note: feedbackNote || (isBn ? "ইউজার তথ্য সংশোধন করেছেন।" : "User corrected details."),
+                changes: changes
+              };
+              existingHistory.push(historyEntry);
+            }
+
+            updatedFeedbackJson = JSON.stringify({
+              note: null,
+              flagged: {
+                personal: false,
+                professional: false,
+                bank: false,
+                nominee: false,
+                documents: false
+              },
+              history: existingHistory
+            });
+          }
+        } catch (e) {
+          console.error("Error computing diff on submit:", e);
+        }
+      }
+
       const payload = {
         chat_id: user.id,
         loan_category: category?.id || 'personal',
@@ -374,6 +714,7 @@ export default function ApplyLoan() {
         nominee_mobile: formData.nomineeMobile,
         nominee_nid: formData.nomineeNid,
         documents: documents,
+        ...(editId && updatedFeedbackJson ? { admin_feedback: updatedFeedbackJson } : {})
       };
 
       let result;
@@ -504,6 +845,55 @@ export default function ApplyLoan() {
         professionalInfo.monthlyIncome = formData.monthlyIncome || '';
       }
 
+      let updatedFeedbackJson = '';
+      if (editId) {
+        try {
+          const { data: currentLoan } = await supabase
+            .from('loan_applications')
+            .select('admin_feedback, status')
+            .eq('id', editId)
+            .single();
+
+          if (currentLoan) {
+            let existingHistory: any[] = [];
+            if (currentLoan.admin_feedback && currentLoan.admin_feedback.trim().startsWith('{')) {
+              try {
+                const parsed = JSON.parse(currentLoan.admin_feedback);
+                if (Array.isArray(parsed.history)) {
+                  existingHistory = parsed.history;
+                }
+              } catch (e) {}
+            }
+
+            const currentFormData = { ...formData, documents: documents };
+            const changes = computeChangesDiff(originalData, currentFormData, isBn);
+
+            if (changes.length > 0 || feedbackNote) {
+              const historyEntry = {
+                date: new Date().toISOString(),
+                note: feedbackNote || (isBn ? "ইউজার তথ্য সংশোধন করেছেন।" : "User corrected details."),
+                changes: changes
+              };
+              existingHistory.push(historyEntry);
+            }
+
+            updatedFeedbackJson = JSON.stringify({
+              note: null,
+              flagged: {
+                personal: false,
+                professional: false,
+                bank: false,
+                nominee: false,
+                documents: false
+              },
+              history: existingHistory
+            });
+          }
+        } catch (e) {
+          console.error("Error computing diff on submit:", e);
+        }
+      }
+
       const payload = {
         chat_id: user.id,
         loan_category: category?.id || 'personal',
@@ -535,6 +925,7 @@ export default function ApplyLoan() {
         nominee_mobile: formData.nomineeMobile,
         nominee_nid: formData.nomineeNid,
         documents: documents,
+        ...(editId && updatedFeedbackJson ? { admin_feedback: updatedFeedbackJson } : {})
       };
 
       let result;
@@ -742,93 +1133,7 @@ export default function ApplyLoan() {
     );
   };
 
-  const getSectionErrorCount = (fields: (keyof LoanFormData)[]) => {
-    return fields.filter(f => errors[f]).length;
-  };
 
-  const AccordionSection = ({
-    sectionKey,
-    title,
-    icon,
-    fields,
-    children
-  }: {
-    sectionKey: string;
-    title: string;
-    icon: React.ReactNode;
-    fields: (keyof LoanFormData)[];
-    children: React.ReactNode;
-  }) => {
-    const isExpanded = expanded[sectionKey];
-    const errorCount = getSectionErrorCount(fields);
-    const hasError = errorCount > 0;
-    const isComplete = !hasError && fields.some(f => methods.getValues(f));
-
-    return (
-      <div className="space-y-2">
-        <button
-          type="button"
-          onClick={() => toggleSection(sectionKey)}
-          className={`w-full flex items-center justify-between p-4.5 border transition-all text-left font-bold text-sm select-none cursor-pointer ${
-            isExpanded
-              ? 'bg-primary-50/50 dark:bg-primary-950/20 border-primary-500 text-primary-900 dark:text-primary-100 shadow-sm rounded-t-2xl rounded-b-none'
-              : hasError
-              ? 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-400 rounded-2xl'
-              : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-gray-200 rounded-2xl'
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-xl transition-colors ${
-              isExpanded
-                ? 'bg-primary-500 text-white'
-                : hasError
-                ? 'bg-rose-500 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-            }`}>
-              {icon}
-            </div>
-            <div className="flex items-center gap-2">
-              <span>{title}</span>
-              {sectionKey === 'professional' && category && (
-                <span className="px-2 py-0.5 text-[9px] bg-primary-100 dark:bg-primary-900/60 text-primary-700 dark:text-primary-300 rounded font-black tracking-wide uppercase">
-                  {category.title}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {hasError ? (
-              <span className="flex items-center gap-1 text-[10px] bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-400 px-2 py-1 rounded-full font-black animate-pulse">
-                <AlertCircle size={10} />
-                {isBn ? `${convertDigits(errorCount.toString(), true)}টি ভুল` : `${errorCount} errors`}
-              </span>
-            ) : isComplete ? (
-              <CheckCircle2 size={16} className="text-green-500" />
-            ) : null}
-            <ChevronRight 
-              size={16} 
-              className={`transition-transform duration-200 text-gray-400 ${isExpanded ? 'rotate-90 text-primary-500' : ''}`}
-            />
-          </div>
-        </button>
-        <AnimatePresence initial={false}>
-          {isExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              <div className="p-5 pt-3 bg-white dark:bg-gray-800 border border-t-0 border-gray-100 dark:border-gray-700 rounded-b-2xl space-y-4 shadow-sm">
-                {children}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    );
-  };
 
   const Step3CombinedInfo = () => {
     const personalFields: (keyof LoanFormData)[] = ['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'mobile', 'whatsapp', 'email', 'currentAddress', 'permanentAddress', 'nidNumber'];
@@ -843,8 +1148,26 @@ export default function ApplyLoan() {
     const bankFields: (keyof LoanFormData)[] = ['bankName', 'accountName', 'accountNumber', 'routingNumber', 'mobileBanking'];
     const nomineeFields: (keyof LoanFormData)[] = ['nomineeName', 'nomineeRelation', 'nomineeMobile', 'nomineeNid'];
 
+    const handleInputFocus = (e: React.FocusEvent<HTMLDivElement>) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT')) {
+        setTimeout(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+      }
+    };
+
     return (
-      <div className="space-y-4 pb-6">
+      <div className="space-y-4 pb-6" onFocus={handleInputFocus}>
+        {feedbackNote && (
+          <div className="bg-amber-50 dark:bg-amber-950/20 text-amber-850 dark:text-amber-300 p-4.5 rounded-2xl border border-amber-100 dark:border-amber-900/40 text-xs font-semibold leading-relaxed flex gap-3 transition-colors mb-4">
+            <AlertCircle size={20} className="text-amber-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-black text-amber-900 dark:text-amber-250 uppercase tracking-wider text-[9px] mb-1">{isBn ? 'সংশোধন অনুরোধ মন্তব্য:' : 'Revision Requested Comments:'}</p>
+              <p>{feedbackNote}</p>
+            </div>
+          </div>
+        )}
         <div className="mb-4">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors">{isBn ? "আবেদনকারীর তথ্য বিবরণী" : "Applicant Information"}</h2>
           <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">{isBn ? "নিচের সবগুলো সেকশন সঠিকভাবে পূরণ করুন" : "Please fill out all the sections below accurately."}</p>
@@ -856,6 +1179,11 @@ export default function ApplyLoan() {
           title={isBn ? "১. ব্যক্তিগত তথ্য" : "1. Personal Information"}
           icon={<User size={18} />}
           fields={personalFields}
+          isExpanded={expanded.personal}
+          onToggle={() => toggleSection('personal')}
+          isBn={isBn}
+          category={category}
+          flagged={flaggedSections.personal}
         >
           <div className="space-y-3.5 text-xs">
             <div>
@@ -932,6 +1260,11 @@ export default function ApplyLoan() {
           title={isBn ? "২. পেশাগত তথ্য" : "2. Professional Info"}
           icon={<Briefcase size={18} />}
           fields={profFields}
+          isExpanded={expanded.professional}
+          onToggle={() => toggleSection('professional')}
+          isBn={isBn}
+          category={category}
+          flagged={flaggedSections.professional}
         >
           <div className="space-y-3.5 text-xs">
             {category?.id === 'personal' && (
@@ -1067,6 +1400,11 @@ export default function ApplyLoan() {
           title={isBn ? "৩. ব্যাংক একাউন্ট তথ্য" : "3. Bank Account Details"}
           icon={<Landmark size={18} />}
           fields={bankFields}
+          isExpanded={expanded.bank}
+          onToggle={() => toggleSection('bank')}
+          isBn={isBn}
+          category={category}
+          flagged={flaggedSections.bank}
         >
           <div className="space-y-3.5 text-xs">
             <div>
@@ -1105,6 +1443,11 @@ export default function ApplyLoan() {
           title={isBn ? "৪. নমিনি তথ্য" : "4. Nominee Details"}
           icon={<Users size={18} />}
           fields={nomineeFields}
+          isExpanded={expanded.nominee}
+          onToggle={() => toggleSection('nominee')}
+          isBn={isBn}
+          category={category}
+          flagged={flaggedSections.nominee}
         >
           <div className="space-y-3.5 text-xs">
             <div>
@@ -1184,13 +1527,23 @@ export default function ApplyLoan() {
 
   const Step4Documents = () => (
     <div className="space-y-5 pb-6 text-xs">
+      {flaggedSections.documents && (
+        <div className="bg-amber-50 dark:bg-amber-950/20 text-amber-850 dark:text-amber-300 p-4.5 rounded-2xl border border-amber-100 dark:border-amber-900/40 text-xs font-semibold leading-relaxed flex gap-3 transition-colors mb-4 animate-pulse">
+          <AlertCircle size={20} className="text-amber-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-black text-amber-900 dark:text-amber-250 uppercase tracking-wider text-[9px] mb-1">{isBn ? 'সংশোধন প্রয়োজন:' : 'Revision Required:'}</p>
+            <p>{isBn ? 'অনুগ্রহ করে নির্দেশিত প্রয়োজনীয় কাগজপত্র সংশোধন করে পুনরায় আপলোড করুন।' : 'Please review and re-upload the flagged documents.'}</p>
+          </div>
+        </div>
+      )}
+
       <div className="mb-4">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors">{isBn ? "প্রয়োজনীয় কাগজপত্র" : "Required Documents"}</h2>
         <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">{isBn ? "আবেদন রিভিউ ও অনুমোদনের জন্য প্রয়োজনীয় ডকুমেন্টস আপলোড করুন" : "Upload documents for profile verification and approval."}</p>
       </div>
 
       {/* Uploads Block */}
-      <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors p-4.5 shadow-sm space-y-4">
+      <div className={`bg-white dark:bg-gray-800 transition-colors rounded-2xl border ${flaggedSections.documents ? 'border-amber-400 ring-2 ring-amber-500/20 shadow-md' : 'border-gray-100 dark:border-gray-700'} p-4.5 shadow-sm space-y-4`}>
         <h3 className="font-bold text-gray-805 dark:text-gray-200 text-sm border-b border-gray-100 dark:border-gray-700 transition-colors pb-2">{isBn ? "পরিচয়পত্র ও ছবি" : "Identity Documents & Photos"}</h3>
         
         {/* Upload Slot Grid */}
@@ -1296,10 +1649,14 @@ export default function ApplyLoan() {
           />
         </div>
         <p className="text-xs text-gray-650 dark:text-gray-400 font-medium leading-relaxed">
-          {isBn ? "আমি ঘোষণা করছি যে, আমার দেওয়া সকল তথ্য সঠিক। আমি " : "I declare that all provided information is correct. I agree to the "} 
-          <Link to="/terms" target="_blank" className="text-primary-600 font-bold hover:underline">
+          I declare that all provided information is correct. I agree to the{" "}
+          <button 
+            type="button" 
+            onClick={() => setShowTermsModal(true)} 
+            className="text-primary-600 font-bold hover:underline bg-transparent border-none p-0 inline cursor-pointer"
+          >
             {isBn ? "শর্তাবলীতে" : "Terms & Conditions"}
-          </Link> 
+          </button>
           {isBn ? " সম্মত আছি এবং লোন অনুমোদনের ক্ষেত্রে Authorities এর সিদ্ধান্ত চূড়ান্ত বলে গণ্য হবে।" : " and authority decision will be considered final regarding loan approval."}
         </p>
       </label>
@@ -1331,24 +1688,32 @@ export default function ApplyLoan() {
         </div>
       </div>
 
-      <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl border border-red-100 dark:border-red-900/40 text-left mt-6 flex gap-3 transition-colors">
-        <AlertCircle size={24} className="text-red-500 shrink-0 mt-1" />
+      <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-2xl border border-amber-100 dark:border-amber-900/40 text-left mt-6 flex gap-3 transition-colors">
+        <AlertCircle size={24} className="text-amber-500 shrink-0 mt-1" />
         <div>
-          <h3 className="font-bold text-red-800 dark:text-red-300 transition-colors">
-            {isBn ? 'গুরুত্বপূর্ণ নোটিশ' : 'Important Notice'}
+          <h3 className="font-bold text-amber-800 dark:text-amber-300 transition-colors">
+            {isBn ? 'কিস্তি ও প্রসেসিং নীতিমালা' : 'Installment & Processing Policy'}
           </h3>
-          <p className="text-xs font-medium text-red-600 dark:text-red-400 mt-1 transition-colors">
-            {isBn ? 'আপনার লোন আবেদনটি প্রসেস করার জন্য "প্রসেসিং ফি" ডিপোজিট করা বাধ্যতামুলক। ফি প্রদান ছাড়া ফাইলটি রিভিউ করা হবে না।' : 'To begin processing your application, you must deposit the "Processing Fee". Files without fee will not be reviewed.'}
+          <p className="text-xs font-medium text-amber-700 dark:text-amber-400 mt-1 transition-colors leading-relaxed">
+            {isBn 
+              ? 'আপনার লোন ফাইলটি চূড়ান্ত সক্রিয় করতে নির্ধারিত প্রসেসিং ফি এবং সমবায় সঞ্চয় আমানত নীতিমালা অনুযায়ী জমা দিন। কিস্তির বিস্তারিত জানতে বা সহায়তা পেতে সরাসরি আমাদের হেল্প সেন্টারে যোগাযোগ করতে পারেন।' 
+              : 'To finalize your loan activation, please complete the processing fee and savings deposit as per cooperative policy. For queries regarding EMI or support, contact our help center.'}
           </p>
         </div>
       </div>
 
-      <div className="pt-6">
+      <div className="pt-6 space-y-3">
         <Link 
           to="/deposit" 
-          className="w-full block bg-primary-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary-600/20 hover:-translate-y-0.5 active:scale-95 transition-all text-sm mb-3"
+          className="w-full block bg-primary-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary-600/20 hover:-translate-y-0.5 active:scale-95 transition-all text-sm"
         >
           {isBn ? "প্রসেসিং ফি জমা দিন" : "Deposit Processing Fee"}
+        </Link>
+        <Link 
+          to={`/support?prefill=loan_apply&cat=${category?.id}&amount=${amount}`}
+          className="w-full block bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-750 font-bold py-4 rounded-xl active:scale-95 transition-all text-sm"
+        >
+          {isBn ? "লাইভ সাপোর্ট চ্যাট" : "Contact Live Support"}
         </Link>
         <Link 
           to="/transactions" 
@@ -1361,6 +1726,7 @@ export default function ApplyLoan() {
   );
 
   return (
+    <FormProvider {...methods}>
     <div className="min-h-full bg-white dark:bg-gray-800 transition-colors flex flex-col relative">
       {/* Dynamic Header */}
       {step < 5 && (
@@ -1720,9 +2086,136 @@ export default function ApplyLoan() {
                 </div>
               )}
             </div>
+            </motion.div>
+          </div>
+        )}
+      {/* Local Terms Modal */}
+      {showTermsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-hidden text-gray-800 dark:text-gray-250">
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white dark:bg-gray-900 rounded-3xl max-w-lg w-full max-h-[85vh] shadow-2xl border border-gray-150 dark:border-gray-800 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200"
+          >
+            <div className="bg-gray-50 dark:bg-gray-950 px-6 py-4.5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center shrink-0">
+              <div className="flex items-center gap-2">
+                <FileText className="text-primary-600 dark:text-primary-400" size={20} />
+                <h3 className="text-base font-black text-gray-900 dark:text-white">
+                  {isBn ? 'নীতিমালা ও শর্তাবলী' : 'Policies & Terms'}
+                </h3>
+              </div>
+              <button 
+                onClick={() => setShowTermsModal(false)}
+                className="text-gray-400 hover:text-gray-650 dark:hover:text-white p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto space-y-6 text-xs text-gray-650 dark:text-gray-300 leading-relaxed">
+              {/* 1. Terms & Conditions */}
+              <section className="space-y-2">
+                <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm border-b pb-1 border-gray-100 dark:border-gray-800">
+                  <FileText className="text-primary-500" size={16} />
+                  {isBn ? '১. নিয়ম ও শর্তাবলী' : '1. Terms & Conditions'}
+                </h4>
+                {isBn ? (
+                  <div className="space-y-1.5">
+                    <p>ক. <b>প্রভাতি সমবায় সমিতি</b> অ্যাপ্লিকেশনের মাধ্যমে ঋণ আবেদনের ক্ষেত্রে আবেদনকারীকে অবশ্যই সমিতির একজন বৈধ সদস্য হতে হবে এবং তার সমস্ত তথ্য সঠিক হতে হবে।</p>
+                    <p>খ. Authorities এর সিদ্ধান্ত লোন অনুমোদন, পুনর্নিরীক্ষণ (Revision), অথবা বাতিলের ক্ষেত্রে চূড়ান্ত বলে গণ্য হবে এবং আবেদনকারী তা মেনে নিতে বাধ্য থাকবেন।</p>
+                    <p>গ. ভুল তথ্য প্রদান বা জাল প্রমাণপত্র আপলোড করা হলে সমিতি কর্তৃপক্ষ কোনো নোটিশ ছাড়াই ব্যবহারকারীর অ্যাকাউন্ট সাময়িকভাবে বা চিরতরে স্থগিত (Suspended/Banned) করার অধিকার সংরক্ষণ করে।</p>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <p>a. To apply for a loan through <b>Provati Somobay Somiti</b>, the applicant must be a registered member, and all provided details must be accurate.</p>
+                    <p>b. The authority's decisions regarding loan approval, rejection, or revision requests are final and binding on all applicants.</p>
+                    <p>c. Submission of fraudulent data or forged documents will lead to instant suspension/ban of the user account without prior notice.</p>
+                  </div>
+                )}
+              </section>
+
+              {/* 2. Loan Guidelines */}
+              <section className="space-y-2">
+                <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm border-b pb-1 border-gray-100 dark:border-gray-800">
+                  <ShieldAlert className="text-primary-500" size={16} />
+                  {isBn ? '২. ঋণ নির্দেশিকা' : '2. Loan Guidelines'}
+                </h4>
+                {isBn ? (
+                  <div className="space-y-1.5">
+                    <p>ঋণ পাওয়ার জন্য আবেদনকারীকে তার পেশা অনুযায়ী সঠিক ক্যাটাগরি নির্বাচন করতে হবে। প্রতিটি ক্যাটাগরির জন্য ঋণের সর্বোচ্চ সীমা এবং মাসিক সুদের হার আলাদা হতে পারে:</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li><b>ব্যক্তিগত লোন (Personal):</b> সর্বোচ্চ ৫,০০,০০০ টাকা। মাসিক সুদ ১.২%।</li>
+                      <li><b>ব্যবসায়িক লোন (Business):</b> সর্বোচ্চ ৫০,০০,০০০ টাকা। মাসিক সুদ ১.৫%।</li>
+                      <li><b>প্রবাসী লোন (Expat):</b> সর্বোচ্চ ১০,০০,০০০ টাকা। মাসিক সুদ ১.০%।</li>
+                      <li><b>শিক্ষা লোন (Student):</b> সর্বোচ্চ ৫,০০,০০০ টাকা। মাসিক সুদ ০.৮%।</li>
+                      <li><b>জরুরি লোন (Emergency):</b> সর্বোচ্চ ১,০০,০০০ টাকা। মাসিক সুদ ২.০%।</li>
+                      <li><b>মহিলা উদ্যোক্তা লোন (Women):</b> সর্বোচ্চ ২০,০০,০০০ টাকা। মাসিক সুদ ০.৮%।</li>
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <p>Applicants must select the appropriate category matching their profession. Loan limits and interest rates are defined as follows:</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li><b>Personal Loan:</b> up to BDT 500,000. Monthly rate 1.2%.</li>
+                      <li><b>Business Loan:</b> up to BDT 5,000,000. Monthly rate 1.5%.</li>
+                      <li><b>Expat Loan:</b> up to BDT 1,000,000. Monthly rate 1.0%.</li>
+                      <li><b>Student Loan:</b> up to BDT 500,000. Monthly rate 0.8%.</li>
+                      <li><b>Emergency Loan:</b> up to BDT 100,000. Monthly rate 2.0%.</li>
+                      <li><b>Women Entrepreneur Loan:</b> up to BDT 2,000,000. Monthly rate 0.8%.</li>
+                    </ul>
+                  </div>
+                )}
+              </section>
+
+              {/* 3. Important Notices */}
+              <section className="space-y-2">
+                <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm border-b pb-1 border-gray-100 dark:border-gray-800">
+                  <AlertCircle className="text-amber-500" size={16} />
+                  {isBn ? '৩. গুরুত্বপূর্ণ নোটিশ' : '3. Important Notices'}
+                </h4>
+                {isBn ? (
+                  <div className="space-y-1.5 bg-amber-50 dark:bg-amber-950/20 p-3 rounded-2xl border border-amber-100 dark:border-amber-900/30 text-amber-850 dark:text-amber-300 font-medium">
+                    <p className="font-bold">প্রসেসিং ফি বাধ্যতামুলক:</p>
+                    <p>ঋণ আবেদন প্রসেস করার জন্য নির্ধারিত "প্রসেসিং ফি" ডিপোজিট করা বাধ্যতামূলক। ফি প্রদান ছাড়া কোনো আবেদন রিভিউর আওতায় নেওয়া হবে না এবং এটি সম্পূর্ণ অফেরতযোগ্য।</p>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5 bg-amber-50 dark:bg-amber-950/20 p-3 rounded-2xl border border-amber-100 dark:border-amber-900/30 text-amber-850 dark:text-amber-300 font-medium">
+                    <p className="font-bold">Processing Fee is Mandatory:</p>
+                    <p>To begin evaluating your loan profile, the processing fee must be deposited. Unpaid files will not be reviewed. Processing fees are non-refundable.</p>
+                  </div>
+                )}
+              </section>
+
+              {/* 4. Savings & Deposit Policies */}
+              <section className="space-y-2">
+                <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm border-b pb-1 border-gray-100 dark:border-gray-800">
+                  <Landmark className="text-primary-500" size={16} />
+                  {isBn ? '৪. সঞ্চয় ও ডিপোজিট নীতিমালা' : '4. Savings & Deposit Policies'}
+                </h4>
+                {isBn ? (
+                  <div className="space-y-1.5">
+                    <p><b>• প্রসেসিং ফি:</b> ৫০,০০০ থেকে ১০,০০,০০০ টাকা পর্যন্ত লোন আবেদনের ক্ষেত্রে ১% প্রসেসিং ফি এবং ১০,০০,০০০ টাকার ওপরে হলে ০.৫% প্রসেসিং ফি প্রযোজ্য।</p>
+                    <p><b>• সঞ্চয় আমানত:</b> সমবায় আমানত সুরক্ষার্থে ৫০,০০০ থেকে ৫,০০,০০০ টাকা ঋণের জন্য ১০% সঞ্চয় এবং ৫,০০,০০০ টাকার ওপরে হলে ৫% সঞ্চয় ডিপোজিট করা বাধ্যতামূলক।</p>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <p><b>• Processing Fee:</b> BDT 50k to BDT 1M requires 1% processing fee. BDT 1M+ requires 0.5% processing fee.</p>
+                    <p><b>• Savings Deposit:</b> BDT 50k to BDT 500k loans require a 10% savings deposit. BDT 500k+ loans require a 5% savings deposit.</p>
+                  </div>
+                )}
+              </section>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-950 px-6 py-4 border-t border-gray-100 dark:border-gray-800 flex justify-end shrink-0">
+              <button 
+                onClick={() => setShowTermsModal(false)}
+                className="px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-bold hover:bg-gray-800 transition-colors shadow cursor-pointer text-xs"
+              >
+                {isBn ? 'বন্ধ করুন' : 'Close'}
+              </button>
+            </div>
           </motion.div>
         </div>
       )}
     </div>
+    </FormProvider>
   );
 }

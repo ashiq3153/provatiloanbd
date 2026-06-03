@@ -22,7 +22,6 @@ export default function Support() {
   const user = getTelegramUser();
   const location = useLocation();
   const navigate = useNavigate();
-
   const [activeTab, setActiveTab] = useState<'chat' | 'faq'>('chat');
   const [messages, setMessages] = useState<SupportMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -30,8 +29,7 @@ export default function Support() {
   const [sending, setSending] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const pollingInterval = useRef<any>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const faqs = [
     {
@@ -80,56 +78,113 @@ export default function Support() {
     }
   };
 
-  // Auto-scroll to bottom
+  // Verify and ensure user profile exists before message operations
+  const ensureProfileExists = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('chat_id')
+        .eq('chat_id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error checking profile:", error);
+        return;
+      }
+
+      if (!data) {
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            chat_id: user.id,
+            first_name: user.first_name || 'Guest',
+            last_name: user.last_name || null,
+            username: user.username || null,
+            photo_url: user.photo_url || null,
+            is_banned: false
+          });
+        if (insertError) {
+          console.error("Error creating profile:", insertError);
+        }
+      }
+    } catch (e) {
+      console.error("Unexpected profile check error:", e);
+    }
+  };
+
+  // Auto-scroll to bottom using scrollTop to avoid shifting parent layout
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  // Initial load and polling
+  // Initial load, profile check, prefilled message check, and Realtime Subscription
   useEffect(() => {
-    fetchMessages(true);
+    let active = true;
 
-    // Set up polling every 3 seconds
-    pollingInterval.current = setInterval(() => {
-      fetchMessages(false);
-    }, 3000);
+    const initializeChat = async () => {
+      await ensureProfileExists();
+      if (!active) return;
 
-    return () => {
-      if (pollingInterval.current) clearInterval(pollingInterval.current);
-    };
-  }, [user.id]);
-
-  // Check for prefilled message
-  useEffect(() => {
-    const checkPrefilled = async () => {
-      // Get message from route state or localStorage
+      // Check and send prefilled message if any
       const prefilledMsg = location.state?.prefilledMsg || localStorage.getItem('pending_support_msg');
       if (prefilledMsg) {
-        // Clear immediately to prevent double sending
         if (location.state?.prefilledMsg) {
           navigate(location.pathname, { replace: true, state: {} });
         }
         localStorage.removeItem('pending_support_msg');
 
-        // Send message
         try {
           await supabase.from('support_messages').insert({
             chat_id: user.id,
             sender: 'user',
             message: prefilledMsg
           });
-          fetchMessages(false);
         } catch (err) {
           console.error('Error sending prefilled message:', err);
         }
       }
+
+      await fetchMessages(true);
     };
-    checkPrefilled();
-  }, [location.state]);
+
+    initializeChat();
+
+    // Set up Supabase Realtime channel subscription for support messages
+    const channel = supabase
+      .channel(`support_messages_user_${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'support_messages',
+          filter: `chat_id=eq.${user.id}`
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newMsg = payload.new as SupportMessage;
+            setMessages((prev) => {
+              if (prev.some((m) => m.id === newMsg.id)) return prev;
+              return [...prev, newMsg];
+            });
+          } else {
+            fetchMessages(false);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      active = false;
+      supabase.removeChannel(channel);
+    };
+  }, [user.id, location.state]);
 
   // Send message handler
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -183,7 +238,7 @@ export default function Support() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors pb-24 h-screen">
+    <div className="h-[100dvh] w-full overflow-hidden bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors">
       {/* Premium Header */}
       <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl px-5 py-4 sticky top-0 z-30 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors flex items-center gap-4">
         <button 
@@ -264,7 +319,7 @@ export default function Support() {
         {activeTab === 'chat' ? (
           <div className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-950 overflow-hidden">
             {/* Messages Scroll Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3.5 custom-scrollbar">
+            <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3.5 custom-scrollbar">
               {loadingMessages ? (
                 <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-2">
                   <Loader2 className="animate-spin text-primary-500" size={24} />
@@ -308,7 +363,6 @@ export default function Support() {
                   );
                 })
               )}
-              <div ref={messagesEndRef} />
             </div>
 
             {/* Input Form */}
