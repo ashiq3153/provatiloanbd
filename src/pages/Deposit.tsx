@@ -25,12 +25,14 @@ const presetAmounts = [50000, 100000, 200000, 500000];
 
 export default function Deposit() {
   const navigate = useNavigate();
-  const { language } = useAppStore();
+  const { language, systemSettings } = useAppStore();
   const isBn = language === 'bn';
   const user = getTelegramUser();
   
   const [method, setMethod] = useState(paymentMethods[0].id);
-  const [depositType, setDepositType] = useState<'processing' | 'security'>('processing');
+  const [selectProcessing, setSelectProcessing] = useState(true);
+  const [selectSecurity, setSelectSecurity] = useState(false);
+  const [selectInsurance, setSelectInsurance] = useState(false);
   const [loanAmount, setLoanAmount] = useState('');
   const [senderNo, setSenderNo] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -68,21 +70,31 @@ export default function Deposit() {
   }
 
   // Savings Deposit (formerly security deposit):
-  // 50,000 BDT to 5 Lakh BDT (500,000) = 10%
-  // 5 Lakh BDT up to 50 Lakh BDT (5,000,000) = 5%
+  // FIXED at 10% for all amounts from 50k to 50 Lakh BDT (5,000,000)
   let calculatedSavingsDeposit = 0;
-  if (loanAmtNum >= 50000) {
-    if (loanAmtNum <= 500000) {
-      calculatedSavingsDeposit = loanAmtNum * 0.10;
-    } else if (loanAmtNum <= 5000000) {
-      calculatedSavingsDeposit = loanAmtNum * 0.05;
-    }
+  if (loanAmtNum >= 50000 && loanAmtNum <= 5000000) {
+    calculatedSavingsDeposit = loanAmtNum * 0.10;
   }
 
-  const calculatedTotalDeposit = calculatedProcessingFee + calculatedSavingsDeposit;
+  // Insurance Fee:
+  // Configured in admin panel settings, default 1% if enabled
+  const isInsuranceEnabled = !!systemSettings?.insuranceEnabled;
+  const insuranceRate = systemSettings?.insuranceRate || 0.01;
+  const calculatedInsurance = isInsuranceEnabled && loanAmtNum >= 50000 ? loanAmtNum * insuranceRate : 0;
 
-  // Selected payment amount depending on selected row/type
-  const selectedPaymentAmount = depositType === 'processing' ? calculatedProcessingFee : calculatedSavingsDeposit;
+  // Selected payment amount depending on selected checked options
+  const selectedPaymentAmount = 
+    (selectProcessing ? calculatedProcessingFee : 0) + 
+    (selectSecurity ? calculatedSavingsDeposit : 0) + 
+    ((selectInsurance && isInsuranceEnabled) ? calculatedInsurance : 0);
+
+  const getSelectedDepositTypes = () => {
+    const selected: string[] = [];
+    if (selectProcessing) selected.push('processing_fee');
+    if (selectSecurity) selected.push('security_deposit');
+    if (selectInsurance && isInsuranceEnabled) selected.push('insurance');
+    return selected.join(',');
+  };
 
   const formatPresetLabel = (val: number) => {
     if (val === 50000) return isBn ? '৫০ হাজার' : '50k';
@@ -102,9 +114,7 @@ export default function Deposit() {
 সদস্য আইডি: ${user.id}
 
 লোন: ৳${formattedLoan.toLocaleString('en-IN')}
-প্রসেসিং ফি: ৳${calculatedProcessingFee.toLocaleString('en-IN')}
-সঞ্চয়: ৳${calculatedSavingsDeposit.toLocaleString('en-IN')}
-মোট জমা: ৳${calculatedTotalDeposit.toLocaleString('en-IN')}
+${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessingFee.toLocaleString('en-IN')}\n` : ''}${selectSecurity ? `সঞ্চয়: ৳${calculatedSavingsDeposit.toLocaleString('en-IN')}\n` : ''}${selectInsurance && isInsuranceEnabled ? `বীমা: ৳${calculatedInsurance.toLocaleString('en-IN')}\n` : ''}মোট জমা: ৳${selectedPaymentAmount.toLocaleString('en-IN')}
 
 মাধ্যম: ${gatewayName}`;
 
@@ -116,7 +126,7 @@ export default function Deposit() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedPaymentAmount <= 0 || !senderNo) {
-      toast.error(isBn ? 'অনুগ্রহ করে প্রথমে লোনের পরিমাণ নির্বাচন করুন' : 'Please select a valid loan amount first');
+      toast.error(isBn ? 'অনুগ্রহ করে প্রথমে লোনের পরিমাণ ও ডিপোজিট টাইপ নির্বাচন করুন' : 'Please select a valid loan amount and deposit options first');
       return;
     }
     setShowConfirmModal(true);
@@ -135,7 +145,7 @@ export default function Deposit() {
         chat_id: user.id,
         loan_id: associatedLoanId,
         type: 'deposit',
-        deposit_type: depositType === 'processing' ? 'processing_fee' : 'security_deposit',
+        deposit_type: getSelectedDepositTypes(),
         amount: selectedPaymentAmount,
         payment_method: method,
         sender_number: senderNo,
@@ -275,46 +285,111 @@ export default function Deposit() {
               {isBn ? 'ডিপোজিটের বিবরণ ও ধরণ' : 'Deposit Details & Type'}
             </p>
             <div className="space-y-2">
-              {/* Processing Fee Row (Selectable) */}
+              {/* Select All Option */}
               <div 
-                onClick={() => setDepositType('processing')}
+                onClick={() => {
+                  const allSelected = selectProcessing && selectSecurity && (!isInsuranceEnabled || selectInsurance);
+                  if (allSelected) {
+                    setSelectProcessing(false);
+                    setSelectSecurity(false);
+                    setSelectInsurance(false);
+                  } else {
+                    setSelectProcessing(true);
+                    setSelectSecurity(true);
+                    if (isInsuranceEnabled) setSelectInsurance(true);
+                  }
+                }}
                 className={`p-3 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer ${
-                  depositType === 'processing'
+                  (selectProcessing && selectSecurity && (!isInsuranceEnabled || selectInsurance))
+                    ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400'
+                    : 'border-gray-50 dark:border-gray-800 hover:border-gray-100 text-gray-800 dark:text-gray-200'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${(selectProcessing && selectSecurity && (!isInsuranceEnabled || selectInsurance)) ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-400'}`}>
+                    {(selectProcessing && selectSecurity && (!isInsuranceEnabled || selectInsurance)) && (
+                      <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    )}
+                  </div>
+                  <span className="text-xs font-bold">{isBn ? 'সব নির্বাচন করুন' : 'Select All'}</span>
+                </div>
+              </div>
+
+              {/* Processing Fee Row */}
+              <div 
+                onClick={() => setSelectProcessing(!selectProcessing)}
+                className={`p-3 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer ${
+                  selectProcessing
                     ? 'border-primary-500 bg-primary-50/50 dark:bg-primary-950/20 text-primary-700 dark:text-primary-400'
                     : 'border-gray-50 dark:border-gray-800 hover:border-gray-100 text-gray-800 dark:text-gray-200'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${depositType === 'processing' ? 'border-primary-600 bg-primary-600' : 'border-gray-400'}`}>
-                    {depositType === 'processing' && <div className="w-1.5 h-1.5 rounded-full bg-white"></div>}
+                  <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${selectProcessing ? 'border-primary-600 bg-primary-600 text-white' : 'border-gray-400'}`}>
+                    {selectProcessing && (
+                      <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    )}
                   </div>
-                  <span className="text-xs font-bold">{isBn ? 'প্রসেসিং ফি (১%)' : 'Processing Fee (1%)'}</span>
+                  <span className="text-xs font-bold">
+                    {isBn 
+                      ? `প্রসেসিং ফি (${loanAmtNum <= 1000000 ? '১%' : '০.৫%'})` 
+                      : `Processing Fee (${loanAmtNum <= 1000000 ? '1%' : '0.5%'})`
+                    }
+                  </span>
                 </div>
                 <span className="text-sm font-black">৳{calculatedProcessingFee.toLocaleString('en-IN')}</span>
               </div>
 
-              {/* Savings Deposit Row (Selectable) */}
+              {/* Savings Deposit Row */}
               <div 
-                onClick={() => setDepositType('security')}
+                onClick={() => setSelectSecurity(!selectSecurity)}
                 className={`p-3 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer ${
-                  depositType === 'security'
+                  selectSecurity
                     ? 'border-primary-500 bg-primary-50/50 dark:bg-primary-950/20 text-primary-700 dark:text-primary-400'
                     : 'border-gray-50 dark:border-gray-800 hover:border-gray-100 text-gray-800 dark:text-gray-200'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${depositType === 'security' ? 'border-primary-600 bg-primary-600' : 'border-gray-400'}`}>
-                    {depositType === 'security' && <div className="w-1.5 h-1.5 rounded-full bg-white"></div>}
+                  <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${selectSecurity ? 'border-primary-600 bg-primary-600 text-white' : 'border-gray-400'}`}>
+                    {selectSecurity && (
+                      <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    )}
                   </div>
-                  <span className="text-xs font-bold">{isBn ? 'সঞ্চয় জমা (১০%)' : 'Savings Deposit (10%)'}</span>
+                  <span className="text-xs font-bold">
+                    {isBn ? 'সঞ্চয় জমা (১০%)' : 'Savings Deposit (10%)'}
+                  </span>
                 </div>
                 <span className="text-sm font-black">৳{calculatedSavingsDeposit.toLocaleString('en-IN')}</span>
               </div>
 
+              {/* Insurance Row */}
+              {isInsuranceEnabled && (
+                <div 
+                  onClick={() => setSelectInsurance(!selectInsurance)}
+                  className={`p-3 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer ${
+                    selectInsurance
+                      ? 'border-primary-500 bg-primary-50/50 dark:bg-primary-950/20 text-primary-700 dark:text-primary-400'
+                      : 'border-gray-50 dark:border-gray-800 hover:border-gray-100 text-gray-800 dark:text-gray-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${selectInsurance ? 'border-primary-600 bg-primary-600 text-white' : 'border-gray-400'}`}>
+                      {selectInsurance && (
+                        <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                      )}
+                    </div>
+                    <span className="text-xs font-bold">
+                      {isBn ? `বীমা ফি (${(insuranceRate * 100).toFixed(1)}%)` : `Insurance Fee (${(insuranceRate * 100).toFixed(1)}%)`}
+                    </span>
+                  </div>
+                  <span className="text-sm font-black">৳{calculatedInsurance.toLocaleString('en-IN')}</span>
+                </div>
+              )}
+
               {/* Total Row */}
               <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl flex items-center justify-between border border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white">
                 <span className="text-xs font-bold opacity-80">{isBn ? 'মোট সম্ভাব্য জমা' : 'Total Charges'}</span>
-                <span className="text-base font-black">৳{calculatedTotalDeposit.toLocaleString('en-IN')}</span>
+                <span className="text-base font-black">৳{selectedPaymentAmount.toLocaleString('en-IN')}</span>
               </div>
             </div>
           </motion.section>

@@ -166,7 +166,16 @@ export default function Home() {
       const method = txn.payment_method?.toUpperCase() || '';
       
       if (txn.type === 'deposit') {
-        const depType = txn.deposit_type === 'processing_fee' ? (isBn ? 'প্রসেসিং ফি' : 'Processing Fee') : (isBn ? 'সিকিউরিটি ডিপোজিট' : 'Security Deposit');
+        const getDepTypeLabel = (type: string | null) => {
+          if (!type) return '';
+          return type.split(',').map(p => {
+            if (p === 'processing_fee') return isBn ? 'প্রসেসিং ফি' : 'Processing Fee';
+            if (p === 'security_deposit') return isBn ? 'সিকিউরিটি ডিপোজিট' : 'Security Deposit';
+            if (p === 'insurance') return isBn ? 'বীমা (ইন্সুরেন্স)' : 'Insurance';
+            return p;
+          }).join(' + ');
+        };
+        const depType = getDepTypeLabel(txn.deposit_type);
         if (txn.status === 'completed') {
           list.push({
             id: `txn-${txn.id}`,

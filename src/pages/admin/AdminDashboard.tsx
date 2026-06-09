@@ -95,6 +95,8 @@ export default function AdminDashboard() {
   const [config, setConfig] = useState({
     processingFee: 1,
     securityDeposit: 10,
+    insuranceEnabled: false,
+    insuranceRate: 1.0,
     emailEnabled: false,
     resendApiKey: '',
     senderEmail: 'Provati Loan <noreply@provatiloanbd.com>',
@@ -165,6 +167,8 @@ export default function AdminDashboard() {
       setConfig({
         processingFee: systemSettings.procFee ? systemSettings.procFee * 100 : 1,
         securityDeposit: systemSettings.secDeposit ? systemSettings.secDeposit * 100 : 10,
+        insuranceEnabled: !!systemSettings.insuranceEnabled,
+        insuranceRate: systemSettings.insuranceRate ? systemSettings.insuranceRate * 100 : 1.0,
         emailEnabled: !!systemSettings.emailEnabled,
         resendApiKey: systemSettings.resendApiKey || '',
         senderEmail: systemSettings.senderEmail || 'Provati Loan <noreply@provatiloanbd.com>',
@@ -359,6 +363,8 @@ export default function AdminDashboard() {
     const newSettings = {
       procFee: config.processingFee / 100,
       secDeposit: config.securityDeposit / 100,
+      insuranceEnabled: config.insuranceEnabled,
+      insuranceRate: config.insuranceRate / 100,
       emailEnabled: config.emailEnabled,
       resendApiKey: config.resendApiKey,
       senderEmail: config.senderEmail,
@@ -468,14 +474,23 @@ export default function AdminDashboard() {
         const method = txn.payment_method?.toUpperCase();
         
         if (txn.type === 'deposit') {
-          const depType = txn.deposit_type === 'processing_fee' ? 'প্রসেসিং ফি' : 'সিকিউরিটি ডিপোজিট';
+          const getDepTypeLabel = (type: string | null) => {
+            if (!type) return '';
+            return type.split(',').map(p => {
+              if (p === 'processing_fee') return 'প্রসেসিং ফি';
+              if (p === 'security_deposit') return 'সিকিউরিটি ডিপোজিট';
+              if (p === 'insurance') return 'বীমা (ইন্সুরেন্স)';
+              return p;
+            }).join(' + ');
+          };
+          const depType = getDepTypeLabel(txn.deposit_type);
           if (status === 'completed') {
             msg = `✅ <b>ডিপোজিট সফল!</b>\n\nআপনার <b>${depType}</b> ডিপোজিট সফলভাবে সম্পন্ন হয়েছে।\n\n💰 পরিমাণ: <b>${formattedAmount}</b>\n💳 মাধ্যম: <b>${method}</b>\n🆔 TrxID: <code>${txn.trx_id}</code>\n\nআপনার অ্যাকাউন্টে ব্যালেন্স যোগ করা হয়েছে। ধন্যবাদ!`;
             
             if (txn.loan_id) {
               const loanTxns = updatedTxns.filter(t => t.loan_id === txn.loan_id && t.type === 'deposit');
-              const hasCompletedProcessingFee = loanTxns.some(t => t.deposit_type === 'processing_fee' && t.status === 'completed');
-              const hasCompletedSecurityDeposit = loanTxns.some(t => t.deposit_type === 'security_deposit' && t.status === 'completed');
+              const hasCompletedProcessingFee = loanTxns.some(t => t.deposit_type?.includes('processing_fee') && t.status === 'completed');
+              const hasCompletedSecurityDeposit = loanTxns.some(t => t.deposit_type?.includes('security_deposit') && t.status === 'completed');
               
               if (hasCompletedProcessingFee && hasCompletedSecurityDeposit) {
                 const loan = loans.find(l => l.id === txn.loan_id);
@@ -1004,7 +1019,12 @@ export default function AdminDashboard() {
                             <td className="px-6 py-4">
                               <div className="font-bold text-gray-900 dark:text-white capitalize">
                                 {txn.type === 'deposit' && txn.deposit_type 
-                                  ? (txn.deposit_type === 'processing_fee' ? (isBn ? 'প্রসেসিং ফি' : 'Processing Fee') : (isBn ? 'সিকিউরিটি ডিপোজিট' : 'Security Deposit')) 
+                                  ? txn.deposit_type.split(',').map(p => {
+                                      if (p === 'processing_fee') return isBn ? 'প্রসেসিং ফি' : 'Processing Fee';
+                                      if (p === 'security_deposit') return isBn ? 'সিকিউরিটি ডিপোজিট' : 'Security Deposit';
+                                      if (p === 'insurance') return isBn ? 'বীমা (ইন্সুরেন্স)' : 'Insurance';
+                                      return p;
+                                    }).join(' + ')
                                   : txn.type === 'emi_payment' 
                                     ? (isBn ? 'ইএমআই পেমেন্ট' : 'EMI Payment') 
                                     : (isBn ? 'অর্থ উত্তোলন' : 'Withdrawal')
@@ -1311,6 +1331,26 @@ export default function AdminDashboard() {
                                   <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'সিকিউরিটি ডিপোজিট (%)' : 'Security Deposit (%)'}</label>
                                   <input type="number" step="0.1" value={config.securityDeposit} onChange={e => setConfig({...config, securityDeposit: parseFloat(e.target.value) || 0})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm transition-all" />
                                 </div>
+                                
+                                <div className="col-span-1 sm:col-span-2 pt-2 border-t border-gray-200/50 dark:border-gray-700/50 flex items-center justify-between">
+                                  <div>
+                                    <h4 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-1">{isBn ? 'বীমা (ইন্সুরেন্স) সক্রিয়' : 'Enable Insurance (বীমা)'}</h4>
+                                    <p className="text-[10px] text-gray-500">{isBn ? 'ডিপোজিটের সময় ইন্সুরেন্স বা বীমা ফি নেওয়ার অপশনটি সক্রিয় করুন।' : 'Enable the insurance fee option on deposit requests.'}</p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setConfig({...config, insuranceEnabled: !config.insuranceEnabled})}
+                                    className="text-primary-600 dark:text-primary-400 focus:outline-none hover:scale-105 transition-transform"
+                                  >
+                                    {config.insuranceEnabled ? <ToggleRight size={44} /> : <ToggleLeft size={44} />}
+                                  </button>
+                                </div>
+                                {config.insuranceEnabled && (
+                                  <div className="col-span-1 sm:col-span-2">
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'বীমা ফি (%)' : 'Insurance Fee (%)'}</label>
+                                    <input type="number" step="0.1" value={config.insuranceRate} onChange={e => setConfig({...config, [ 'insuranceRate' ]: parseFloat(e.target.value) || 0})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm transition-all" />
+                                  </div>
+                                )}
                               </div>
                             </div>
 
@@ -1911,7 +1951,35 @@ export default function AdminDashboard() {
                         </>
                       )}
                       {(selectedLoan.status === 'approved' || selectedLoan.status === 'active') && (
-                        <button onClick={() => { handleLoanStatus(selectedLoan.id, 'completed'); setSelectedLoan({...selectedLoan, status: 'completed'}); }} className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm">Mark Completed</button>
+                        <>
+                          <button onClick={() => { handleLoanStatus(selectedLoan.id, 'completed'); setSelectedLoan({...selectedLoan, status: 'completed'}); }} className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm">Mark Completed</button>
+                          <button 
+                            onClick={() => { 
+                              const confirmCancel = window.confirm(isBn ? 'আপনি কি নিশ্চিত যে আপনি এই লোন আবেদনটি বাতিল করতে চান?' : 'Are you sure you want to cancel this loan application?');
+                              if (confirmCancel) {
+                                handleLoanStatus(selectedLoan.id, 'rejected'); 
+                                setSelectedLoan({...selectedLoan, status: 'rejected'}); 
+                              }
+                            }} 
+                            className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm flex items-center gap-1.5"
+                          >
+                            <Trash2 size={14} /> {isBn ? 'আবেদন বাতিল করুন' : 'Cancel Application'}
+                          </button>
+                        </>
+                      )}
+                      {selectedLoan.status === 'action_required' && (
+                        <button 
+                          onClick={() => { 
+                            const confirmCancel = window.confirm(isBn ? 'আপনি কি নিশ্চিত যে আপনি এই লোন আবেদনটি বাতিল করতে চান?' : 'Are you sure you want to cancel this loan application?');
+                            if (confirmCancel) {
+                              handleLoanStatus(selectedLoan.id, 'rejected'); 
+                              setSelectedLoan({...selectedLoan, status: 'rejected'}); 
+                            }
+                          }} 
+                          className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm flex items-center gap-1.5"
+                        >
+                          <Trash2 size={14} /> {isBn ? 'আবেদন বাতিল করুন' : 'Cancel Application'}
+                        </button>
                       )}
                     </div>
                   </div>

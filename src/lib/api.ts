@@ -241,7 +241,7 @@ export async function getDashboardStats(chatId: number): Promise<DashboardStats>
 
   // 2. Calculate savings balance (completed security_deposit transactions)
   const savingsBalance = transactions
-    .filter(t => t.type === 'deposit' && t.deposit_type === 'security_deposit' && t.status === 'completed')
+    .filter(t => t.type === 'deposit' && t.deposit_type?.includes('security_deposit') && t.status === 'completed')
     .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
   // 3. Calculate deposit balance (completed deposits: processing fees, security deposits, other deposits)
@@ -288,18 +288,18 @@ export async function getDepositStatus(chatId: number): Promise<DepositStatus> {
   const transactions = await getTransactions(chatId);
 
   const processingFeeDeposit = transactions.find(
-    t => t.deposit_type === 'processing_fee' && t.status === 'completed'
+    t => t.deposit_type?.includes('processing_fee') && t.status === 'completed'
   );
   const securityDeposit = transactions.find(
-    t => t.deposit_type === 'security_deposit' && t.status === 'completed'
+    t => t.deposit_type?.includes('security_deposit') && t.status === 'completed'
   );
 
   const processingFeeAmount = transactions
-    .filter(t => t.deposit_type === 'processing_fee' && t.status === 'completed')
+    .filter(t => t.deposit_type?.includes('processing_fee') && t.status === 'completed')
     .reduce((sum, t) => sum + t.amount, 0);
 
   const securityDepositAmount = transactions
-    .filter(t => t.deposit_type === 'security_deposit' && t.status === 'completed')
+    .filter(t => t.deposit_type?.includes('security_deposit') && t.status === 'completed')
     .reduce((sum, t) => sum + t.amount, 0);
 
   return {
