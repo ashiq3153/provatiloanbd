@@ -238,7 +238,7 @@ export default function Support() {
   };
 
   return (
-    <div className="h-[100dvh] w-full overflow-hidden bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors">
+    <div className="h-full w-full overflow-hidden bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors">
       {/* Premium Header */}
       <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl px-5 py-4 sticky top-0 z-30 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors flex items-center gap-4">
         <button 

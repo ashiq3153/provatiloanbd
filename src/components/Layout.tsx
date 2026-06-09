@@ -18,10 +18,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { name: isBn ? 'প্রোফাইল' : 'Profile', path: '/profile', icon: User },
   ];
 
+  const isSupportPage = location.pathname === '/support';
+
   return (
     <div className="flex flex-col h-full sm:h-[90vh] sm:max-h-[850px] w-full max-w-md mx-auto bg-gray-50 dark:bg-gray-900 sm:rounded-[2.5rem] relative overflow-hidden shadow-2xl sm:border-[8px] border-gray-900 my-auto transition-colors">
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto pb-24 scroll-smooth">
+      <div className={cn(
+        "flex-1 scroll-smooth",
+        isSupportPage ? "overflow-hidden pb-0" : "overflow-y-auto pb-24"
+      )}>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
@@ -29,7 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="min-h-full"
+            className={isSupportPage ? "h-full" : "min-h-full"}
           >
             {children}
           </motion.div>
@@ -60,7 +65,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </>
       )}
 
-      <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800 px-6 py-2 pb-6 rounded-t-3xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] transition-colors z-50">
+      {!isSupportPage && (
+        <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800 px-6 py-2 pb-6 rounded-t-3xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] transition-colors z-50">
         <div className="flex justify-between items-center relative">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
@@ -132,7 +138,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             );
           })}
         </div>
-      </div>
+      </div>)}
     </div>
   );
 }
