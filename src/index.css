@@ -43,3 +43,81 @@
   }
 }
 
+/* ══════════════════════════════════════════════════════════════
+   Premium Glassmorphic Card Styling & Animations
+   ══════════════════════════════════════════════════════════════ */
+
+/* Target light mode cards based on rounding styles */
+.bg-white.rounded-2xl, 
+.bg-white.rounded-3xl,
+.bg-white.rounded-\[20px\], 
+.bg-white.rounded-\[23px\], 
+.bg-white.rounded-\[24px\], 
+.bg-white.rounded-\[28px\], 
+.bg-white.rounded-\[32px\] {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(243, 244, 246, 0.6) !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.03), 
+              0 1px 3px -1px rgba(0, 0, 0, 0.02) !important;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Target dark mode cards (using class .dark on html/body) */
+.dark .dark\:bg-gray-800.rounded-2xl, 
+.dark .dark\:bg-gray-800.rounded-3xl,
+.dark .dark\:bg-gray-800.rounded-\[20px\], 
+.dark .dark\:bg-gray-800.rounded-\[23px\], 
+.dark .dark\:bg-gray-800.rounded-\[24px\], 
+.dark .dark\:bg-gray-800.rounded-\[28px\], 
+.dark .dark\:bg-gray-800.rounded-\[32px\],
+.dark .dark\:bg-gray-850.rounded-2xl,
+.dark .dark\:bg-gray-850.rounded-3xl {
+  background-color: rgba(17, 24, 39, 0.65) !important; /* transparent dark gray */
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.075) !important;
+  box-shadow: 0 12px 35px -12px rgba(0, 0, 0, 0.5) !important;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Interactive Card Micro-Animations on Hover & Active States */
+button.bg-white.rounded-2xl:hover,
+button.bg-white.rounded-3xl:hover,
+button.bg-white.rounded-\[20px\]:hover,
+button.bg-white.rounded-\[24px\]:hover,
+button.bg-white.rounded-\[28px\]:hover,
+button.bg-white.rounded-\[32px\]:hover,
+a.bg-white.rounded-2xl:hover,
+a.bg-white.rounded-\[20px\]:hover,
+a.bg-white.rounded-\[24px\]:hover,
+div.cursor-pointer.bg-white:hover {
+  transform: translateY(-2.5px) scale(1.005);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.07) !important;
+  border-color: rgba(37, 99, 235, 0.45) !important; /* primary border glow */
+}
+
+/* Dark Mode Hover & Active States */
+.dark button.dark\:bg-gray-800.rounded-2xl:hover,
+.dark button.dark\:bg-gray-800.rounded-3xl:hover,
+.dark button.dark\:bg-gray-800.rounded-\[20px\]:hover,
+.dark button.dark\:bg-gray-800.rounded-\[24px\]:hover,
+.dark button.dark\:bg-gray-800.rounded-\[28px\]:hover,
+.dark button.dark\:bg-gray-800.rounded-\[32px\]:hover,
+.dark a.dark\:bg-gray-800.rounded-2xl:hover,
+.dark a.dark\:bg-gray-800.rounded-\[20px\]:hover,
+.dark a.dark\:bg-gray-800.rounded-\[24px\]:hover,
+.dark div.cursor-pointer.dark\:bg-gray-800:hover {
+  transform: translateY(-2.5px) scale(1.005);
+  box-shadow: 0 25px 45px -15px rgba(0, 0, 0, 0.7) !important;
+  border-color: rgba(37, 99, 235, 0.6) !important; /* primary border glow */
+}
+
+/* Accent overlays on hover */
+.bg-white:active,
+.dark\:bg-gray-800:active {
+  transform: translateY(-0.5px) scale(0.995) !important;
+  transition-duration: 0.1s !important;
+}
+
