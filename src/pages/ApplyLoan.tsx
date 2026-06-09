@@ -982,46 +982,73 @@ export default function ApplyLoan() {
                 setTenure(minAllowed);
                 setStep(2);
               }}
-              className={`rounded-2xl p-5 text-left relative overflow-hidden ${getColorStyles(cat.color, isActive)}`}
+              className={`group w-full rounded-[24px] text-left relative overflow-hidden transition-all duration-300 border-2 cursor-pointer ${
+                isActive 
+                  ? "border-primary-500 bg-gradient-to-br from-white to-primary-50/20 dark:from-gray-800 dark:to-primary-950/10 shadow-lg shadow-primary-500/10"
+                  : "border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-650 hover:shadow-md"
+              }`}
             >
-              <div className="flex items-start gap-4 mb-4">
-                <div className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 ${getIconColor(cat.color)}`}>
-                  <cat.icon size={28} />
-                </div>
-                <div className="flex-1 pt-1">
-                  <h3 className="font-bold text-gray-900 dark:text-white transition-colors text-lg mb-1">{cat.title}</h3>
-                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide transition-colors">{isBn ? "সর্বোচ্চঃ" : "Up to"} {cat.limit} {isBn ? "টাকা" : ""}</p>
-                </div>
-                <div className="shrink-0 text-gray-300 mt-2">
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${isActive ? 'border-current opacity-100' : 'border-gray-300 opacity-50'}`}>
-                    {isActive && <div className="w-3 h-3 rounded-full bg-current"></div>}
+              <div className="flex flex-col sm:flex-row min-h-[160px]">
+                {/* Text Content */}
+                <div className="flex-1 p-5 relative z-10 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${getIconColor(cat.color)}`}>
+                        <cat.icon size={20} />
+                      </div>
+                      <div>
+                        <h3 className="font-extrabold text-gray-900 dark:text-white text-lg transition-colors group-hover:text-primary-600 dark:group-hover:text-primary-400">
+                          {cat.title}
+                        </h3>
+                        <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                          {isBn ? "সর্বোচ্চঃ" : "Up to"} {cat.limit} {isBn ? "টাকা" : ""}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Highlights Grid */}
+                  <div className="grid grid-cols-3 gap-2 py-3 border-t border-b border-gray-100 dark:border-gray-700/60 my-3">
+                    <div>
+                      <p className="text-[10px] text-gray-450 dark:text-gray-500 font-bold uppercase tracking-wider mb-0.5">{isBn ? "মেয়াদ" : "Tenure"}</p>
+                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-250">{cat.tenureRange}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-450 dark:text-gray-500 font-bold uppercase tracking-wider mb-0.5">{isBn ? "সুদ" : "Int. Rate"}</p>
+                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-250">{cat.intRates}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-450 dark:text-gray-500 font-bold uppercase tracking-wider mb-0.5">{isBn ? "প্রসেস" : "Processing"}</p>
+                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-250">{cat.procTime}</p>
+                    </div>
+                  </div>
+
+                  {/* Features Tag */}
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {cat.features.map((feature, i) => (
+                      <span key={i} className={`px-2 py-0.5 text-[10px] rounded-[6px] border font-bold ${
+                        isActive 
+                          ? 'bg-primary-500/10 border-primary-500/20 text-primary-600 dark:text-primary-400' 
+                          : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'
+                      }`}>
+                        {feature}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              </div>
 
-              <div className="space-y-2 bg-white dark:bg-gray-800 transition-colors/60 rounded-xl p-3 mb-4 border border-gray-100 dark:border-gray-700 transition-colors backdrop-blur-sm">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-gray-500 dark:text-gray-400 font-medium">{isBn ? "মেয়াদঃ" : "Tenure:"}</span>
-                  <span className="font-bold text-gray-900 dark:text-white transition-colors">{cat.tenureRange}</span>
+                {/* Right side Image wrapper with fade mask */}
+                <div className="relative w-full sm:w-[190px] h-[160px] sm:h-auto overflow-hidden shrink-0 self-stretch">
+                  {/* Fade Gradient Overlay (Left for desktop, bottom for mobile) */}
+                  <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-white dark:from-gray-800 via-white/40 dark:via-gray-800/40 to-transparent z-10 pointer-events-none" />
+                  
+                  {/* Category Image */}
+                  <img 
+                    src={cat.image} 
+                    alt={cat.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-gray-500 dark:text-gray-400 font-medium">{isBn ? "সুদের হারঃ" : "Int. Rate:"}</span>
-                  <span className="font-bold text-gray-900 dark:text-white transition-colors">{cat.intRates}</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-gray-500 dark:text-gray-400 font-medium">{isBn ? "প্রসেসিং সময়ঃ" : "Proc. Time:"}</span>
-                  <span className="font-bold text-gray-900 dark:text-white transition-colors">{cat.procTime}</span>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {cat.features.map((feature, i) => (
-                  <span key={i} className={`px-2.5 py-1 text-[10px] rounded border font-bold ${
-                    isActive ? 'bg-white dark:bg-gray-800 transition-colors border-'+cat.color+'-200 text-'+cat.color+'-700' : 'bg-gray-50 dark:bg-gray-900 transition-colors border-gray-200 text-gray-600'
-                  }`}>
-                    {feature}
-                  </span>
-                ))}
               </div>
             </button>
           );

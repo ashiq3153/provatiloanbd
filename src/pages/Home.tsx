@@ -11,6 +11,12 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { getDashboardStats, getActiveLoans, getSuccessStories, getTransactions, getLoanApplications } from '../lib/api';
 import type { DashboardStats } from '../lib/api';
 import type { LoanApplication, SuccessStory, Transaction } from '../types/database';
+import personalImg from '../assets/categories/personal.png';
+import businessImg from '../assets/categories/business.png';
+import expatImg from '../assets/categories/expat.png';
+import studentImg from '../assets/categories/student.png';
+import emergencyImg from '../assets/categories/emergency.png';
+import womenImg from '../assets/categories/women.png';
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -76,12 +82,12 @@ export default function Home() {
   const safeStoryIndex = currentStoryIndex % Math.max(stories.length, 1);
 
   const allLoanCategories = [
-    { id: 'business', name: isBn ? 'ব্যবসায়ী ঋণ' : 'Business', icon: '🏢', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-    { id: 'personal', name: isBn ? 'চাকরিজীবী' : 'Salaried (Personal)', icon: '👤', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-    { id: 'expat', name: isBn ? 'প্রবাসী ঋণ' : 'Expatriate', icon: '✈️', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-    { id: 'student', name: isBn ? 'শিক্ষার্থী ঋণ' : 'Student', icon: '🎓', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-    { id: 'emergency', name: isBn ? 'জরুরি ঋণ' : 'Emergency', icon: '🚨', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-    { id: 'women', name: isBn ? 'নারী উদ্যোক্তা' : 'Women Entrepreneur', icon: '🏆', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+    { id: 'business', name: isBn ? 'ব্যবসায়ী ঋণ' : 'Business', icon: '🏢', image: businessImg, color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+    { id: 'personal', name: isBn ? 'চাকরিজীবী' : 'Salaried (Personal)', icon: '👤', image: personalImg, color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+    { id: 'expat', name: isBn ? 'প্রবাসী ঋণ' : 'Expatriate', icon: '✈️', image: expatImg, color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+    { id: 'student', name: isBn ? 'শিক্ষার্থী ঋণ' : 'Student', icon: '🎓', image: studentImg, color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+    { id: 'emergency', name: isBn ? 'জরুরি ঋণ' : 'Emergency', icon: '🚨', image: emergencyImg, color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+    { id: 'women', name: isBn ? 'নারী উদ্যোক্তা' : 'Women Entrepreneur', icon: '🏆', image: womenImg, color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
   ];
 
   const displayCategories = allLoanCategories.filter(cat => systemSettings?.categories?.[cat.id]?.enabled !== false);
@@ -793,12 +799,24 @@ export default function Home() {
               key={i}
               type="button"
               onClick={() => navigate(`/apply?category=${cat.id}`)}
-              className="w-full text-left bg-white dark:bg-gray-800 rounded-[20px] p-4 flex items-center gap-3 shadow-[0_10px_30px_-15px_rgb(0,0,0,0.1)] dark:shadow-[0_10px_30px_-15px_rgb(0,0,0,0.3)] border border-gray-50 dark:border-gray-700 transition-colors hover:border-primary-200 dark:hover:border-primary-700"
+              className="group w-full text-left bg-white dark:bg-gray-800 rounded-[20px] flex overflow-hidden shadow-[0_10px_30px_-15px_rgb(0,0,0,0.1)] dark:shadow-[0_10px_30px_-15px_rgb(0,0,0,0.3)] border border-gray-50 dark:border-gray-700 transition-all hover:border-primary-200 dark:hover:border-primary-700 hover:shadow-md cursor-pointer"
             >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-inner transition-colors ${cat.color}`}>
-                {cat.icon}
+              <div className="flex-1 p-4 flex items-center gap-3 relative z-10 min-w-0">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-inner transition-colors shrink-0 ${cat.color}`}>
+                  {cat.icon}
+                </div>
+                <span className="font-bold text-sm text-gray-800 dark:text-gray-100 transition-colors group-hover:text-primary-600 dark:group-hover:text-primary-400 truncate">{cat.name}</span>
               </div>
-              <span className="font-bold text-sm text-gray-800 dark:text-gray-100 transition-colors">{cat.name}</span>
+              
+              {/* Subtle background card preview */}
+              <div className="relative w-12 h-full overflow-hidden shrink-0 self-stretch hidden xs:block">
+                <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-gray-800 via-white/40 dark:via-gray-800/40 to-transparent z-10 pointer-events-none" />
+                <img 
+                  src={cat.image} 
+                  alt="" 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-60"
+                />
+              </div>
             </button>
           ))}
         </div>

@@ -7,6 +7,12 @@ import {
   Award
 } from "lucide-react";
 import { convertDigits } from "../lib/translation";
+import personalImg from "../assets/categories/personal.png";
+import businessImg from "../assets/categories/business.png";
+import expatImg from "../assets/categories/expat.png";
+import studentImg from "../assets/categories/student.png";
+import emergencyImg from "../assets/categories/emergency.png";
+import womenImg from "../assets/categories/women.png";
 
 const getLimitText = (amount: number, isBn: boolean) => {
   if (amount >= 10000000) {
@@ -30,6 +36,7 @@ export const getCategories = (isBn: boolean, settings?: any) => [
     id: "personal",
     title: isBn ? "চাকরিজীবী" : "Salaried",
     icon: Briefcase,
+    image: personalImg,
     limit: getLimitText(settings?.categories?.personal?.maxAmount ?? 500000, isBn),
     maxAmount: settings?.categories?.personal?.maxAmount ?? 500000,
     minTenure: settings?.categories?.personal?.minTenure ?? 12,
@@ -47,6 +54,7 @@ export const getCategories = (isBn: boolean, settings?: any) => [
     id: "business",
     title: isBn ? "ব্যবসায়ী" : "Business",
     icon: Store,
+    image: businessImg,
     limit: getLimitText(settings?.categories?.business?.maxAmount ?? 5000000, isBn),
     maxAmount: settings?.categories?.business?.maxAmount ?? 5000000,
     minTenure: settings?.categories?.business?.minTenure ?? 12,
@@ -64,6 +72,7 @@ export const getCategories = (isBn: boolean, settings?: any) => [
     id: "expat",
     title: isBn ? "প্রবাসী" : "Expatriate",
     icon: Plane,
+    image: expatImg,
     limit: getLimitText(settings?.categories?.expat?.maxAmount ?? 1000000, isBn),
     maxAmount: settings?.categories?.expat?.maxAmount ?? 1000000,
     minTenure: settings?.categories?.expat?.minTenure ?? 24,
@@ -81,6 +90,7 @@ export const getCategories = (isBn: boolean, settings?: any) => [
     id: "student",
     title: isBn ? "শিক্ষার্থী" : "Student",
     icon: GraduationCap,
+    image: studentImg,
     limit: getLimitText(settings?.categories?.student?.maxAmount ?? 500000, isBn),
     maxAmount: settings?.categories?.student?.maxAmount ?? 500000,
     minTenure: settings?.categories?.student?.minTenure ?? 12,
@@ -98,6 +108,7 @@ export const getCategories = (isBn: boolean, settings?: any) => [
     id: "emergency",
     title: isBn ? "জরুরি ঋণ" : "Emergency",
     icon: AlertCircle,
+    image: emergencyImg,
     limit: getLimitText(settings?.categories?.emergency?.maxAmount ?? 100000, isBn),
     maxAmount: settings?.categories?.emergency?.maxAmount ?? 100000,
     minTenure: settings?.categories?.emergency?.minTenure ?? 6,
@@ -115,6 +126,7 @@ export const getCategories = (isBn: boolean, settings?: any) => [
     id: "women",
     title: isBn ? "নারী উদ্যোক্তা" : "Women Entrepreneur",
     icon: Award,
+    image: womenImg,
     limit: getLimitText(settings?.categories?.women?.maxAmount ?? 2000000, isBn),
     maxAmount: settings?.categories?.women?.maxAmount ?? 2000000,
     minTenure: settings?.categories?.women?.minTenure ?? 12,
