@@ -698,44 +698,43 @@ export default function Home() {
                 transition={{ duration: 0.3 }}
                 className="absolute inset-0 px-1"
               >
-                <div className="relative rounded-[26px] p-[3px] overflow-hidden shadow-lg">
-                  {/* Rainbow spinning background */}
-                  <div className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,red,orange,yellow,green,blue,indigo,violet,red)] animate-[spin_4s_linear_infinite]" />
+                <div className="relative w-full h-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-[24px] p-5 border border-gray-100 dark:border-gray-700 shadow-[0_20px_40px_-15px_rgb(0,0,0,0.06)] dark:shadow-[0_20px_40px_-15px_rgb(0,0,0,0.2)] overflow-hidden transition-colors">
+                  {/* Subtle top-right background accent glow */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 dark:bg-blue-900/10 rounded-bl-full -mr-10 -mt-10 z-0 transition-colors" />
 
-                  {/* Inner Card content */}
-                  <div className="relative w-full h-full bg-white dark:bg-gray-800 rounded-[23px] p-5 border border-gray-100 dark:border-gray-700 transition-colors">
-                    <div className="absolute top-4 right-4 text-blue-100 dark:text-blue-900/50 transition-colors">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg>
+                  {/* Quote icon watermark */}
+                  <div className="absolute top-4 right-4 text-blue-50 dark:text-blue-950/30 transition-colors z-0">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg>
+                  </div>
+
+                  <div className="flex gap-3 mb-3 relative z-10 w-full overflow-hidden">
+                    <img
+                      src={stories[safeStoryIndex].avatar_url || `https://ui-avatars.com/api/?name=${stories[safeStoryIndex].name}&background=random`}
+                      alt={stories[safeStoryIndex].name}
+                      onError={(e) => {
+                        const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(stories[safeStoryIndex].name)}&background=random`;
+                        if (e.currentTarget.src !== fallback) {
+                          e.currentTarget.src = fallback;
+                        }
+                      }}
+                      className="w-12 h-12 rounded-full object-cover shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-1 transition-colors truncate">
+                        {stories[safeStoryIndex].name}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#3b82f6" className="shrink-0"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
+                      </h4>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400 transition-colors truncate">{stories[safeStoryIndex].loan_type}</p>
                     </div>
-                    <div className="flex gap-3 mb-3 relative z-10 w-full overflow-hidden">
-                      <img
-                        src={stories[safeStoryIndex].avatar_url || `https://ui-avatars.com/api/?name=${stories[safeStoryIndex].name}&background=random`}
-                        alt={stories[safeStoryIndex].name}
-                        onError={(e) => {
-                          const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(stories[safeStoryIndex].name)}&background=random`;
-                          if (e.currentTarget.src !== fallback) {
-                            e.currentTarget.src = fallback;
-                          }
-                        }}
-                        className="w-12 h-12 rounded-full object-cover shrink-0"
-                      />
-                      <div className="min-w-0">
-                        <h4 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-1 transition-colors truncate">
-                          {stories[safeStoryIndex].name}
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="#3b82f6" className="shrink-0"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
-                        </h4>
-                        <p className="text-[11px] text-gray-500 dark:text-gray-400 transition-colors truncate">{stories[safeStoryIndex].loan_type}</p>
-                      </div>
-                    </div>
-                    <div className="mb-2">
-                      <p className="text-lg font-bold text-primary-600 dark:text-primary-400 transition-colors">{formatCurrency(stories[safeStoryIndex].amount || 0, isBn)}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors truncate">{convertDigits(stories[safeStoryIndex].approval_time, isBn)}</p>
-                    </div>
-                    <div className="flex gap-1 text-yellow-400">
-                      {[...Array(stories[safeStoryIndex].rating || 5)].map((_, i) => (
-                        <Star key={i} size={12} fill="currentColor" />
-                      ))}
-                    </div>
+                  </div>
+                  <div className="mb-2 relative z-10">
+                    <p className="text-lg font-bold text-primary-600 dark:text-primary-400 transition-colors">{formatCurrency(stories[safeStoryIndex].amount || 0, isBn)}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors truncate">{convertDigits(stories[safeStoryIndex].approval_time, isBn)}</p>
+                  </div>
+                  <div className="flex gap-1 text-yellow-400 relative z-10">
+                    {[...Array(stories[safeStoryIndex].rating || 5)].map((_, i) => (
+                      <Star key={i} size={12} fill="currentColor" />
+                    ))}
                   </div>
                 </div>
               </motion.div>
