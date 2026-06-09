@@ -238,184 +238,155 @@ export default function Support() {
   };
 
   return (
-    <div className="h-full w-full overflow-hidden bg-[#3b82f6] dark:bg-slate-900 flex flex-col relative transition-colors">
-      {/* Curved Blue App Header (inspired by mockup) */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-500 dark:from-slate-900 dark:to-slate-800 px-5 pt-5 pb-10 transition-colors flex flex-col gap-4 relative shrink-0">
-        <div className="flex items-center justify-between w-full">
-          {/* Back Button */}
-          <button 
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full bg-white/10 dark:bg-slate-800/60 border border-white/10 dark:border-slate-700/50 flex items-center justify-center text-white active:scale-95 transition-all shadow-sm"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          
-          {/* Premium WhatsApp Button */}
-          <a 
-            href={whatsappUrl} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="w-10 h-10 rounded-full bg-white/10 border border-white/25 flex items-center justify-center text-white dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-500/30 dark:shadow-[0_0_15px_rgba(16,185,129,0.25)] hover:bg-white/20 dark:hover:bg-emerald-900/30 transition-all active:scale-95 cursor-pointer shrink-0"
-            title={isBn ? 'হোয়াটসঅ্যাপ কল' : 'WhatsApp Call'}
-          >
-            <svg className="w-5.5 h-5.5 fill-current" viewBox="0 0 24 24">
-              <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.864.002-2.637-1.03-5.114-2.905-6.99C16.486 1.86 14.024 1.81 11.998 1.81 6.558 1.81 2.138 6.23 2.134 11.671c-.001 1.693.447 3.346 1.298 4.843l-.999 3.648 3.622-.968z" />
-            </svg>
-          </a>
-        </div>
-
-        {/* Center Support Info */}
-        <div className="flex flex-col items-center justify-center text-center -mt-2">
-          <div className="relative mb-2.5">
-            <div className="w-16 h-16 rounded-full bg-white/10 dark:bg-slate-800/40 border border-white/20 dark:border-slate-700/50 flex items-center justify-center text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]">
-              <MessageCircle size={32} className="text-white" />
-            </div>
-            <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-emerald-400 border-2 border-blue-500 dark:border-slate-900 rounded-full animate-pulse shadow-sm"></span>
-          </div>
-          <h1 className="text-base font-extrabold text-white leading-tight tracking-wide">
-            {isBn ? 'প্রভাতি লাইভ সাপোর্ট' : 'Provati Live Support'}
+    <div className="h-full w-full overflow-hidden bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors">
+      {/* Premium Header */}
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl px-5 py-4 sticky top-0 z-30 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors flex items-center gap-4">
+        <button 
+          onClick={() => navigate(-1)}
+          className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 active:scale-95 transition-all"
+        >
+          <ArrowLeft size={20} />
+        </button>
+        <div className="flex-1">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white leading-tight transition-colors">
+            {isBn ? 'সহায়তা ও চ্যাট' : 'Support & Chat'}
           </h1>
-          <p className="text-[11px] font-bold text-emerald-200 dark:text-emerald-400 flex items-center gap-1.5 justify-center mt-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 dark:bg-emerald-400 inline-block animate-ping"></span>
-            {isBn ? 'অনলাইন' : 'Online'}
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 transition-colors">
+            {isBn ? 'যেকোনো প্রয়োজনে আমরা আছি' : "We're here to help"}
           </p>
         </div>
       </div>
 
-      {/* Curved Container Wrapper */}
-      <div className="rounded-t-[30px] -mt-6 bg-[#f8fafc] dark:bg-slate-950 relative z-20 flex-1 flex flex-col overflow-hidden shadow-[0_-10px_30px_rgba(0,0,0,0.05)] border-t border-white/10 dark:border-slate-800/20">
-        {/* Tabs */}
-        <div className="bg-white dark:bg-slate-900 px-4 py-2 border-b border-gray-100 dark:border-slate-800 transition-colors flex gap-2 shrink-0">
-          <button
-            onClick={() => setActiveTab('chat')}
-            className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-              activeTab === 'chat'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'bg-gray-50 dark:bg-slate-850 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800'
-            }`}
+      {/* Tabs */}
+      <div className="bg-white dark:bg-gray-800 px-4 py-2 border-b border-gray-100 dark:border-gray-700 transition-colors flex gap-2">
+        <button
+          onClick={() => setActiveTab('chat')}
+          className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+            activeTab === 'chat'
+              ? 'bg-primary-600 text-white shadow-md'
+              : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100'
+          }`}
+        >
+          <MessageCircle size={16} />
+          {isBn ? 'লাইভ চ্যাট' : 'Live Chat'}
+        </button>
+        <button
+          onClick={() => setActiveTab('faq')}
+          className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+            activeTab === 'faq'
+              ? 'bg-primary-600 text-white shadow-md'
+              : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100'
+          }`}
+        >
+          <FileText size={16} />
+          {isBn ? 'সাধারণ জিজ্ঞাসা' : 'FAQs'}
+        </button>
+      </div>
+
+      {/* Direct Contact Bar */}
+      <div className="bg-white dark:bg-gray-800 px-5 py-2.5 border-b border-gray-100 dark:border-gray-700 transition-colors flex items-center justify-between gap-3 shrink-0">
+        <span className="text-[11px] font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          {isBn ? 'সরাসরি যোগাযোগ:' : 'Direct Contact:'}
+        </span>
+        <div className="flex gap-2">
+          <a 
+            href={whatsappUrl} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
           >
-            <MessageCircle size={16} />
-            {isBn ? 'লাইভ চ্যাট' : 'Live Chat'}
-          </button>
-          <button
-            onClick={() => setActiveTab('faq')}
-            className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-              activeTab === 'faq'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'bg-gray-50 dark:bg-slate-850 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800'
-            }`}
+            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+              <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.864.002-2.637-1.03-5.114-2.905-6.99C16.486 1.86 14.024 1.81 11.998 1.81 6.558 1.81 2.138 6.23 2.134 11.671c-.001 1.693.447 3.346 1.298 4.843l-.999 3.648 3.622-.968z" />
+            </svg>
+            <span>WhatsApp</span>
+          </a>
+          <a 
+            href={telegramUrl} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0088cc] hover:bg-[#0077b3] text-white rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
           >
-            <FileText size={16} />
-            {isBn ? 'সাধারণ জিজ্ঞাসা' : 'FAQs'}
-          </button>
+            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.327-2.95-.924c-.642-.2-1.042-.642-.042-1.032l11.536-4.444c.536-.2 1.002.12.871.745z" />
+            </svg>
+            <span>Telegram</span>
+          </a>
         </div>
+      </div>
 
-        {/* Direct Contact Bar - Only shown in FAQ tab to keep live chat screen super clean */}
-        {activeTab === 'faq' && (
-          <div className="bg-white dark:bg-slate-900 px-5 py-2.5 border-b border-gray-100 dark:border-slate-800 transition-colors flex items-center justify-between gap-3 shrink-0">
-            <span className="text-[11px] font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              {isBn ? 'সরাসরি যোগাযোগ:' : 'Direct Contact:'}
-            </span>
-            <div className="flex gap-2">
-              <a 
-                href={whatsappUrl} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
-              >
-                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.864.002-2.637-1.03-5.114-2.905-6.99C16.486 1.86 14.024 1.81 11.998 1.81 6.558 1.81 2.138 6.23 2.134 11.671c-.001 1.693.447 3.346 1.298 4.843l-.999 3.648 3.622-.968z" />
-                </svg>
-                <span>WhatsApp</span>
-              </a>
-              <a 
-                href={telegramUrl} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0088cc] hover:bg-[#0077b3] text-white rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
-              >
-                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.327-2.95-.924c-.642-.2-1.042-.642-.042-1.032l11.536-4.444c.536-.2 1.002.12.871.745z" />
-                </svg>
-                <span>Telegram</span>
-              </a>
-            </div>
-          </div>
-        )}
-
-        {/* Content Area */}
-        <div className="flex-1 overflow-hidden relative flex flex-col">
-          {activeTab === 'chat' ? (
-            <div className="flex-1 flex flex-col h-full bg-[#f1f5f9] dark:bg-slate-950 overflow-hidden">
-              {/* Messages Scroll Area */}
-              <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3.5 custom-scrollbar">
-                {loadingMessages ? (
-                  <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-2">
-                    <Loader2 className="animate-spin text-blue-500" size={24} />
-                    <span className="text-xs font-semibold">{isBn ? 'মেসেজ লোড হচ্ছে...' : 'Loading messages...'}</span>
+      {/* Content Area */}
+      <div className="flex-1 overflow-hidden relative flex flex-col">
+        {activeTab === 'chat' ? (
+          <div className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-950 overflow-hidden">
+            {/* Messages Scroll Area */}
+            <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3.5 custom-scrollbar">
+              {loadingMessages ? (
+                <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-2">
+                  <Loader2 className="animate-spin text-primary-500" size={24} />
+                  <span className="text-xs font-semibold">{isBn ? 'মেসেজ লোড হচ্ছে...' : 'Loading messages...'}</span>
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center p-8">
+                  <div className="w-16 h-16 bg-primary-50 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center text-primary-500 mb-4 shadow-inner">
+                    <MessageCircle size={28} />
                   </div>
-                ) : messages.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center p-8">
-                    <div className="w-16 h-16 bg-blue-50 dark:bg-slate-900 rounded-2xl flex items-center justify-center text-blue-500 mb-4 shadow-inner">
-                      <MessageCircle size={28} />
-                    </div>
-                    <h3 className="font-bold text-gray-900 dark:text-white text-base mb-1">
-                      {isBn ? 'আমাদের চ্যাট সাপোর্ট' : 'Live Support Chat'}
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[240px] leading-relaxed">
-                      {isBn 
-                        ? 'ডিপোজিটের পেমেন্ট নির্দেশনা বা যেকোনো সাহায্যের জন্য নিচে মেসেজ লিখুন।' 
-                        : 'Write a message below for payment details or general support.'}
-                    </p>
-                  </div>
-                ) : (
-                  messages.map((msg) => {
-                    const isUser = msg.sender === 'user';
-                    return (
-                      <div 
-                        key={msg.id}
-                        className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div className={`max-w-[80%] rounded-[20px] px-4 py-2.5 shadow-sm ${
-                          isUser 
-                            ? 'bg-blue-600 text-white rounded-tr-none' 
-                            : 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded-tl-none border border-gray-100 dark:border-slate-800'
+                  <h3 className="font-bold text-gray-900 dark:text-white text-base mb-1">
+                    {isBn ? 'আমাদের চ্যাট সাপোর্ট' : 'Live Support Chat'}
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[240px] leading-relaxed">
+                    {isBn 
+                      ? 'ডিপোজিটের পেমেন্ট নির্দেশনা বা যেকোনো সাহায্যের জন্য নিচে মেসেজ লিখুন।' 
+                      : 'Write a message below for payment details or general support.'}
+                  </p>
+                </div>
+              ) : (
+                messages.map((msg) => {
+                  const isUser = msg.sender === 'user';
+                  return (
+                    <div 
+                      key={msg.id}
+                      className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div className={`max-w-[80%] rounded-[20px] px-4 py-3 shadow-sm ${
+                        isUser 
+                          ? 'bg-primary-600 text-white rounded-tr-none' 
+                          : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-tl-none border border-gray-100 dark:border-gray-800'
+                      }`}>
+                        <p className="text-sm font-medium leading-relaxed break-words whitespace-pre-wrap">{msg.message}</p>
+                        <span className={`text-[9px] block text-right mt-1.5 opacity-65 font-semibold ${
+                          isUser ? 'text-primary-100' : 'text-gray-400 dark:text-gray-500'
                         }`}>
-                          <p className="text-sm font-medium leading-relaxed break-words whitespace-pre-wrap">{msg.message}</p>
-                          <span className={`text-[9px] block text-right mt-1.5 opacity-65 font-semibold ${
-                            isUser ? 'text-blue-100' : 'text-gray-400 dark:text-gray-500'
-                          }`}>
-                            {formatMessageTime(msg.created_at)}
-                          </span>
-                        </div>
+                          {formatMessageTime(msg.created_at)}
+                        </span>
                       </div>
-                    );
-                  })
-                )}
-              </div>
-
-              {/* Input Form */}
-              <form 
-                onSubmit={handleSendMessage}
-                className="bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 p-3 flex gap-2 items-center transition-colors relative z-10"
-              >
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder={isBn ? 'মেসেজ লিখুন...' : 'Type a message...'}
-                  className="flex-1 bg-slate-100 dark:bg-slate-950 border-none rounded-full px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 text-gray-900 dark:text-white transition-all"
-                />
-                <button
-                  type="submit"
-                  disabled={!newMessage.trim() || sending}
-                  className="w-11 h-11 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-full flex items-center justify-center active:scale-95 transition-all shadow-md shadow-blue-500/20 shrink-0"
-                >
-                  <Send size={18} className="translate-x-[1px]" />
-                </button>
-              </form>
+                    </div>
+                  );
+                })
+              )}
             </div>
-          ) : (
+
+            {/* Input Form */}
+            <form 
+              onSubmit={handleSendMessage}
+              className="bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 p-3 flex gap-2 items-center transition-colors relative z-10"
+            >
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder={isBn ? 'মেসেজ লিখুন...' : 'Type a message...'}
+                className="flex-1 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-primary-500 text-gray-900 dark:text-white transition-all"
+              />
+              <button
+                type="submit"
+                disabled={!newMessage.trim() || sending}
+                className="w-11 h-11 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white rounded-xl flex items-center justify-center active:scale-95 transition-all shadow-md shadow-primary-500/20 shrink-0"
+              >
+                <Send size={18} />
+              </button>
+            </form>
+          </div>
+        ) : (
           <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
             {/* FAQ List */}
             {faqs.map((faq, index) => (
@@ -476,6 +447,5 @@ export default function Support() {
         )}
       </div>
     </div>
-  </div>
   );
 }
