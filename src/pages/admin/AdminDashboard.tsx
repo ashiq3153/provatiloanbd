@@ -958,10 +958,36 @@ export default function AdminDashboard() {
                                    >
                                      Request Revision
                                    </button>
+                                    {loan.status === 'action_required' && (
+                                      <button 
+                                        onClick={() => {
+                                          const confirmCancel = window.confirm(isBn ? 'আপনি কি নিশ্চিত যে আপনি এই লোন আবেদনটি বাতিল করতে চান?' : 'Are you sure you want to cancel this loan application?');
+                                          if (confirmCancel) {
+                                            handleLoanStatus(loan.id, 'rejected');
+                                          }
+                                        }}
+                                        className="text-xs px-3 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-200/50 rounded-xl font-bold w-full transition-colors cursor-pointer flex items-center justify-center gap-1.5 mt-1.5"
+                                      >
+                                        <Trash2 size={12} /> {isBn ? 'আবেদন বাতিল করুন' : 'Cancel Application'}
+                                      </button>
+                                    )}
                                 </div>
                               )}
                               {(loan.status === 'approved' || loan.status === 'active') && (
-                                 <button onClick={() => handleLoanStatus(loan.id, 'completed')} className="text-xs px-3.5 py-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200/50 rounded-xl font-bold transition-colors w-max cursor-pointer">Mark Completed</button>
+                                <div className="flex flex-col gap-1.5 mt-1">
+                                  <button onClick={() => handleLoanStatus(loan.id, 'completed')} className="text-xs px-3.5 py-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200/50 rounded-xl font-bold transition-colors w-max cursor-pointer">Mark Completed</button>
+                                  <button 
+                                    onClick={() => {
+                                      const confirmCancel = window.confirm(isBn ? 'আপনি কি নিশ্চিত যে আপনি এই লোন আবেদনটি বাতিল করতে চান?' : 'Are you sure you want to cancel this loan application?');
+                                      if (confirmCancel) {
+                                        handleLoanStatus(loan.id, 'rejected');
+                                      }
+                                    }}
+                                    className="text-xs px-3.5 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-200/50 rounded-xl font-bold transition-colors w-max cursor-pointer flex items-center gap-1.5"
+                                  >
+                                    <Trash2 size={12} /> {isBn ? 'আবেদন বাতিল করুন' : 'Cancel Application'}
+                                  </button>
+                                </div>
                               )}
                               {loan.documents && Object.keys(loan.documents).length > 0 && (
                                 <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
