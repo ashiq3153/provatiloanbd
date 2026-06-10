@@ -1506,6 +1506,7 @@ export default function ApplyLoan() {
   };
 
   const renderFileUploader = (id: string, title: string) => {
+    const isUploading = uploadingDoc === id;
     return (
       <div className="relative">
         <input 
@@ -1526,14 +1527,12 @@ export default function ApplyLoan() {
             setUploadingDoc(null);
           }}
         />
-        <button 
-          onClick={() => document.getElementById(`file-${id}`)?.click()}
-          disabled={uploadingDoc === id}
-          type="button"
-          className={`w-full bg-gray-50 dark:bg-gray-900 transition-colors border-2 ${documents[id] ? 'border-solid border-green-500' : 'border-dashed border-gray-200 dark:border-gray-700'} rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-primary-50 hover:border-primary-300 transition-colors cursor-pointer select-none`}
+        <label 
+          htmlFor={isUploading ? undefined : `file-${id}`}
+          className={`w-full bg-gray-50 dark:bg-gray-900 transition-colors border-2 ${documents[id] ? 'border-solid border-green-500' : 'border-dashed border-gray-200 dark:border-gray-700'} rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-primary-50 hover:border-primary-300 transition-colors cursor-pointer text-center block ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
         >
-           <div className={`w-10 h-10 ${documents[id] ? 'bg-green-100 dark:bg-green-900' : 'bg-white dark:bg-gray-800'} transition-colors rounded-full flex items-center justify-center shadow-sm`}>
-             {uploadingDoc === id ? (
+           <div className={`w-10 h-10 ${documents[id] ? 'bg-green-100 dark:bg-green-900' : 'bg-white dark:bg-gray-800'} transition-colors rounded-full flex items-center justify-center shadow-sm mx-auto`}>
+             {isUploading ? (
                <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
              ) : documents[id] ? (
                <CheckCircle2 size={18} className="text-green-600 dark:text-green-400" />
@@ -1541,13 +1540,13 @@ export default function ApplyLoan() {
                <UploadCloud size={18} className="text-gray-500 dark:text-gray-400" />
              )}
            </div>
-           <span className="text-xs font-bold text-gray-600 dark:text-gray-300 text-center leading-tight">{title}</span>
+           <span className="text-xs font-bold text-gray-600 dark:text-gray-300 text-center leading-tight block">{title}</span>
            {documents[id] && (
-             <span className="text-[10px] text-green-600 font-bold">
+             <span className="text-[10px] text-green-600 font-bold block">
                {isBn ? 'আপলোড হয়েছে' : 'Uploaded'}
              </span>
            )}
-        </button>
+        </label>
       </div>
     );
   };
@@ -1666,9 +1665,10 @@ export default function ApplyLoan() {
       </div>
 
       {/* Terms and Declaration Checkbox */}
-      <label className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-900/50 transition-colors rounded-2xl border border-gray-200 dark:border-gray-750 cursor-pointer group mt-4">
+      <label htmlFor="acceptedTerms" className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-900/50 transition-colors rounded-2xl border border-gray-200 dark:border-gray-750 cursor-pointer group mt-4">
         <div className="pt-0.5">
           <input 
+            id="acceptedTerms"
             type="checkbox" 
             checked={acceptedTerms}
             onChange={(e) => setAcceptedTerms(e.target.checked)}
@@ -1679,7 +1679,10 @@ export default function ApplyLoan() {
           I declare that all provided information is correct. I agree to the{" "}
           <button 
             type="button" 
-            onClick={() => setShowTermsModal(true)} 
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent toggling the checkbox when clicking the terms link
+              setShowTermsModal(true);
+            }} 
             className="text-primary-600 font-bold hover:underline bg-transparent border-none p-0 inline cursor-pointer"
           >
             {isBn ? "শর্তাবলীতে" : "Terms & Conditions"}
