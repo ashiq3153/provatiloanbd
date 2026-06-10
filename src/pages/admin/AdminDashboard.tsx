@@ -2327,8 +2327,9 @@ export default function AdminDashboard() {
                           {isBn ? 'সংশোধনযোগ্য সেকশনসমূহ সিলেক্ট করুন:' : 'Select sections requiring revision:'}
                         </p>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs font-bold text-gray-750 dark:text-gray-300">
-                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                          <label htmlFor="flaggedPersonal" className="flex items-center gap-2 cursor-pointer">
                             <input 
+                              id="flaggedPersonal"
                               type="checkbox" 
                               checked={flaggedPersonal} 
                               onChange={(e) => setFlaggedPersonal(e.target.checked)}
@@ -2336,8 +2337,9 @@ export default function AdminDashboard() {
                             />
                             <span>{isBn ? 'ব্যক্তিগত তথ্য' : 'Personal Info'}</span>
                           </label>
-                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                          <label htmlFor="flaggedProfessional" className="flex items-center gap-2 cursor-pointer">
                             <input 
+                              id="flaggedProfessional"
                               type="checkbox" 
                               checked={flaggedProfessional} 
                               onChange={(e) => setFlaggedProfessional(e.target.checked)}
@@ -2345,8 +2347,9 @@ export default function AdminDashboard() {
                             />
                             <span>{isBn ? 'পেশাগত তথ্য' : 'Professional Info'}</span>
                           </label>
-                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                          <label htmlFor="flaggedBank" className="flex items-center gap-2 cursor-pointer">
                             <input 
+                              id="flaggedBank"
                               type="checkbox" 
                               checked={flaggedBank} 
                               onChange={(e) => setFlaggedBank(e.target.checked)}
@@ -2354,8 +2357,9 @@ export default function AdminDashboard() {
                             />
                             <span>{isBn ? 'ব্যাংক তথ্য' : 'Bank Info'}</span>
                           </label>
-                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                          <label htmlFor="flaggedNominee" className="flex items-center gap-2 cursor-pointer">
                             <input 
+                              id="flaggedNominee"
                               type="checkbox" 
                               checked={flaggedNominee} 
                               onChange={(e) => setFlaggedNominee(e.target.checked)}
@@ -2363,8 +2367,9 @@ export default function AdminDashboard() {
                             />
                             <span>{isBn ? 'নমিনি তথ্য' : 'Nominee Info'}</span>
                           </label>
-                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                          <label htmlFor="flaggedDocuments" className="flex items-center gap-2 cursor-pointer">
                             <input 
+                              id="flaggedDocuments"
                               type="checkbox" 
                               checked={flaggedDocuments} 
                               onChange={(e) => setFlaggedDocuments(e.target.checked)}

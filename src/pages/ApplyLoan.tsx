@@ -1897,8 +1897,9 @@ export default function ApplyLoan() {
 
                     <div className="space-y-2.5">
                       {/* Check 1 */}
-                      <label className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer select-none group">
+                      <label htmlFor="checkAntiFraud" className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer group">
                         <input 
+                          id="checkAntiFraud"
                           type="checkbox" 
                           checked={checkAntiFraud}
                           onChange={(e) => setCheckAntiFraud(e.target.checked)}
@@ -1912,8 +1913,9 @@ export default function ApplyLoan() {
                       </label>
 
                       {/* Check 2 */}
-                      <label className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer select-none group">
+                      <label htmlFor="checkNoRefund" className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer group">
                         <input 
+                          id="checkNoRefund"
                           type="checkbox" 
                           checked={checkNoRefund}
                           onChange={(e) => setCheckNoRefund(e.target.checked)}
@@ -1927,8 +1929,9 @@ export default function ApplyLoan() {
                       </label>
 
                       {/* Check 3 */}
-                      <label className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer select-none group">
+                      <label htmlFor="checkSavingsRule" className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer group">
                         <input 
+                          id="checkSavingsRule"
                           type="checkbox" 
                           checked={checkSavingsRule}
                           onChange={(e) => setCheckSavingsRule(e.target.checked)}
@@ -1942,8 +1945,9 @@ export default function ApplyLoan() {
                       </label>
 
                       {/* Check 4 */}
-                      <label className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer select-none group">
+                      <label htmlFor="checkEmiObligation" className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer group">
                         <input 
+                          id="checkEmiObligation"
                           type="checkbox" 
                           checked={checkEmiObligation}
                           onChange={(e) => setCheckEmiObligation(e.target.checked)}
