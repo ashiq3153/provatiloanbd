@@ -115,8 +115,12 @@ div.cursor-pointer.bg-white:hover {
 }
 
 /* Accent overlays on hover */
-.bg-white:active,
-.dark\:bg-gray-800:active {
+button.bg-white:active,
+button.dark\:bg-gray-800:active,
+a.bg-white:active,
+a.dark\:bg-gray-800:active,
+.cursor-pointer.bg-white:active,
+.cursor-pointer.dark\:bg-gray-800:active {
   transform: translateY(-0.5px) scale(0.995) !important;
   transition-duration: 0.1s !important;
 }
