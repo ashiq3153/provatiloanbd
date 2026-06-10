@@ -295,6 +295,17 @@ export default function ApplyLoan() {
   const [checkSavingsRule, setCheckSavingsRule] = useState(false);
   const [checkEmiObligation, setCheckEmiObligation] = useState(false);
 
+  const handleCloseVerification = () => {
+    setVerificationStage('idle');
+    setCheckAntiFraud(false);
+    setCheckNoRefund(false);
+    setCheckSavingsRule(false);
+    setCheckEmiObligation(false);
+    setProgressPercent(0);
+    setActiveCheck(0);
+    setVerifyingError(null);
+  };
+
   // Accordion state for Step 3 combined info form
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     personal: true,
@@ -942,7 +953,7 @@ export default function ApplyLoan() {
         await sleep(650);
 
         localStorage.removeItem('loan_draft_v1');
-        setVerificationStage('idle');
+        handleCloseVerification();
         setStep(5);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
@@ -1849,10 +1860,10 @@ export default function ApplyLoan() {
                   {isBn ? 'স্মার্ট আবেদন যাচাইকরণ' : 'Smart Application Review'}
                 </h3>
               </div>
-              {verificationStage === 'confirm' && (
+              {(verificationStage === 'confirm' || verificationStage === 'failed') && (
                 <button 
-                  onClick={() => setVerificationStage('idle')}
-                  className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  onClick={handleCloseVerification}
+                  className="text-gray-400 hover:text-gray-650 dark:hover:text-white p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                 >
                   <X size={18} />
                 </button>
@@ -1968,8 +1979,8 @@ export default function ApplyLoan() {
                   {/* Buttons */}
                   <div className="flex gap-3 pt-3">
                     <button 
-                      onClick={() => setVerificationStage('idle')}
-                      className="flex-1 py-3 rounded-xl font-bold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                      onClick={handleCloseVerification}
+                      className="flex-1 py-3 rounded-xl font-bold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                     >
                       {isBn ? 'বাতিল' : 'Cancel'}
                     </button>
@@ -2098,9 +2109,14 @@ export default function ApplyLoan() {
               {/* STAGE 4: Failed Visuals */}
               {verificationStage === 'failed' && (
                 <div className="text-center py-6 space-y-5">
-                  <div className="w-20 h-20 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mx-auto text-rose-500 ring-8 ring-rose-50 dark:ring-rose-950/20">
+                  <button 
+                    type="button"
+                    onClick={handleCloseVerification}
+                    className="w-20 h-20 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mx-auto text-rose-500 ring-8 ring-rose-50 dark:ring-rose-950/20 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                    title={isBn ? 'বন্ধ করুন' : 'Close'}
+                  >
                     <X size={40} strokeWidth={2.5} />
-                  </div>
+                  </button>
                   <div>
                     <h4 className="text-lg font-black text-rose-600 dark:text-rose-450">
                       {isBn ? 'যাচাইকরণ ব্যর্থ!' : 'Verification Failed'}
@@ -2112,7 +2128,7 @@ export default function ApplyLoan() {
                   </div>
 
                   <button 
-                    onClick={() => setVerificationStage('idle')}
+                    onClick={handleCloseVerification}
                     className="w-full py-3.5 rounded-xl font-bold bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 transition-colors shadow cursor-pointer"
                   >
                     {isBn ? 'তথ্য সংশোধন করতে ফিরে যান' : 'Go Back to Edit Details'}
