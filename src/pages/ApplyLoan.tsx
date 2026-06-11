@@ -1046,16 +1046,16 @@ export default function ApplyLoan() {
                   : "border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-650 hover:shadow-md"
               }`}
             >
-              <div className="flex flex-row min-h-[150px] sm:min-h-[160px]">
+              <div className="flex flex-col sm:flex-row min-h-[160px]">
                 {/* Text Content */}
-                <div className="flex-1 p-4 sm:p-5 relative z-10 flex flex-col justify-between min-w-0">
+                <div className="flex-1 p-5 relative z-10 flex flex-col justify-between min-w-0">
                   <div>
                     <div className="flex items-center gap-3 mb-2">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${getIconColor(cat.color)}`}>
                         <cat.icon size={20} />
                       </div>
                       <div>
-                        <h3 className="font-extrabold text-gray-900 dark:text-white text-base sm:text-lg transition-colors group-hover:text-primary-600 dark:group-hover:text-primary-400 truncate">
+                        <h3 className="font-extrabold text-gray-900 dark:text-white text-lg transition-colors group-hover:text-primary-600 dark:group-hover:text-primary-400">
                           {cat.title}
                         </h3>
                         <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
@@ -1066,25 +1066,25 @@ export default function ApplyLoan() {
                   </div>
 
                   {/* Highlights Grid */}
-                  <div className="grid grid-cols-3 gap-2 py-2 sm:py-3 border-t border-b border-gray-100 dark:border-gray-700/60 my-2 sm:my-3">
+                  <div className="grid grid-cols-3 gap-2 py-3 border-t border-b border-gray-100 dark:border-gray-700/60 my-3">
                     <div>
-                      <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "মেয়াদ" : "Tenure"}</p>
-                      <p className="text-[11px] sm:text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.tenureRange}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "মেয়াদ" : "Tenure"}</p>
+                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.tenureRange}</p>
                     </div>
                     <div>
-                      <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "সুদ" : "Int. Rate"}</p>
-                      <p className="text-[11px] sm:text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.intRates}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "সুদ" : "Int. Rate"}</p>
+                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.intRates}</p>
                     </div>
                     <div>
-                      <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "প্রসেস" : "Processing"}</p>
-                      <p className="text-[11px] sm:text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.procTime}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "প্রসেস" : "Processing"}</p>
+                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.procTime}</p>
                     </div>
                   </div>
 
                   {/* Features Tag */}
                   <div className="flex flex-wrap gap-1.5 mt-1">
                     {cat.features.map((feature, i) => (
-                      <span key={i} className={`px-2 py-0.5 text-[9px] sm:text-[10px] rounded-[6px] border font-bold ${
+                      <span key={i} className={`px-2 py-0.5 text-[10px] rounded-[6px] border font-bold ${
                         isActive 
                           ? 'bg-primary-500/10 border-primary-500/20 text-primary-600 dark:text-primary-400' 
                           : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'
@@ -1096,9 +1096,9 @@ export default function ApplyLoan() {
                 </div>
 
                 {/* Right side Image wrapper with fade mask */}
-                <div className="relative w-[135px] sm:w-[190px] overflow-hidden shrink-0 self-stretch">
-                  {/* Fade Gradient Overlay (Left to blend with card background) */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-gray-800 via-white/20 dark:via-gray-800/20 to-transparent z-10 pointer-events-none" />
+                <div className="relative w-full sm:w-[190px] h-[180px] sm:h-auto overflow-hidden shrink-0 self-stretch">
+                  {/* Fade Gradient Overlay (Bottom-to-top on mobile, left-to-right on desktop) */}
+                  <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-white dark:from-gray-800 via-white/20 dark:via-gray-800/20 to-transparent z-10 pointer-events-none" />
                   
                   {/* Category Image */}
                   <img 
