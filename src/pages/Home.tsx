@@ -83,8 +83,8 @@ export default function Home() {
 
   const allLoanCategories = [
     { id: 'business', name: isBn ? 'ব্যবসায়ী ঋণ' : 'Business', icon: '🏢', image: businessImg, color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-    { id: 'personal', name: isBn ? 'চাকরিজীবী' : 'Salaried (Personal)', icon: '👤', image: personalImg, color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-    { id: 'expat', name: isBn ? 'প্রবাসী ঋণ' : 'Expatriate', icon: '✈️', image: expatImg, color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+    { id: 'personal', name: isBn ? 'ব্যক্তিগত লোন' : 'Personal', icon: '👤', image: personalImg, color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+    { id: 'expat', name: isBn ? 'প্রবাসী ঋণ' : 'Probashi', icon: '✈️', image: expatImg, color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
     { id: 'student', name: isBn ? 'শিক্ষার্থী ঋণ' : 'Student', icon: '🎓', image: studentImg, color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
     { id: 'emergency', name: isBn ? 'জরুরি ঋণ' : 'Emergency', icon: '🚨', image: emergencyImg, color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
     { id: 'women', name: isBn ? 'নারী উদ্যোক্তা' : 'Women Entrepreneur', icon: '🏆', image: womenImg, color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
@@ -104,9 +104,9 @@ export default function Home() {
     const list: { id: string; title: string; time: string; type: string; status: string; link?: string }[] = [];
 
     userLoans.forEach(loan => {
-      const cat = loan.loan_category === 'personal' ? (isBn ? 'ব্যক্তিগত' : 'Salaried') :
+      const cat = loan.loan_category === 'personal' ? (isBn ? 'ব্যক্তিগত' : 'Personal') :
                   loan.loan_category === 'business' ? (isBn ? 'ব্যবসায়িক' : 'Business') :
-                  loan.loan_category === 'expat' ? (isBn ? 'প্রবাসী' : 'Expatriate') :
+                  loan.loan_category === 'expat' ? (isBn ? 'প্রবাসী' : 'Probashi') :
                   loan.loan_category === 'student' ? (isBn ? 'শিক্ষা' : 'Student') :
                   loan.loan_category === 'emergency' ? (isBn ? 'জরুরি' : 'Emergency') : (isBn ? 'নারী উদ্যোক্তা' : 'Women Entrepreneur');
 

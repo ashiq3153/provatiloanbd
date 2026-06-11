@@ -1387,9 +1387,9 @@ export default function AdminDashboard() {
                               </h3>
                               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                                 {[
-                                  { label: isBn ? 'চাকরিজীবী লোন' : 'Personal Loan', key: 'minRatePersonal' },
+                                  { label: isBn ? 'ব্যক্তিগত লোন' : 'Personal Loan', key: 'minRatePersonal' },
                                   { label: isBn ? 'ব্যবসায়ী লোন' : 'Business Loan', key: 'minRateBusiness' },
-                                  { label: isBn ? 'প্রবাসী লোন' : 'Expatriate Loan', key: 'minRateExpat' },
+                                  { label: isBn ? 'প্রবাসী লোন' : 'Probashi Loan', key: 'minRateExpat' },
                                   { label: isBn ? 'শিক্ষার্থী লোন' : 'Student Loan', key: 'minRateStudent' },
                                   { label: isBn ? 'জরুরি ঋণ' : 'Emergency Loan', key: 'minRateEmergency' },
                                   { label: isBn ? 'নারী উদ্যোক্তা লোন' : 'Women Entrepreneur', key: 'minRateWomen' },
@@ -1671,9 +1671,9 @@ export default function AdminDashboard() {
                           <div className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                               {[
-                                { id: 'Personal', stateKey: 'catPersonal', label: isBn ? 'চাকরিজীবী ঋণ' : 'Salaried (Personal)', defaultMax: 500000 },
+                                { id: 'Personal', stateKey: 'catPersonal', label: isBn ? 'ব্যক্তিগত লোন' : 'Personal Loan', defaultMax: 500000 },
                                 { id: 'Business', stateKey: 'catBusiness', label: isBn ? 'ব্যবসায়ী ঋণ' : 'Business Loan', defaultMax: 5000000 },
-                                { id: 'Expat', stateKey: 'catExpat', label: isBn ? 'প্রবাসী ঋণ' : 'Expatriate Loan', defaultMax: 1000000 },
+                                { id: 'Expat', stateKey: 'catExpat', label: isBn ? 'প্রবাসী লোন' : 'Probashi Loan', defaultMax: 1000000 },
                                 { id: 'Student', stateKey: 'catStudent', label: isBn ? 'শিক্ষার্থী ঋণ' : 'Student Loan', defaultMax: 500000 },
                                 { id: 'Emergency', stateKey: 'catEmergency', label: isBn ? 'জরুরি ঋণ' : 'Emergency Loan', defaultMax: 100000 },
                                 { id: 'Women', stateKey: 'catWomen', label: isBn ? 'নারী উদ্যোক্তা ঋণ' : 'Women Entrepreneur', defaultMax: 2000000 },

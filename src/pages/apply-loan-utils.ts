@@ -34,7 +34,7 @@ const getTenureText = (min: number, max: number, isBn: boolean) => {
 export const getCategories = (isBn: boolean, settings?: any) => [
   {
     id: "personal",
-    title: isBn ? "চাকরিজীবী" : "Salaried",
+    title: isBn ? "ব্যক্তিগত" : "Personal",
     icon: Briefcase,
     image: personalImg,
     limit: getLimitText(settings?.categories?.personal?.maxAmount ?? 500000, isBn),
@@ -70,7 +70,7 @@ export const getCategories = (isBn: boolean, settings?: any) => [
   },
   {
     id: "expat",
-    title: isBn ? "প্রবাসী" : "Expatriate",
+    title: isBn ? "প্রবাসী" : "Probashi",
     icon: Plane,
     image: expatImg,
     limit: getLimitText(settings?.categories?.expat?.maxAmount ?? 1000000, isBn),

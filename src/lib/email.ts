@@ -18,9 +18,9 @@ export async function sendEmailNotification(
     return false;
   }
 
-  const categoryName = loan.loan_category === 'personal' ? (isBn ? 'চাকরিজীবী (ব্যক্তিগত)' : 'Salaried (Personal)') :
+  const categoryName = loan.loan_category === 'personal' ? (isBn ? 'ব্যক্তিগত' : 'Personal') :
                        loan.loan_category === 'business' ? (isBn ? 'ব্যবসায়িক' : 'Business') :
-                       loan.loan_category === 'expat' ? (isBn ? 'প্রবাসী' : 'Expatriate') :
+                       loan.loan_category === 'expat' ? (isBn ? 'প্রবাসী' : 'Probashi') :
                        loan.loan_category === 'student' ? (isBn ? 'শিক্ষা' : 'Student') :
                        loan.loan_category === 'emergency' ? (isBn ? 'জরুরি' : 'Emergency') : (isBn ? 'নারী উদ্যোক্তা' : 'Women Entrepreneur');
 

@@ -129,7 +129,7 @@ export default function Terms() {
                   <ul className="list-disc pl-5 space-y-1.5 font-medium">
                     <li><b>ব্যক্তিগত লোন (Personal):</b> চাকুরিজীবীদের জন্য সর্বোচ্চ ৫,০০,০০০ টাকা পর্যন্ত ঋণ। মাসিক সুদ ১.২%।</li>
                     <li><b>ব্যবসায়িক লোন (Business):</b> ব্যবসায়ীদের জন্য সর্বোচ্চ ৫০,০০,০০০ টাকা পর্যন্ত ঋণ। মাসিক সুদ ১.৫%।</li>
-                    <li><b>প্রবাসী লোন (Expat):</b> রেমিট্যান্স যোদ্ধাদের জন্য সর্বোচ্চ ১০,০০,০০০ টাকা পর্যন্ত ঋণ। মাসিক সুদ ১.০%।</li>
+                    <li><b>প্রবাসী লোন (Probashi):</b> রেমিট্যান্স যোদ্ধাদের জন্য সর্বোচ্চ ১০,০০,০০০ টাকা পর্যন্ত ঋণ। মাসিক সুদ ১.০%।</li>
                     <li><b>শিক্ষা লোন (Student):</b> শিক্ষার্থীদের জন্য সর্বোচ্চ ৫,০০,০০০ টাকা পর্যন্ত ঋণ। মাসিক সুদ ০.৮%।</li>
                     <li><b>জরুরি লোন (Emergency):</b> তাৎক্ষণিক প্রয়োজনের জন্য সর্বোচ্চ ১,০০,০০০ টাকা পর্যন্ত ঋণ। মাসিক সুদ ২.০%।</li>
                     <li><b>মহিলা উদ্যোক্তা লোন (Women):</b> নারী উদ্যোক্তাদের জন্য সর্বোচ্চ ২০,০০,০০০ টাকা পর্যন্ত ঋণ। মাসিক সুদ ০.৮%।</li>
@@ -142,7 +142,7 @@ export default function Terms() {
                   <ul className="list-disc pl-5 space-y-1.5 font-medium">
                     <li><b>Personal Loan:</b> For salaried employees up to BDT 500,000. Monthly rate 1.2%.</li>
                     <li><b>Business Loan:</b> For entrepreneurs up to BDT 5,000,000. Monthly rate 1.5%.</li>
-                    <li><b>Expat Loan:</b> For overseas workers up to BDT 1,000,000. Monthly rate 1.0%.</li>
+                    <li><b>Probashi Loan:</b> For overseas workers up to BDT 1,000,000. Monthly rate 1.0%.</li>
                     <li><b>Student Loan:</b> For students up to BDT 500,000. Monthly rate 0.8%.</li>
                     <li><b>Emergency Loan:</b> For urgent situations up to BDT 100,000. Monthly rate 2.0%.</li>
                     <li><b>Women Entrepreneur Loan:</b> For female entrepreneurs up to BDT 2,000,000. Monthly rate 0.8%.</li>
