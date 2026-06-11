@@ -1096,15 +1096,15 @@ export default function ApplyLoan() {
                 </div>
 
                 {/* Right side Image wrapper with fade mask */}
-                <div className="relative w-[110px] sm:w-[190px] overflow-hidden shrink-0 self-stretch flex items-center justify-center bg-gray-50/30 dark:bg-gray-900/10">
-                  {/* Fade Gradient Overlay (Left for desktop & mobile to blend with the white/dark background) */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-gray-800 via-white/10 dark:via-gray-800/10 to-transparent z-10 pointer-events-none" />
+                <div className="relative w-[135px] sm:w-[190px] overflow-hidden shrink-0 self-stretch">
+                  {/* Fade Gradient Overlay (Left to blend with card background) */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-gray-800 via-white/20 dark:via-gray-800/20 to-transparent z-10 pointer-events-none" />
                   
                   {/* Category Image */}
                   <img 
                     src={cat.image} 
                     alt={cat.title} 
-                    className="w-full h-full object-contain p-2 sm:p-4 group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
               </div>
