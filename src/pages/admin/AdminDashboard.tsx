@@ -2302,7 +2302,7 @@ export default function AdminDashboard() {
                                     </ul>
                                   </div>
                                 ) : (
-                                  <p className="text-[10px] text-gray-450 dark:text-gray-550 font-medium mt-1">
+                                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium mt-1">
                                     {isBn ? 'কোনো নির্দিষ্ট তথ্য পরিবর্তন সনাক্ত করা যায়নি।' : 'No field changes logged in this step.'}
                                   </p>
                                 )}

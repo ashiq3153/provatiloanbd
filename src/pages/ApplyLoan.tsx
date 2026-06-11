@@ -31,6 +31,7 @@ import { convertDigits, formatCurrency } from "../lib/translation";
 import { useForm, FormProvider, useFormContext } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getLoanSchema, LoanFormData } from "./ApplyLoanSchema";
+import { AddressSelector, AddressValue, emptyAddress, serializeAddress } from "../components/AddressSelector";
 
 import { getCategories, snapPoints, amountPackages, formatAmount, getAllowedTenure, getColorStyles, getIconColor } from "./apply-loan-utils";
 
@@ -283,6 +284,14 @@ export default function ApplyLoan() {
   const [documents, setDocuments] = useState<Record<string, string>>({});
   const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
 
+  // Structured address states
+  const [currentAddress, setCurrentAddress] = useState<AddressValue>(emptyAddress());
+  const [permanentAddress, setPermanentAddress] = useState<AddressValue>(emptyAddress());
+  const [addressErrors, setAddressErrors] = useState<{
+    current: Partial<Record<keyof AddressValue, string>>;
+    permanent: Partial<Record<keyof AddressValue, string>>;
+  }>({ current: {}, permanent: {} });
+
   // Smart Review System States
   const [verificationStage, setVerificationStage] = useState<'idle' | 'confirm' | 'verifying' | 'success' | 'failed'>('idle');
   const [activeCheck, setActiveCheck] = useState(0);
@@ -367,6 +376,22 @@ export default function ApplyLoan() {
             setDocuments(loan.documents);
           }
 
+          // Parse stored address JSON (if stored) or fall back to empty
+          let parsedCurrentAddr: AddressValue = emptyAddress();
+          let parsedPermanentAddr: AddressValue = emptyAddress();
+          try {
+            if (loan.current_address && loan.current_address.trim().startsWith('{')) {
+              parsedCurrentAddr = JSON.parse(loan.current_address);
+            }
+          } catch (e) {}
+          try {
+            if (loan.permanent_address && loan.permanent_address.trim().startsWith('{')) {
+              parsedPermanentAddr = JSON.parse(loan.permanent_address);
+            }
+          } catch (e) {}
+          setCurrentAddress(parsedCurrentAddr);
+          setPermanentAddress(parsedPermanentAddr);
+
           const defaultFields = {
             fullName: loan.full_name,
             fatherName: loan.father_name,
@@ -376,8 +401,8 @@ export default function ApplyLoan() {
             mobile: loan.mobile,
             whatsapp: loan.whatsapp || '',
             email: loan.email || '',
-            currentAddress: loan.current_address,
-            permanentAddress: loan.permanent_address,
+            currentAddress: parsedCurrentAddr,
+            permanentAddress: parsedPermanentAddr,
             nidNumber: loan.nid_number || '',
             bankName: loan.bank_name,
             accountName: loan.account_name,
@@ -514,7 +539,8 @@ export default function ApplyLoan() {
     const r = category.minRate;
     const n = tenure;
     if (r === 0) return amount / n;
-    const emi = (amount * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    const totalInterest = amount * r * n;
+    const emi = (amount + totalInterest) / n;
     return Math.round(emi);
   };
 
@@ -526,7 +552,28 @@ export default function ApplyLoan() {
       if (step === 2 && (!amount || !tenure)) return;
       
       if (step === 3) {
-        const personalFields: (keyof LoanFormData)[] = ['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'mobile', 'whatsapp', 'email', 'currentAddress', 'permanentAddress', 'nidNumber'];
+        // Validate address fields manually
+        const validateAddr = (addr: AddressValue, isBn: boolean) => {
+          const errs: Partial<Record<keyof AddressValue, string>> = {};
+          if (!addr.division) errs.division = isBn ? "বিভাগ নির্বাচন করুন" : "Select division";
+          if (!addr.district) errs.district = isBn ? "জেলা নির্বাচন করুন" : "Select district";
+          if (!addr.upazila) errs.upazila = isBn ? "উপজেলা নির্বাচন করুন" : "Select upazila";
+          if (!addr.union) errs.union = isBn ? "ইউনিয়ন/পৌরসভা লিখুন" : "Enter union";
+          if (!addr.village) errs.village = isBn ? "গ্রাম/মহল্লা লিখুন" : "Enter village";
+          if (!addr.postOffice) errs.postOffice = isBn ? "পোস্ট অফিস লিখুন" : "Enter post office";
+          if (!addr.postCode || addr.postCode.length < 4) errs.postCode = isBn ? "পোস্ট কোড দিন" : "Enter post code";
+          return errs;
+        };
+        const currErrs = validateAddr(currentAddress, isBn);
+        const permErrs = validateAddr(permanentAddress, isBn);
+        setAddressErrors({ current: currErrs, permanent: permErrs });
+        const hasAddrError = Object.keys(currErrs).length > 0 || Object.keys(permErrs).length > 0;
+
+        // Sync address values to form for RHF validation
+        methods.setValue('currentAddress', currentAddress as any);
+        methods.setValue('permanentAddress', permanentAddress as any);
+
+        const personalFields: (keyof LoanFormData)[] = ['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'mobile', 'whatsapp', 'email', 'nidNumber'];
         
         let profFields: (keyof LoanFormData)[] = [];
         if (category?.id === 'personal') profFields = ['companyName', 'designation', 'workDuration', 'monthlyIncome'];
@@ -541,10 +588,10 @@ export default function ApplyLoan() {
         const allFields = [...personalFields, ...profFields, ...bankFields, ...nomineeFields];
         const isValid = await trigger(allFields);
         
-        if (!isValid) {
+        if (!isValid || hasAddrError) {
           // Auto-expand sections that have validation errors
           const newExpanded = { ...expanded };
-          const hasPersonalError = personalFields.some(f => errors[f]);
+          const hasPersonalError = personalFields.some(f => errors[f]) || hasAddrError;
           const hasProfError = profFields.some(f => errors[f]);
           const hasBankError = bankFields.some(f => errors[f]);
           const hasNomineeError = nomineeFields.some(f => errors[f]);
@@ -711,8 +758,8 @@ export default function ApplyLoan() {
         mobile: formData.mobile,
         whatsapp: formData.whatsapp || null,
         email: formData.email || null,
-        current_address: formData.currentAddress,
-        permanent_address: formData.permanentAddress,
+        current_address: JSON.stringify(currentAddress),
+        permanent_address: JSON.stringify(permanentAddress),
         nid_number: formData.nidNumber,
         professional_info: professionalInfo,
         bank_name: formData.bankName,
@@ -1021,16 +1068,16 @@ export default function ApplyLoan() {
                   {/* Highlights Grid */}
                   <div className="grid grid-cols-3 gap-2 py-3 border-t border-b border-gray-100 dark:border-gray-700/60 my-3">
                     <div>
-                      <p className="text-[10px] text-gray-450 dark:text-gray-500 font-bold uppercase tracking-wider mb-0.5">{isBn ? "মেয়াদ" : "Tenure"}</p>
-                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-250">{cat.tenureRange}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "মেয়াদ" : "Tenure"}</p>
+                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.tenureRange}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-gray-450 dark:text-gray-500 font-bold uppercase tracking-wider mb-0.5">{isBn ? "সুদ" : "Int. Rate"}</p>
-                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-250">{cat.intRates}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "সুদ" : "Int. Rate"}</p>
+                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.intRates}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-gray-450 dark:text-gray-500 font-bold uppercase tracking-wider mb-0.5">{isBn ? "প্রসেস" : "Processing"}</p>
-                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-250">{cat.procTime}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "প্রসেস" : "Processing"}</p>
+                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.procTime}</p>
                     </div>
                   </div>
 
@@ -1087,8 +1134,8 @@ export default function ApplyLoan() {
                 onClick={() => handleAmountChange(pkg)}
                 className={`py-2 px-3 rounded-xl font-bold text-sm transition-all border-2 flex-grow text-center ${
                   amount === pkg 
-                    ? "border-primary-600 bg-primary-50 text-primary-700 shadow-sm" 
-                    : "border-gray-100 dark:border-gray-700 transition-colors bg-gray-50 dark:bg-gray-900 transition-colors hover:border-gray-200 text-gray-600"
+                    ? "border-primary-600 bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300 shadow-sm" 
+                    : "border-gray-100 dark:border-gray-700 transition-colors bg-gray-50 dark:bg-gray-900 transition-colors hover:border-gray-200 text-gray-600 dark:text-gray-300"
                 }`}
               >
                 {formatAmount(pkg, isBn)}
@@ -1111,11 +1158,11 @@ export default function ApplyLoan() {
               
               let btnClass = "py-3 px-4 rounded-xl font-bold text-sm transition-all border-2 flex-grow text-center ";
               if (isSelected) {
-                btnClass += "border-primary-600 bg-primary-50 text-primary-700 shadow-sm";
+                btnClass += "border-primary-600 bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300 shadow-sm";
               } else if (isAllowed) {
-                btnClass += "border-gray-200 bg-white dark:bg-gray-800 transition-colors text-gray-700 hover:border-gray-300";
+                btnClass += "border-gray-200 bg-white dark:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300 hover:border-gray-300";
               } else {
-                btnClass += "border-gray-100 dark:border-gray-700 transition-colors bg-gray-50 dark:bg-gray-900 transition-colors text-gray-300 cursor-not-allowed";
+                btnClass += "border-gray-100 dark:border-gray-700 transition-colors bg-gray-50 dark:bg-gray-900 transition-colors text-gray-300 dark:text-gray-600 cursor-not-allowed";
               }
 
               return (
@@ -1279,16 +1326,41 @@ export default function ApplyLoan() {
               <input type="email" {...register("email")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.email ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="example@email.com" />
               <ErrorText field="email" />
             </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বর্তমান ঠিকানা" : "Current Address"}</label>
-              <textarea rows={1.5} {...register("currentAddress")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.currentAddress ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all resize-none`} placeholder={isBn ? "বাসা, রাস্তা, এলাকা..." : "House, Road, Area..."} />
-              <ErrorText field="currentAddress" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "স্থায়ী ঠিকানা" : "Permanent Address"}</label>
-              <textarea rows={1.5} {...register("permanentAddress")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.permanentAddress ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all resize-none`} placeholder={isBn ? "এনআইডি অনুযায়ী সম্পূর্ণ ঠিকানা..." : "Complete address as per NID..."} />
-              <ErrorText field="permanentAddress" />
-            </div>
+            <AddressSelector
+              label={isBn ? "বর্তমান ঠিকানা" : "Current Address"}
+              value={currentAddress}
+              onChange={(val) => {
+                setCurrentAddress(val);
+                methods.setValue('currentAddress', val as any);
+                // Clear errors for filled fields
+                setAddressErrors(prev => ({
+                  ...prev,
+                  current: Object.fromEntries(
+                    Object.entries(prev.current).filter(([k]) => !val[k as keyof AddressValue])
+                  )
+                }));
+              }}
+              isBn={isBn}
+              errors={addressErrors.current}
+              prefix="current"
+            />
+            <AddressSelector
+              label={isBn ? "স্থায়ী ঠিকানা (NID অনুযায়ী)" : "Permanent Address (as per NID)"}
+              value={permanentAddress}
+              onChange={(val) => {
+                setPermanentAddress(val);
+                methods.setValue('permanentAddress', val as any);
+                setAddressErrors(prev => ({
+                  ...prev,
+                  permanent: Object.fromEntries(
+                    Object.entries(prev.permanent).filter(([k]) => !val[k as keyof AddressValue])
+                  )
+                }));
+              }}
+              isBn={isBn}
+              errors={addressErrors.permanent}
+              prefix="permanent"
+            />
           </div>
         </AccordionSection>
 
@@ -2141,7 +2213,7 @@ export default function ApplyLoan() {
         )}
       {/* Local Terms Modal */}
       {showTermsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-hidden text-gray-800 dark:text-gray-250">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-hidden text-gray-800 dark:text-gray-200">
           <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
