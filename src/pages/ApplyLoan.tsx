@@ -1096,7 +1096,7 @@ export default function ApplyLoan() {
                 </div>
 
                 {/* Right side Image wrapper with fade mask */}
-                <div className="relative w-full sm:w-[190px] h-[180px] sm:h-auto overflow-hidden shrink-0 self-stretch">
+                <div className="relative w-full sm:w-[190px] h-[200px] sm:h-auto overflow-hidden shrink-0 self-stretch">
                   {/* Fade Gradient Overlay (Bottom-to-top on mobile, left-to-right on desktop) */}
                   <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-white dark:from-gray-800 via-white/20 dark:via-gray-800/20 to-transparent z-10 pointer-events-none" />
                   
@@ -1104,7 +1104,7 @@ export default function ApplyLoan() {
                   <img 
                     src={cat.image} 
                     alt={cat.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
               </div>
