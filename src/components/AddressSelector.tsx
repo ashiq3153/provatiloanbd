@@ -67,12 +67,12 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
 }) => {
   const [filteredDistricts, setFilteredDistricts] = useState(
     value.division ? getDistrictsByDivision(
-      divisions.find(d => (isBn ? d.bn_name : d.name) === value.division)?.id || ""
+      divisions.find(d => d.name === value.division || d.bn_name === value.division)?.id || ""
     ) : []
   );
   const [filteredUpazilas, setFilteredUpazilas] = useState(
     value.district ? getUpazilasByDistrict(
-      districts.find(d => (isBn ? d.bn_name : d.name) === value.district)?.id || ""
+      districts.find(d => d.name === value.district || d.bn_name === value.district)?.id || ""
     ) : []
   );
 
@@ -117,6 +117,49 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
       }
     }
   }, [value.division, value.district]);
+
+  // Language auto-translation/correction
+  useEffect(() => {
+    let updated = false;
+    const newValue = { ...value };
+
+    if (value.division) {
+      const div = divisions.find(d => d.name === value.division || d.bn_name === value.division);
+      if (div) {
+        const correctDivName = isBn ? div.bn_name : div.name;
+        if (value.division !== correctDivName) {
+          newValue.division = correctDivName;
+          updated = true;
+        }
+      }
+    }
+
+    if (value.district) {
+      const dist = districts.find(d => d.name === value.district || d.bn_name === value.district);
+      if (dist) {
+        const correctDistName = isBn ? dist.bn_name : dist.name;
+        if (value.district !== correctDistName) {
+          newValue.district = correctDistName;
+          updated = true;
+        }
+      }
+    }
+
+    if (value.upazila) {
+      const upz = upazilas.find(u => u.name === value.upazila || u.bn_name === value.upazila);
+      if (upz) {
+        const correctUpzName = isBn ? upz.bn_name : upz.name;
+        if (value.upazila !== correctUpzName) {
+          newValue.upazila = correctUpzName;
+          updated = true;
+        }
+      }
+    }
+
+    if (updated) {
+      onChange(newValue);
+    }
+  }, [isBn, value.division, value.district, value.upazila, onChange]);
 
   const t = (en: string, bn: string) => (isBn ? bn : en);
 

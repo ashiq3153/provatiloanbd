@@ -497,6 +497,12 @@ export default function ApplyLoan() {
             if (draft.tenure) setTenure(draft.tenure);
             if (draft.formData) {
               methods.reset(draft.formData);
+              if (draft.formData.currentAddress) {
+                setCurrentAddress(draft.formData.currentAddress);
+              }
+              if (draft.formData.permanentAddress) {
+                setPermanentAddress(draft.formData.permanentAddress);
+              }
             }
           } else {
             localStorage.removeItem('loan_draft_v1');
