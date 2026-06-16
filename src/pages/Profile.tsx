@@ -1,5 +1,5 @@
 import { getTelegramUser } from '../lib/telegram';
-import { ShieldCheck, Settings, HelpCircle, LogOut, ChevronRight, Moon, Sun, Languages } from 'lucide-react';
+import { ShieldCheck, Settings, HelpCircle, LogOut, ChevronRight, Moon, Sun, Languages, Volume2, VolumeX } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAppStore } from '../lib/store';
 import { useState, useEffect } from 'react';
@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 
 export default function Profile() {
   const user = getTelegramUser();
-  const { theme, toggleTheme, language, setLanguage } = useAppStore();
+  const { theme, toggleTheme, language, setLanguage, soundEnabled, setSoundEnabled } = useAppStore();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -134,6 +134,38 @@ export default function Profile() {
               className={`w-14 h-8 rounded-full relative transition-colors duration-300 ease-in-out neu-sunken border-0 cursor-pointer ${isBn ? 'bg-emerald-500/20' : 'bg-blue-500/20'}`}
             >
               <div className={`absolute top-1 left-1 w-6 h-6 rounded-full transition-transform duration-300 ease-in-out shadow-md ${isBn ? 'translate-x-6 bg-gradient-to-r from-emerald-500 to-green-600' : 'translate-x-0 bg-gradient-to-r from-blue-500 to-indigo-500'}`}></div>
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Sound Toggle */}
+        <motion.div
+           initial={{ opacity: 0, y: 10 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.15 }}
+        >
+          <div className="w-full neu-raised p-4 rounded-[24px] border-0 flex items-center justify-between transition-colors">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full neu-sunken flex items-center justify-center text-amber-500 dark:text-amber-400 transition-colors border-0">
+                {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+              </div>
+              <div>
+                <span className="font-extrabold text-gray-900 dark:text-white text-base block transition-colors">
+                  {isBn ? 'ক্লিক সাউন্ড' : 'Click Sounds'}
+                </span>
+                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 transition-colors mt-0.5 block">
+                  {isBn ? 'ইনপুট ও বাটনে শব্দ সক্রিয় রাখুন' : 'Enable click sounds on buttons and inputs'}
+                </span>
+              </div>
+            </div>
+            
+            {/* Toggle Switch */}
+            <button 
+              type="button"
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className={`w-14 h-8 rounded-full relative transition-colors duration-300 ease-in-out neu-sunken border-0 cursor-pointer ${soundEnabled ? 'bg-amber-500/20' : 'bg-gray-300/40'}`}
+            >
+              <div className={`absolute top-1 left-1 w-6 h-6 rounded-full transition-transform duration-300 ease-in-out shadow-md ${soundEnabled ? 'translate-x-6 bg-gradient-to-r from-amber-500 to-orange-500' : 'translate-x-0 bg-white'}`}></div>
             </button>
           </div>
         </motion.div>

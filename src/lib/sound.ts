@@ -1,3 +1,5 @@
+import { useAppStore } from './store';
+
 let audioCtx: AudioContext | null = null;
 
 /**
@@ -5,6 +7,9 @@ let audioCtx: AudioContext | null = null;
  */
 export function playUIClick() {
   try {
+    const isSoundEnabled = useAppStore.getState().soundEnabled;
+    if (!isSoundEnabled) return;
+
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
@@ -41,6 +46,9 @@ export function playUIClick() {
  */
 export function playUITap() {
   try {
+    const isSoundEnabled = useAppStore.getState().soundEnabled;
+    if (!isSoundEnabled) return;
+
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
     }

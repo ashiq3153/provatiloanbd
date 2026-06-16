@@ -5,9 +5,11 @@ interface AppState {
   theme: 'light' | 'dark';
   language: 'en' | 'bn';
   systemSettings: any;
+  soundEnabled: boolean;
   toggleTheme: () => void;
   setLanguage: (lang: 'en' | 'bn') => void;
   setSystemSettings: (settings: any) => void;
+  setSoundEnabled: (enabled: boolean) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -16,6 +18,7 @@ export const useAppStore = create<AppState>()(
       theme: 'light',
       language: 'bn', // Defaulting to Bangla as requested context implies Bangla might be preferred, or English
       systemSettings: null,
+      soundEnabled: true,
       toggleTheme: () =>
         set((state) => {
           const newTheme = state.theme === 'light' ? 'dark' : 'light';
@@ -24,6 +27,7 @@ export const useAppStore = create<AppState>()(
         }),
       setLanguage: (lang) => set({ language: lang }),
       setSystemSettings: (settings) => set({ systemSettings: settings }),
+      setSoundEnabled: (enabled) => set({ soundEnabled: enabled }),
     }),
     {
       name: 'app-settings',
