@@ -728,12 +728,32 @@ export default function Home() {
                 className="absolute inset-0 px-1"
               >
                 <div className="relative w-full h-full neu-raised rounded-[24px] p-5 border-0 overflow-hidden transition-colors flex flex-col justify-between">
-                  {/* Subtle top-right background accent glow */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/20 dark:bg-blue-900/10 rounded-bl-full -mr-10 -mt-10 z-0 transition-colors" />
- 
+                  {/* ── Decorative Background Layer ── */}
+                  {/* Gradient mesh blob - top right */}
+                  <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-gradient-to-bl from-blue-400/15 via-indigo-400/10 to-transparent dark:from-blue-500/10 dark:via-indigo-500/5 blur-2xl z-0 transition-colors" />
+                  {/* Gradient mesh blob - bottom left */}
+                  <div className="absolute -bottom-6 -left-6 w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-400/12 via-teal-400/8 to-transparent dark:from-emerald-500/8 dark:via-teal-500/4 blur-2xl z-0 transition-colors" />
+                  {/* Subtle center accent */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full bg-gradient-to-br from-purple-300/5 via-pink-300/5 to-transparent dark:from-purple-500/3 dark:via-pink-500/3 blur-3xl z-0 transition-colors" />
+
+                  {/* Geometric pattern overlay */}
+                  <div className="absolute inset-0 z-0 opacity-[0.03] dark:opacity-[0.04]" style={{
+                    backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
+                    backgroundSize: '20px 20px'
+                  }} />
+
+                  {/* Decorative shapes */}
+                  <div className="absolute top-6 right-14 w-5 h-5 border-2 border-blue-300/15 dark:border-blue-400/10 rounded rotate-45 z-0 transition-colors" />
+                  <div className="absolute bottom-8 right-8 w-3 h-3 bg-emerald-400/10 dark:bg-emerald-400/8 rounded-full z-0 transition-colors" />
+                  <div className="absolute top-14 right-6 w-2 h-2 bg-amber-400/15 dark:bg-amber-400/10 rounded-full z-0 transition-colors" />
+                  <div className="absolute bottom-12 left-6 w-4 h-4 border border-purple-300/10 dark:border-purple-400/8 rounded-full z-0 transition-colors" />
+
+                  {/* Bottom gradient fade */}
+                  <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white/40 via-white/10 to-transparent dark:from-gray-900/30 dark:via-gray-900/5 z-0 pointer-events-none transition-colors" />
+
                   {/* Quote icon watermark */}
-                  <div className="absolute top-4 right-4 text-blue-100/50 dark:text-blue-950/20 transition-colors z-0">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg>
+                  <div className="absolute top-4 right-4 text-blue-200/30 dark:text-blue-800/20 transition-colors z-0">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg>
                   </div>
  
                   <div className="flex gap-3 mb-2 relative z-10 w-full overflow-hidden items-center">
@@ -765,8 +785,21 @@ export default function Home() {
                   <div className="flex justify-between items-center relative z-10 w-full mt-1.5">
                     {/* Rating Stars (Left) */}
                     <div className="flex gap-0.5 text-yellow-400">
-                      {[...Array(stories[safeStoryIndex].rating || 5)].map((_, i) => (
+                      {[...Array(Math.min(stories[safeStoryIndex].rating || 5, 5))].map((_, i) => (
                         <Star key={i} size={10} fill="currentColor" className="border-0" />
+                      ))}
+                    </div>
+                    {/* Story Indicator Dots (Right) */}
+                    <div className="flex items-center gap-1.5">
+                      {stories.map((_, i) => (
+                        <div
+                          key={i}
+                          className={`rounded-full transition-all duration-300 ${
+                            i === safeStoryIndex
+                              ? 'w-4 h-1.5 bg-primary-500 dark:bg-primary-400'
+                              : 'w-1.5 h-1.5 bg-gray-300 dark:bg-gray-600'
+                          }`}
+                        />
                       ))}
                     </div>
                   </div>
