@@ -136,3 +136,14 @@ CREATE POLICY "Public insert support_messages" ON support_messages FOR INSERT WI
 
 CREATE INDEX IF NOT EXISTS idx_support_messages_chat_id ON support_messages(chat_id);
 CREATE INDEX IF NOT EXISTS idx_support_messages_created_at ON support_messages(created_at ASC);
+
+-- 8. Migration: Add Reaction Columns to Success Stories
+ALTER TABLE success_stories
+ADD COLUMN IF NOT EXISTS like_count INT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS dislike_count INT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS love_count INT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS loveit_count INT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS congratulation_count INT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS wow_count INT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS sad_count INT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS hundred_count INT DEFAULT 0;

@@ -30,7 +30,7 @@ export default function ApplicationDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen neu-bg flex items-center justify-center">
         <Loader2 className="animate-spin text-primary-600" size={32} />
       </div>
     );
@@ -38,13 +38,13 @@ export default function ApplicationDetails() {
 
   if (!appDetails) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-6">
-        <div className="w-20 h-20 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+      <div className="min-h-screen neu-bg flex flex-col items-center justify-center p-6">
+        <div className="w-20 h-20 neu-sunken rounded-full flex items-center justify-center mb-4">
           <FileText size={32} className="text-gray-400" />
         </div>
         <p className="text-gray-900 dark:text-white font-bold text-lg mb-2">{isBn ? 'আবেদন পাওয়া যায়নি' : 'Application not found'}</p>
         <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-6">{isBn ? 'দুঃখিত, এই আইডি দিয়ে কোনো আবেদন খুঁজে পাওয়া যায়নি।' : 'Sorry, no application could be found with this ID.'}</p>
-        <button onClick={() => navigate(-1)} className="px-8 py-3.5 bg-primary-600 text-white rounded-full font-bold shadow-lg shadow-primary-600/30 hover:bg-primary-700 active:scale-95 transition-all">
+        <button onClick={() => navigate(-1)} className="px-8 py-3.5 neu-btn-primary text-white rounded-full font-bold active:scale-95 transition-all">
           {isBn ? 'ফিরে যান' : 'Go Back'}
         </button>
       </div>
@@ -53,27 +53,27 @@ export default function ApplicationDetails() {
 
   const getAppStatusStyles = (status: LoanAppStatus) => {
     switch (status) {
-      case 'pending': return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/50';
-      case 'under_review': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800/50';
-      case 'approved': return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50';
-      case 'active': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/50';
-      case 'rejected': return 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800/50';
-      case 'action_required': return 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800/50';
-      case 'completed': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700';
-      default: return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700';
+      case 'pending': return 'neu-badge-orange border-white/20';
+      case 'under_review': return 'neu-badge-orange border-white/20';
+      case 'approved': return 'neu-badge-green border-white/20';
+      case 'active': return 'neu-badge-green border-white/20';
+      case 'rejected': return 'neu-badge-red border-white/20';
+      case 'action_required': return 'neu-badge-purple border-white/20';
+      case 'completed': return 'neu-badge-green border-white/20';
+      default: return 'neu-badge-orange border-white/20';
     }
   };
 
   const getAppStatusIcon = (status: LoanAppStatus) => {
     switch (status) {
-      case 'pending': return <Clock size={20} className="text-amber-600 dark:text-amber-400" />;
-      case 'under_review': return <Clock size={20} className="text-purple-600 dark:text-purple-400" />;
-      case 'approved': return <CheckCircle2 size={20} className="text-emerald-600 dark:text-emerald-400" />;
-      case 'active': return <CheckCircle2 size={20} className="text-blue-600 dark:text-blue-400" />;
-      case 'rejected': return <XCircle size={20} className="text-rose-600 dark:text-rose-400" />;
-      case 'action_required': return <AlertCircle size={20} className="text-orange-600 dark:text-orange-400" />;
-      case 'completed': return <CheckCircle2 size={20} className="text-gray-600 dark:text-gray-400" />;
-      default: return <FileText size={20} className="text-gray-600 dark:text-gray-400" />;
+      case 'pending': return <Clock size={28} className="text-white" />;
+      case 'under_review': return <Clock size={28} className="text-white" />;
+      case 'approved': return <CheckCircle2 size={28} className="text-white" />;
+      case 'active': return <CheckCircle2 size={28} className="text-white" />;
+      case 'rejected': return <XCircle size={28} className="text-white" />;
+      case 'action_required': return <AlertCircle size={28} className="text-white" />;
+      case 'completed': return <CheckCircle2 size={28} className="text-white" />;
+      default: return <FileText size={28} className="text-white" />;
     }
   };
 
@@ -115,11 +115,11 @@ export default function ApplicationDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors pb-24">
+    <div className="min-h-screen neu-bg flex flex-col relative transition-colors pb-24">
       {/* Premium Header */}
-      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl px-5 py-4 sticky top-0 z-30 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors flex items-center justify-between">
+      <div className="neu-bg px-5 py-4 sticky top-0 z-30 shadow-md border-b border-white/20 dark:border-white/5 transition-colors flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-2.5 -ml-2.5 bg-gray-50 dark:bg-gray-700 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 active:scale-95 transition-all text-gray-700 dark:text-gray-300">
+          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full neu-btn flex items-center justify-center text-gray-700 dark:text-gray-300 active:scale-95 transition-all">
             <ArrowLeft size={20} />
           </button>
           <div>
@@ -138,12 +138,12 @@ export default function ApplicationDetails() {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-gray-800 rounded-[32px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 text-center relative overflow-hidden group"
+          className="neu-raised rounded-[32px] p-8 text-center relative overflow-hidden group"
         >
-          <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary-50/50 to-transparent dark:from-primary-900/10 z-0"></div>
+          <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary-500/5 to-transparent dark:from-primary-900/5 z-0"></div>
           
           <div className="relative z-10">
-            <div className={`w-20 h-20 rounded-[24px] flex items-center justify-center mx-auto mb-5 border-4 border-white dark:border-gray-800 shadow-xl ${getAppStatusStyles(appDetails.status as LoanAppStatus).replace('border-', 'ring-1 ring-').replace('text-', 'text-').replace('bg-', 'bg-')} transition-colors`}>
+            <div className={`w-20 h-20 rounded-[24px] flex items-center justify-center mx-auto mb-5 border-2 border-white/20 shadow-lg ${getAppStatusStyles(appDetails.status as LoanAppStatus)} transition-colors`}>
               {getAppStatusIcon(appDetails.status as LoanAppStatus)}
             </div>
             <p className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">
@@ -151,7 +151,7 @@ export default function ApplicationDetails() {
             </p>
             <h2 className="text-4xl font-black text-gray-900 dark:text-white mb-6">{formatCurrency(appDetails.amount || 0, isBn)}</h2>
 
-            <div className="pt-5 border-t border-gray-100 dark:border-gray-700 flex justify-center">
+            <div className="pt-5 border-t border-white/20 dark:border-white/5 flex justify-center">
               <div className={`px-5 py-2.5 rounded-full border shadow-sm text-sm font-bold capitalize flex items-center gap-2 ${getAppStatusStyles(appDetails.status as LoanAppStatus)}`}>
                 <span className="w-2 h-2 rounded-full bg-current opacity-60"></span>
                 {isBn ? 'স্ট্যাটাস: ' : 'Status: '} {displayStatus(appDetails.status)}
@@ -165,29 +165,29 @@ export default function ApplicationDetails() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-gray-800 rounded-[24px] shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden"
+          className="neu-raised rounded-[24px] overflow-hidden"
         >
-          <div className="p-5 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+          <div className="p-5 bg-transparent border-b border-white/20 dark:border-white/5">
              <h3 className="font-bold text-gray-900 dark:text-white text-base flex items-center gap-2">
                <FileText size={18} className="text-gray-500 dark:text-gray-400" /> 
                {isBn ? 'সারাংশ' : 'Summary'}
              </h3>
           </div>
-          <div className="divide-y divide-gray-50 dark:divide-gray-700/50">
-            <div className="p-5 flex justify-between items-center bg-white dark:bg-gray-800">
+          <div className="divide-y divide-white/20 dark:divide-white/5">
+            <div className="p-5 flex justify-between items-center bg-transparent">
               <span className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
                  <Calendar size={18} className="text-gray-400" /> {isBn ? 'আবেদনের তারিখ' : 'Applied On'}
               </span>
               <span className="text-sm font-bold text-gray-900 dark:text-white">{formatDate(appDetails.applied_at)}</span>
             </div>
-            <div className="p-5 flex justify-between items-center bg-white dark:bg-gray-800">
+            <div className="p-5 flex justify-between items-center bg-transparent">
               <span className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
                 <Clock size={18} className="text-gray-400" /> {isBn ? 'মেয়াদ' : 'Duration'}
               </span>
               <span className="text-sm font-bold text-gray-900 dark:text-white">{convertDigits(appDetails.tenure_months, isBn)} {isBn ? 'মাস' : 'months'}</span>
             </div>
-            <div className="p-5 flex justify-between items-center bg-primary-50/50 dark:bg-primary-900/10">
-              <span className="text-sm font-bold flex items-center gap-2 text-primary-700 dark:text-primary-400">
+            <div className="p-5 flex justify-between items-center neu-sunken border-t border-white/20 dark:border-white/5">
+              <span className="text-sm font-bold flex items-center gap-2 text-primary-750 dark:text-primary-400">
                  <Wallet size={18} /> {isBn ? 'সম্ভাব্য মাসিক কিস্তি (EMI)' : 'Estimated EMI'}
               </span>
               <span className="text-base font-black text-primary-700 dark:text-primary-300">{formatCurrency(appDetails.emi_amount || 0, isBn)}</span>
@@ -201,7 +201,7 @@ export default function ApplicationDetails() {
              initial={{ opacity: 0, y: 10 }}
              animate={{ opacity: 1, y: 0 }}
              transition={{ delay: 0.2 }}
-             className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/50 rounded-[24px] p-6 relative overflow-hidden"
+             className="neu-sunken border border-orange-500/25 rounded-[24px] p-6 relative overflow-hidden"
            >
              <div className="flex items-center gap-3 mb-3 relative z-10">
                <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-800/50 flex items-center justify-center shrink-0">
@@ -211,7 +211,7 @@ export default function ApplicationDetails() {
                  {isBn ? 'এডমিন নোটস' : 'Admin Notes'}
                </h3>
              </div>
-             <p className="text-sm text-orange-800 dark:text-orange-200 leading-relaxed bg-white/60 dark:bg-gray-800/60 p-4 rounded-xl border border-orange-100/50 dark:border-orange-800/50 relative z-10 font-medium">
+             <p className="text-sm text-orange-850 dark:text-orange-200 leading-relaxed neu-raised-sm p-4 rounded-xl relative z-10 font-medium">
                {appDetails.admin_feedback}
              </p>
            </motion.div>

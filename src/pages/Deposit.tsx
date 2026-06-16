@@ -170,39 +170,40 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-6 text-center transition-colors">
+      <div className="min-h-screen neu-bg flex flex-col items-center justify-center p-6 text-center transition-colors">
         <motion.div
            initial={{ scale: 0.8, opacity: 0, y: 20 }}
            animate={{ scale: 1, opacity: 1, y: 0 }}
-           className="bg-white dark:bg-gray-800 p-8 rounded-[32px] shadow-xl border border-gray-100 dark:border-gray-700 max-w-sm w-full transition-colors relative overflow-hidden"
+           className="neu-raised p-8 rounded-[32px] max-w-sm w-full transition-colors relative overflow-hidden border-0 shadow-none"
         >
-          <div className="absolute top-0 right-0 w-40 h-40 bg-green-500/10 blur-3xl rounded-full -mr-10 -mt-10 pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-40 h-40 bg-green-500/5 blur-3xl rounded-full -mr-10 -mt-10 pointer-events-none"></div>
           
-          <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500 ring-8 ring-green-50 dark:ring-green-900/10 relative z-10">
-            <CheckCircle2 size={40} strokeWidth={2.5} />
+          <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500 shadow-inner ring-8 ring-green-500/5 relative z-10">
+            <CheckCircle2 size={36} strokeWidth={2.5} />
           </div>
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-3 tracking-tight transition-colors relative z-10">
+          <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2 tracking-tight transition-colors relative z-10">
             {isBn ? 'ধন্যবাদ!' : 'Thank You!'}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 font-medium text-xs leading-relaxed mb-6 transition-colors relative z-10">
+          <p className="text-gray-500 dark:text-gray-400 font-bold text-xs leading-relaxed mb-6 transition-colors relative z-10">
             {isBn 
               ? 'আপনার ডিপোজিট রিকুয়েস্ট সফলভাবে সাবমিট হয়েছে। আমাদের এডমিন প্যানেল এটি ভেরিফাই করছে।' 
               : 'Your deposit request has been submitted successfully. Our admin panel is verifying it.'}
           </p>
           
-          <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-2xl border border-orange-100 dark:border-orange-900/40 mb-6 transition-colors relative z-10">
-            <p className="text-[10px] uppercase tracking-wider font-bold text-orange-800 dark:text-orange-300 mb-1 transition-colors">
+          <div className="neu-sunken p-4 rounded-2xl mb-6 transition-colors relative z-10 border-0">
+            <p className="text-[10px] uppercase tracking-wider font-black text-orange-600 dark:text-orange-400 mb-1 transition-colors">
               {isBn ? 'আপডেট সময়' : 'Estimated Time'}
             </p>
-            <p className="font-bold text-sm text-orange-600 dark:text-orange-400 transition-colors flex items-center justify-center gap-2">
-               <ShieldCheck size={16} />
+            <p className="font-extrabold text-sm text-gray-700 dark:text-gray-300 transition-colors flex items-center justify-center gap-2">
+              <ShieldCheck size={16} className="text-green-500" />
               {isBn ? '২০-৩০ মিনিট' : '20-30 Minutes'}
             </p>
           </div>
 
           <button 
+            type="button"
             onClick={() => navigate('/')}
-            className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-3.5 rounded-[20px] font-bold shadow-lg shadow-gray-900/20 active:scale-95 transition-all text-base relative z-10"
+            className="w-full neu-btn-primary py-3.5 rounded-[20px] font-black active:scale-95 transition-all text-sm relative z-10 border-0"
           >
             {isBn ? 'হোম পেজে ফিরে যান' : 'Back to Home'}
           </button>
@@ -212,48 +213,49 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors pb-10">
+    <div className="min-h-screen neu-bg flex flex-col relative transition-colors pb-24">
       {/* Premium Header */}
-      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl px-5 py-3 sticky top-0 z-30 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors flex items-center gap-4">
+      <div className="px-5 py-4 sticky top-0 z-30 flex items-center gap-4 shrink-0 bg-transparent">
         <button 
+          type="button"
           onClick={() => navigate(-1)}
-          className="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 active:scale-95 transition-all"
+          className="w-10 h-10 rounded-full neu-btn flex items-center justify-center text-gray-700 dark:text-gray-300 active:scale-95 transition-all border-0"
         >
           <ArrowLeft size={18} />
         </button>
         <div>
-          <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-tight transition-colors">
+          <h1 className="text-lg font-black text-gray-900 dark:text-white leading-tight transition-colors">
             {isBn ? 'ডিপোজিট করুন' : 'Deposit Funds'}
           </h1>
-          <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 transition-colors">
+          <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 transition-colors mt-0.5">
             {isBn ? 'লোন প্রসেসিং ও সঞ্চয় জমা' : 'Pay processing fee or savings deposit'}
           </p>
         </div>
       </div>
 
-      <div className="flex-1 p-4 space-y-4">
+      <div className="flex-1 p-4 space-y-4 bg-transparent">
         
         {/* Step 1: Loan Amount Selection */}
         <motion.section 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-gray-800 rounded-[20px] p-4 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
+          className="neu-raised rounded-[24px] p-5 border-0"
         >
-          <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 transition-colors">
+          <label className="block text-xs font-black text-gray-700 dark:text-gray-300 mb-3 transition-colors">
             {isBn ? 'লোনের পরিমাণ নির্বাচন করুন' : 'Select Loan Amount'}
           </label>
           
           {/* Preset chips */}
-          <div className="flex flex-wrap gap-1.5 mb-3">
+          <div className="flex flex-wrap gap-2 mb-4">
             {presetAmounts.map((amt) => (
               <button
                 key={amt}
                 type="button"
                 onClick={() => setLoanAmount(amt.toString())}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all border-0 cursor-pointer ${
                   loanAmtNum === amt
-                    ? 'bg-primary-600 border-primary-600 text-white shadow-sm'
-                    : 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100'
+                    ? 'neu-btn-primary shadow-sm'
+                    : 'neu-btn'
                 }`}
               >
                 {formatPresetLabel(amt)}
@@ -262,13 +264,13 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
           </div>
 
           {/* Custom entry */}
-          <div className="relative font-bold">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-gray-400 font-bold">৳</span>
+          <div className="relative font-black">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-gray-400 font-black">৳</span>
             <input 
               type="number" 
               value={loanAmount}
               onChange={(e) => setLoanAmount(e.target.value)}
-              className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-xl py-3 pl-8 pr-4 text-lg font-black text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all" 
+              className="w-full neu-input rounded-xl py-3 pl-8 pr-4 text-base font-black outline-none border-0 transition-all text-gray-900 dark:text-white" 
               placeholder={isBn ? "অন্যান্য পরিমাণ লিখুন (উদাঃ ১০০০০০)" : "Enter custom amount (e.g. 100000)"} 
             />
           </div>
@@ -279,12 +281,12 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
           <motion.section
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-[20px] p-4 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
+            className="neu-raised rounded-[24px] p-5 border-0"
           >
-            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-extrabold mb-2">
+            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black mb-3">
               {isBn ? 'ডিপোজিটের বিবরণ ও ধরণ' : 'Deposit Details & Type'}
             </p>
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {/* Select All Option */}
               <div 
                 onClick={() => {
@@ -301,17 +303,17 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 }}
                 className={`p-3 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer ${
                   (selectProcessing && selectSecurity && (!isInsuranceEnabled || selectInsurance))
-                    ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400'
-                    : 'border-gray-50 dark:border-gray-800 hover:border-gray-100 text-gray-800 dark:text-gray-200'
+                    ? 'border-primary-500/40 bg-primary-600/10 text-primary-600 dark:text-indigo-400 neu-raised shadow-inner'
+                    : 'neu-btn text-gray-800 dark:text-gray-250 border-0'
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${(selectProcessing && selectSecurity && (!isInsuranceEnabled || selectInsurance)) ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-400'}`}>
+                <div className="flex items-center gap-2 relative z-10">
+                  <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${(selectProcessing && selectSecurity && (!isInsuranceEnabled || selectInsurance)) ? 'border-primary-600 bg-primary-600 text-white' : 'border-gray-400'}`}>
                     {(selectProcessing && selectSecurity && (!isInsuranceEnabled || selectInsurance)) && (
                       <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                     )}
                   </div>
-                  <span className="text-xs font-bold">{isBn ? 'সব নির্বাচন করুন' : 'Select All'}</span>
+                  <span className="text-xs font-extrabold">{isBn ? 'সব নির্বাচন করুন' : 'Select All'}</span>
                 </div>
               </div>
 
@@ -320,24 +322,24 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 onClick={() => setSelectProcessing(!selectProcessing)}
                 className={`p-3 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer ${
                   selectProcessing
-                    ? 'border-primary-500 bg-primary-50/50 dark:bg-primary-950/20 text-primary-700 dark:text-primary-400'
-                    : 'border-gray-50 dark:border-gray-800 hover:border-gray-100 text-gray-800 dark:text-gray-200'
+                    ? 'border-primary-500/40 bg-primary-600/10 text-primary-600 dark:text-indigo-400 neu-raised shadow-inner'
+                    : 'neu-btn text-gray-800 dark:text-gray-250 border-0'
                 }`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 relative z-10">
                   <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${selectProcessing ? 'border-primary-600 bg-primary-600 text-white' : 'border-gray-400'}`}>
                     {selectProcessing && (
                       <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                     )}
                   </div>
-                  <span className="text-xs font-bold">
+                  <span className="text-xs font-extrabold">
                     {isBn 
                       ? `প্রসেসিং ফি (${loanAmtNum <= 1000000 ? '১%' : '০.৫%'})` 
                       : `Processing Fee (${loanAmtNum <= 1000000 ? '1%' : '0.5%'})`
                     }
                   </span>
                 </div>
-                <span className="text-sm font-black">৳{calculatedProcessingFee.toLocaleString('en-IN')}</span>
+                <span className="text-xs font-black relative z-10">৳{calculatedProcessingFee.toLocaleString('en-IN')}</span>
               </div>
 
               {/* Savings Deposit Row */}
@@ -345,21 +347,21 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 onClick={() => setSelectSecurity(!selectSecurity)}
                 className={`p-3 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer ${
                   selectSecurity
-                    ? 'border-primary-500 bg-primary-50/50 dark:bg-primary-950/20 text-primary-700 dark:text-primary-400'
-                    : 'border-gray-50 dark:border-gray-800 hover:border-gray-100 text-gray-800 dark:text-gray-200'
+                    ? 'border-primary-500/40 bg-primary-600/10 text-primary-600 dark:text-indigo-400 neu-raised shadow-inner'
+                    : 'neu-btn text-gray-800 dark:text-gray-250 border-0'
                 }`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 relative z-10">
                   <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${selectSecurity ? 'border-primary-600 bg-primary-600 text-white' : 'border-gray-400'}`}>
                     {selectSecurity && (
                       <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                     )}
                   </div>
-                  <span className="text-xs font-bold">
+                  <span className="text-xs font-extrabold">
                     {isBn ? 'সঞ্চয় জমা (১০%)' : 'Savings Deposit (10%)'}
                   </span>
                 </div>
-                <span className="text-sm font-black">৳{calculatedSavingsDeposit.toLocaleString('en-IN')}</span>
+                <span className="text-xs font-black relative z-10">৳{calculatedSavingsDeposit.toLocaleString('en-IN')}</span>
               </div>
 
               {/* Insurance Row */}
@@ -368,27 +370,27 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                   onClick={() => setSelectInsurance(!selectInsurance)}
                   className={`p-3 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer ${
                     selectInsurance
-                      ? 'border-primary-500 bg-primary-50/50 dark:bg-primary-950/20 text-primary-700 dark:text-primary-400'
-                      : 'border-gray-50 dark:border-gray-800 hover:border-gray-100 text-gray-800 dark:text-gray-200'
+                      ? 'border-primary-500/40 bg-primary-600/10 text-primary-600 dark:text-indigo-400 neu-raised shadow-inner'
+                      : 'neu-btn text-gray-800 dark:text-gray-250 border-0'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 relative z-10">
                     <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${selectInsurance ? 'border-primary-600 bg-primary-600 text-white' : 'border-gray-400'}`}>
                       {selectInsurance && (
                         <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                       )}
                     </div>
-                    <span className="text-xs font-bold">
+                    <span className="text-xs font-extrabold">
                       {isBn ? `বীমা ফি (${(insuranceRate * 100).toFixed(1)}%)` : `Insurance Fee (${(insuranceRate * 100).toFixed(1)}%)`}
                     </span>
                   </div>
-                  <span className="text-sm font-black">৳{calculatedInsurance.toLocaleString('en-IN')}</span>
+                  <span className="text-xs font-black relative z-10">৳{calculatedInsurance.toLocaleString('en-IN')}</span>
                 </div>
               )}
 
               {/* Total Row */}
-              <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl flex items-center justify-between border border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white">
-                <span className="text-xs font-bold opacity-80">{isBn ? 'মোট সম্ভাব্য জমা' : 'Total Charges'}</span>
+              <div className="p-3.5 neu-sunken rounded-2xl flex items-center justify-between border-0 text-gray-900 dark:text-white">
+                <span className="text-xs font-black text-gray-500 dark:text-gray-400">{isBn ? 'মোট সম্ভাব্য জমা' : 'Total Charges'}</span>
                 <span className="text-base font-black">৳{selectedPaymentAmount.toLocaleString('en-IN')}</span>
               </div>
             </div>
@@ -399,50 +401,44 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
         <motion.section 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-gray-800 rounded-[20px] p-4 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
+          className="neu-raised rounded-[24px] p-5 border-0"
         >
-          <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-3.5 transition-colors">
+          <label className="block text-xs font-black text-gray-700 dark:text-gray-300 mb-3.5 transition-colors">
             {isBn ? 'পেমেন্ট গেটওয়ে' : 'Payment Method'}
           </label>
           
-          <div className="grid grid-cols-3 gap-2 mb-2">
+          <div className="grid grid-cols-3 gap-2.5 mb-2.5">
             {paymentMethods.slice(0, 3).map((m) => (
               <button
                 key={m.id}
                 type="button"
                 onClick={() => setMethod(m.id)}
-                className={`py-2 px-1.5 rounded-xl text-xs font-bold border-2 transition-all flex flex-col items-center justify-center gap-1.5 relative overflow-hidden ${
+                className={`py-2 px-1.5 rounded-xl text-xs font-bold border-2 transition-all flex flex-col items-center justify-center gap-1.5 relative overflow-hidden cursor-pointer ${
                   method === m.id 
-                    ? `border-primary-500 shadow-sm` 
-                    : 'border-gray-50 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900 hover:border-gray-100'
+                    ? `border-primary-500/40 bg-primary-600/10 shadow-inner` 
+                    : 'neu-btn border-0'
                 }`}
               >
-                {method === m.id && (
-                  <div className={`absolute inset-0 ${m.bgLight} pointer-events-none`}></div>
-                )}
                 <img src={m.logo} alt={m.name} className="h-6 object-contain mix-blend-multiply dark:mix-blend-normal rounded-sm relative z-10" />
-                <span className={`text-[10px] relative z-10 ${method === m.id ? m.text : 'text-gray-600 dark:text-gray-300'}`}>{m.name}</span>
+                <span className={`text-[10px] font-black relative z-10 ${method === m.id ? m.text : 'text-gray-600 dark:text-gray-300'}`}>{m.name}</span>
               </button>
             ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2.5">
             {paymentMethods.slice(3).map((m) => (
               <button
                 key={m.id}
                 type="button"
                 onClick={() => setMethod(m.id)}
-                className={`py-2 px-1.5 rounded-xl text-xs font-bold border-2 transition-all flex flex-col items-center justify-center gap-1 relative overflow-hidden ${
+                className={`py-2 px-1.5 rounded-xl text-xs font-bold border-2 transition-all flex flex-col items-center justify-center gap-1 relative overflow-hidden cursor-pointer ${
                   method === m.id 
-                    ? `border-primary-500 shadow-sm` 
-                    : 'border-gray-50 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900 hover:border-gray-100'
+                    ? `border-primary-500/40 bg-primary-600/10 shadow-inner` 
+                    : 'neu-btn border-0'
                 }`}
               >
-                {method === m.id && (
-                  <div className={`absolute inset-0 ${m.bgLight} pointer-events-none`}></div>
-                )}
                 <img src={m.logo} alt={m.name} className="h-6 object-contain mix-blend-multiply dark:mix-blend-normal rounded-sm relative z-10" />
-                <span className={`text-[10px] relative z-10 ${method === m.id ? m.text : 'text-gray-600 dark:text-gray-300'}`}>{m.name}</span>
+                <span className={`text-[10px] font-black relative z-10 ${method === m.id ? m.text : 'text-gray-600 dark:text-gray-300'}`}>{m.name}</span>
               </button>
             ))}
           </div>
@@ -452,18 +448,17 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-primary-600 to-indigo-700 rounded-[20px] p-4 text-white shadow-md relative overflow-hidden"
+          className="neu-raised rounded-[24px] p-5 border-0"
         >
-          <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
-          <div className="relative z-10 flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-3 relative z-10">
             <div>
-              <h4 className="font-bold text-sm mb-0.5">{isBn ? 'পেমেন্ট নাম্বার সংগ্রহ করুন' : 'Get Support Agent Number'}</h4>
-              <p className="text-[10px] text-blue-100">{isBn ? '💬 আমাদের টিম থেকে নম্বর নিয়ে পেমেন্ট করুন।' : 'Contact live chat to get payment details.'}</p>
+              <h4 className="font-extrabold text-xs text-gray-900 dark:text-white mb-0.5">{isBn ? 'পেমেন্ট নাম্বার সংগ্রহ করুন' : 'Get Support Agent Number'}</h4>
+              <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold">{isBn ? '💬 আমাদের টিম থেকে নম্বর নিয়ে পেমেন্ট করুন।' : 'Contact live chat to get payment details.'}</p>
             </div>
             <button
               type="button"
               onClick={handleLiveSupportChat}
-              className="bg-white text-primary-700 hover:bg-gray-50 font-extrabold text-xs py-2 px-3 rounded-lg active:scale-95 transition-all shadow flex items-center gap-1.5 shrink-0"
+              className="neu-btn-primary font-black text-xs py-2.5 px-3.5 rounded-xl active:scale-95 transition-all border-0 flex items-center gap-1.5 shrink-0"
             >
               <MessageCircle size={14} />
               {isBn ? 'পেমেন্ট নির্দেশনা নিন' : '💬 Live Chat'}
@@ -475,15 +470,15 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
         <motion.section 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-gray-800 rounded-[20px] p-4 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors"
+          className="neu-raised rounded-[24px] p-5 border-0"
         >
-          <p className="text-[10px] text-gray-400 uppercase tracking-widest font-extrabold mb-3">
+          <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black mb-3">
             {isBn ? 'পেমেন্ট ভেরিফিকেশন প্রুফ' : 'Submit Payment Proof'}
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-3.5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase mb-1 transition-colors">
+              <label className="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase mb-1.5 transition-colors">
                 {isBn ? 'যে নাম্বার থেকে টাকা পাঠিয়েছেন' : 'Sender Number'}
               </label>
               <input 
@@ -491,13 +486,13 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 required
                 value={senderNo}
                 onChange={(e) => setSenderNo(e.target.value)}
-                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-xl px-3 py-3 text-sm font-bold text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all" 
+                className="w-full neu-input rounded-2xl px-4 py-3 text-sm font-bold text-gray-900 dark:text-white outline-none border-0 transition-all" 
                 placeholder="01XXXXXXXXX" 
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase mb-1 transition-colors">
+              <label className="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase mb-1.5 transition-colors">
                 {isBn ? 'পেমেন্ট স্ক্রিনশট' : 'Payment Screenshot'}
               </label>
               
@@ -523,19 +518,19 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 />
                 <label 
                   htmlFor="screenshot-upload" 
-                  className="w-full bg-gray-50 dark:bg-gray-900 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-xl py-4 flex flex-col items-center justify-center gap-2 hover:bg-primary-50/50 hover:border-primary-400 transition-all cursor-pointer"
+                  className="w-full neu-sunken border-2 border-dashed border-gray-300 dark:border-gray-800 rounded-2xl py-5 flex flex-col items-center justify-center gap-2 hover:border-primary-500/40 cursor-pointer"
                 >
                   {uploading ? (
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
                   ) : screenshotUrl ? (
-                    <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 text-xs font-bold">
+                    <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 text-xs font-black">
                       <CheckCircle2 size={16} />
                       {isBn ? 'স্ক্রিনশট সংযুক্ত হয়েছে' : 'Screenshot Attached'}
                     </div>
                   ) : (
                     <>
                       <UploadCloud size={20} className="text-gray-400" />
-                      <span className="text-xs font-bold text-gray-600 dark:text-gray-400">
+                      <span className="text-xs font-black text-gray-500 dark:text-gray-400">
                         {isBn ? 'ক্লিক করে স্ক্রিনশট দিন' : 'Click to upload screenshot'}
                       </span>
                     </>
@@ -547,7 +542,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
             <button
               type="submit"
               disabled={selectedPaymentAmount <= 0 || !senderNo || submitted}
-              className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white py-3.5 rounded-[16px] font-bold text-sm shadow active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              className="w-full neu-btn-primary disabled:opacity-50 text-white py-3.5 rounded-2xl font-black text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 border-0"
             >
               {submitted ? (
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -566,29 +561,31 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
           <motion.div 
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-gray-100 dark:border-gray-700"
+            className="neu-raised rounded-[28px] p-6 max-w-sm w-full border-0 shadow-none"
           >
-            <div className="w-14 h-14 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-500">
+            <div className="w-14 h-14 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-500 shadow-inner">
               <AlertCircle size={28} />
             </div>
-            <h3 className="text-lg font-bold text-center text-gray-900 dark:text-white mb-2">
+            <h3 className="text-lg font-black text-center text-gray-900 dark:text-white mb-2">
               {isBn ? 'আপনি কি নিশ্চিত?' : 'Are you sure?'}
             </h3>
-            <p className="text-xs text-center text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+            <p className="text-xs text-center text-gray-500 dark:text-gray-400 font-bold mb-6 leading-relaxed">
               {isBn 
                 ? 'ডিপোজিট সাবমিট করার আগে নিশ্চিত করুন আপনি সঠিক সেন্ডার নাম্বার দিয়েছেন এবং যথাযথ পেমেন্ট করেছেন। ভুল তথ্যে রিকোয়েস্ট বাতিল হবে।' 
                 : 'Ensure the sender number is correct before submitting. Incorrect details will result in automated rejection.'}
             </p>
             <div className="flex gap-3">
               <button 
+                type="button"
                 onClick={() => setShowConfirmModal(false)}
-                className="flex-1 py-3 rounded-xl font-bold text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                className="flex-1 py-3 rounded-xl font-black text-xs neu-btn border-0"
               >
                 {isBn ? 'বাতিল' : 'Cancel'}
               </button>
               <button 
+                type="button"
                 onClick={processDeposit}
-                className="flex-1 py-3 rounded-xl font-bold text-xs bg-primary-600 text-white hover:bg-primary-700 transition-colors"
+                className="flex-1 py-3 rounded-xl font-black text-xs neu-btn-primary border-0"
               >
                 {isBn ? 'হ্যাঁ, সাবমিট' : 'Yes, Submit'}
               </button>

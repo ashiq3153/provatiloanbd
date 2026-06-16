@@ -21,7 +21,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isSupportPage = location.pathname === '/support';
 
   return (
-    <div className="flex flex-col h-full sm:h-[90vh] sm:max-h-[850px] w-full max-w-md mx-auto bg-gray-50 dark:bg-gray-900 sm:rounded-[2.5rem] relative overflow-hidden shadow-2xl sm:border-[8px] border-gray-900 my-auto transition-colors">
+    <div className="flex flex-col h-full sm:h-[90vh] sm:max-h-[850px] w-full max-w-md mx-auto neu-bg sm:rounded-[2.5rem] relative overflow-hidden shadow-2xl sm:border-[8px] border-gray-900 my-auto transition-colors">
       {/* Main Content Area */}
       <div className={cn(
         "flex-1 scroll-smooth",
@@ -66,79 +66,81 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       )}
 
       {!isSupportPage && (
-        <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800 px-6 py-2 pb-6 rounded-t-3xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] transition-colors z-50">
-        <div className="flex justify-between items-center relative">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            
-            if (item.isPrimary) {
-              if (location.pathname === '/') {
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className="relative -top-6 flex flex-col items-center justify-center pointer-events-auto"
-                  >
-                    <div className="bg-primary-600 text-white rounded-full p-4 shadow-lg shadow-primary-500/40 translate-y-1 active:scale-95 transition-transform">
-                      <item.icon size={24} strokeWidth={2.5} />
-                    </div>
-                    <span className="text-[10px] font-medium text-gray-600 dark:text-gray-400 mt-2 transition-colors">
-                      {item.name}
-                    </span>
-                  </Link>
-                );
-              } else {
-                // Return as normal tab
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={cn(
-                      "flex flex-col items-center justify-center p-2 transition-all active:scale-95",
-                      isActive ? "text-primary-600 dark:text-primary-400" : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-                    )}
-                  >
-                    <item.icon 
-                      size={24} 
-                      strokeWidth={isActive ? 2.5 : 2} 
-                      className={cn("mb-1 transition-transform", isActive && "scale-110")} 
-                    />
-                    <span className={cn(
-                      "text-[10px] font-medium transition-colors",
-                      isActive && "font-semibold"
-                    )}>
-                      {item.name}
-                    </span>
-                  </Link>
-                );
+        <div className="absolute bottom-4 left-4 right-4 neu-raised px-4 py-2 rounded-[24px] transition-colors z-50">
+          <div className="flex justify-between items-center relative">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              
+              if (item.isPrimary) {
+                if (location.pathname === '/') {
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className="relative -top-5 flex flex-col items-center justify-center pointer-events-auto shrink-0"
+                    >
+                      <div className="bg-gradient-to-tr from-blue-600 to-indigo-700 text-white rounded-full p-3.5 shadow-md active:scale-95 transition-transform flex items-center justify-center">
+                        <item.icon size={22} strokeWidth={2.5} />
+                      </div>
+                      <span className="text-[9px] font-black text-gray-700 dark:text-gray-300 mt-1 transition-colors">
+                        {item.name}
+                      </span>
+                    </Link>
+                  );
+                } else {
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={cn(
+                        "flex flex-col items-center justify-center p-1.5 transition-all active:scale-95",
+                        isActive ? "text-primary-600 dark:text-indigo-400 font-extrabold" : "text-gray-400 dark:text-gray-500"
+                      )}
+                    >
+                      <div className={cn(
+                        "p-1.5 rounded-full mb-1 flex items-center justify-center transition-all",
+                        isActive ? "neu-btn-primary" : "bg-transparent"
+                      )}>
+                        <item.icon 
+                          size={18} 
+                          strokeWidth={isActive ? 2.5 : 2} 
+                        />
+                      </div>
+                      <span className="text-[9px] font-black tracking-tight">
+                        {item.name}
+                      </span>
+                    </Link>
+                  );
+                }
               }
-            }
 
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "flex flex-col items-center justify-center p-2 transition-all active:scale-95",
-                  isActive ? "text-primary-600 dark:text-primary-400" : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-                )}
-              >
-                <item.icon 
-                  size={24} 
-                  strokeWidth={isActive ? 2.5 : 2} 
-                  className={cn("mb-1 transition-transform", isActive && "scale-110")} 
-                />
-                <span className={cn(
-                  "text-[10px] font-medium transition-colors",
-                  isActive && "font-semibold"
-                )}>
-                  {item.name}
-                </span>
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "flex flex-col items-center justify-center p-1.5 transition-all active:scale-95",
+                    isActive ? "text-primary-600 dark:text-indigo-400 font-extrabold" : "text-gray-400 dark:text-gray-500"
+                  )}
+                >
+                  <div className={cn(
+                    "p-1.5 rounded-full mb-1 flex items-center justify-center transition-all",
+                    isActive ? "neu-btn-primary" : "bg-transparent"
+                  )}>
+                    <item.icon 
+                      size={18} 
+                      strokeWidth={isActive ? 2.5 : 2} 
+                    />
+                  </div>
+                  <span className="text-[9px] font-black tracking-tight">
+                    {item.name}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
         </div>
-      </div>)}
+      )}
     </div>
   );
 }

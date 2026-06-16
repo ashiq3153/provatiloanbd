@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, MessageCircle, Copy } from 'lucide-react';
+import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, MessageCircle, Copy, ArrowLeft } from 'lucide-react';
 import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
@@ -80,7 +80,15 @@ export default function AdminDashboard() {
     amount: '',
     approval_time: '',
     rating: 5,
-    avatar_url: ''
+    avatar_url: '',
+    like_count: 0,
+    dislike_count: 0,
+    love_count: 0,
+    loveit_count: 0,
+    congratulation_count: 0,
+    wow_count: 0,
+    sad_count: 0,
+    hundred_count: 0
   });
   
   const { systemSettings, setSystemSettings, language, setLanguage } = useAppStore();
@@ -334,6 +342,25 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error('Error sending admin reply:', err);
+    }
+  };
+
+  const handleDeleteMessage = async (msgId: string) => {
+    if (!window.confirm(isBn ? 'আপনি কি এই বার্তাটি মুছে ফেলতে চান?' : 'Are you sure you want to delete this message?')) return;
+    try {
+      const { error } = await supabase
+        .from('support_messages')
+        .delete()
+        .eq('id', msgId);
+
+      if (!error) {
+        setChatMessages(prev => prev.filter(m => m.id !== msgId));
+        toast.success(isBn ? 'বার্তাটি মুছে ফেলা হয়েছে' : 'Message deleted successfully');
+      } else {
+        toast.error(isBn ? 'বার্তাটি মুছতে ব্যর্থ হয়েছে' : 'Failed to delete message');
+      }
+    } catch (e) {
+      console.error('Error deleting message:', e);
     }
   };
 
@@ -1222,6 +1249,7 @@ export default function AdminDashboard() {
                           <span className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Rating</span>
                           <input type="number" min="1" max="5" value={newStory.rating} onChange={e => setNewStory({...newStory, rating: Number(e.target.value)})} className="w-16 px-2 py-1 text-center font-bold rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 outline-none" />
                         </div>
+
                         <button 
                           onClick={async () => {
                             if (stories.length >= 10) return toast.error('Maximum 10 stories allowed');
@@ -1230,7 +1258,22 @@ export default function AdminDashboard() {
                             if (added) {
                               toast.success('Story added');
                               fetchData();
-                              setNewStory({name: '', loan_type: '', amount: '', approval_time: '', rating: 5, avatar_url: ''});
+                              setNewStory({
+                                name: '',
+                                loan_type: '',
+                                amount: '',
+                                approval_time: '',
+                                rating: 5,
+                                avatar_url: '',
+                                like_count: 0,
+                                dislike_count: 0,
+                                love_count: 0,
+                                loveit_count: 0,
+                                congratulation_count: 0,
+                                wow_count: 0,
+                                sad_count: 0,
+                                hundred_count: 0
+                              });
                             } else {
                               toast.error('Failed to add story. Please check Supabase permissions (RLS).');
                             }
@@ -1245,40 +1288,44 @@ export default function AdminDashboard() {
                     <div className="lg:col-span-2">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {stories.map(story => (
-                          <div key={story.id} className="bg-white dark:bg-gray-800 p-5 rounded-[20px] border border-gray-100 dark:border-gray-700 shadow-sm flex justify-between items-start hover:shadow-md transition-all group">
-                            <div className="flex gap-4">
-                              <img 
-                                src={story.avatar_url || `https://ui-avatars.com/api/?name=${story.name}&background=random`} 
-                                alt="" 
-                                onError={(e) => { 
-                                  const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(story.name)}&background=random`;
-                                  if (e.currentTarget.src !== fallback) {
-                                    e.currentTarget.src = fallback;
-                                  }
-                                }}
-                                className="w-12 h-12 rounded-full border-2 border-gray-100 dark:border-gray-700 object-cover shrink-0" 
-                              />
-                              <div>
-                                <h4 className="font-bold text-gray-900 dark:text-white text-base">{story.name}</h4>
-                                <p className="text-sm text-primary-600 dark:text-primary-400 font-black">{formatCurrency(story.amount || 0, isBn)} <span className="text-gray-400 text-xs font-normal ml-1">{story.loan_type}</span></p>
-                                <div className="flex items-center gap-1 mt-1 text-[11px] text-gray-500 font-medium">
-                                  <Star size={10} className="text-amber-400 fill-amber-400" /> {convertDigits(story.rating || 5, isBn)}/৫ • {convertDigits(story.approval_time || '', isBn)}
+                          <div key={story.id} className="bg-white dark:bg-gray-800 p-5 rounded-[20px] border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-between hover:shadow-md transition-all group">
+                            <div className="flex justify-between items-start w-full">
+                              <div className="flex gap-4">
+                                <img 
+                                  src={story.avatar_url || `https://ui-avatars.com/api/?name=${story.name}&background=random`} 
+                                  alt="" 
+                                  onError={(e) => { 
+                                    const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(story.name)}&background=random`;
+                                    if (e.currentTarget.src !== fallback) {
+                                      e.currentTarget.src = fallback;
+                                    }
+                                  }}
+                                  className="w-12 h-12 rounded-full border-2 border-gray-100 dark:border-gray-700 object-cover shrink-0" 
+                                />
+                                <div>
+                                  <h4 className="font-bold text-gray-900 dark:text-white text-base">{story.name}</h4>
+                                  <p className="text-sm text-primary-600 dark:text-primary-400 font-black">{formatCurrency(story.amount || 0, isBn)} <span className="text-gray-400 text-xs font-normal ml-1">{story.loan_type}</span></p>
+                                  <div className="flex items-center gap-1 mt-1 text-[11px] text-gray-500 font-medium">
+                                    <Star size={10} className="text-amber-400 fill-amber-400" /> {convertDigits(story.rating || 5, isBn)}/৫ • {convertDigits(story.approval_time || '', isBn)}
+                                  </div>
                                 </div>
                               </div>
+                              <button 
+                                onClick={async () => {
+                                  if (await deleteSuccessStory(story.id)) {
+                                    toast.success('Story removed');
+                                    setStories(stories.filter(s => s.id !== story.id));
+                                  } else {
+                                    toast.error('Failed to delete story. RLS is blocking it.');
+                                  }
+                                }}
+                                className="text-rose-400 hover:text-rose-600 p-2 bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-xl transition-colors opacity-0 group-hover:opacity-100"
+                              >
+                                <Trash2 size={16} />
+                              </button>
                             </div>
-                            <button 
-                              onClick={async () => {
-                                if (await deleteSuccessStory(story.id)) {
-                                  toast.success('Story removed');
-                                  setStories(stories.filter(s => s.id !== story.id));
-                                } else {
-                                  toast.error('Failed to delete story. RLS is blocking it.');
-                                }
-                              }}
-                              className="text-rose-400 hover:text-rose-600 p-2 bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-xl transition-colors opacity-0 group-hover:opacity-100"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+
+
                           </div>
                         ))}
                         {stories.length === 0 && (
@@ -1753,7 +1800,7 @@ export default function AdminDashboard() {
               {activeTab === 'chat' && (
                 <div className="bg-white dark:bg-gray-800 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden h-[calc(100vh-220px)] flex flex-col md:flex-row">
                   {/* Left Column: Users List */}
-                  <div className="w-full md:w-80 border-r border-gray-100 dark:border-gray-700 flex flex-col shrink-0">
+                  <div className={`w-full md:w-80 border-r border-gray-100 dark:border-gray-700 flex flex-col shrink-0 ${selectedChatId ? 'hidden md:flex' : 'flex'}`}>
                     <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
                       <h3 className="font-bold text-gray-900 dark:text-white text-base">{isBn ? 'গ্রাহক তালিকা' : 'Active Support Chats'}</h3>
                       <p className="text-xs text-gray-500 mt-1">{isBn ? 'সাপোর্ট চ্যাট এবং সাহায্য বার্তা সমূহ' : 'Select a user to review support logs.'}</p>
@@ -1803,7 +1850,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Right Column: Active Chat Thread */}
-                  <div className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 h-full overflow-hidden">
+                  <div className={`flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 h-full overflow-hidden ${selectedChatId ? 'flex' : 'hidden md:flex'}`}>
                     {selectedChatId ? (
                       (() => {
                         const selectedUser = chatUsers.find(u => u.chat_id === selectedChatId);
@@ -1811,6 +1858,13 @@ export default function AdminDashboard() {
                           <>
                             {/* Chat Header */}
                             <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3 shrink-0">
+                              <button 
+                                type="button"
+                                onClick={() => setSelectedChatId(null)}
+                                className="md:hidden p-1.5 -ml-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors border-0 bg-transparent cursor-pointer flex items-center justify-center"
+                              >
+                                <ArrowLeft size={18} />
+                              </button>
                               <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-600 flex items-center justify-center font-bold">
                                 {selectedUser?.avatar ? (
                                   <img src={selectedUser.avatar} alt={selectedUser.name} className="w-full h-full rounded-full object-cover" />
@@ -1824,15 +1878,25 @@ export default function AdminDashboard() {
                               </div>
                             </div>
 
-                            {/* Messages Scrollbox */}
+                             {/* Messages Scrollbox */}
                             <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar flex flex-col">
                               {chatMessages.map((msg) => {
                                 const isUser = msg.sender === 'user';
                                 return (
                                   <div 
                                     key={msg.id}
-                                    className={`flex ${isUser ? 'justify-start' : 'justify-end'}`}
+                                    className={`flex ${isUser ? 'justify-start' : 'justify-end'} items-center gap-2 group`}
                                   >
+                                    {!isUser && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteMessage(msg.id)}
+                                        className="opacity-0 group-hover:opacity-100 p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all border-0 bg-transparent cursor-pointer shrink-0 flex items-center justify-center"
+                                        title={isBn ? "মুছে ফেলুন" : "Delete Message"}
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
+                                    )}
                                     <div className={`max-w-[70%] rounded-[18px] px-4 py-2.5 shadow-sm text-xs font-semibold leading-relaxed ${
                                       isUser 
                                         ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-tl-none border border-gray-100 dark:border-gray-850'
@@ -1845,6 +1909,16 @@ export default function AdminDashboard() {
                                         {new Date(msg.created_at).toLocaleTimeString(isBn ? 'bn-BD' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                                       </span>
                                     </div>
+                                    {isUser && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteMessage(msg.id)}
+                                        className="opacity-0 group-hover:opacity-100 p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all border-0 bg-transparent cursor-pointer shrink-0 flex items-center justify-center"
+                                        title={isBn ? "মুছে ফেলুন" : "Delete Message"}
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
+                                    )}
                                   </div>
                                 );
                               })}

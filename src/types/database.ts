@@ -84,6 +84,14 @@ export interface SuccessStory {
   approval_time: string | null;
   rating: number;
   is_verified: boolean;
+  like_count?: number;
+  dislike_count?: number;
+  love_count?: number;
+  loveit_count?: number;
+  congratulation_count?: number;
+  wow_count?: number;
+  sad_count?: number;
+  hundred_count?: number;
 }
 
 // Supabase Database type helper

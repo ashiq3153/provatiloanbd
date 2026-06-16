@@ -28,17 +28,17 @@ interface AddressSelectorProps {
 }
 
 const selectClass = (hasError?: boolean) =>
-  `w-full bg-gray-50 dark:bg-gray-900 border ${
+  `w-full neu-input ${
     hasError
-      ? "border-red-500 focus:ring-red-500"
-      : "border-gray-200 dark:border-gray-700 focus:ring-primary-500 focus:border-primary-500"
+      ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+      : "border-transparent focus:border-primary-500/50"
   } rounded-xl px-3 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all appearance-none cursor-pointer`;
 
 const inputClass = (hasError?: boolean) =>
-  `w-full bg-gray-50 dark:bg-gray-900 border ${
+  `w-full neu-input ${
     hasError
-      ? "border-red-500 focus:ring-red-500"
-      : "border-gray-200 dark:border-gray-700 focus:ring-primary-500 focus:border-primary-500"
+      ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+      : "border-transparent focus:border-primary-500/50"
   } rounded-xl px-3 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`;
 
 const FieldLabel = ({ children }: { children: React.ReactNode }) => (
@@ -164,10 +164,10 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
   const t = (en: string, bn: string) => (isBn ? bn : en);
 
   return (
-    <div className="rounded-2xl border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 overflow-hidden">
+    <div className="rounded-2xl border border-white/20 dark:border-white/5 bg-gray-50/50 dark:bg-gray-900/20 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.03)] dark:shadow-[inset_1px_1px_3px_rgba(0,0,0,0.2)] overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
-        <div className="w-7 h-7 rounded-lg bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center">
+      <div className="flex items-center gap-2 px-4 py-3 bg-white/40 dark:bg-gray-800/30 border-b border-gray-200/50 dark:border-gray-850/50">
+        <div className="w-7 h-7 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
           <MapPin size={14} className="text-primary-600 dark:text-primary-400" />
         </div>
         <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{label}</span>

@@ -125,3 +125,207 @@ a.dark\:bg-gray-800:active,
   transition-duration: 0.1s !important;
 }
 
+/* ══════════════════════════════════════════════════════════════
+   Neumorphic Live Chat & UI System
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+  --neu-bg-light: #dce4ed;
+  --neu-bg-dark: #05070a;
+  
+  --neu-raised-shadow-light: 6px 6px 15px rgba(163, 177, 198, 0.6), -5px -5px 12px rgba(255, 255, 255, 0.95);
+  --neu-raised-shadow-dark: 7px 7px 16px rgba(0, 0, 0, 0.55), -5px -5px 15px rgba(255, 255, 255, 0.03);
+
+  --neu-raised-sm-shadow-light: 3px 3px 8px rgba(163, 177, 198, 0.5), -3px -3px 7px rgba(255, 255, 255, 0.95);
+  --neu-raised-sm-shadow-dark: 4px 4px 10px rgba(0, 0, 0, 0.55), -3px -3px 9px rgba(255, 255, 255, 0.03);
+
+  --neu-sunken-shadow-light: inset 3px 3px 6px rgba(163, 177, 198, 0.45), inset -3px -3px 6px rgba(255, 255, 255, 0.85);
+  --neu-sunken-shadow-dark: inset 3px 3px 7px rgba(0, 0, 0, 0.5), inset -3px -3px 7px rgba(255, 255, 255, 0.03);
+}
+
+.neu-bg {
+  background-color: var(--neu-bg-light) !important;
+}
+.dark .neu-bg {
+  background-color: var(--neu-bg-dark) !important;
+}
+
+/* Base Cards */
+.neu-flat-card {
+  background-color: #f5f7fa;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+.dark .neu-flat-card {
+  background-color: #171d26;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.neu-raised {
+  background-color: #f1f3f6;
+  box-shadow: var(--neu-raised-shadow-light);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+}
+.dark .neu-raised {
+  background-color: #141822;
+  box-shadow: var(--neu-raised-shadow-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.neu-raised-sm {
+  background-color: #f1f3f6;
+  box-shadow: var(--neu-raised-sm-shadow-light);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+}
+.dark .neu-raised-sm {
+  background-color: #141822;
+  box-shadow: var(--neu-raised-sm-shadow-dark);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.neu-sunken {
+  background-color: #ebedf2;
+  box-shadow: var(--neu-sunken-shadow-light);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.dark .neu-sunken {
+  background-color: #0b0d12;
+  box-shadow: var(--neu-sunken-shadow-dark);
+  border: 1px solid rgba(255, 255, 255, 0.01);
+}
+
+/* Form inputs */
+.neu-input {
+  background-color: #ebedf2;
+  box-shadow: var(--neu-sunken-shadow-light);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+}
+.neu-input:focus {
+  border-color: rgba(37, 99, 235, 0.35);
+  box-shadow: inset 2px 2px 5px rgba(163, 177, 198, 0.4), inset -2px -2px 5px rgba(255, 255, 255, 0.8), 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+.dark .neu-input {
+  background-color: #0b0d12;
+  box-shadow: var(--neu-sunken-shadow-dark);
+  border: 1px solid rgba(255, 255, 255, 0.01);
+}
+.dark .neu-input:focus {
+  border-color: rgba(37, 99, 235, 0.5);
+  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.5), inset -2px -2px 5px rgba(255, 255, 255, 0.02), 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* Neumorphic Buttons */
+.neu-btn {
+  background-color: #f1f3f6;
+  box-shadow: var(--neu-raised-sm-shadow-light);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.neu-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 4px 4px 10px rgba(163, 177, 198, 0.6), -4px -4px 10px rgba(255, 255, 255, 0.98);
+}
+.neu-btn:active {
+  transform: translateY(0.5px) scale(0.98);
+  box-shadow: var(--neu-sunken-shadow-light);
+}
+.dark .neu-btn {
+  background-color: #151a24;
+  box-shadow: var(--neu-raised-sm-shadow-dark);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+.dark .neu-btn:hover {
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.55), -4px -4px 12px rgba(255, 255, 255, 0.04);
+}
+.dark .neu-btn:active {
+  box-shadow: var(--neu-sunken-shadow-dark);
+}
+
+/* Primary Neumorphic Button (e.g. Send, active states) */
+.neu-btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  box-shadow: 4px 4px 8px rgba(37, 99, 235, 0.35), -4px -4px 8px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.neu-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 5px 5px 12px rgba(37, 99, 235, 0.45), -5px -5px 12px rgba(255, 255, 255, 0.8);
+}
+.neu-btn-primary:active {
+  transform: translateY(0.5px) scale(0.98);
+  box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.25), inset -3px -3px 6px rgba(255, 255, 255, 0.1);
+}
+.dark .neu-btn-primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5), -3px -3px 8px rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.dark .neu-btn-primary:hover {
+  box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.6), -4px -4px 10px rgba(255, 255, 255, 0.06);
+}
+.dark .neu-btn-primary:active {
+  box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Beautiful Neumorphic Badges */
+.neu-badge-orange {
+  background: linear-gradient(135deg, #ffae53, #f97316);
+  color: white;
+  box-shadow: 3px 3px 6px rgba(249, 115, 22, 0.35), -3px -3px 6px rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.neu-badge-purple {
+  background: linear-gradient(135deg, #c084fc, #9333ea);
+  color: white;
+  box-shadow: 3px 3px 6px rgba(147, 51, 234, 0.35), -3px -3px 6px rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.neu-badge-green {
+  background: linear-gradient(135deg, #4ade80, #16a34a);
+  color: white;
+  box-shadow: 3px 3px 6px rgba(22, 163, 74, 0.35), -3px -3px 6px rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.neu-badge-red {
+  background: linear-gradient(135deg, #f87171, #dc2626);
+  color: white;
+  box-shadow: 3px 3px 6px rgba(220, 38, 38, 0.35), -3px -3px 6px rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Bubble Tail styling */
+.user-bubble-tail {
+  position: relative;
+}
+.user-bubble-tail::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: -5px;
+  width: 12px;
+  height: 12px;
+  background: inherit;
+  clip-path: polygon(0 0, 0% 100%, 100% 100%);
+}
+
+.admin-bubble-tail {
+  position: relative;
+}
+.admin-bubble-tail::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -5px;
+  width: 12px;
+  height: 12px;
+  background: inherit;
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+  border-left: inherit;
+  border-bottom: inherit;
+}
+
+

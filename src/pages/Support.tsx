@@ -202,19 +202,7 @@ export default function Support() {
         message: textToSend
       });
 
-      if (!error) {
-        // Optimistic update
-        setMessages(prev => [
-          ...prev,
-          {
-            id: Math.random().toString(),
-            chat_id: user.id,
-            sender: 'user',
-            message: textToSend,
-            created_at: new Date().toISOString()
-          }
-        ]);
-      } else {
+      if (error) {
         console.error('Error sending message:', error);
       }
     } catch (err) {
@@ -238,62 +226,64 @@ export default function Support() {
   };
 
   return (
-    <div className="h-full w-full overflow-hidden bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors">
-      {/* Premium Header */}
-      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl px-5 py-4 sticky top-0 z-30 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors flex items-center gap-4">
+    <div className="h-full w-full overflow-hidden neu-bg flex flex-col relative transition-colors">
+      {/* Premium Neumorphic Header */}
+      <div className="px-5 py-4 sticky top-0 z-30 flex items-center gap-4 shrink-0 bg-transparent">
         <button 
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 active:scale-95 transition-all"
+          className="w-10 h-10 rounded-full neu-btn flex items-center justify-center text-gray-700 dark:text-gray-300 active:scale-95 transition-all"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={18} />
         </button>
         <div className="flex-1">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white leading-tight transition-colors">
+          <h1 className="text-lg font-black text-gray-900 dark:text-white leading-tight transition-colors">
             {isBn ? 'সহায়তা ও চ্যাট' : 'Support & Chat'}
           </h1>
-          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 transition-colors">
+          <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 transition-colors">
             {isBn ? 'যেকোনো প্রয়োজনে আমরা আছি' : "We're here to help"}
           </p>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="bg-white dark:bg-gray-800 px-4 py-2 border-b border-gray-100 dark:border-gray-700 transition-colors flex gap-2">
-        <button
-          onClick={() => setActiveTab('chat')}
-          className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'chat'
-              ? 'bg-primary-600 text-white shadow-md'
-              : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100'
-          }`}
-        >
-          <MessageCircle size={16} />
-          {isBn ? 'লাইভ চ্যাট' : 'Live Chat'}
-        </button>
-        <button
-          onClick={() => setActiveTab('faq')}
-          className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'faq'
-              ? 'bg-primary-600 text-white shadow-md'
-              : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100'
-          }`}
-        >
-          <FileText size={16} />
-          {isBn ? 'সাধারণ জিজ্ঞাসা' : 'FAQs'}
-        </button>
+      {/* Neumorphic Segmented Tab Switch */}
+      <div className="px-5 py-1.5 shrink-0 bg-transparent">
+        <div className="neu-sunken p-1 rounded-2xl flex gap-1">
+          <button
+            onClick={() => setActiveTab('chat')}
+            className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border-0 ${
+              activeTab === 'chat'
+                ? 'neu-btn-primary'
+                : 'text-gray-500 dark:text-gray-400 bg-transparent hover:text-gray-800 dark:hover:text-white'
+            }`}
+          >
+            <MessageCircle size={14} />
+            {isBn ? 'লাইভ চ্যাট' : 'Live Chat'}
+          </button>
+          <button
+            onClick={() => setActiveTab('faq')}
+            className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border-0 ${
+              activeTab === 'faq'
+                ? 'neu-btn-primary'
+                : 'text-gray-500 dark:text-gray-400 bg-transparent hover:text-gray-800 dark:hover:text-white'
+            }`}
+          >
+            <FileText size={14} />
+            {isBn ? 'সাধারণ জিজ্ঞাসা' : 'FAQs'}
+          </button>
+        </div>
       </div>
 
-      {/* Direct Contact Bar */}
-      <div className="bg-white dark:bg-gray-800 px-5 py-2.5 border-b border-gray-100 dark:border-gray-700 transition-colors flex items-center justify-between gap-3 shrink-0">
-        <span className="text-[11px] font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+      {/* Direct Contact Bar - Neumorphic style */}
+      <div className="px-5 py-2.5 flex items-center justify-between gap-3 shrink-0 bg-transparent">
+        <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider">
           {isBn ? 'সরাসরি যোগাযোগ:' : 'Direct Contact:'}
         </span>
-        <div className="flex gap-2">
+        <div className="flex gap-2.5">
           <a 
             href={whatsappUrl} 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 rounded-xl text-xs font-black transition-all active:scale-95 cursor-pointer neu-raised-sm"
           >
             <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
               <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.864.002-2.637-1.03-5.114-2.905-6.99C16.486 1.86 14.024 1.81 11.998 1.81 6.558 1.81 2.138 6.23 2.134 11.671c-.001 1.693.447 3.346 1.298 4.843l-.999 3.648 3.622-.968z" />
@@ -304,7 +294,7 @@ export default function Support() {
             href={telegramUrl} 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0088cc] hover:bg-[#0077b3] text-white rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 bg-blue-500/10 hover:bg-blue-500/15 text-[#0088cc] dark:text-[#33a3fc] border border-blue-500/25 rounded-xl text-xs font-black transition-all active:scale-95 cursor-pointer neu-raised-sm"
           >
             <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
               <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.327-2.95-.924c-.642-.2-1.042-.642-.042-1.032l11.536-4.444c.536-.2 1.002.12.871.745z" />
@@ -315,25 +305,59 @@ export default function Support() {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-hidden relative flex flex-col">
+      <div className="flex-1 overflow-hidden relative flex flex-col bg-transparent">
         {activeTab === 'chat' ? (
-          <div className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-950 overflow-hidden">
+          <div className="flex-1 flex flex-col h-full overflow-hidden bg-transparent">
+            {/* Help Topics Row - Neumorphic visual badges */}
+            <div className="px-5 py-2 overflow-x-auto shrink-0 flex gap-3.5 hide-scrollbar">
+              {[
+                { id: 1, type: 'orange', labelBn: 'ডিপোজিট সমস্যা', labelEn: 'Deposit Issue', text: 'আমি ডিপোজিট করতে চাই, পেমেন্ট নম্বর দিন।' },
+                { id: 2, type: 'purple', labelBn: 'ঋণ অনুমোদন', labelEn: 'Loan Approval', text: 'আমার লোন আবেদনটি কতক্ষণে অনুমোদিত হবে?' },
+                { id: 3, type: 'green', labelBn: 'উত্তোলন সাহায্য', labelEn: 'Withdraw Help', text: 'অনুমোদিত লোন কিভাবে উত্তোলন করব?' },
+                { id: 7, type: 'red', labelBn: 'ইএমআই কিস্তি', labelEn: 'EMI Payment', text: 'কিস্তি পরিশোধের নিয়ম ও মাধ্যম কি?' }
+              ].map((topic) => (
+                <button
+                  key={topic.id}
+                  type="button"
+                  onClick={() => setNewMessage(topic.text)}
+                  className="neu-raised-sm rounded-[20px] p-2.5 flex items-center gap-2.5 shrink-0 transition-all hover:scale-[1.02] active:scale-95 text-left border-0 cursor-pointer"
+                >
+                  <div className={`w-8 h-8 rounded-xl font-black text-sm flex items-center justify-center select-none ${
+                    topic.type === 'orange' ? 'neu-badge-orange' :
+                    topic.type === 'purple' ? 'neu-badge-purple' :
+                    topic.type === 'green' ? 'neu-badge-green' :
+                    'neu-badge-red'
+                  }`}>
+                    {topic.id}
+                  </div>
+                  <div>
+                    <span className="text-[10px] block font-black text-gray-800 dark:text-gray-200">
+                      {isBn ? topic.labelBn : topic.labelEn}
+                    </span>
+                    <span className="text-[8px] block text-gray-400 dark:text-gray-500 font-bold truncate max-w-[90px] mt-0.5">
+                      {topic.text}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+
             {/* Messages Scroll Area */}
-            <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3.5 custom-scrollbar">
+            <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
               {loadingMessages ? (
                 <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-2">
                   <Loader2 className="animate-spin text-primary-500" size={24} />
-                  <span className="text-xs font-semibold">{isBn ? 'মেসেজ লোড হচ্ছে...' : 'Loading messages...'}</span>
+                  <span className="text-xs font-bold">{isBn ? 'মেসেজ লোড হচ্ছে...' : 'Loading messages...'}</span>
                 </div>
               ) : messages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center p-8">
-                  <div className="w-16 h-16 bg-primary-50 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center text-primary-500 mb-4 shadow-inner">
+                  <div className="w-16 h-16 neu-sunken rounded-2xl flex items-center justify-center text-primary-500 mb-4 shadow-inner">
                     <MessageCircle size={28} />
                   </div>
-                  <h3 className="font-bold text-gray-900 dark:text-white text-base mb-1">
+                  <h3 className="font-black text-gray-900 dark:text-white text-base mb-1">
                     {isBn ? 'আমাদের চ্যাট সাপোর্ট' : 'Live Support Chat'}
                   </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[240px] leading-relaxed">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[240px] leading-relaxed font-semibold">
                     {isBn 
                       ? 'ডিপোজিটের পেমেন্ট নির্দেশনা বা যেকোনো সাহায্যের জন্য নিচে মেসেজ লিখুন।' 
                       : 'Write a message below for payment details or general support.'}
@@ -345,20 +369,42 @@ export default function Support() {
                   return (
                     <div 
                       key={msg.id}
-                      className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
+                      className={`flex gap-2 items-end ${isUser ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div className={`max-w-[80%] rounded-[20px] px-4 py-3 shadow-sm ${
+                      {!isUser && (
+                        <div className="w-8 h-8 rounded-full neu-raised-sm flex items-center justify-center overflow-hidden shrink-0 border border-white/40">
+                          <img 
+                            src="https://api.dicebear.com/7.x/bottts/svg?seed=provati-support&backgroundColor=b6e3f4" 
+                            alt="Support Agent"
+                            className="w-7 h-7"
+                          />
+                        </div>
+                      )}
+
+                      <div className={`max-w-[75%] rounded-[20px] px-4 py-2.5 shadow-sm ${
                         isUser 
-                          ? 'bg-primary-600 text-white rounded-tr-none' 
-                          : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-tl-none border border-gray-100 dark:border-gray-800'
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-br-none user-bubble-tail font-semibold' 
+                          : 'neu-raised rounded-bl-none text-gray-900 dark:text-white admin-bubble-tail font-semibold'
                       }`}>
-                        <p className="text-sm font-medium leading-relaxed break-words whitespace-pre-wrap">{msg.message}</p>
-                        <span className={`text-[9px] block text-right mt-1.5 opacity-65 font-semibold ${
-                          isUser ? 'text-primary-100' : 'text-gray-400 dark:text-gray-500'
+                        <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{msg.message}</p>
+                        <span className={`text-[8px] block text-right mt-1.5 opacity-65 font-black ${
+                          isUser ? 'text-blue-100' : 'text-gray-400 dark:text-gray-500'
                         }`}>
                           {formatMessageTime(msg.created_at)}
                         </span>
                       </div>
+
+                      {isUser && (
+                        <div className="w-8 h-8 rounded-full neu-raised-sm flex items-center justify-center overflow-hidden shrink-0 border border-white/40">
+                          {user?.photo_url ? (
+                            <img src={user.photo_url} alt="Profile" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-black text-xs flex items-center justify-center uppercase select-none">
+                              {(user?.first_name || 'U').charAt(0)}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })
@@ -368,42 +414,42 @@ export default function Support() {
             {/* Input Form */}
             <form 
               onSubmit={handleSendMessage}
-              className="bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 p-3 flex gap-2 items-center transition-colors relative z-10"
+              className="p-4 flex gap-2.5 items-center transition-colors relative z-10 bg-transparent shrink-0"
             >
               <input
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder={isBn ? 'মেসেজ লিখুন...' : 'Type a message...'}
-                className="flex-1 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-primary-500 text-gray-900 dark:text-white transition-all"
+                className="flex-1 neu-input rounded-2xl px-4 py-3 text-sm outline-none text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600 font-bold"
               />
               <button
                 type="submit"
                 disabled={!newMessage.trim() || sending}
-                className="w-11 h-11 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white rounded-xl flex items-center justify-center active:scale-95 transition-all shadow-md shadow-primary-500/20 shrink-0"
+                className="w-11 h-11 neu-btn-primary disabled:opacity-50 text-white rounded-full flex items-center justify-center active:scale-95 transition-all shrink-0 border-0"
               >
-                <Send size={18} />
+                <Send size={16} />
               </button>
             </form>
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-5 space-y-4.5 custom-scrollbar">
             {/* FAQ List */}
             {faqs.map((faq, index) => (
               <div 
                 key={index} 
-                className={`bg-white dark:bg-gray-800 border transition-all duration-300 rounded-[20px] overflow-hidden shadow-sm ${openFaq === index ? 'border-primary-300 dark:border-primary-700 ring-4 ring-primary-50 dark:ring-primary-900/20' : 'border-gray-100 dark:border-gray-700'}`}
+                className={`neu-raised transition-all duration-300 rounded-[20px] overflow-hidden ${openFaq === index ? 'border-primary-400 dark:border-primary-600' : ''}`}
               >
                 <button 
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full flex items-center justify-between p-5 text-left focus:outline-none"
+                  className="w-full flex items-center justify-between p-4.5 text-left focus:outline-none bg-transparent border-0 cursor-pointer"
                 >
-                  <span className={`font-bold text-sm pr-4 transition-colors ${openFaq === index ? 'text-primary-600 dark:text-primary-400' : 'text-gray-800 dark:text-gray-200'}`}>
+                  <span className={`font-black text-xs pr-4 transition-colors ${openFaq === index ? 'text-primary-600 dark:text-primary-400' : 'text-gray-800 dark:text-gray-200'}`}>
                     {faq.q}
                   </span>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${openFaq === index ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' : 'bg-gray-50 dark:bg-gray-700 text-gray-400'}`}>
+                  <div className={`w-7 h-7 rounded-full neu-btn flex items-center justify-center shrink-0`}>
                     <ChevronDown 
-                      size={18} 
+                      size={14} 
                       className={`transition-transform duration-300 ${openFaq === index ? 'rotate-180' : ''}`} 
                     />
                   </div>
@@ -417,7 +463,7 @@ export default function Support() {
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="p-5 pt-0 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                      <div className="p-4.5 pt-0 text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-bold">
                         {faq.a}
                       </div>
                     </motion.div>
@@ -426,19 +472,19 @@ export default function Support() {
               </div>
             ))}
 
-            {/* View Full Terms & Guidelines Card */}
-            <div className="bg-gradient-to-br from-primary-50 to-indigo-50 dark:from-gray-800/40 dark:to-gray-900/30 p-5 rounded-[24px] border border-primary-100/50 dark:border-gray-800 text-center mt-6 transition-all">
-              <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-1.5">
+            {/* View Full Terms & Guidelines Card - Neumorphic Style */}
+            <div className="neu-raised p-5 rounded-[24px] text-center mt-6 transition-all">
+              <h4 className="font-extrabold text-gray-900 dark:text-white text-xs mb-1.5">
                 {isBn ? 'বিস্তারিত নীতিমালা ও নির্দেশিকা' : 'Complete Policies & Guidelines'}
               </h4>
-              <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-4 max-w-xs mx-auto leading-relaxed">
+              <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-4 max-w-xs mx-auto leading-relaxed font-bold">
                 {isBn 
                   ? 'সমিতির ঋণ নিয়মনীতি, প্রসেসিং ফি, লোন উত্তোলন সীমা, গোপনীয়তা এবং ব্যবহারকারীর আইনি দায়বদ্ধতা সম্পর্কে বিস্তারিত পড়ুন।' 
                   : 'Read the complete terms regarding cooperative loan rules, processing fees, withdrawal limits, privacy, and legal declarations.'}
               </p>
               <button
                 onClick={() => navigate('/terms')}
-                className="inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-bold py-2.5 px-5 rounded-xl text-xs shadow-md shadow-primary-500/10 active:scale-95 transition-all cursor-pointer"
+                className="inline-flex items-center justify-center neu-btn-primary font-black py-2.5 px-5 rounded-xl text-xs active:scale-95 transition-all cursor-pointer border-0"
               >
                 {isBn ? 'নীতিমালা ও শর্তাবলী দেখুন' : 'View Terms & Conditions'}
               </button>

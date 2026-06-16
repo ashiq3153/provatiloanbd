@@ -75,20 +75,20 @@ const AccordionSection = ({
   const isComplete = !hasError && fields.some(f => getValues(f));
 
   return (
-    <div id={`accordion-section-${sectionKey}`} className="space-y-2 scroll-mt-20">
+    <div id={`accordion-section-${sectionKey}`} className="space-y-1.5 scroll-mt-20">
       <button
         type="button"
         onClick={onToggle}
-        className={`w-full flex items-center justify-between p-4.5 border transition-all text-left font-bold text-sm select-none cursor-pointer ${
+        className={`w-full flex items-center justify-between p-4.5 transition-all text-left font-bold text-sm select-none cursor-pointer border ${
           isExpanded
             ? flagged
-              ? "bg-amber-50/50 dark:bg-amber-950/20 border-amber-500 text-amber-900 dark:text-amber-100 shadow-sm rounded-t-2xl rounded-b-none ring-2 ring-amber-500/20"
-              : "bg-primary-50/50 dark:bg-primary-950/20 border-primary-500 text-primary-900 dark:text-primary-100 shadow-sm rounded-t-2xl rounded-b-none"
+              ? "neu-raised border-amber-500 text-amber-900 dark:text-amber-100 rounded-t-2xl rounded-b-none ring-2 ring-amber-500/20"
+              : "neu-raised border-primary-500/50 dark:border-primary-500/30 text-primary-900 dark:text-primary-100 rounded-t-2xl rounded-b-none"
             : flagged
-            ? "bg-amber-50/40 dark:bg-amber-950/10 border-amber-400 dark:border-amber-900/60 text-amber-800 dark:text-amber-400 rounded-2xl ring-2 ring-amber-500/10 animate-pulse"
+            ? "neu-raised border-amber-400 dark:border-amber-900/60 text-amber-800 dark:text-amber-400 rounded-2xl ring-2 ring-amber-500/10 animate-pulse"
             : hasError
-            ? "bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-455 rounded-2xl"
-            : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-gray-200 rounded-2xl"
+            ? "neu-raised border-rose-450/60 dark:border-rose-900 text-rose-700 dark:text-rose-455 rounded-2xl"
+            : "neu-raised border-white/60 dark:border-white/5 text-gray-805 dark:text-gray-200 hover:border-primary-500/30 rounded-2xl"
         }`}
       >
         <div className="flex items-center gap-3">
@@ -99,7 +99,7 @@ const AccordionSection = ({
               ? "bg-amber-500 text-white animate-bounce"
               : hasError
               ? "bg-rose-500 text-white"
-              : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+              : "neu-sunken text-gray-500 dark:text-gray-400"
           }`}>
             {icon}
           </div>
@@ -141,7 +141,7 @@ const AccordionSection = ({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="p-5 pt-3 bg-white dark:bg-gray-800 border border-t-0 border-gray-100 dark:border-gray-700 rounded-b-2xl space-y-4 shadow-sm">
+            <div className="p-5 pt-3 bg-gray-50/40 dark:bg-gray-950/20 border border-t-0 border-white/30 dark:border-white/5 rounded-b-2xl space-y-4 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.02)]">
               {children}
             </div>
           </motion.div>
@@ -975,8 +975,8 @@ export default function ApplyLoan() {
         mobile: formData.mobile,
         whatsapp: formData.whatsapp || null,
         email: formData.email || null,
-        current_address: JSON.stringify(formData.currentAddress),
-        permanent_address: JSON.stringify(formData.permanentAddress),
+        current_address: JSON.stringify(currentAddress),
+        permanent_address: JSON.stringify(permanentAddress),
         nid_number: formData.nidNumber,
         professional_info: professionalInfo,
         bank_name: formData.bankName,
@@ -1029,8 +1029,8 @@ export default function ApplyLoan() {
   const Step1Category = () => (
     <div className="space-y-4">
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors">{isBn ? "লোনের ধরন নির্বাচন করুন" : "Select Loan Type"}</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors">{isBn ? "আপনার পেশা অনুযায়ী সঠিক লোন নির্বাচন করুন" : "Select the right loan based on your profession"}</p>
+        <h2 className="text-xl font-extrabold text-gray-900 dark:text-white transition-colors tracking-tight">{isBn ? "লোনের ধরন নির্বাচন করুন" : "Select Loan Type"}</h2>
+        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 transition-colors mt-0.5">{isBn ? "আপনার পেশা অনুযায়ী সঠিক লোন নির্বাচন করুন" : "Select the right loan based on your profession"}</p>
       </div>
       <div className="grid grid-cols-1 gap-4">
         {categories.map((cat) => {
@@ -1046,10 +1046,10 @@ export default function ApplyLoan() {
                 setTenure(minAllowed);
                 setStep(2);
               }}
-              className={`group w-full rounded-[24px] text-left relative overflow-hidden transition-all duration-300 border-2 cursor-pointer ${
+              className={`group w-full rounded-[24px] text-left relative overflow-hidden transition-all duration-300 border cursor-pointer ${
                 isActive 
-                  ? "border-primary-500 bg-gradient-to-br from-white to-primary-50/20 dark:from-gray-800 dark:to-primary-950/10 shadow-lg shadow-primary-500/10"
-                  : "border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-650 hover:shadow-md"
+                  ? "neu-raised border-primary-500 dark:border-primary-500/80 ring-2 ring-primary-500/20 shadow-[inset_0_0_8px_rgba(59,130,246,0.1)] text-primary-905 dark:text-primary-100"
+                  : "neu-raised border-white/60 dark:border-white/5 hover:border-gray-200 dark:hover:border-gray-700 hover:scale-[1.01]"
               }`}
             >
               <div className="flex flex-col sm:flex-row min-h-[160px]">
@@ -1057,14 +1057,14 @@ export default function ApplyLoan() {
                 <div className="flex-1 p-5 relative z-10 flex flex-col justify-between min-w-0">
                   <div>
                     <div className="flex items-center gap-3 mb-2">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${getIconColor(cat.color)}`}>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 neu-sunken ${getIconColor(cat.color)}`}>
                         <cat.icon size={20} />
                       </div>
                       <div>
                         <h3 className="font-extrabold text-gray-900 dark:text-white text-lg transition-colors group-hover:text-primary-600 dark:group-hover:text-primary-400">
                           {cat.title}
                         </h3>
-                        <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                        <p className="text-xs font-bold text-gray-550 dark:text-gray-400 uppercase tracking-wide">
                           {isBn ? "সর্বোচ্চঃ" : "Up to"} {cat.limit} {isBn ? "টাকা" : ""}
                         </p>
                       </div>
@@ -1072,18 +1072,18 @@ export default function ApplyLoan() {
                   </div>
 
                   {/* Highlights Grid */}
-                  <div className="grid grid-cols-3 gap-2 py-3 border-t border-b border-gray-100 dark:border-gray-700/60 my-3">
+                  <div className="grid grid-cols-3 gap-2 py-3 border-t border-b border-gray-200/50 dark:border-gray-700/60 my-3">
                     <div>
                       <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "মেয়াদ" : "Tenure"}</p>
-                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.tenureRange}</p>
+                      <p className="text-xs font-extrabold text-gray-805 dark:text-gray-200">{cat.tenureRange}</p>
                     </div>
                     <div>
                       <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "সুদ" : "Int. Rate"}</p>
-                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.intRates}</p>
+                      <p className="text-xs font-extrabold text-gray-805 dark:text-gray-200">{cat.intRates}</p>
                     </div>
                     <div>
                       <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "প্রসেস" : "Processing"}</p>
-                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.procTime}</p>
+                      <p className="text-xs font-extrabold text-gray-805 dark:text-gray-200">{cat.procTime}</p>
                     </div>
                   </div>
 
@@ -1092,8 +1092,8 @@ export default function ApplyLoan() {
                     {cat.features.map((feature, i) => (
                       <span key={i} className={`px-2 py-0.5 text-[10px] rounded-[6px] border font-bold ${
                         isActive 
-                          ? 'bg-primary-500/10 border-primary-500/20 text-primary-600 dark:text-primary-400' 
-                          : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'
+                          ? 'bg-primary-500/10 border-primary-500/20 text-primary-600 dark:text-primary-400 font-bold shadow-sm' 
+                          : 'neu-sunken border-white/50 dark:border-white/5 text-gray-500 dark:text-gray-400 shadow-sm'
                       }`}>
                         {feature}
                       </span>
@@ -1104,7 +1104,7 @@ export default function ApplyLoan() {
                 {/* Right side Image wrapper with fade mask */}
                 <div className="relative w-full sm:w-[190px] h-[200px] sm:h-auto overflow-hidden shrink-0 self-stretch">
                   {/* Fade Gradient Overlay (Bottom-to-top on mobile, left-to-right on desktop) */}
-                  <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-white dark:from-gray-800 via-white/20 dark:via-gray-800/20 to-transparent z-10 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-[#f1f3f6] dark:from-[#151a24] via-[#f1f3f6]/40 dark:via-[#151a24]/40 to-transparent z-10 pointer-events-none" />
                   
                   {/* Category Image */}
                   <img 
@@ -1131,17 +1131,17 @@ export default function ApplyLoan() {
         </div>
 
         {/* Amount Chips */}
-        <div className="bg-white dark:bg-gray-800 transition-colors p-5 rounded-3xl border border-gray-100 dark:border-gray-700 transition-colors shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <div className="neu-raised p-5 rounded-3xl">
           <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-4 transition-colors">{isBn ? "লোনের পরিমাণ" : "Loan Amount"}</label>
           <div className="flex flex-wrap gap-2">
             {amountPackages.filter(amt => amt <= (category?.maxAmount || 5000000)).map(pkg => (
               <button
                 key={pkg}
                 onClick={() => handleAmountChange(pkg)}
-                className={`py-2 px-3 rounded-xl font-bold text-sm transition-all border-2 flex-grow text-center ${
+                className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all border flex-grow text-center ${
                   amount === pkg 
-                    ? "border-primary-600 bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300 shadow-sm" 
-                    : "border-gray-100 dark:border-gray-700 transition-colors bg-gray-50 dark:bg-gray-900 transition-colors hover:border-gray-200 text-gray-600 dark:text-gray-300"
+                    ? "neu-btn-primary" 
+                    : "neu-btn text-gray-605 dark:text-gray-300"
                 }`}
               >
                 {formatAmount(pkg, isBn)}
@@ -1151,8 +1151,8 @@ export default function ApplyLoan() {
         </div>
 
         {/* Tenure Snap Slider */}
-        <div className="bg-white dark:bg-gray-800 transition-colors p-5 rounded-3xl border border-gray-100 dark:border-gray-700 transition-colors shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-          <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-4 transition-colors">{isBn ? "সময়কাল (মাস)" : "Tenure (Months)"}</label>
+        <div className="neu-raised p-5 rounded-3xl">
+          <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-4 transition-colors">{isBn ? "সময়কাল (মাস)" : "Tenure (Months)"}</label>
           
           <div className="flex flex-wrap gap-2">
             {snapPoints.map(months => {
@@ -1162,13 +1162,13 @@ export default function ApplyLoan() {
               const isAllowed = months >= minAllowed && months <= maxAllowed;
               const isSelected = tenure === months;
               
-              let btnClass = "py-3 px-4 rounded-xl font-bold text-sm transition-all border-2 flex-grow text-center ";
+              let btnClass = "py-3 px-4 rounded-xl font-bold text-sm transition-all flex-grow text-center ";
               if (isSelected) {
-                btnClass += "border-primary-600 bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300 shadow-sm";
+                btnClass += "neu-btn-primary";
               } else if (isAllowed) {
-                btnClass += "border-gray-200 bg-white dark:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300 hover:border-gray-300";
+                btnClass += "neu-btn text-gray-700 dark:text-gray-350";
               } else {
-                btnClass += "border-gray-100 dark:border-gray-700 transition-colors bg-gray-50 dark:bg-gray-900 transition-colors text-gray-300 dark:text-gray-600 cursor-not-allowed";
+                btnClass += "neu-sunken opacity-40 cursor-not-allowed shadow-none text-gray-400 dark:text-gray-650";
               }
 
               return (
@@ -1189,8 +1189,8 @@ export default function ApplyLoan() {
         </div>
 
         {/* Breakdown */}
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white dark:bg-gray-800 transition-colors/5 rounded-bl-[100px] -mr-8 -mt-8"></div>
+        <div className="bg-gradient-to-br from-[#1b2330] via-[#0f131a] to-[#0b0c10] border border-white/10 dark:border-white/5 rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 dark:bg-white/5 rounded-bl-[100px] -mr-8 -mt-8"></div>
           
           <div className="relative z-10 flex flex-col gap-4">
             <div className="flex justify-between items-center pb-4 border-b border-white/10">
@@ -1200,7 +1200,7 @@ export default function ApplyLoan() {
                </div>
                <div className="text-right">
                  <p className="text-gray-400 text-xs font-medium mb-1 uppercase tracking-wider">{isBn ? "মোট পরিশোধ" : "Total Payable"}</p>
-                 <p className="text-xl font-bold text-emerald-400">{formatCurrency(calculateEMI() * tenure, isBn)}</p>
+                 <p className="text-xl font-bold text-emerald-450">{formatCurrency(calculateEMI() * tenure, isBn)}</p>
                </div>
             </div>
 
@@ -1215,7 +1215,7 @@ export default function ApplyLoan() {
               </div>
               <div>
                 <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{isBn ? "মোট সুদ" : "Total Interest"}</p>
-                <p className="font-semibold text-sm text-rose-400">{formatCurrency(Math.round(amount * category.minRate * tenure), isBn)}</p>
+                <p className="font-semibold text-sm text-rose-450">{formatCurrency(Math.round(amount * category.minRate * tenure), isBn)}</p>
               </div>
               <div>
                 <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{isBn ? "প্রসেসিং ফি" : "Processing Fee"}</p>
@@ -1259,7 +1259,7 @@ export default function ApplyLoan() {
     return (
       <div className="space-y-4 pb-6" onFocus={handleInputFocus}>
         {feedbackNote && (
-          <div className="bg-amber-50 dark:bg-amber-950/20 text-amber-850 dark:text-amber-300 p-4.5 rounded-2xl border border-amber-100 dark:border-amber-900/40 text-xs font-semibold leading-relaxed flex gap-3 transition-colors mb-4">
+          <div className="p-4.5 rounded-2xl border border-amber-500/40 dark:border-amber-900/40 bg-amber-500/5 dark:bg-amber-950/10 text-amber-850 dark:text-amber-300 text-xs font-semibold leading-relaxed flex gap-3 transition-colors mb-4">
             <AlertCircle size={20} className="text-amber-500 shrink-0 mt-0.5" />
             <div>
               <p className="font-black text-amber-900 dark:text-amber-250 uppercase tracking-wider text-[9px] mb-1">{isBn ? 'সংশোধন অনুরোধ মন্তব্য:' : 'Revision Requested Comments:'}</p>
@@ -1268,7 +1268,7 @@ export default function ApplyLoan() {
           </div>
         )}
         <div className="mb-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors">{isBn ? "আবেদনকারীর তথ্য বিবরণী" : "Applicant Information"}</h2>
+          <h2 className="text-xl font-bold text-gray-905 dark:text-white transition-colors">{isBn ? "আবেদনকারীর তথ্য বিবরণী" : "Applicant Information"}</h2>
           <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">{isBn ? "নিচের সবগুলো সেকশন সঠিকভাবে পূরণ করুন" : "Please fill out all the sections below accurately."}</p>
         </div>
 
@@ -1287,35 +1287,35 @@ export default function ApplyLoan() {
           <div className="space-y-3.5 text-xs">
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পূর্ণ নাম (NID অনুযায়ী)" : "Full Name (as per NID)"}</label>
-              <input type="text" {...register("fullName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.fullName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500 focus:border-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder={isBn ? "যেমন: মোঃ রহিম উদ্দিন" : "e.g. Md. Rahim Uddin"} />
+              <input type="text" {...register("fullName")} className={`w-full neu-input ${errors.fullName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: মোঃ রহিম উদ্দিন" : "e.g. Md. Rahim Uddin"} />
               <ErrorText field="fullName" />
             </div>
             <div className="grid grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পিতার নাম" : "Father's Name"}</label>
-                <input type="text" {...register("fatherName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.fatherName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder={isBn ? "পিতার নাম" : "Father's Name"} />
+                <input type="text" {...register("fatherName")} className={`w-full neu-input ${errors.fatherName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "পিতার নাম" : "Father's Name"} />
                 <ErrorText field="fatherName" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাতার নাম" : "Mother's Name"}</label>
-                <input type="text" {...register("motherName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.motherName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder={isBn ? "মাতার নাম" : "Mother's Name"} />
+                <input type="text" {...register("motherName")} className={`w-full neu-input ${errors.motherName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "মাতার নাম" : "Mother's Name"} />
                 <ErrorText field="motherName" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "আপনার NID নম্বর" : "Your NID Number"}</label>
-              <input type="text" {...register("nidNumber")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nidNumber ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder={isBn ? "এনআইডি নম্বর লিখুন" : "Enter NID Number"} />
+              <input type="text" {...register("nidNumber")} className={`w-full neu-input ${errors.nidNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "এনআইডি নম্বর লিখুন" : "Enter NID Number"} />
               <ErrorText field="nidNumber" />
             </div>
             <div className="grid grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "জন্ম তারিখ" : "Date of Birth"}</label>
-                <input type="date" {...register("dob")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.dob ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-750 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} />
+                <input type="date" {...register("dob")} className={`w-full neu-input ${errors.dob ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} />
                 <ErrorText field="dob" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "লিঙ্গ" : "Gender"}</label>
-                <select {...register("gender")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.gender ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`}>
+                <select {...register("gender")} className={`w-full neu-input ${errors.gender ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
                   <option>{isBn ? "পুরুষ" : "Male"}</option>
                   <option>{isBn ? "নারী" : "Female"}</option>
                   <option>{isBn ? "অন্যান্য" : "Other"}</option>
@@ -1326,18 +1326,18 @@ export default function ApplyLoan() {
             <div className="grid grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল নাম্বার" : "Mobile Number"}</label>
-                <input type="tel" {...register("mobile")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.mobile ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="01XXXXXXXXX" />
+                <input type="tel" {...register("mobile")} className={`w-full neu-input ${errors.mobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
                 <ErrorText field="mobile" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "হোয়াটসঅ্যাপ (ঐচ্ছিক)" : "WhatsApp (Optional)"}</label>
-                <input type="tel" {...register("whatsapp")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.whatsapp ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="01XXXXXXXXX" />
+                <input type="tel" {...register("whatsapp")} className={`w-full neu-input ${errors.whatsapp ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
                 <ErrorText field="whatsapp" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ইমেইল (ঐচ্ছিক)" : "Email (Optional)"}</label>
-              <input type="email" {...register("email")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.email ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="example@email.com" />
+              <input type="email" {...register("email")} className={`w-full neu-input ${errors.email ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="example@email.com" />
               <ErrorText field="email" />
             </div>
             <AddressSelector
@@ -1395,24 +1395,24 @@ export default function ApplyLoan() {
               <>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কোম্পানির নাম / পেশা" : "Company/Profession Name"}</label>
-                  <input type="text" {...register("companyName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.companyName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder={isBn ? "কোম্পানি বা পেশার নাম" : "Company or Profession name"} />
+                  <input type="text" {...register("companyName")} className={`w-full neu-input ${errors.companyName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "কোম্পানি বা পেশার নাম" : "Company or Profession name"} />
                   <ErrorText field="companyName" />
                 </div>
                 <div className="grid grid-cols-2 gap-3.5">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পদবী" : "Designation"}</label>
-                    <input type="text" {...register("designation")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.designation ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Manager/Worker" />
+                    <input type="text" {...register("designation")} className={`w-full neu-input ${errors.designation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Manager/Worker" />
                     <ErrorText field="designation" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কাজের মেয়াদ" : "Work Duration"}</label>
-                    <input type="text" {...register("workDuration")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.workDuration ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="যেমন: ৩ বছর" />
+                    <input type="text" {...register("workDuration")} className={`w-full neu-input ${errors.workDuration ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: ৩ বছর" : "e.g. 3 years"} />
                     <ErrorText field="workDuration" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
-                  <input type="number" {...register("monthlyIncome")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.monthlyIncome ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="৳" />
+                  <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                   <ErrorText field="monthlyIncome" />
                 </div>
               </>
@@ -1422,23 +1422,23 @@ export default function ApplyLoan() {
               <>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্যবসার নাম" : "Business Name"}</label>
-                  <input type="text" {...register("businessName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.businessName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="আপনার স্টোর বা কোম্পানির নাম" />
+                  <input type="text" {...register("businessName")} className={`w-full neu-input ${errors.businessName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="আপনার স্টোর বা কোম্পানির নাম" />
                   <ErrorText field="businessName" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "দোকান / অফিসের ঠিকানা" : "Shop / Office Address"}</label>
-                  <textarea rows={1.5} {...register("shopAddress")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.shopAddress ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all resize-none`} placeholder={isBn ? "ঠিকানা লিখুন" : "Enter Address"} />
+                  <textarea rows={1.5} {...register("shopAddress")} className={`w-full neu-input ${errors.shopAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder={isBn ? "ঠিকানা লিখুন" : "Enter Address"} />
                   <ErrorText field="shopAddress" />
                 </div>
                 <div className="grid grid-cols-2 gap-3.5">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ট্রেড লাইসেন্স নম্বর" : "Trade License No"}</label>
-                    <input type="text" {...register("tradeLicense")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.tradeLicense ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Tr xxx-xxx" />
+                    <input type="text" {...register("tradeLicense")} className={`w-full neu-input ${errors.tradeLicense ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Tr xxx-xxx" />
                     <ErrorText field="tradeLicense" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
-                    <input type="number" {...register("monthlyIncome")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.monthlyIncome ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="৳" />
+                    <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                     <ErrorText field="monthlyIncome" />
                   </div>
                 </div>
@@ -1450,24 +1450,24 @@ export default function ApplyLoan() {
                 <div className="grid grid-cols-2 gap-3.5">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কর্মরত দেশের নাম" : "Working Country"}</label>
-                    <input type="text" {...register("workingCountry")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.workingCountry ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Dubai / KSA" />
+                    <input type="text" {...register("workingCountry")} className={`w-full neu-input ${errors.workingCountry ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Dubai / KSA" />
                     <ErrorText field="workingCountry" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ভিসার ধরন" : "Visa Type"}</label>
-                    <input type="text" {...register("visaType")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.visaType ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Work Visa" />
+                    <input type="text" {...register("visaType")} className={`w-full neu-input ${errors.visaType ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Work Visa" />
                     <ErrorText field="visaType" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3.5">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পাসপোর্ট নম্বর" : "Passport Number"}</label>
-                    <input type="text" {...register("passportNumber")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.passportNumber ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="AXXXXXXXX" />
+                    <input type="text" {...register("passportNumber")} className={`w-full neu-input ${errors.passportNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="AXXXXXXXX" />
                     <ErrorText field="passportNumber" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
-                    <input type="number" {...register("monthlyIncome")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.monthlyIncome ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="৳" />
+                    <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                     <ErrorText field="monthlyIncome" />
                   </div>
                 </div>
@@ -1478,18 +1478,18 @@ export default function ApplyLoan() {
               <>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "প্রতিষ্ঠানের নাম" : "Institution Name"}</label>
-                  <input type="text" {...register("institutionName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.institutionName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="University Name" />
+                  <input type="text" {...register("institutionName")} className={`w-full neu-input ${errors.institutionName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="University Name" />
                   <ErrorText field="institutionName" />
                 </div>
                 <div className="grid grid-cols-2 gap-3.5">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "স্টুডেন্ট আইডি" : "Student ID"}</label>
-                    <input type="text" {...register("studentId")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.studentId ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="201-xx-xx" />
+                    <input type="text" {...register("studentId")} className={`w-full neu-input ${errors.studentId ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="201-xx-xx" />
                     <ErrorText field="studentId" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "অভিভাবকের আয়" : "Guardian's Income"}</label>
-                    <input type="number" {...register("guardianIncome")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.guardianIncome ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="৳" />
+                    <input type="number" {...register("guardianIncome")} className={`w-full neu-input ${errors.guardianIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                     <ErrorText field="guardianIncome" />
                   </div>
                 </div>
@@ -1500,17 +1500,17 @@ export default function ApplyLoan() {
               <>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পেশা" : "Profession"}</label>
-                  <input type="text" {...register("professionName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.professionName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-855 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder={isBn ? "পেশা" : "Profession"} />
+                  <input type="text" {...register("professionName")} className={`w-full neu-input ${errors.professionName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-855 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "পেশা" : "Profession"} />
                   <ErrorText field="professionName" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "জরুরি কারণ" : "Emergency Reason"}</label>
-                  <textarea rows={1.5} {...register("emergencyReason")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.emergencyReason ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all resize-none`} placeholder="জরুরি লোন কেন প্রয়োজন?" />
+                  <textarea rows={1.5} {...register("emergencyReason")} className={`w-full neu-input ${errors.emergencyReason ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="জরুরি লোন কেন প্রয়োজন?" />
                   <ErrorText field="emergencyReason" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
-                  <input type="number" {...register("monthlyIncome")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.monthlyIncome ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="৳" />
+                  <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                   <ErrorText field="monthlyIncome" />
                 </div>
               </>
@@ -1533,29 +1533,29 @@ export default function ApplyLoan() {
           <div className="space-y-3.5 text-xs">
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্যাংকের নাম" : "Bank Name"}</label>
-              <input type="text" {...register("bankName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.bankName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="DBBL / BRAC Bank / Islami Bank" />
+              <input type="text" {...register("bankName")} className={`w-full neu-input ${errors.bankName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="DBBL / BRAC Bank / Islami Bank" />
               <ErrorText field="bankName" />
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "একাউন্টের নাম" : "Account Name"}</label>
-              <input type="text" {...register("accountName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.accountName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Account Holder Name" />
+              <input type="text" {...register("accountName")} className={`w-full neu-input ${errors.accountName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Account Holder Name" />
               <ErrorText field="accountName" />
             </div>
             <div className="grid grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "একাউন্ট নম্বর" : "Account Number"}</label>
-                <input type="text" {...register("accountNumber")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.accountNumber ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-855 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Account Number" />
+                <input type="text" {...register("accountNumber")} className={`w-full neu-input ${errors.accountNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-855 dark:text-white font-medium outline-none transition-all`} placeholder="Account Number" />
                 <ErrorText field="accountNumber" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রাউটিং নাম্বার (ঐচ্ছিক)" : "Routing Number (Optional)"}</label>
-                <input type="text" {...register("routingNumber")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.routingNumber ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Routing Number" />
+                <input type="text" {...register("routingNumber")} className={`w-full neu-input ${errors.routingNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Routing Number" />
                 <ErrorText field="routingNumber" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল ব্যাংকিং নম্বর (বিকাশ/নগদ) (ঐচ্ছিক)" : "Mobile Banking Number (bKash/Nagad) (Optional)"}</label>
-              <input type="tel" {...register("mobileBanking")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.mobileBanking ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="01XXXXXXXXX" />
+              <input type="tel" {...register("mobileBanking")} className={`w-full neu-input ${errors.mobileBanking ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
               <ErrorText field="mobileBanking" />
             </div>
           </div>
@@ -1576,24 +1576,24 @@ export default function ApplyLoan() {
           <div className="space-y-3.5 text-xs">
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নমিনির নাম" : "Nominee Name"}</label>
-              <input type="text" {...register("nomineeName")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nomineeName ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="Nominee Name" />
+              <input type="text" {...register("nomineeName")} className={`w-full neu-input ${errors.nomineeName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Nominee Name" />
               <ErrorText field="nomineeName" />
             </div>
             <div className="grid grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "সম্পর্ক" : "Relationship"}</label>
-                <input type="text" {...register("nomineeRelation")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nomineeRelation ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="যেমন: ভাই / স্ত্রী" />
+                <input type="text" {...register("nomineeRelation")} className={`w-full neu-input ${errors.nomineeRelation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: ভাই / স্ত্রী" : "e.g. Brother / Wife"} />
                 <ErrorText field="nomineeRelation" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল নাম্বার" : "Mobile Number"}</label>
-                <input type="text" {...register("nomineeMobile")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nomineeMobile ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="01XXXXXXXXX" />
+                <input type="text" {...register("nomineeMobile")} className={`w-full neu-input ${errors.nomineeMobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
                 <ErrorText field="nomineeMobile" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "NID নম্বর" : "NID Number"}</label>
-              <input type="text" {...register("nomineeNid")} className={`w-full bg-gray-50 dark:bg-gray-900 border ${errors.nomineeNid ? "border-red-500 focus:ring-red-500" : "border-gray-200 dark:border-gray-700 focus:ring-primary-500"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium focus:ring-2 outline-none transition-all`} placeholder="নমিনির এনআইডি নম্বর" />
+              <input type="text" {...register("nomineeNid")} className={`w-full neu-input ${errors.nomineeNid ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="নমিনির এনআইডি নম্বর" />
               <ErrorText field="nomineeNid" />
             </div>
           </div>
@@ -1626,13 +1626,17 @@ export default function ApplyLoan() {
         />
         <label 
           htmlFor={isUploading ? undefined : `file-${id}`}
-          className={`w-full bg-gray-50 dark:bg-gray-900 transition-colors border-2 ${documents[id] ? 'border-solid border-green-500' : 'border-dashed border-gray-200 dark:border-gray-700'} rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-primary-50 hover:border-primary-300 transition-colors cursor-pointer text-center block ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+          className={`w-full transition-all border-2 ${
+            documents[id] 
+              ? 'border-solid border-green-500 bg-green-50/10 dark:bg-green-950/5' 
+              : 'border-dashed border-white/60 dark:border-white/5 bg-gray-100/10 dark:bg-gray-950/10'
+          } rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:scale-[1.01] transition-all cursor-pointer text-center block neu-sunken ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
         >
-           <div className={`w-10 h-10 ${documents[id] ? 'bg-green-100 dark:bg-green-900' : 'bg-white dark:bg-gray-800'} transition-colors rounded-full flex items-center justify-center shadow-sm mx-auto`}>
+           <div className={`w-10 h-10 ${documents[id] ? 'neu-badge-green border-white/20' : 'neu-btn'} transition-colors rounded-full flex items-center justify-center shadow-sm mx-auto`}>
              {isUploading ? (
                <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
              ) : documents[id] ? (
-               <CheckCircle2 size={18} className="text-green-600 dark:text-green-400" />
+               <CheckCircle2 size={18} className="text-white" />
              ) : (
                <UploadCloud size={18} className="text-gray-500 dark:text-gray-400" />
              )}
@@ -1651,7 +1655,7 @@ export default function ApplyLoan() {
   const Step4Documents = () => (
     <div className="space-y-5 pb-6 text-xs">
       {flaggedSections.documents && (
-        <div className="bg-amber-50 dark:bg-amber-950/20 text-amber-850 dark:text-amber-300 p-4.5 rounded-2xl border border-amber-100 dark:border-amber-900/40 text-xs font-semibold leading-relaxed flex gap-3 transition-colors mb-4 animate-pulse">
+        <div className="text-amber-850 dark:text-amber-305 p-4.5 rounded-2xl border border-amber-500/30 dark:border-amber-900/40 bg-amber-500/5 dark:bg-amber-955/10 text-xs font-semibold leading-relaxed flex gap-3 transition-colors mb-4 animate-pulse">
           <AlertCircle size={20} className="text-amber-500 shrink-0 mt-0.5" />
           <div>
             <p className="font-black text-amber-900 dark:text-amber-250 uppercase tracking-wider text-[9px] mb-1">{isBn ? 'সংশোধন প্রয়োজন:' : 'Revision Required:'}</p>
@@ -1666,8 +1670,8 @@ export default function ApplyLoan() {
       </div>
 
       {/* Uploads Block */}
-      <div className={`bg-white dark:bg-gray-800 transition-colors rounded-2xl border ${flaggedSections.documents ? 'border-amber-400 ring-2 ring-amber-500/20 shadow-md' : 'border-gray-100 dark:border-gray-700'} p-4.5 shadow-sm space-y-4`}>
-        <h3 className="font-bold text-gray-805 dark:text-gray-200 text-sm border-b border-gray-100 dark:border-gray-700 transition-colors pb-2">{isBn ? "পরিচয়পত্র ও ছবি" : "Identity Documents & Photos"}</h3>
+      <div className={`transition-all rounded-2xl border ${flaggedSections.documents ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-white/60 dark:border-white/5'} p-4.5 space-y-4 neu-raised`}>
+        <h3 className="font-bold text-gray-805 dark:text-gray-200 text-sm border-b border-gray-200/50 dark:border-gray-800 transition-colors pb-2">{isBn ? "পরিচয়পত্র ও ছবি" : "Identity Documents & Photos"}</h3>
         
         {/* Upload Slot Grid */}
         <div className="grid grid-cols-2 gap-3.5">
@@ -1676,14 +1680,14 @@ export default function ApplyLoan() {
           {renderFileUploader("selfie", isBn ? "সেলফি (NID সহ)" : "Selfie (with NID)")}
           {renderFileUploader("photo", isBn ? "পাসপোর্ট সাইজ ছবি" : "Passport Size Photo")}
         </div>
-        <div className="mt-3.5 border-t border-gray-100 dark:border-gray-700/50 pt-3.5">
+        <div className="mt-3.5 border-t border-gray-200/50 dark:border-gray-700/50 pt-3.5">
           {renderFileUploader("nominee_photo", isBn ? "নমিনির ছবি (ঐচ্ছিক)" : "Nominee Photo (Optional)")}
         </div>
       </div>
 
       {/* Income Proofs Block */}
-      <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors p-4.5 shadow-sm space-y-4">
-        <h3 className="font-bold text-gray-805 dark:text-gray-200 text-sm border-b border-gray-100 dark:border-gray-700 transition-colors pb-2">
+      <div className="rounded-2xl border border-white/60 dark:border-white/5 p-4.5 space-y-4 neu-raised">
+        <h3 className="font-bold text-gray-805 dark:text-gray-200 text-sm border-b border-gray-200/50 dark:border-gray-800 transition-colors pb-2">
           {isBn ? "আয়ের প্রমাণপত্র" : "Income Proof"} ({category?.title})
         </h3>
         <div className="grid grid-cols-1 gap-3.5">
@@ -1728,7 +1732,7 @@ export default function ApplyLoan() {
         </div>
       </div>
 
-      <div className="bg-amber-50 dark:bg-amber-950/20 p-3.5 rounded-2xl border border-amber-100 dark:border-amber-900/40 flex items-start gap-3 transition-colors">
+      <div className="p-3.5 rounded-2xl border border-amber-500/40 dark:border-amber-900/40 bg-amber-500/5 dark:bg-amber-955/10 flex items-start gap-3 transition-colors">
         <AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" />
         <p className="text-xs text-amber-800 dark:text-amber-300 leading-normal font-medium">
           {isBn ? "অতিরিক্ত ডকুমেন্টস (যেমন: TIN Certificate, Utility Bill) এডমিন আপনার প্রোফাইল যাচাই করার পর সাবমিট করতে হতে পারে।" : "Additional documents (e.g. TIN, Utility Bill) may be required after admin reviews your profile."}
@@ -1736,16 +1740,16 @@ export default function ApplyLoan() {
       </div>
 
       {/* Review Details Summary Card */}
-      <div className="bg-white dark:bg-gray-800 transition-colors rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors shadow-sm overflow-hidden mt-4">
-        <div className="bg-gray-50 dark:bg-gray-900 transition-colors p-4 border-b border-gray-100 dark:border-gray-700 transition-colors flex justify-between items-center">
+      <div className="rounded-2xl border border-white/60 dark:border-white/5 overflow-hidden mt-4 neu-raised">
+        <div className="bg-gray-100/40 dark:bg-gray-900/20 p-4 border-b border-gray-200/50 dark:border-gray-800 flex justify-between items-center">
           <div className="flex items-center gap-2">
             {category?.icon && <category.icon size={18} className="text-gray-500" />}
-            <span className="font-bold text-sm text-gray-850 dark:text-gray-200">{category?.title} লোন</span>
+            <span className="font-bold text-sm text-gray-850 dark:text-gray-205">{category?.title} লোন</span>
           </div>
-          <span className="text-xs font-bold bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 px-2.5 py-1 rounded-full">New</span>
+          <span className="text-xs font-bold neu-badge-purple border-white/20 px-2.5 py-1 rounded-full">New</span>
         </div>
         
-        <div className="p-4 divide-y divide-gray-50 dark:divide-gray-700/50">
+        <div className="p-4 divide-y divide-gray-200/40 dark:divide-gray-700/50">
           <div className="py-2.5 flex justify-between">
             <span className="text-gray-500 text-sm">{isBn ? "লোনের পরিমাণ" : "Loan Amount"}</span>
             <span className="font-bold text-gray-900 dark:text-white transition-colors">{formatCurrency(amount, isBn)}</span>
@@ -1762,7 +1766,7 @@ export default function ApplyLoan() {
       </div>
 
       {/* Terms and Declaration Checkbox */}
-      <label htmlFor="acceptedTerms" className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-900/50 transition-colors rounded-2xl border border-gray-200 dark:border-gray-750 cursor-pointer group mt-4">
+      <label htmlFor="acceptedTerms" className="flex items-start gap-3 p-4 rounded-2xl cursor-pointer group mt-4 neu-sunken border-white/30 dark:border-white/5">
         <div className="pt-0.5">
           <input 
             id="acceptedTerms"
@@ -1796,7 +1800,7 @@ export default function ApplyLoan() {
       animate={{ opacity: 1, scale: 1 }}
       className="text-center py-10 px-5 space-y-6"
     >
-      <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500 dark:text-green-400 ring-8 ring-green-50/50 dark:ring-green-950/20">
+      <div className="w-24 h-24 neu-badge-green border-white/20 rounded-full flex items-center justify-center mx-auto mb-6 text-white shadow-lg">
         <CheckCircle2 size={48} strokeWidth={2.5} />
       </div>
       <div>
@@ -1804,18 +1808,17 @@ export default function ApplyLoan() {
         <p className="text-gray-600 dark:text-gray-400 text-sm">{isBn ? "আপনার আবেদনটি পর্যালোচনার জন্য পাঠানো হয়েছে।" : "Your application has been submitted for review."}</p>
       </div>
 
-      <div className="bg-gray-50 dark:bg-gray-900 transition-colors rounded-2xl border border-gray-200 dark:border-gray-700 p-5 text-left max-w-xs mx-auto">
+      <div className="rounded-2xl border border-white/30 dark:border-white/5 p-5 text-left max-w-xs mx-auto neu-sunken">
         <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">{isBn ? "ট্র্যাকিং আইডি" : "Tracking ID"}</p>
         <p className="text-lg font-mono font-black text-gray-900 dark:text-white transition-colors mb-4">#LN-{(Math.random()*100000).toFixed(0).padStart(6,'0')}</p>
         
         <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">{isBn ? "বর্তমান স্ট্যাটাস" : "Current Status"}</p>
         <div className="flex items-center gap-2">
-           <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-           <p className="font-bold text-amber-600 text-sm">{isBn ? "রিভিউ চলছে" : "Under Review"}</p>
+           <span className="px-3 py-1 text-xs font-bold neu-badge-orange border-white/25 rounded-full">{isBn ? "রিভিউ চলছে" : "Under Review"}</span>
         </div>
       </div>
 
-      <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-2xl border border-amber-100 dark:border-amber-900/40 text-left mt-6 flex gap-3 transition-colors">
+      <div className="p-4 rounded-2xl border border-amber-500/20 dark:border-amber-900/40 bg-amber-500/5 dark:bg-amber-955/10 text-left mt-6 flex gap-3 transition-colors">
         <AlertCircle size={24} className="text-amber-500 shrink-0 mt-1" />
         <div>
           <h3 className="font-bold text-amber-800 dark:text-amber-300 transition-colors">
@@ -1832,19 +1835,19 @@ export default function ApplyLoan() {
       <div className="pt-6 space-y-3">
         <Link 
           to="/deposit" 
-          className="w-full block bg-primary-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary-600/20 hover:-translate-y-0.5 active:scale-95 transition-all text-sm"
+          className="w-full block text-center neu-btn-primary font-bold py-4 rounded-xl text-sm"
         >
           {isBn ? "প্রসেসিং ফি জমা দিন" : "Deposit Processing Fee"}
         </Link>
         <Link 
           to={`/support?prefill=loan_apply&cat=${category?.id}&amount=${amount}`}
-          className="w-full block bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-750 font-bold py-4 rounded-xl active:scale-95 transition-all text-sm"
+          className="w-full block text-center neu-btn font-bold py-4 rounded-xl text-sm"
         >
           {isBn ? "লাইভ সাপোর্ট চ্যাট" : "Contact Live Support"}
         </Link>
         <Link 
           to="/transactions" 
-          className="w-full block bg-gray-900 dark:bg-gray-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-gray-900/20 active:scale-95 transition-all text-sm"
+          className="w-full block text-center font-bold py-4 rounded-xl text-sm bg-gradient-to-r from-gray-800 to-gray-900 text-white border border-white/5 shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all"
         >
           {isBn ? "ট্র্যাকিং পেজে যান" : "Go to Tracking Page"}
         </Link>
@@ -1854,12 +1857,12 @@ export default function ApplyLoan() {
 
   return (
     <FormProvider {...methods}>
-    <div className="min-h-full bg-white dark:bg-gray-800 transition-colors flex flex-col relative">
+    <div className="min-h-full neu-bg transition-colors flex flex-col relative">
       {/* Dynamic Header */}
       {step < 5 && (
-        <div className="bg-white dark:bg-gray-800 transition-colors px-5 pt-6 pb-4 sticky top-0 z-30 shadow-sm flex items-center justify-between">
+        <div className="px-5 pt-6 pb-4 sticky top-0 z-30 flex items-center justify-between border-b border-gray-200/30 dark:border-gray-850/50">
            {step > 1 ? (
-             <button onClick={prevStep} className="p-2 -ml-2 rounded-full bg-gray-50 dark:bg-gray-900 transition-colors hover:bg-gray-100 text-gray-700 transition-colors">
+             <button onClick={prevStep} className="p-2 -ml-2 rounded-full neu-btn flex items-center justify-center">
                <ChevronLeft size={20} />
              </button>
            ) : (
@@ -1868,9 +1871,9 @@ export default function ApplyLoan() {
            
            <div className="flex flex-col items-center">
              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Step {step} of 4</p>
-             <div className="flex gap-1 h-1.5 w-32 bg-gray-100 rounded-full overflow-hidden">
+             <div className="flex gap-1 h-2 w-32 neu-sunken rounded-full overflow-hidden border-none">
                <motion.div 
-                 className="bg-primary-500 h-full rounded-full"
+                 className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full"
                  initial={{ width: 0 }}
                  animate={{ width: `${(step / 4) * 100}%` }}
                  transition={{ duration: 0.3 }}
@@ -1903,12 +1906,12 @@ export default function ApplyLoan() {
 
       {/* Bottom Action Bar - Compact */}
       {step < 5 && (
-        <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-white dark:bg-gray-800 transition-colors border-t border-gray-100 dark:border-gray-700 z-40 flex gap-2">
+        <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md transition-colors border-t border-gray-200/50 dark:border-gray-855/50 z-40 flex gap-2">
           {step > 1 && (
             <button
               type="button"
               onClick={prevStep}
-              className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 active:scale-95 transition-all shrink-0"
+              className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm neu-btn shrink-0 text-gray-700 dark:text-gray-300"
             >
               <ChevronLeft size={16} /> {isBn ? 'পিছনে' : 'Back'}
             </button>
@@ -1917,7 +1920,7 @@ export default function ApplyLoan() {
             type="button"
             onClick={nextStep}
             disabled={(step === 1 && !category) || (step === 4 && !acceptedTerms) || isSubmitting}
-            className="flex-1 bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none text-white py-2.5 rounded-xl font-bold text-sm shadow-md shadow-blue-600/30 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-1"
+            className="flex-1 neu-btn-primary disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-650 disabled:shadow-none py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-1"
           >
             {isSubmitting
               ? (isBn ? 'অপেক্ষা করুন...' : 'Please wait...')
@@ -1936,10 +1939,10 @@ export default function ApplyLoan() {
           <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full shadow-2xl border border-gray-150 dark:border-gray-700 overflow-hidden my-8"
+            className="rounded-3xl max-w-md w-full shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden my-8 neu-raised"
           >
             {/* Header */}
-            <div className="bg-gray-50 dark:bg-gray-900 px-6 py-4.5 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+            <div className="bg-gray-100/40 dark:bg-gray-900/20 px-6 py-4.5 border-b border-gray-200/50 dark:border-gray-800 flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <ShieldAlert className="text-primary-600 dark:text-primary-400" size={20} />
                 <h3 className="text-base font-black text-gray-900 dark:text-white">
@@ -1949,7 +1952,7 @@ export default function ApplyLoan() {
               {(verificationStage === 'confirm' || verificationStage === 'failed') && (
                 <button 
                   onClick={handleCloseVerification}
-                  className="text-gray-400 hover:text-gray-650 dark:hover:text-white p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                  className="text-gray-400 hover:text-gray-650 dark:hover:text-white p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-805 transition-colors cursor-pointer"
                 >
                   <X size={18} />
                 </button>
@@ -1960,8 +1963,8 @@ export default function ApplyLoan() {
               {/* STAGE 1: Confirmation & Warnings checklist */}
               {verificationStage === 'confirm' && (
                 <>
-                  <div className="bg-primary-50/50 dark:bg-primary-950/10 p-4 rounded-2xl border border-primary-100/50 dark:border-primary-900/30 space-y-2.5">
-                    <h4 className="font-bold text-gray-900 dark:text-white text-xs">
+                  <div className="p-4 rounded-2xl border border-white/20 dark:border-white/5 space-y-2.5 neu-sunken">
+                    <h4 className="font-bold text-gray-905 dark:text-white text-xs">
                       {isBn ? 'লোন ও আবেদনকারী সারসংক্ষেপ' : 'Loan & Applicant Summary'}
                     </h4>
                     <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-600 dark:text-gray-400">
@@ -1986,7 +1989,7 @@ export default function ApplyLoan() {
 
                   {/* Summary Warnings Checklist */}
                   <div className="space-y-3 pt-2">
-                    <h4 className="font-bold text-gray-800 dark:text-gray-200 text-xs border-b border-gray-100 dark:border-gray-700 pb-2">
+                    <h4 className="font-bold text-gray-805 dark:text-gray-200 text-xs border-b border-gray-150 dark:border-gray-700 pb-2">
                       {isBn ? 'আইনি ঘোষণা ও সতর্কবার্তা চেকলিস্ট' : 'Legal Declaration & Warnings Checklist'}
                     </h4>
                     <p className="text-[10px] text-gray-400 leading-normal">
@@ -1997,7 +2000,7 @@ export default function ApplyLoan() {
 
                     <div className="space-y-2.5">
                       {/* Check 1 */}
-                      <label htmlFor="checkAntiFraud" className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer group">
+                      <label htmlFor="checkAntiFraud" className="flex items-start gap-2.5 p-3 rounded-xl cursor-pointer group neu-sunken border-white/20 dark:border-white/5">
                         <input 
                           id="checkAntiFraud"
                           type="checkbox" 
@@ -2013,7 +2016,7 @@ export default function ApplyLoan() {
                       </label>
 
                       {/* Check 2 */}
-                      <label htmlFor="checkNoRefund" className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer group">
+                      <label htmlFor="checkNoRefund" className="flex items-start gap-2.5 p-3 rounded-xl cursor-pointer group neu-sunken border-white/20 dark:border-white/5">
                         <input 
                           id="checkNoRefund"
                           type="checkbox" 
@@ -2029,7 +2032,7 @@ export default function ApplyLoan() {
                       </label>
 
                       {/* Check 3 */}
-                      <label htmlFor="checkSavingsRule" className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer group">
+                      <label htmlFor="checkSavingsRule" className="flex items-start gap-2.5 p-3 rounded-xl cursor-pointer group neu-sunken border-white/20 dark:border-white/5">
                         <input 
                           id="checkSavingsRule"
                           type="checkbox" 
@@ -2045,7 +2048,7 @@ export default function ApplyLoan() {
                       </label>
 
                       {/* Check 4 */}
-                      <label htmlFor="checkEmiObligation" className="flex items-start gap-2.5 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200/50 dark:border-gray-700 cursor-pointer group">
+                      <label htmlFor="checkEmiObligation" className="flex items-start gap-2.5 p-3 rounded-xl cursor-pointer group neu-sunken border-white/20 dark:border-white/5">
                         <input 
                           id="checkEmiObligation"
                           type="checkbox" 
@@ -2066,14 +2069,14 @@ export default function ApplyLoan() {
                   <div className="flex gap-3 pt-3">
                     <button 
                       onClick={handleCloseVerification}
-                      className="flex-1 py-3 rounded-xl font-bold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                      className="flex-1 py-3 rounded-xl font-bold neu-btn text-gray-700 dark:text-gray-300"
                     >
                       {isBn ? 'বাতিল' : 'Cancel'}
                     </button>
                     <button 
                       disabled={!checkAntiFraud || !checkNoRefund || !checkSavingsRule || !checkEmiObligation}
                       onClick={processSmartVerification}
-                      className="flex-1 py-3 rounded-xl font-bold bg-primary-600 disabled:bg-gray-200 disabled:text-gray-400 text-white hover:bg-primary-700 transition-colors shadow shadow-primary-500/10 cursor-pointer"
+                      className="flex-1 py-3 rounded-xl font-bold neu-btn-primary disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-650 disabled:shadow-none"
                     >
                       {isBn ? 'যাচাইকরণ শুরু করুন' : 'Start Verification'}
                     </button>
@@ -2117,7 +2120,7 @@ export default function ApplyLoan() {
                   </div>
 
                   {/* Checklist of steps */}
-                  <div className="text-left space-y-3.5 bg-gray-50 dark:bg-gray-900/50 p-4.5 rounded-2xl border border-gray-150 dark:border-gray-750">
+                  <div className="text-left space-y-3.5 p-4.5 rounded-2xl border border-white/20 dark:border-white/5 neu-sunken">
                     {/* Check 1 */}
                     <div className="flex items-center justify-between text-[11px] font-bold">
                       <span className={activeCheck >= 1 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500'}>
@@ -2178,7 +2181,7 @@ export default function ApplyLoan() {
               {/* STAGE 3: Success Visuals */}
               {verificationStage === 'success' && (
                 <div className="text-center py-8 space-y-4">
-                  <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto text-green-500 ring-8 ring-green-50 dark:ring-green-950/20">
+                  <div className="w-20 h-20 neu-badge-green border-white/20 rounded-full flex items-center justify-center mx-auto text-white shadow-lg">
                     <CheckCircle2 size={44} strokeWidth={2.5} />
                   </div>
                   <div>
@@ -2207,7 +2210,7 @@ export default function ApplyLoan() {
                     <h4 className="text-lg font-black text-rose-600 dark:text-rose-450">
                       {isBn ? 'যাচাইকরণ ব্যর্থ!' : 'Verification Failed'}
                     </h4>
-                    <div className="bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-450 p-4 rounded-2xl border border-rose-100 dark:border-rose-900/40 text-left mt-4 text-[11px] leading-relaxed font-semibold">
+                    <div className="bg-rose-50 dark:bg-rose-955/20 text-rose-705 dark:text-rose-450 p-4 rounded-2xl border border-rose-100 dark:border-rose-900/40 text-left mt-4 text-[11px] leading-relaxed font-semibold">
                       <p className="flex items-center gap-1 mb-1 font-black uppercase tracking-wider text-[9px]"><AlertCircle size={12} /> {isBn ? 'ব্যর্থতার কারণ:' : 'Error details:'}</p>
                       {verifyingError}
                     </div>
@@ -2215,7 +2218,7 @@ export default function ApplyLoan() {
 
                   <button 
                     onClick={handleCloseVerification}
-                    className="w-full py-3.5 rounded-xl font-bold bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 transition-colors shadow cursor-pointer"
+                    className="w-full py-3.5 rounded-xl font-bold bg-gradient-to-r from-gray-800 to-gray-900 text-white border border-white/5 shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer"
                   >
                     {isBn ? 'তথ্য সংশোধন করতে ফিরে যান' : 'Go Back to Edit Details'}
                   </button>
@@ -2227,13 +2230,13 @@ export default function ApplyLoan() {
         )}
       {/* Local Terms Modal */}
       {showTermsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-hidden text-gray-800 dark:text-gray-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-hidden text-gray-805 dark:text-gray-200">
           <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white dark:bg-gray-900 rounded-3xl max-w-lg w-full max-h-[85vh] shadow-2xl border border-gray-150 dark:border-gray-800 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200"
+            className="rounded-3xl max-w-lg w-full max-h-[85vh] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 neu-raised"
           >
-            <div className="bg-gray-50 dark:bg-gray-950 px-6 py-4.5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center shrink-0">
+            <div className="bg-gray-100/40 dark:bg-gray-950/20 px-6 py-4.5 border-b border-gray-200/50 dark:border-gray-800 flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
                 <FileText className="text-primary-600 dark:text-primary-400" size={20} />
                 <h3 className="text-base font-black text-gray-900 dark:text-white">
@@ -2250,7 +2253,7 @@ export default function ApplyLoan() {
             <div className="p-6 overflow-y-auto space-y-6 text-xs text-gray-650 dark:text-gray-300 leading-relaxed">
               {/* 1. Terms & Conditions */}
               <section className="space-y-2">
-                <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm border-b pb-1 border-gray-100 dark:border-gray-800">
+                <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm border-b pb-1 border-gray-200/50 dark:border-gray-800">
                   <FileText className="text-primary-500" size={16} />
                   {isBn ? '১. নিয়ম ও শর্তাবলী' : '1. Terms & Conditions'}
                 </h4>
@@ -2271,7 +2274,7 @@ export default function ApplyLoan() {
 
               {/* 2. Loan Guidelines */}
               <section className="space-y-2">
-                <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm border-b pb-1 border-gray-100 dark:border-gray-800">
+                <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm border-b pb-1 border-gray-200/50 dark:border-gray-800">
                   <ShieldAlert className="text-primary-500" size={16} />
                   {isBn ? '২. ঋণ নির্দেশিকা' : '2. Loan Guidelines'}
                 </h4>
@@ -2304,17 +2307,17 @@ export default function ApplyLoan() {
 
               {/* 3. Important Notices */}
               <section className="space-y-2">
-                <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm border-b pb-1 border-gray-100 dark:border-gray-800">
+                <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm border-b pb-1 border-gray-200/50 dark:border-gray-800">
                   <AlertCircle className="text-amber-500" size={16} />
                   {isBn ? '৩. গুরুত্বপূর্ণ নোটিশ' : '3. Important Notices'}
                 </h4>
                 {isBn ? (
-                  <div className="space-y-1.5 bg-amber-50 dark:bg-amber-950/20 p-3 rounded-2xl border border-amber-100 dark:border-amber-900/30 text-amber-850 dark:text-amber-300 font-medium">
+                  <div className="space-y-1.5 bg-amber-50 dark:bg-amber-955/20 p-3 rounded-2xl border border-amber-500/20 dark:border-amber-900/30 text-amber-850 dark:text-amber-300 font-medium">
                     <p className="font-bold">প্রসেসিং ফি বাধ্যতামুলক:</p>
                     <p>ঋণ আবেদন প্রসেস করার জন্য নির্ধারিত "প্রসেসিং ফি" ডিপোজিট করা বাধ্যতামূলক। ফি প্রদান ছাড়া কোনো আবেদন রিভিউর আওতায় নেওয়া হবে না এবং এটি সম্পূর্ণ অফেরতযোগ্য।</p>
                   </div>
                 ) : (
-                  <div className="space-y-1.5 bg-amber-50 dark:bg-amber-950/20 p-3 rounded-2xl border border-amber-100 dark:border-amber-900/30 text-amber-850 dark:text-amber-300 font-medium">
+                  <div className="space-y-1.5 bg-amber-50 dark:bg-amber-955/20 p-3 rounded-2xl border border-amber-500/20 dark:border-amber-900/30 text-amber-850 dark:text-amber-300 font-medium">
                     <p className="font-bold">Processing Fee is Mandatory:</p>
                     <p>To begin evaluating your loan profile, the processing fee must be deposited. Unpaid files will not be reviewed. Processing fees are non-refundable.</p>
                   </div>
@@ -2323,7 +2326,7 @@ export default function ApplyLoan() {
 
               {/* 4. Savings & Deposit Policies */}
               <section className="space-y-2">
-                <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm border-b pb-1 border-gray-100 dark:border-gray-800">
+                <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm border-b pb-1 border-gray-200/50 dark:border-gray-800">
                   <Landmark className="text-primary-500" size={16} />
                   {isBn ? '৪. সঞ্চয় ও ডিপোজিট নীতিমালা' : '4. Savings & Deposit Policies'}
                 </h4>
@@ -2340,10 +2343,10 @@ export default function ApplyLoan() {
                 )}
               </section>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-950 px-6 py-4 border-t border-gray-100 dark:border-gray-800 flex justify-end shrink-0">
+            <div className="bg-gray-100/40 dark:bg-gray-950/20 px-6 py-4 border-t border-gray-200/50 dark:border-gray-800 flex justify-end shrink-0">
               <button 
                 onClick={() => setShowTermsModal(false)}
-                className="px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-bold hover:bg-gray-800 transition-colors shadow cursor-pointer text-xs"
+                className="px-5 py-2.5 neu-btn text-gray-850 dark:text-white rounded-xl font-bold text-xs"
               >
                 {isBn ? 'বন্ধ করুন' : 'Close'}
               </button>

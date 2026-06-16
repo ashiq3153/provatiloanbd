@@ -146,18 +146,18 @@ export default function Transactions() {
 
   const getIconStyles = (type: TransactionType) => {
     switch (type) {
-      case 'deposit': return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-emerald-200';
-      case 'withdraw': return 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border-rose-200';
-      case 'emi': return 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border-violet-200';
-      case 'loan': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-blue-200';
+      case 'deposit': return 'neu-sunken text-emerald-600 dark:text-emerald-400 border-white/20';
+      case 'withdraw': return 'neu-sunken text-rose-600 dark:text-rose-400 border-white/20';
+      case 'emi': return 'neu-sunken text-violet-600 dark:text-violet-400 border-white/20';
+      case 'loan': return 'neu-sunken text-blue-600 dark:text-blue-400 border-white/20';
     }
   };
 
   const getAppStatusStyles = (status: LoanAppStatus) => {
     switch (status) {
-      case 'pending': return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200';
-      case 'approved': return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200';
-      case 'rejected': return 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border-rose-200';
+      case 'pending': return 'neu-badge-orange border-white/20';
+      case 'approved': return 'neu-badge-green border-white/20';
+      case 'rejected': return 'neu-badge-red border-white/20';
     }
   };
 
@@ -223,11 +223,11 @@ export default function Transactions() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col relative transition-colors pb-24">
+    <div className="min-h-screen neu-bg flex flex-col relative transition-colors pb-24">
       {/* Premium Header */}
-      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl px-5 py-4 sticky top-0 z-30 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors flex items-center justify-between">
+      <div className="neu-bg px-5 py-4 sticky top-0 z-30 shadow-md border-b border-white/20 dark:border-white/5 transition-colors flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400">
+          <div className="w-10 h-10 rounded-full neu-sunken flex items-center justify-center text-primary-600 dark:text-primary-400">
             <LayoutList size={20} />
           </div>
           <div>
@@ -244,13 +244,13 @@ export default function Transactions() {
       <div className="flex-1 p-5 space-y-6">
 
         {/* Tabs */}
-        <div className="flex bg-gray-200/50 dark:bg-gray-800 p-1 rounded-[16px] shadow-inner transition-colors">
+        <div className="flex neu-sunken p-1.5 rounded-[16px] transition-colors">
            <button
               onClick={() => setView('transactions')}
               className={`flex-1 py-3 text-sm font-bold rounded-[12px] transition-all flex justify-center items-center gap-2 ${
                 view === 'transactions' 
-                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'
+                  ? 'neu-raised-sm text-gray-900 dark:text-white' 
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-750'
               }`}
             >
               <LayoutList size={16} />
@@ -260,8 +260,8 @@ export default function Transactions() {
               onClick={() => setView('applications')}
               className={`flex-1 py-3 text-sm font-bold rounded-[12px] transition-all flex justify-center items-center gap-2 ${
                 view === 'applications' 
-                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'
+                  ? 'neu-raised-sm text-gray-900 dark:text-white' 
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-750'
               }`}
             >
               <FileText size={16} />
@@ -279,25 +279,23 @@ export default function Transactions() {
               exit={{ opacity: 0, height: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-5 rounded-[24px] shadow-lg shadow-emerald-500/20 text-white relative overflow-hidden">
-                <div className="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
+              <div className="neu-raised p-5 rounded-[24px] relative overflow-hidden text-gray-900 dark:text-white">
                 <div className="flex justify-between items-start mb-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <div className="w-10 h-10 neu-sunken rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                     <TrendingUp size={20} />
                   </div>
                 </div>
-                <p className="text-xs font-bold uppercase tracking-widest text-emerald-100">{isBn ? "মোট জমা" : "Total Deposit"}</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">{isBn ? "মোট জমা" : "Total Deposit"}</p>
                 <p className="text-2xl font-black mt-1">{formatCurrency(stats.totalDeposit, isBn)}</p>
               </div>
 
-              <div className="bg-gradient-to-br from-rose-500 to-rose-600 p-5 rounded-[24px] shadow-lg shadow-rose-500/20 text-white relative overflow-hidden">
-                <div className="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
+              <div className="neu-raised p-5 rounded-[24px] relative overflow-hidden text-gray-900 dark:text-white">
                 <div className="flex justify-between items-start mb-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <div className="w-10 h-10 neu-sunken rounded-full flex items-center justify-center text-rose-600 dark:text-rose-400">
                     <TrendingDown size={20} />
                   </div>
                 </div>
-                <p className="text-xs font-bold uppercase tracking-widest text-rose-100">{isBn ? "মোট উত্তোলন" : "Total Withdraw"}</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-rose-600 dark:text-rose-400">{isBn ? "মোট উত্তোলন" : "Total Withdraw"}</p>
                 <p className="text-2xl font-black mt-1">{formatCurrency(stats.totalWithdraw, isBn)}</p>
               </div>
             </motion.div>
@@ -318,12 +316,12 @@ export default function Transactions() {
                 placeholder={isBn ? "লেনদেন খুঁজুন..." : "Search transactions..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 rounded-[20px] text-base font-medium focus:outline-none focus:border-primary-500 transition-all shadow-sm"
+                className="w-full pl-12 pr-4 py-4 neu-input rounded-[20px] text-base font-medium outline-none focus:outline-none transition-all"
               />
             </div>
 
             {/* Sort and Export Options */}
-            <div className="flex gap-2 justify-between items-center bg-white dark:bg-gray-800 p-2 rounded-[16px] border border-gray-100 dark:border-gray-700 shadow-sm">
+            <div className="flex gap-2 justify-between items-center neu-raised p-2 rounded-[16px]">
               <div className="flex-1 px-2">
                 <select
                   value={sortBy}
@@ -339,7 +337,7 @@ export default function Transactions() {
               
               <button
                 onClick={exportToCSV}
-                className="p-3 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-xl hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors flex items-center justify-center"
+                className="p-3 neu-btn text-primary-600 dark:text-primary-400 rounded-xl active:scale-95 transition-all flex items-center justify-center"
                 title={isBn ? "এক্সপোর্ট করুন" : "Export"}
               >
                 <Download size={18} />
@@ -362,10 +360,10 @@ export default function Transactions() {
                   <button
                     key={f}
                     onClick={() => setFilter(f)}
-                    className={`px-6 py-2.5 rounded-full text-sm font-bold capitalize whitespace-nowrap transition-all ${
+                    className={`px-6 py-2.5 rounded-full text-sm font-bold capitalize whitespace-nowrap active:scale-95 transition-all ${
                       filter === f 
-                        ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-md' 
-                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        ? 'neu-btn-primary text-white' 
+                        : 'neu-btn text-gray-600 dark:text-gray-300'
                     }`}
                   >
                     {isBn && f === "all" ? "সব" : isBn && f === "deposit" ? "জমা" : isBn && f === "withdraw" ? "উত্তোলন" : f}
@@ -376,7 +374,7 @@ export default function Transactions() {
               <div className="space-y-3">
                 {loading ? (
                   [1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="bg-white dark:bg-gray-800 p-5 rounded-[20px] border border-gray-100 dark:border-gray-700 shadow-sm flex items-center gap-4">
+                    <div key={i} className="neu-raised p-5 rounded-[20px] flex items-center gap-4">
                       <Skeleton className="w-12 h-12 rounded-full shrink-0" />
                       <div className="flex-1 space-y-2">
                         <Skeleton className="h-4 w-3/4" />
@@ -389,8 +387,8 @@ export default function Transactions() {
                     </div>
                   ))
                 ) : filteredTransactions.length === 0 ? (
-                  <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-[24px] border border-gray-100 dark:border-gray-700 border-dashed">
-                    <div className="w-20 h-20 bg-gray-50 dark:bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300 dark:text-gray-600">
+                  <div className="text-center py-16 bg-transparent border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-[24px] neu-raised-sm">
+                    <div className="w-20 h-20 bg-gray-200/50 dark:bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 dark:text-gray-600 neu-sunken">
                       <Search size={40} />
                     </div>
                     <p className="text-gray-500 dark:text-gray-400 font-bold">{searchQuery ? (isBn ? "কোনো লেনদেন পাওয়া যায়নি" : "No transactions found") : (isBn ? "কোনো লেনদেন পাওয়া যায়নি" : "No transactions found")}</p>
@@ -401,11 +399,11 @@ export default function Transactions() {
                 ) : (
                   filteredTransactions.map((tx, index) => (
                     <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      key={tx.id}
-                      className="bg-white dark:bg-gray-800 p-5 rounded-[20px] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center gap-4 group"
+                       initial={{ opacity: 0, y: 10 }}
+                       animate={{ opacity: 1, y: 0 }}
+                       transition={{ delay: index * 0.05 }}
+                       key={tx.id}
+                       className="neu-raised p-5 rounded-[20px] transition-all cursor-pointer flex items-center gap-4 group hover:scale-[1.005]"
                     >
                       <div className={`w-12 h-12 rounded-full flex items-center justify-center border group-hover:scale-110 transition-transform ${getIconStyles(tx.type)}`}>
                         {getIcon(tx.type)}
@@ -448,10 +446,10 @@ export default function Transactions() {
                   <button
                     key={f}
                     onClick={() => setAppFilter(f)}
-                    className={`px-6 py-2.5 rounded-full text-sm font-bold capitalize whitespace-nowrap transition-all ${
+                    className={`px-6 py-2.5 rounded-full text-sm font-bold capitalize whitespace-nowrap active:scale-95 transition-all ${
                       appFilter === f 
-                        ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-md' 
-                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        ? 'neu-btn-primary text-white' 
+                        : 'neu-btn text-gray-600 dark:text-gray-300'
                     }`}
                   >
                     {isBn && f === "all" ? "সব" : isBn && f === "pending" ? "অপেক্ষমান" : isBn && f === "approved" ? "অনুমোদিত" : isBn && f === "rejected" ? "বাতিল" : f}
@@ -461,7 +459,7 @@ export default function Transactions() {
 
               {loading ? (
                 [1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white dark:bg-gray-800 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden">
+                  <div key={i} className="neu-raised p-6 rounded-[24px] relative overflow-hidden">
                     <div className="flex justify-between items-start mb-5 relative z-10">
                       <div className="space-y-3 flex-1 pr-6">
                         <Skeleton className="h-6 w-1/2" />
@@ -469,7 +467,7 @@ export default function Transactions() {
                       </div>
                       <Skeleton className="h-8 w-24 rounded-full shrink-0" />
                     </div>
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700 relative z-10">
+                    <div className="flex items-center justify-between pt-4 border-t border-white/20 dark:border-white/5 relative z-10">
                       <div className="space-y-2">
                         <Skeleton className="h-3 w-12" />
                         <Skeleton className="h-6 w-24" />
@@ -482,12 +480,12 @@ export default function Transactions() {
                   </div>
                 ))
               ) : filteredApplications.length === 0 ? (
-                <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-[24px] border border-gray-100 dark:border-gray-700 border-dashed">
-                    <div className="w-20 h-20 bg-gray-50 dark:bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300 dark:text-gray-600">
+                <div className="text-center py-16 bg-transparent border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-[24px] neu-raised-sm">
+                    <div className="w-20 h-20 bg-gray-200/50 dark:bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300 dark:text-gray-600 neu-sunken">
                       <FileText size={40} />
                     </div>
                     <p className="text-gray-500 dark:text-gray-400 font-bold">{isBn ? "এখনো কোনো আবেদন নেই" : "No loan applications yet"}</p>
-                    <Link to="/apply" className="mt-5 inline-block px-8 py-3.5 bg-primary-600 text-white rounded-full text-base font-bold shadow-lg shadow-primary-600/30 hover:bg-primary-700 active:scale-95 transition-all">
+                    <Link to="/apply" className="mt-5 inline-block px-8 py-3.5 neu-btn-primary text-white rounded-full text-base font-bold active:scale-95 transition-all">
                       {isBn ? "এখনই আবেদন করুন" : "Apply Now"}
                     </Link>
                 </div>
@@ -498,9 +496,9 @@ export default function Transactions() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     key={app.id}
-                    className="bg-white dark:bg-gray-800 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600 transition-all relative overflow-hidden group cursor-pointer"
+                    className="neu-raised p-6 rounded-[24px] transition-all relative overflow-hidden group cursor-pointer hover:scale-[1.005]"
                   >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary-50 dark:bg-primary-900/10 rounded-bl-full -mr-10 -mt-10 z-0 group-hover:scale-110 transition-transform"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/5 dark:bg-primary-900/5 rounded-bl-full -mr-10 -mt-10 z-0 group-hover:scale-110 transition-transform"></div>
                     
                     <div className="flex justify-between items-start mb-5 relative z-10">
                       <div>
@@ -515,7 +513,7 @@ export default function Transactions() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700 relative z-10">
+                    <div className="flex items-center justify-between pt-4 border-t border-white/20 dark:border-white/5 relative z-10">
                       <div>
                          <p className="text-[11px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mb-0.5">{isBn ? "পরিমাণ" : "Amount"}</p>
                          <p className="font-black text-gray-900 dark:text-white text-xl">{formatCurrency(app.amount, isBn)}</p>
@@ -527,16 +525,16 @@ export default function Transactions() {
                     </div>
                     
                     {app.status === 'pending' && (
-                       <div className="mt-5 bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl flex items-start gap-3 relative z-10 border border-amber-100 dark:border-amber-900/30">
+                       <div className="mt-5 neu-sunken p-4 rounded-xl flex items-start gap-3 relative z-10 border border-orange-500/20">
                          <AlertCircle size={18} className="text-amber-500 dark:text-amber-400 mt-0.5 shrink-0" />
-                         <p className="text-xs text-amber-800 dark:text-amber-200 font-medium leading-relaxed">
+                         <p className="text-xs text-amber-800 dark:text-amber-255 font-medium leading-relaxed">
                            {isBn ? "আপনার আবেদনটি বর্তমানে পর্যালোচনার অধীনে রয়েছে। খুব শীঘ্রই আপডেট জানানো হবে।" : "Your application is currently under review by our team. You'll be notified soon."}
                          </p>
                        </div>
                     )}
 
-                    <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end relative z-10">
-                      <Link to={`/application/${app.id}`} className="text-primary-600 dark:text-primary-400 hover:text-primary-700 flex items-center gap-1 font-bold text-sm bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/30 dark:hover:bg-primary-900/50 px-4 py-2 rounded-lg transition-colors">
+                    <div className="mt-5 pt-4 border-t border-white/20 dark:border-white/5 flex justify-end relative z-10">
+                      <Link to={`/application/${app.id}`} className="text-primary-600 dark:text-primary-400 flex items-center gap-1 font-bold text-sm neu-btn px-4 py-2 rounded-lg active:scale-95 transition-all">
                         {isBn ? "বিস্তারিত দেখুন" : "View Details"} <ChevronRight size={16} />
                       </Link>
                     </div>
