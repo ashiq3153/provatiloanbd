@@ -431,13 +431,14 @@ export default function Home() {
       {/* Notice Board Marquee */}
       {systemSettings?.announcementActive && (
         <div className="neu-sunken rounded-2xl py-3 px-4 overflow-hidden relative flex items-center gap-3 transition-all border-0">
-          <span className="bg-primary-500 text-white text-[10px] uppercase font-black py-1 px-2.5 rounded shrink-0 relative z-10 shadow-sm flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="bg-[#dc2626] text-white text-[10px] uppercase font-black py-1 px-2.5 rounded shrink-0 relative z-10 shadow-sm flex items-center gap-1 animate-blink-bounce">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
             {isBn ? 'বিজ্ঞপ্তি' : 'Notice'}
           </span>
-          <div className="overflow-hidden flex-1 relative w-full h-5">
-            <div className="whitespace-nowrap absolute animate-marquee font-bold text-xs text-primary-700 dark:text-primary-400 leading-normal hover:[animation-play-state:paused] cursor-pointer">
-              {isBn ? systemSettings.announcementBn : systemSettings.announcementEn}
+          <div className="overflow-hidden flex-1 relative w-full h-5 flex items-center">
+            <div className="flex whitespace-nowrap absolute animate-marquee-seamless font-extrabold text-[14px] text-primary-700 dark:text-primary-400 leading-none hover:[animation-play-state:paused] cursor-pointer">
+              <span className="pr-16">{isBn ? systemSettings.announcementBn : systemSettings.announcementEn}</span>
+              <span className="pr-16">{isBn ? systemSettings.announcementBn : systemSettings.announcementEn}</span>
             </div>
           </div>
         </div>

@@ -24,10 +24,44 @@ import { useAppStore } from './lib/store';
 import { getTelegramUser } from './lib/telegram';
 import { upsertProfile } from './lib/api';
 import { getSystemSettings } from './lib/adminApi';
+import { playUIClick, playUITap } from './lib/sound';
 
 export default function App() {
   const theme = useAppStore(state => state.theme);
   const setSystemSettings = useAppStore(state => state.setSystemSettings);
+
+  // Setup global interactive click/focus sound effects
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const interactiveEl = target.closest('button, a, [role="button"], .cursor-pointer, input, textarea, select');
+      
+      if (interactiveEl) {
+        const tagName = interactiveEl.tagName;
+        if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
+          playUITap();
+        } else {
+          playUIClick();
+        }
+      }
+    };
+
+    const handleGlobalFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      const tagName = target.tagName;
+      if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
+        playUITap();
+      }
+    };
+
+    document.addEventListener('click', handleGlobalClick, { capture: true, passive: true });
+    document.addEventListener('focusin', handleGlobalFocus, { capture: true, passive: true });
+
+    return () => {
+      document.removeEventListener('click', handleGlobalClick, { capture: true });
+      document.removeEventListener('focusin', handleGlobalFocus, { capture: true });
+    };
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');

@@ -14,10 +14,28 @@
   --color-primary-900: #1e3a8a;
 
   --animate-marquee: marquee 20s linear infinite;
+  --animate-marquee-seamless: marquee-seamless 25s linear infinite;
+  --animate-blink-bounce: blink-bounce 1.5s infinite ease-in-out;
 
   @keyframes marquee {
     0% { transform: translateX(100%); }
     100% { transform: translateX(-100%); }
+  }
+
+  @keyframes marquee-seamless {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  @keyframes blink-bounce {
+    0%, 100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    50% {
+      transform: translateY(-4px);
+      opacity: 0.35;
+    }
   }
 }
 
