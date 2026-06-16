@@ -1201,7 +1201,15 @@ export default function AdminDashboard() {
                           onClick={async () => {
                             if (stories.length >= 10) return toast.error('Maximum 10 stories allowed');
                             if (!newStory.name || !newStory.loan_type || !newStory.amount) return toast.error('Please fill name, loan type and amount');
-                            const added = await addSuccessStory({ ...newStory, amount: Number(newStory.amount), is_verified: true, avatar_url: newStory.avatar_url || null });
+                            const added = await addSuccessStory({
+                              name: newStory.name,
+                              loan_type: newStory.loan_type,
+                              amount: Number(newStory.amount),
+                              approval_time: newStory.approval_time,
+                              rating: newStory.rating,
+                              avatar_url: newStory.avatar_url || null,
+                              is_verified: true
+                            });
                             if (added) {
                               toast.success('Story added');
                               fetchData();
