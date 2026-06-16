@@ -5,6 +5,7 @@ import { useAppStore } from '../lib/store';
 import { getTelegramUser } from '../lib/telegram';
 import { supabase } from '../lib/supabase';
 import { useLocation, useNavigate } from 'react-router-dom';
+import logoImg from '../assets/logo.png';
 
 interface SupportMessage {
   id: string;
@@ -372,11 +373,11 @@ export default function Support() {
                       className={`flex gap-2 items-end ${isUser ? 'justify-end' : 'justify-start'}`}
                     >
                       {!isUser && (
-                        <div className="w-8 h-8 rounded-full neu-raised-sm flex items-center justify-center overflow-hidden shrink-0 border border-white/40">
+                        <div className="w-8 h-8 rounded-full neu-raised-sm flex items-center justify-center overflow-hidden shrink-0 border border-white/40 bg-white">
                           <img 
-                            src="https://api.dicebear.com/7.x/bottts/svg?seed=provati-support&backgroundColor=b6e3f4" 
+                            src={logoImg} 
                             alt="Support Agent"
-                            className="w-7 h-7"
+                            className="w-full h-full object-cover"
                           />
                         </div>
                       )}
