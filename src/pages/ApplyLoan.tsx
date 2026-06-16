@@ -346,6 +346,17 @@ export default function ApplyLoan() {
     }
   }, [user, isBn, navigate]);
 
+  // Scroll to top on step changes to ensure user starts from top of next step
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const scrollTimers = [
+      setTimeout(() => window.scrollTo(0, 0), 50),
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 150),
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 300)
+    ];
+    return () => scrollTimers.forEach(clearTimeout);
+  }, [step]);
+
   const toggleSection = (section: string) => {
     const nextState = !expanded[section];
     setExpanded(prev => ({ ...prev, [section]: nextState }));

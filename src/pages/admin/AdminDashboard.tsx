@@ -99,6 +99,28 @@ export default function AdminDashboard() {
     navigator.clipboard.writeText(text);
     toast.success(isBn ? 'ক্লিপবোর্ডে কপি করা হয়েছে!' : 'Copied to clipboard!');
   };
+
+  const formatAddress = (addressStr: string | null | undefined) => {
+    if (!addressStr) return 'N/A';
+    if (addressStr.trim().startsWith('{')) {
+      try {
+        const addr = JSON.parse(addressStr);
+        const parts = [
+          addr.village && `${isBn ? 'গ্রাম: ' : 'Village: '}${addr.village}`,
+          addr.union && `${isBn ? 'ইউনিয়ন/পৌরসভা: ' : 'Union/Municipality: '}${addr.union}`,
+          addr.postOffice && `${isBn ? 'পোস্ট অফিস: ' : 'Post Office: '}${addr.postOffice}`,
+          addr.postCode && `${isBn ? 'পোস্ট কোড: ' : 'Post Code: '}${addr.postCode}`,
+          addr.upazila && `${isBn ? 'উপজেলা: ' : 'Upazila: '}${addr.upazila}`,
+          addr.district && `${isBn ? 'জেলা: ' : 'District: '}${addr.district}`,
+          addr.division && `${isBn ? 'বিভাগ: ' : 'Division: '}${addr.division}`
+        ].filter(Boolean);
+        return parts.length > 0 ? parts.join(', ') : addressStr;
+      } catch (e) {
+        return addressStr;
+      }
+    }
+    return addressStr;
+  };
   
   const [config, setConfig] = useState({
     processingFee: 1,
@@ -2073,11 +2095,11 @@ export default function AdminDashboard() {
                           </div>
                           <div className="col-span-2">
                             <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'বর্তমান ঠিকানা' : 'Current Address'}</span>
-                            <span className="font-bold text-gray-800 dark:text-gray-200 leading-normal">{selectedLoan.current_address}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200 leading-normal">{formatAddress(selectedLoan.current_address)}</span>
                           </div>
                           <div className="col-span-2">
                             <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'স্থায়ী ঠিকানা' : 'Permanent Address'}</span>
-                            <span className="font-bold text-gray-800 dark:text-gray-200 leading-normal">{selectedLoan.permanent_address}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200 leading-normal">{formatAddress(selectedLoan.permanent_address)}</span>
                           </div>
                           <div className="col-span-2">
                             <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'এনআইডি কার্ড নম্বর' : 'NID Card Number'}</span>
@@ -2379,11 +2401,11 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        <input 
-                          type="text" 
+                      <div className="flex flex-col gap-3">
+                        <textarea 
+                          rows={4}
                           placeholder="Provide descriptive feedback for the applicant..." 
-                          className="flex-1 px-4 py-3 text-sm border rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-500 focus:outline-none font-medium text-gray-800 dark:text-gray-100"
+                          className="w-full px-4 py-3 text-sm border rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-500 focus:outline-none font-medium text-gray-800 dark:text-gray-100 resize-y"
                           id={`modal-feedback-${selectedLoan.id}`}
                           defaultValue={(() => {
                             const feedbackStr = selectedLoan.admin_feedback;
@@ -2397,41 +2419,43 @@ export default function AdminDashboard() {
                             return feedbackStr;
                           })()}
                         />
-                        <button 
-                          onClick={() => {
-                            const fbText = (document.getElementById(`modal-feedback-${selectedLoan.id}`) as HTMLInputElement).value;
-                            if(!fbText) return toast.error('Please enter feedback');
+                        <div className="flex justify-end">
+                          <button 
+                            onClick={() => {
+                              const fbText = (document.getElementById(`modal-feedback-${selectedLoan.id}`) as HTMLTextAreaElement).value;
+                              if(!fbText) return toast.error('Please enter feedback');
 
-                            let existingHistory: any[] = [];
-                            if (selectedLoan.admin_feedback && selectedLoan.admin_feedback.trim().startsWith('{')) {
-                              try {
-                                const parsed = JSON.parse(selectedLoan.admin_feedback);
-                                if (Array.isArray(parsed.history)) {
-                                  existingHistory = parsed.history;
-                                }
-                              } catch (e) {}
-                            }
+                              let existingHistory: any[] = [];
+                              if (selectedLoan.admin_feedback && selectedLoan.admin_feedback.trim().startsWith('{')) {
+                                try {
+                                  const parsed = JSON.parse(selectedLoan.admin_feedback);
+                                  if (Array.isArray(parsed.history)) {
+                                    existingHistory = parsed.history;
+                                  }
+                                } catch (e) {}
+                              }
 
-                            const feedbackObj = {
-                              note: fbText,
-                              flagged: {
-                                personal: flaggedPersonal,
-                                professional: flaggedProfessional,
-                                bank: flaggedBank,
-                                nominee: flaggedNominee,
-                                documents: flaggedDocuments
-                              },
-                              history: existingHistory
-                            };
+                              const feedbackObj = {
+                                note: fbText,
+                                flagged: {
+                                  personal: flaggedPersonal,
+                                  professional: flaggedProfessional,
+                                  bank: flaggedBank,
+                                  nominee: flaggedNominee,
+                                  documents: flaggedDocuments
+                                },
+                                history: existingHistory
+                              };
 
-                            const serializedFeedback = JSON.stringify(feedbackObj);
-                            handleLoanStatus(selectedLoan.id, 'action_required', serializedFeedback);
-                            setSelectedLoan({...selectedLoan, status: 'action_required', admin_feedback: serializedFeedback});
-                          }}
-                          className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm transition-colors cursor-pointer shrink-0"
-                        >
-                          Send Revision Request
-                        </button>
+                              const serializedFeedback = JSON.stringify(feedbackObj);
+                              handleLoanStatus(selectedLoan.id, 'action_required', serializedFeedback);
+                              setSelectedLoan({...selectedLoan, status: 'action_required', admin_feedback: serializedFeedback});
+                            }}
+                            className="w-full sm:w-auto px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm transition-colors cursor-pointer shrink-0"
+                          >
+                            Send Revision Request
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
