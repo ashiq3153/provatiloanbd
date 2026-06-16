@@ -212,7 +212,19 @@ export default function ApplicationDetails() {
                </h3>
              </div>
              <p className="text-sm text-orange-850 dark:text-orange-200 leading-relaxed neu-raised-sm p-4 rounded-xl relative z-10 font-medium">
-               {appDetails.admin_feedback}
+               {(() => {
+                 const feedbackStr = appDetails.admin_feedback;
+                 if (!feedbackStr) return '';
+                 if (feedbackStr.trim().startsWith('{')) {
+                   try {
+                     const parsed = JSON.parse(feedbackStr);
+                     return parsed.note || '';
+                   } catch (e) {
+                     console.error("Error parsing admin_feedback JSON in ApplicationDetails.tsx", e);
+                   }
+                 }
+                 return feedbackStr;
+               })()}
              </p>
            </motion.div>
         )}

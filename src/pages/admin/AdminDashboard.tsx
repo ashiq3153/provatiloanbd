@@ -973,7 +973,19 @@ export default function AdminDashboard() {
                                      placeholder="Add feedback note..." 
                                      className="px-3 py-2 text-xs border rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 w-full focus:ring-2 focus:ring-primary-500 focus:outline-none font-medium"
                                      id={`feedback-${loan.id}`}
-                                     defaultValue={loan.admin_feedback || ''}
+                                     defaultValue={(() => {
+                                       const feedbackStr = loan.admin_feedback;
+                                       if (!feedbackStr) return '';
+                                       if (feedbackStr.trim().startsWith('{')) {
+                                         try {
+                                           const parsed = JSON.parse(feedbackStr);
+                                           return parsed.note || '';
+                                         } catch (e) {
+                                           console.error("Error parsing admin_feedback JSON in AdminDashboard.tsx", e);
+                                         }
+                                       }
+                                       return feedbackStr;
+                                     })()}
                                    />
                                    <button 
                                      onClick={() => {

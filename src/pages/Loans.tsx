@@ -167,7 +167,21 @@ export default function Loans() {
                           <AlertCircle size={20} className="text-orange-500 shrink-0 mt-0.5" />
                           <div>
                             <p className="text-sm font-bold text-orange-800 dark:text-orange-300 mb-1">{isBn ? 'অ্যাডমিন মেসেজ:' : 'Admin Message:'}</p>
-                            <p className="text-xs font-medium leading-relaxed text-orange-700 dark:text-orange-400">{loan.admin_feedback}</p>
+                            <p className="text-xs font-medium leading-relaxed text-orange-700 dark:text-orange-400">
+                              {(() => {
+                                const feedbackStr = loan.admin_feedback;
+                                if (!feedbackStr) return '';
+                                if (feedbackStr.trim().startsWith('{')) {
+                                  try {
+                                    const parsed = JSON.parse(feedbackStr);
+                                    return parsed.note || '';
+                                  } catch (e) {
+                                    console.error("Error parsing admin_feedback in Loans.tsx", e);
+                                  }
+                                }
+                                return feedbackStr;
+                              })()}
+                            </p>
                           </div>
                         </div>
                         <button 

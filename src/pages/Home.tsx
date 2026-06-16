@@ -148,11 +148,24 @@ export default function Home() {
           link: `/application/${loan.id}`
         });
       } else if (loan.status === 'action_required') {
+        const feedbackText = (() => {
+          const fb = loan.admin_feedback;
+          if (!fb) return '';
+          if (fb.trim().startsWith('{')) {
+            try {
+              const parsed = JSON.parse(fb);
+              return parsed.note || '';
+            } catch (e) {
+              console.error("Error parsing admin_feedback JSON in Home.tsx", e);
+            }
+          }
+          return fb;
+        })();
         list.push({
           id: `loan-action-${loan.id}`,
           title: isBn 
-            ? `⚠️ আপনার ${amountText} (${cat}) লোন আবেদনে সংশোধন প্রয়োজন: ${loan.admin_feedback}` 
-            : `⚠️ Your ${amountText} (${cat}) loan requires updates: ${loan.admin_feedback}`,
+            ? `⚠️ আপনার ${amountText} (${cat}) লোন আবেদনে সংশোধন প্রয়োজন: ${feedbackText}` 
+            : `⚠️ Your ${amountText} (${cat}) loan requires updates: ${feedbackText}`,
           time: appliedDate,
           type: 'loan',
           status: 'action_required',
