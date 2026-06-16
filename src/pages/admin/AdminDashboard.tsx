@@ -942,7 +942,7 @@ export default function AdminDashboard() {
                                 {loan.status.replace('_', ' ')}
                               </span>
                             </td>
-                            <td className="px-6 py-4 flex flex-col gap-2.5">
+                            <td className="px-6 py-4">
                               {/* View Details Button */}
                               <button 
                                 onClick={() => setSelectedLoan(loan)}
@@ -950,93 +950,6 @@ export default function AdminDashboard() {
                               >
                                 <Eye size={14} /> View Details
                               </button>
-
-                              {loan.status === 'pending' && (
-                                <div className="flex flex-wrap gap-2 mt-1">
-                                  <button onClick={() => handleLoanStatus(loan.id, 'under_review')} className="px-3 py-2 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border border-purple-200/50 rounded-xl transition-colors font-bold text-xs flex items-center gap-1 cursor-pointer" title="Start Review"><Clock size={14} /> Start Review</button>
-                                  <button onClick={() => handleLoanStatus(loan.id, 'approved')} className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200/50 rounded-xl transition-colors font-bold text-xs flex items-center gap-1 cursor-pointer" title="Approve"><CheckCircle size={14} /> Approve</button>
-                                  <button onClick={() => handleLoanStatus(loan.id, 'rejected')} className="px-3 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-200/50 rounded-xl transition-colors font-bold text-xs flex items-center gap-1 cursor-pointer" title="Reject"><XCircle size={14} /> Reject</button>
-                                </div>
-                              )}
-
-                              {loan.status === 'under_review' && (
-                                <div className="flex flex-wrap gap-2 mt-1">
-                                  <button onClick={() => handleLoanStatus(loan.id, 'approved')} className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200/50 rounded-xl transition-colors font-bold text-xs flex items-center gap-1 cursor-pointer" title="Approve"><CheckCircle size={14} /> Approve</button>
-                                  <button onClick={() => handleLoanStatus(loan.id, 'rejected')} className="px-3 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-200/50 rounded-xl transition-colors font-bold text-xs flex items-center gap-1 cursor-pointer" title="Reject"><XCircle size={14} /> Reject</button>
-                                </div>
-                              )}
-
-                              {(loan.status === 'pending' || loan.status === 'under_review' || loan.status === 'action_required') && (
-                                <div className="flex flex-col gap-2 mt-1 max-w-xs">
-                                   <input 
-                                     type="text" 
-                                     placeholder="Add feedback note..." 
-                                     className="px-3 py-2 text-xs border rounded-xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 w-full focus:ring-2 focus:ring-primary-500 focus:outline-none font-medium"
-                                     id={`feedback-${loan.id}`}
-                                     defaultValue={(() => {
-                                       const feedbackStr = loan.admin_feedback;
-                                       if (!feedbackStr) return '';
-                                       if (feedbackStr.trim().startsWith('{')) {
-                                         try {
-                                           const parsed = JSON.parse(feedbackStr);
-                                           return parsed.note || '';
-                                         } catch (e) {
-                                           console.error("Error parsing admin_feedback JSON in AdminDashboard.tsx", e);
-                                         }
-                                       }
-                                       return feedbackStr;
-                                     })()}
-                                   />
-                                   <button 
-                                     onClick={() => {
-                                       const fb = (document.getElementById(`feedback-${loan.id}`) as HTMLInputElement).value;
-                                       if(!fb) return toast.error('Please enter feedback');
-                                       handleLoanStatus(loan.id, 'action_required', fb);
-                                     }}
-                                     className="text-xs px-3 py-2 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-400 border border-amber-200/50 rounded-xl font-bold w-full transition-colors cursor-pointer"
-                                   >
-                                     Request Revision
-                                   </button>
-                                    {loan.status === 'action_required' && (
-                                      <button 
-                                        onClick={() => {
-                                          const confirmCancel = window.confirm(isBn ? 'আপনি কি নিশ্চিত যে আপনি এই লোন আবেদনটি বাতিল করতে চান?' : 'Are you sure you want to cancel this loan application?');
-                                          if (confirmCancel) {
-                                            handleLoanStatus(loan.id, 'rejected');
-                                          }
-                                        }}
-                                        className="text-xs px-3 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-200/50 rounded-xl font-bold w-full transition-colors cursor-pointer flex items-center justify-center gap-1.5 mt-1.5"
-                                      >
-                                        <Trash2 size={12} /> {isBn ? 'আবেদন বাতিল করুন' : 'Cancel Application'}
-                                      </button>
-                                    )}
-                                </div>
-                              )}
-                              {(loan.status === 'approved' || loan.status === 'active') && (
-                                <div className="flex flex-col gap-1.5 mt-1">
-                                  <button onClick={() => handleLoanStatus(loan.id, 'completed')} className="text-xs px-3.5 py-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200/50 rounded-xl font-bold transition-colors w-max cursor-pointer">Mark Completed</button>
-                                  <button 
-                                    onClick={() => {
-                                      const confirmCancel = window.confirm(isBn ? 'আপনি কি নিশ্চিত যে আপনি এই লোন আবেদনটি বাতিল করতে চান?' : 'Are you sure you want to cancel this loan application?');
-                                      if (confirmCancel) {
-                                        handleLoanStatus(loan.id, 'rejected');
-                                      }
-                                    }}
-                                    className="text-xs px-3.5 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-200/50 rounded-xl font-bold transition-colors w-max cursor-pointer flex items-center gap-1.5"
-                                  >
-                                    <Trash2 size={12} /> {isBn ? 'আবেদন বাতিল করুন' : 'Cancel Application'}
-                                  </button>
-                                </div>
-                              )}
-                              {loan.documents && Object.keys(loan.documents).length > 0 && (
-                                <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
-                                  {Object.entries(loan.documents).map(([key, url]) => (
-                                    <a key={key} href={url as string} target="_blank" rel="noopener noreferrer" className="text-[10px] px-2 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center gap-1">
-                                      <Eye size={12} /> {key.replace('_', ' ')}
-                                    </a>
-                                  ))}
-                                </div>
-                              )}
                             </td>
                           </tr>
                         ))}
