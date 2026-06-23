@@ -217,7 +217,7 @@ export default function Withdraw() {
               value={amount} 
               onChange={(e) => setAmount(e.target.value)} 
               placeholder="0.00" 
-              className="w-full pl-12 pr-4 py-4 neu-input rounded-2xl outline-none font-black text-2xl text-gray-900 dark:text-white transition-all" 
+              className="w-full pl-12 pr-4 py-4 neu-input rounded-full outline-none font-black text-2xl text-gray-900 dark:text-white transition-all" 
             />
           </div>
         </motion.div>
@@ -233,12 +233,12 @@ export default function Withdraw() {
             {isBn ? 'মাধ্যম নির্বাচন করুন' : 'Select Destination'}
           </label>
           <div className="grid grid-cols-2 gap-3 mb-5">
-            <button className="neu-sunken text-primary-600 dark:text-primary-400 p-4 rounded-[16px] font-bold text-sm transition-colors flex flex-col items-center justify-center gap-2 shadow-inner relative overflow-hidden">
+            <button className="neu-sunken text-primary-600 dark:text-primary-400 p-4 rounded-[20px] font-bold text-sm transition-colors flex flex-col items-center justify-center gap-2 shadow-inner relative overflow-hidden">
               <div className="absolute inset-0 bg-primary-500/5 dark:bg-primary-500/10 pointer-events-none"></div>
               <Landmark size={24} />
               <span>{isBn ? 'ব্যাংক একাউন্ট' : 'Bank Account'}</span>
             </button>
-            <button className="neu-raised-sm text-gray-400 dark:text-gray-600 p-4 rounded-[16px] font-bold text-sm transition-colors flex flex-col items-center justify-center gap-2 opacity-55 cursor-not-allowed">
+            <button className="neu-raised-sm text-gray-400 dark:text-gray-600 p-4 rounded-[20px] font-bold text-sm transition-colors flex flex-col items-center justify-center gap-2 opacity-55 cursor-not-allowed">
               <Smartphone size={24} />
               <span>{isBn ? 'মোবাইল অ্যাপ' : 'Mobile App'}</span>
             </button>
@@ -252,7 +252,7 @@ export default function Withdraw() {
               {bankAccount && (
                 <button 
                   onClick={deleteBankAccount}
-                  className="text-xs font-bold text-red-500 hover:text-red-600 dark:text-red-400/80 dark:hover:text-red-400 flex items-center gap-1 neu-btn px-2 py-1 rounded-lg active:scale-95 transition-all"
+                  className="text-xs font-bold text-red-500 hover:text-red-600 dark:text-red-400/80 dark:hover:text-red-400 flex items-center gap-1 neu-btn px-3 py-1 rounded-full active:scale-95 transition-all"
                 >
                   <Trash2 size={13} /> {isBn ? 'মুছে ফেলুন' : 'Delete'}
                 </button>
@@ -260,9 +260,9 @@ export default function Withdraw() {
             </div>
 
             {bankAccount ? (
-              <div className="flex items-center justify-between neu-sunken p-4 rounded-[16px] transition-colors">
+              <div className="flex items-center justify-between neu-sunken p-4 px-6 rounded-full transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 neu-raised-sm rounded-xl flex items-center justify-center transition-colors">
+                  <div className="w-12 h-12 neu-raised-sm rounded-full flex items-center justify-center transition-colors">
                     <Landmark className="text-blue-600 dark:text-blue-400" size={24} />
                   </div>
                   <div>
@@ -287,7 +287,7 @@ export default function Withdraw() {
                     value={newBankName} 
                     onChange={e => setNewBankName(e.target.value)} 
                     placeholder={isBn ? 'যেমন: ইসলামী ব্যাংক' : 'e.g. Islami Bank'}
-                    className="w-full neu-input rounded-xl px-3 py-2 text-xs font-bold text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
+                    className="w-full neu-input rounded-full px-4 py-2 text-xs font-bold text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -298,7 +298,7 @@ export default function Withdraw() {
                     value={newAccountName} 
                     onChange={e => setNewAccountName(e.target.value)} 
                     placeholder={isBn ? 'যেমন: আরিফ হোসেন' : 'e.g. Arif Hossain'}
-                    className="w-full neu-input rounded-xl px-3 py-2 text-xs font-bold text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
+                    className="w-full neu-input rounded-full px-4 py-2 text-xs font-bold text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -309,7 +309,7 @@ export default function Withdraw() {
                     value={newAccountNumber} 
                     onChange={e => setNewAccountNumber(e.target.value)} 
                     placeholder="1234567890"
-                    className="w-full neu-input rounded-xl px-3 py-2 text-xs font-mono text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
+                    className="w-full neu-input rounded-full px-4 py-2 text-xs font-mono text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -319,20 +319,20 @@ export default function Withdraw() {
                     value={newRoutingNumber} 
                     onChange={e => setNewRoutingNumber(e.target.value)} 
                     placeholder="123456"
-                    className="w-full neu-input rounded-xl px-3 py-2 text-xs font-mono text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
+                    className="w-full neu-input rounded-full px-4 py-2 text-xs font-mono text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
                   />
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button 
                     type="button" 
                     onClick={() => setShowAddForm(false)} 
-                    className="flex-1 py-2 rounded-xl text-xs font-bold neu-btn text-gray-700 dark:text-gray-300 transition-colors"
+                    className="flex-1 py-2 rounded-full text-xs font-bold neu-btn text-gray-700 dark:text-gray-300 transition-colors"
                   >
                     {isBn ? 'বাতিল' : 'Cancel'}
                   </button>
                   <button 
                     type="submit" 
-                    className="flex-1 py-2 rounded-xl text-xs font-bold neu-btn-primary text-white transition-colors"
+                    className="flex-1 py-2 rounded-full text-xs font-bold neu-btn-primary text-white transition-colors"
                   >
                     {isBn ? 'সেভ করুন' : 'Save Account'}
                   </button>
@@ -342,7 +342,7 @@ export default function Withdraw() {
               <button 
                 type="button"
                 onClick={() => setShowAddForm(true)}
-                className="w-full py-4 border-2 border-dashed border-gray-300 dark:border-gray-700 bg-transparent rounded-2xl flex items-center justify-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-500/50 dark:hover:border-primary-500/50 active:scale-[0.98] transition-all neu-raised-sm"
+                className="w-full py-4 border-2 border-dashed border-gray-300 dark:border-gray-700 bg-transparent rounded-full flex items-center justify-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-500/50 dark:hover:border-primary-500/50 active:scale-[0.98] transition-all neu-raised-sm"
               >
                 <Plus size={16} />
                 {isBn ? 'ব্যাংক একাউন্ট যুক্ত করুন' : 'Add Bank Account'}
@@ -369,7 +369,7 @@ export default function Withdraw() {
         <button 
           onClick={handleWithdraw} 
           disabled={isSubmitting || !amount || Number(amount) <= 0 || Number(amount) > availableBalance} 
-          className="w-full mt-2 neu-btn-primary disabled:opacity-50 disabled:active:scale-100 text-white py-4 rounded-[20px] font-bold text-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          className="w-full mt-2 neu-btn-primary disabled:opacity-50 disabled:active:scale-100 text-white py-4 rounded-full font-bold text-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
             <span className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -470,7 +470,7 @@ export default function Withdraw() {
               <div className="flex gap-3 relative z-10">
                 <button
                   onClick={() => setShowDepositModal(false)}
-                  className="flex-1 py-4 neu-btn text-gray-700 dark:text-gray-300 rounded-xl font-bold active:scale-95 transition-all"
+                  className="flex-1 py-4 neu-btn text-gray-700 dark:text-gray-300 rounded-full font-bold active:scale-95 transition-all"
                 >
                   {isBn ? 'পরে করব' : 'Later'}
                 </button>
@@ -479,7 +479,7 @@ export default function Withdraw() {
                     setShowDepositModal(false);
                     navigate('/deposit');
                   }}
-                  className="flex-1 py-4 neu-btn-primary text-white rounded-xl font-bold active:scale-95 transition-all"
+                  className="flex-1 py-4 neu-btn-primary text-white rounded-full font-bold active:scale-95 transition-all"
                 >
                   {isBn ? 'ডিপোজিট করুন' : 'Deposit Now'}
                 </button>

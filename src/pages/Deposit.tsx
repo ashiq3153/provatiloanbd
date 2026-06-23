@@ -252,7 +252,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 key={amt}
                 type="button"
                 onClick={() => setLoanAmount(amt.toString())}
-                className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all border-0 cursor-pointer ${
+                className={`px-3.5 py-2 rounded-full text-xs font-black transition-all border-0 cursor-pointer ${
                   loanAmtNum === amt
                     ? 'neu-btn-primary shadow-sm'
                     : 'neu-btn'
@@ -270,7 +270,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               type="number" 
               value={loanAmount}
               onChange={(e) => setLoanAmount(e.target.value)}
-              className="w-full neu-input rounded-xl py-3 pl-8 pr-4 text-base font-black outline-none border-0 transition-all text-gray-900 dark:text-white" 
+              className="w-full neu-input rounded-full py-3 pl-8 pr-4 text-base font-black outline-none border-0 transition-all text-gray-900 dark:text-white" 
               placeholder={isBn ? "অন্যান্য পরিমাণ লিখুন (উদাঃ ১০০০০০)" : "Enter custom amount (e.g. 100000)"} 
             />
           </div>
@@ -301,7 +301,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                     if (isInsuranceEnabled) setSelectInsurance(true);
                   }
                 }}
-                className={`p-3 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer ${
+                className={`p-3 px-4 rounded-full border-2 transition-all flex items-center justify-between cursor-pointer ${
                   (selectProcessing && selectSecurity && (!isInsuranceEnabled || selectInsurance))
                     ? 'border-primary-500/40 bg-primary-600/10 text-primary-600 dark:text-indigo-400 neu-raised shadow-inner'
                     : 'neu-btn text-gray-800 dark:text-gray-250 border-0'
@@ -320,7 +320,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               {/* Processing Fee Row */}
               <div 
                 onClick={() => setSelectProcessing(!selectProcessing)}
-                className={`p-3 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer ${
+                className={`p-3 px-4 rounded-full border-2 transition-all flex items-center justify-between cursor-pointer ${
                   selectProcessing
                     ? 'border-primary-500/40 bg-primary-600/10 text-primary-600 dark:text-indigo-400 neu-raised shadow-inner'
                     : 'neu-btn text-gray-800 dark:text-gray-250 border-0'
@@ -345,7 +345,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               {/* Savings Deposit Row */}
               <div 
                 onClick={() => setSelectSecurity(!selectSecurity)}
-                className={`p-3 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer ${
+                className={`p-3 px-4 rounded-full border-2 transition-all flex items-center justify-between cursor-pointer ${
                   selectSecurity
                     ? 'border-primary-500/40 bg-primary-600/10 text-primary-600 dark:text-indigo-400 neu-raised shadow-inner'
                     : 'neu-btn text-gray-800 dark:text-gray-250 border-0'
@@ -368,7 +368,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               {isInsuranceEnabled && (
                 <div 
                   onClick={() => setSelectInsurance(!selectInsurance)}
-                  className={`p-3 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer ${
+                  className={`p-3 px-4 rounded-full border-2 transition-all flex items-center justify-between cursor-pointer ${
                     selectInsurance
                       ? 'border-primary-500/40 bg-primary-600/10 text-primary-600 dark:text-indigo-400 neu-raised shadow-inner'
                       : 'neu-btn text-gray-800 dark:text-gray-250 border-0'
@@ -389,7 +389,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               )}
 
               {/* Total Row */}
-              <div className="p-3.5 neu-sunken rounded-2xl flex items-center justify-between border-0 text-gray-900 dark:text-white">
+              <div className="p-3.5 px-5 neu-sunken rounded-full flex items-center justify-between border-0 text-gray-900 dark:text-white">
                 <span className="text-xs font-black text-gray-500 dark:text-gray-400">{isBn ? 'মোট সম্ভাব্য জমা' : 'Total Charges'}</span>
                 <span className="text-base font-black">৳{selectedPaymentAmount.toLocaleString('en-IN')}</span>
               </div>
@@ -413,7 +413,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 key={m.id}
                 type="button"
                 onClick={() => setMethod(m.id)}
-                className={`py-2 px-1.5 rounded-xl text-xs font-bold border-2 transition-all flex flex-col items-center justify-center gap-1.5 relative overflow-hidden cursor-pointer ${
+                className={`py-2 px-1.5 rounded-[20px] text-xs font-bold border-2 transition-all flex flex-col items-center justify-center gap-1.5 relative overflow-hidden cursor-pointer ${
                   method === m.id 
                     ? `border-primary-500/40 bg-primary-600/10 shadow-inner` 
                     : 'neu-btn border-0'
@@ -431,7 +431,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 key={m.id}
                 type="button"
                 onClick={() => setMethod(m.id)}
-                className={`py-2 px-1.5 rounded-xl text-xs font-bold border-2 transition-all flex flex-col items-center justify-center gap-1 relative overflow-hidden cursor-pointer ${
+                className={`py-2 px-1.5 rounded-[20px] text-xs font-bold border-2 transition-all flex flex-col items-center justify-center gap-1 relative overflow-hidden cursor-pointer ${
                   method === m.id 
                     ? `border-primary-500/40 bg-primary-600/10 shadow-inner` 
                     : 'neu-btn border-0'
@@ -458,7 +458,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
             <button
               type="button"
               onClick={handleLiveSupportChat}
-              className="neu-btn-primary font-black text-xs py-2.5 px-3.5 rounded-xl active:scale-95 transition-all border-0 flex items-center gap-1.5 shrink-0"
+              className="neu-btn-primary font-black text-xs py-2.5 px-4 rounded-full active:scale-95 transition-all border-0 flex items-center gap-1.5 shrink-0"
             >
               <MessageCircle size={14} />
               {isBn ? 'পেমেন্ট নির্দেশনা নিন' : '💬 Live Chat'}
@@ -486,7 +486,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 required
                 value={senderNo}
                 onChange={(e) => setSenderNo(e.target.value)}
-                className="w-full neu-input rounded-2xl px-4 py-3 text-sm font-bold text-gray-900 dark:text-white outline-none border-0 transition-all" 
+                className="w-full neu-input rounded-full px-5 py-3 text-sm font-bold text-gray-900 dark:text-white outline-none border-0 transition-all" 
                 placeholder="01XXXXXXXXX" 
               />
             </div>
@@ -518,7 +518,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 />
                 <label 
                   htmlFor="screenshot-upload" 
-                  className="w-full neu-sunken border-2 border-dashed border-gray-300 dark:border-gray-800 rounded-2xl py-5 flex flex-col items-center justify-center gap-2 hover:border-primary-500/40 cursor-pointer"
+                  className="w-full neu-sunken border-2 border-dashed border-gray-300 dark:border-gray-800 rounded-[24px] py-5 flex flex-col items-center justify-center gap-2 hover:border-primary-500/40 cursor-pointer"
                 >
                   {uploading ? (
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
@@ -542,7 +542,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
             <button
               type="submit"
               disabled={selectedPaymentAmount <= 0 || !senderNo || submitted}
-              className="w-full neu-btn-primary disabled:opacity-50 text-white py-3.5 rounded-2xl font-black text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 border-0"
+              className="w-full neu-btn-primary disabled:opacity-50 text-white py-3.5 rounded-full font-black text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 border-0"
             >
               {submitted ? (
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -578,14 +578,14 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               <button 
                 type="button"
                 onClick={() => setShowConfirmModal(false)}
-                className="flex-1 py-3 rounded-xl font-black text-xs neu-btn border-0"
+                className="flex-1 py-3 rounded-full font-black text-xs neu-btn border-0"
               >
                 {isBn ? 'বাতিল' : 'Cancel'}
               </button>
               <button 
                 type="button"
                 onClick={processDeposit}
-                className="flex-1 py-3 rounded-xl font-black text-xs neu-btn-primary border-0"
+                className="flex-1 py-3 rounded-full font-black text-xs neu-btn-primary border-0"
               >
                 {isBn ? 'হ্যাঁ, সাবমিট' : 'Yes, Submit'}
               </button>

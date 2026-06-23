@@ -99,11 +99,11 @@ export default function App() {
       <Toaster position="top-center" richColors theme={theme === 'dark' ? 'dark' : 'light'} />
       <Routes>
         <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/terms" element={<Terms />} />
         <Route path="/*" element={
           <Layout>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/terms" element={<Terms />} />
               <Route path="/apply" element={<ApplyLoan />} />
               <Route path="/deposit" element={<Deposit />} />
               <Route path="/withdraw" element={<Withdraw />} />

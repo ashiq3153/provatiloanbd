@@ -6,12 +6,21 @@
 @theme {
   --font-sans: "Inter", system-ui, sans-serif;
   
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-900: #1e3a8a;
+  --color-primary-50: #e0f7ff;
+  --color-primary-100: #b3ebff;
+  --color-primary-200: #80deff;
+  --color-primary-300: #4dd2ff;
+  --color-primary-400: #1ac6ff;
+  --color-primary-500: #13bcff;
+  --color-primary-600: #0099e6;
+  --color-primary-700: #007acc;
+  --color-primary-800: #005c99;
+  --color-primary-900: #003d66;
+  --color-primary-950: #001f33;
+
+  --color-gray-250: #eef2f6;
+  --color-gray-850: #002433;
+  --color-gray-950: #001821;
 
   --animate-marquee: marquee 20s linear infinite;
   --animate-marquee-seamless: marquee-seamless 25s linear infinite;
@@ -41,10 +50,41 @@
 
 @layer base {
   body {
-    @apply font-sans antialiased text-gray-900 bg-gray-50 sm:bg-gray-200 overflow-hidden dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300;
+    @apply font-sans antialiased text-gray-900 overflow-hidden dark:text-gray-100 transition-colors duration-300;
+    background-color: #dce8f5;
     /* Optimizations for Telegram Mini Apps */
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    position: relative;
+  }
+  /* Light mode blurred background image */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('./assets/light_bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    filter: blur(6px);
+    transform: scale(1.05);
+    opacity: 0.65;
+    z-index: -1;
+    pointer-events: none;
+  }
+  /* Dark mode body & background */
+  .dark body {
+    background-color: #001821 !important;
+  }
+  .dark body::before {
+    background-image: url('./assets/dark_bg.png') !important;
+    opacity: 1;
+    filter: blur(8px);
+    transform: scale(1.05);
   }
   #root {
     @apply h-screen w-screen sm:p-4 flex items-center justify-center;
@@ -65,7 +105,27 @@
    Premium Glassmorphic Card Styling & Animations
    ══════════════════════════════════════════════════════════════ */
 
-/* Target light mode cards based on rounding styles */
+/* Force very rounded cards everywhere in the app */
+.rounded-3xl,
+.rounded-2xl,
+.rounded-xl:not(.rounded-full-ignore),
+.rounded-\[20px\],
+.rounded-\[23px\],
+.rounded-\[24px\],
+.rounded-\[26px\],
+.rounded-\[28px\],
+.rounded-\[32px\] {
+  border-radius: 28px !important;
+}
+
+/* Live Chat FAB — no background, no border-radius override */
+.chat-fab {
+  background: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 .bg-white.rounded-2xl, 
 .bg-white.rounded-3xl,
 .bg-white.rounded-\[20px\], 
@@ -73,10 +133,10 @@
 .bg-white.rounded-\[24px\], 
 .bg-white.rounded-\[28px\], 
 .bg-white.rounded-\[32px\] {
-  background-color: rgba(255, 255, 255, 0.75) !important;
+  background-color: rgba(255, 255, 255, 0.35) !important;
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(243, 244, 246, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.03), 
               0 1px 3px -1px rgba(0, 0, 0, 0.02) !important;
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -92,11 +152,11 @@
 .dark .dark\:bg-gray-800.rounded-\[32px\],
 .dark .dark\:bg-gray-850.rounded-2xl,
 .dark .dark\:bg-gray-850.rounded-3xl {
-  background-color: rgba(17, 24, 39, 0.65) !important; /* transparent dark gray */
+  background-color: rgba(0, 24, 33, 0.12) !important;
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.075) !important;
-  box-shadow: 0 12px 35px -12px rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid rgba(19, 188, 255, 0.3) !important;
+  box-shadow: 0 12px 35px -12px rgba(0, 0, 0, 0.55) !important;
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
@@ -148,113 +208,134 @@ a.dark\:bg-gray-800:active,
    ══════════════════════════════════════════════════════════════ */
 
 :root {
-  --neu-bg-light: #dce4ed;
-  --neu-bg-dark: #05070a;
+  --neu-bg-light: #e8ecf2;
+  --neu-bg-dark: #001821;
   
-  --neu-raised-shadow-light: 6px 6px 15px rgba(163, 177, 198, 0.6), -5px -5px 12px rgba(255, 255, 255, 0.95);
-  --neu-raised-shadow-dark: 7px 7px 16px rgba(0, 0, 0, 0.55), -5px -5px 15px rgba(255, 255, 255, 0.03);
+  --neu-raised-shadow-light: 6px 6px 18px rgba(165, 180, 203, 0.5), -6px -6px 18px rgba(255, 255, 255, 0.95);
+  --neu-raised-shadow-dark: 8px 8px 24px rgba(0, 8, 12, 0.6), -4px -4px 16px rgba(19, 188, 255, 0.02);
 
-  --neu-raised-sm-shadow-light: 3px 3px 8px rgba(163, 177, 198, 0.5), -3px -3px 7px rgba(255, 255, 255, 0.95);
-  --neu-raised-sm-shadow-dark: 4px 4px 10px rgba(0, 0, 0, 0.55), -3px -3px 9px rgba(255, 255, 255, 0.03);
+  --neu-raised-sm-shadow-light: 3px 3px 8px rgba(165, 180, 203, 0.45), -3px -3px 8px rgba(255, 255, 255, 0.95);
+  --neu-raised-sm-shadow-dark: 4px 4px 12px rgba(0, 8, 12, 0.55), -3px -3px 9px rgba(19, 188, 255, 0.02);
 
-  --neu-sunken-shadow-light: inset 3px 3px 6px rgba(163, 177, 198, 0.45), inset -3px -3px 6px rgba(255, 255, 255, 0.85);
-  --neu-sunken-shadow-dark: inset 3px 3px 7px rgba(0, 0, 0, 0.5), inset -3px -3px 7px rgba(255, 255, 255, 0.03);
+  --neu-sunken-shadow-light: inset 3px 3px 6px rgba(165, 180, 203, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.9);
+  --neu-sunken-shadow-dark: inset 4px 4px 10px rgba(0, 8, 12, 0.65), inset -3px -3px 9px rgba(19, 188, 255, 0.015);
 }
 
 .neu-bg {
-  background-color: var(--neu-bg-light) !important;
+  background-color: transparent !important;
+  position: relative;
 }
 .dark .neu-bg {
-  background-color: var(--neu-bg-dark) !important;
+  background-color: transparent !important;
 }
 
 /* Base Cards */
 .neu-flat-card {
-  background-color: #f5f7fa;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background-color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.6);
 }
 .dark .neu-flat-card {
-  background-color: #171d26;
+  background-color: #1e293b;
   border: 1px solid rgba(255, 255, 255, 0.02);
 }
 
 .neu-raised {
-  background-color: #f1f3f6;
+  background-color: rgba(255, 255, 255, 0.22) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   box-shadow: var(--neu-raised-shadow-light);
-  border: 1px solid rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
 }
 .dark .neu-raised {
-  background-color: #141822;
+  background-color: rgba(0, 24, 33, 0.12) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   box-shadow: var(--neu-raised-shadow-dark);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(19, 188, 255, 0.3) !important;
 }
 
 .neu-raised-sm {
-  background-color: #f1f3f6;
+  background-color: rgba(255, 255, 255, 0.22) !important;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   box-shadow: var(--neu-raised-sm-shadow-light);
-  border: 1px solid rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
 }
 .dark .neu-raised-sm {
-  background-color: #141822;
+  background-color: rgba(0, 24, 33, 0.12) !important;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   box-shadow: var(--neu-raised-sm-shadow-dark);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(19, 188, 255, 0.3) !important;
 }
 
 .neu-sunken {
-  background-color: #ebedf2;
+  background-color: rgba(226, 232, 240, 0.18) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   box-shadow: var(--neu-sunken-shadow-light);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
 }
 .dark .neu-sunken {
-  background-color: #0b0d12;
+  background-color: rgba(0, 16, 23, 0.08) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   box-shadow: var(--neu-sunken-shadow-dark);
-  border: 1px solid rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(19, 188, 255, 0.2) !important;
 }
 
 /* Form inputs */
 .neu-input {
-  background-color: #ebedf2;
+  background-color: rgba(237, 242, 247, 0.18) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   box-shadow: var(--neu-sunken-shadow-light);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
   transition: all 0.2s ease;
 }
 .neu-input:focus {
-  border-color: rgba(37, 99, 235, 0.35);
-  box-shadow: inset 2px 2px 5px rgba(163, 177, 198, 0.4), inset -2px -2px 5px rgba(255, 255, 255, 0.8), 0 0 0 2px rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.45) !important;
+  box-shadow: inset 2px 2px 5px rgba(163, 177, 198, 0.3), inset -2px -2px 5px rgba(255, 255, 255, 0.8), 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 .dark .neu-input {
-  background-color: #0b0d12;
+  background-color: rgba(0, 16, 23, 0.08) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   box-shadow: var(--neu-sunken-shadow-dark);
-  border: 1px solid rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(19, 188, 255, 0.25) !important;
 }
 .dark .neu-input:focus {
-  border-color: rgba(37, 99, 235, 0.5);
-  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.5), inset -2px -2px 5px rgba(255, 255, 255, 0.02), 0 0 0 2px rgba(37, 99, 235, 0.2);
+  border-color: rgba(19, 188, 255, 0.6) !important;
+  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.5), inset -2px -2px 5px rgba(255, 255, 255, 0.02), 0 0 0 2px rgba(19, 188, 255, 0.2);
 }
 
 /* Neumorphic Buttons */
 .neu-btn {
-  background-color: #f1f3f6;
+  background-color: rgba(241, 245, 249, 0.25) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   box-shadow: var(--neu-raised-sm-shadow-light);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 .neu-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 4px 4px 10px rgba(163, 177, 198, 0.6), -4px -4px 10px rgba(255, 255, 255, 0.98);
+  box-shadow: 4px 4px 10px rgba(163, 177, 198, 0.5), -4px -4px 10px rgba(255, 255, 255, 0.98);
 }
 .neu-btn:active {
   transform: translateY(0.5px) scale(0.98);
   box-shadow: var(--neu-sunken-shadow-light);
 }
 .dark .neu-btn {
-  background-color: #151a24;
+  background-color: rgba(0, 24, 33, 0.12) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   box-shadow: var(--neu-raised-sm-shadow-dark);
-  border: 1px solid rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(19, 188, 255, 0.25) !important;
 }
 .dark .neu-btn:hover {
-  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.55), -4px -4px 12px rgba(255, 255, 255, 0.04);
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.55), -4px -4px 12px rgba(19, 188, 255, 0.04);
 }
 .dark .neu-btn:active {
   box-shadow: var(--neu-sunken-shadow-dark);
@@ -262,28 +343,28 @@ a.dark\:bg-gray-800:active,
 
 /* Primary Neumorphic Button (e.g. Send, active states) */
 .neu-btn-primary {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: linear-gradient(135deg, #13bcff, #007acc);
   color: white;
-  box-shadow: 4px 4px 8px rgba(37, 99, 235, 0.35), -4px -4px 8px rgba(255, 255, 255, 0.8);
+  box-shadow: 4px 4px 8px rgba(19, 188, 255, 0.35), -4px -4px 8px rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 .neu-btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 5px 5px 12px rgba(37, 99, 235, 0.45), -5px -5px 12px rgba(255, 255, 255, 0.8);
+  box-shadow: 5px 5px 12px rgba(19, 188, 255, 0.45), -5px -5px 12px rgba(255, 255, 255, 0.8);
 }
 .neu-btn-primary:active {
   transform: translateY(0.5px) scale(0.98);
   box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.25), inset -3px -3px 6px rgba(255, 255, 255, 0.1);
 }
 .dark .neu-btn-primary {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5), -3px -3px 8px rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(135deg, #13bcff, #005c99);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5), -3px -3px 8px rgba(19, 188, 255, 0.05);
+  border: 1px solid rgba(19, 188, 255, 0.05);
 }
 .dark .neu-btn-primary:hover {
-  box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.6), -4px -4px 10px rgba(255, 255, 255, 0.06);
+  box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.6), -4px -4px 10px rgba(19, 188, 255, 0.06);
 }
 .dark .neu-btn-primary:active {
   box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.4);

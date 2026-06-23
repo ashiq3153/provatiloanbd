@@ -13,6 +13,9 @@ interface SupportMessage {
   sender: 'user' | 'admin';
   message: string;
   created_at: string;
+  reply_to?: string | null;
+  is_edited?: boolean;
+  is_seen?: boolean;
 }
 
 export default function Support() {
@@ -29,6 +32,9 @@ export default function Support() {
   const [loadingMessages, setLoadingMessages] = useState(true);
   const [sending, setSending] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [replyingTo, setReplyingTo] = useState<SupportMessage | null>(null);
+  const [adminTyping, setAdminTyping] = useState(false);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -71,6 +77,14 @@ export default function Support() {
 
       if (!error && data) {
         setMessages(data);
+        // Mark any unseen admin messages as seen
+        const unseenAdminMsgs = data.filter(m => m.sender === 'admin' && !m.is_seen);
+        if (unseenAdminMsgs.length > 0) {
+          await supabase
+            .from('support_messages')
+            .update({ is_seen: true })
+            .in('id', unseenAdminMsgs.map(m => m.id));
+        }
       }
     } catch (err) {
       console.error('Error fetching support messages:', err);
@@ -174,16 +188,41 @@ export default function Support() {
               if (prev.some((m) => m.id === newMsg.id)) return prev;
               return [...prev, newMsg];
             });
-          } else {
-            fetchMessages(false);
+            // If it's from admin, mark it as seen immediately
+            if (newMsg.sender === 'admin') {
+              supabase.from('support_messages').update({ is_seen: true }).eq('id', newMsg.id).then();
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedMsg = payload.new as SupportMessage;
+            setMessages((prev) => prev.map(m => m.id === updatedMsg.id ? updatedMsg : m));
+          } else if (payload.eventType === 'DELETE') {
+            const deletedId = payload.old.id;
+            setMessages((prev) => prev.filter(m => m.id !== deletedId));
           }
         }
       )
       .subscribe();
 
+    // Set up Realtime Presence/Broadcast for Typing Indicator
+    const typingChannel = supabase.channel(`typing_chat_${user.id}`);
+    
+    typingChannel
+      .on('broadcast', { event: 'typing' }, (payload) => {
+        if (payload.payload.sender === 'admin') {
+          setAdminTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => {
+            setAdminTyping(false);
+          }, 3000);
+        }
+      })
+      .subscribe();
+
     return () => {
       active = false;
       supabase.removeChannel(channel);
+      supabase.removeChannel(typingChannel);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     };
   }, [user.id, location.state]);
 
@@ -200,17 +239,30 @@ export default function Support() {
       const { error } = await supabase.from('support_messages').insert({
         chat_id: user.id,
         sender: 'user',
-        message: textToSend
+        message: textToSend,
+        reply_to: replyingTo?.id || null
       });
 
       if (error) {
         console.error('Error sending message:', error);
+      } else {
+        setReplyingTo(null);
       }
     } catch (err) {
       console.error('Error sending message:', err);
     } finally {
       setSending(false);
     }
+  };
+
+  const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+    // Broadcast typing event
+    supabase.channel(`typing_chat_${user.id}`).send({
+      type: 'broadcast',
+      event: 'typing',
+      payload: { sender: 'user' }
+    });
   };
 
   const formatMessageTime = (isoString: string) => {
@@ -382,17 +434,38 @@ export default function Support() {
                         </div>
                       )}
 
-                      <div className={`max-w-[75%] rounded-[20px] px-4 py-2.5 shadow-sm ${
+                      <div className={`max-w-[75%] rounded-[20px] px-4 py-2.5 shadow-sm relative group ${
                         isUser 
                           ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-br-none user-bubble-tail font-semibold' 
                           : 'neu-raised rounded-bl-none text-gray-900 dark:text-white admin-bubble-tail font-semibold'
                       }`}>
+                        {msg.reply_to && (
+                          <div className={`mb-2 pl-2 border-l-2 text-xs opacity-75 rounded bg-black/5 dark:bg-white/5 p-1 ${isUser ? 'border-blue-300' : 'border-gray-400'}`}>
+                            {messages.find(m => m.id === msg.reply_to)?.message || 'Original message deleted'}
+                          </div>
+                        )}
                         <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{msg.message}</p>
-                        <span className={`text-[8px] block text-right mt-1.5 opacity-65 font-black ${
-                          isUser ? 'text-blue-100' : 'text-gray-400 dark:text-gray-500'
-                        }`}>
-                          {formatMessageTime(msg.created_at)}
-                        </span>
+                        
+                        <div className={`flex items-center justify-end gap-1 mt-1.5 ${isUser ? 'text-blue-100' : 'text-gray-400 dark:text-gray-500'}`}>
+                          {msg.is_edited && <span className="text-[8px] italic opacity-75 mr-1">edited</span>}
+                          <span className="text-[8px] font-black opacity-65">
+                            {formatMessageTime(msg.created_at)}
+                          </span>
+                          {isUser && (
+                            <span className="text-[10px]">
+                              {msg.is_seen ? <span className="text-blue-300">✓✓</span> : <span className="opacity-70">✓</span>}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Reply Button on Hover */}
+                        <button 
+                          onClick={() => setReplyingTo(msg)}
+                          className={`absolute top-2 opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 flex items-center justify-center rounded-full bg-white/20 dark:bg-black/20 ${isUser ? '-left-8 text-gray-500 dark:text-gray-400' : '-right-8 text-gray-500 dark:text-gray-400'}`}
+                          title="Reply"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg>
+                        </button>
                       </div>
 
                       {isUser && (
@@ -412,6 +485,26 @@ export default function Support() {
               )}
             </div>
 
+            {/* Typing Indicator */}
+            {adminTyping && (
+              <div className="px-5 py-1 text-xs text-gray-500 dark:text-gray-400 font-semibold animate-pulse">
+                {isBn ? 'অ্যাডমিন টাইপ করছেন...' : 'Admin is typing...'}
+              </div>
+            )}
+
+            {/* Replying To Preview */}
+            {replyingTo && (
+              <div className="px-4 py-2 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center z-20 relative">
+                <div className="text-xs truncate text-gray-600 dark:text-gray-300">
+                  <span className="font-bold text-primary-500">{replyingTo.sender === 'user' ? 'You' : 'Admin'}: </span>
+                  {replyingTo.message}
+                </div>
+                <button onClick={() => setReplyingTo(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+              </div>
+            )}
+
             {/* Input Form */}
             <form 
               onSubmit={handleSendMessage}
@@ -420,7 +513,7 @@ export default function Support() {
               <input
                 type="text"
                 value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
+                onChange={handleTyping}
                 placeholder={isBn ? 'মেসেজ লিখুন...' : 'Type a message...'}
                 className="flex-1 neu-input rounded-2xl px-4 py-3 text-sm outline-none text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600 font-bold"
               />

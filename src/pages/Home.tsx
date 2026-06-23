@@ -1,11 +1,11 @@
-import { Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight, Star, FileText, Eye, EyeOff, Loader2, Clock, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight, Star, FileText, Eye, EyeOff, Loader2, Clock, CheckCircle2, XCircle, AlertCircle, User } from 'lucide-react';
 import { getTelegramUser } from '../lib/telegram';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
 import { supabase } from '../lib/supabase';
 import { convertDigits, formatCurrency, formatNumber } from '../lib/translation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Skeleton } from '../components/Skeleton';
 import { toast } from 'sonner';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -21,8 +21,9 @@ import womenImg from '../assets/categories/women.png';
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
+  const storyScrollRef = useRef<HTMLDivElement>(null);
+  const storyScrollPaused = useRef(false);
   const [balanceVisible, setBalanceVisible] = useState(true);
-  const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activeLoan, setActiveLoan] = useState<LoanApplication | null>(null);
   const [completedEmisCount, setCompletedEmisCount] = useState(0);
@@ -72,15 +73,44 @@ export default function Home() {
     fetchData();
   }, [user.id]);
 
+  // Auto-scroll Success Stories — seamless infinite loop
   useEffect(() => {
     if (stories.length < 2) return;
-    const slideTimer = setInterval(() => {
-      setCurrentStoryIndex((prev) => (prev + 1) % stories.length);
-    }, 3000);
-    return () => clearInterval(slideTimer);
+    const CARD_WIDTH = 332; // card width (320) + gap (12)
+    const SCROLL_INTERVAL = 2500;
+    const el = storyScrollRef.current;
+    if (!el) return;
+
+    // Start from the middle set (index = stories.length)
+    const initialOffset = CARD_WIDTH * stories.length;
+    el.scrollLeft = initialOffset;
+
+    const timer = setInterval(() => {
+      if (!el || storyScrollPaused.current) return;
+      el.scrollBy({ left: CARD_WIDTH, behavior: 'smooth' });
+
+      // After scroll animation (~400ms), check if we need to silently jump back to middle
+      setTimeout(() => {
+        if (!el) return;
+        const singleSetWidth = CARD_WIDTH * stories.length;
+        // If we've gone past the 2nd set, jump silently to middle
+        if (el.scrollLeft >= singleSetWidth * 2) {
+          el.style.scrollBehavior = 'auto';
+          el.scrollLeft = el.scrollLeft - singleSetWidth;
+          el.style.scrollBehavior = '';
+        }
+        // If somehow before first set, jump to middle
+        if (el.scrollLeft < singleSetWidth * 0.5) {
+          el.style.scrollBehavior = 'auto';
+          el.scrollLeft = el.scrollLeft + singleSetWidth;
+          el.style.scrollBehavior = '';
+        }
+      }, 420);
+    }, SCROLL_INTERVAL);
+
+    return () => clearInterval(timer);
   }, [stories.length]);
 
-  const safeStoryIndex = currentStoryIndex % Math.max(stories.length, 1);
 
   const allLoanCategories = [
     { id: 'business', name: isBn ? 'ব্যবসায়ী ঋণ' : 'Business', icon: '🏢', image: businessImg, color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
@@ -326,7 +356,7 @@ export default function Home() {
       <div className="flex justify-between items-center neu-raised p-4.5 rounded-[28px] mb-2 transition-colors">
         <div className="flex items-center gap-4">
           <div className="relative">
-            <div className="w-14 h-14 rounded-full p-[3.5px] bg-white dark:bg-gray-800 border border-white/50 shadow-inner flex items-center justify-center overflow-hidden">
+            <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden">
               <img
                 src={user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name}`}
                 alt="Profile"
@@ -349,7 +379,7 @@ export default function Home() {
             </h1>
           </div>
         </div>
-        <div className="relative">
+        <div className="flex items-center gap-3 relative">
           <button
             type="button"
             onClick={() => setShowNotifications(!showNotifications)}
@@ -360,7 +390,14 @@ export default function Home() {
               <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border border-white dark:border-gray-700 shadow-sm shadow-red-500/50 transition-colors animate-pulse"></span>
             )}
           </button>
- 
+
+          <Link
+            to="/profile"
+            className="w-11 h-11 rounded-2xl neu-btn flex items-center justify-center relative border-0 cursor-pointer"
+          >
+            <User className="w-5 h-5 text-gray-700 dark:text-gray-300 transition-colors" />
+          </Link>
+
           {/* Premium Glassmorphic Notifications Panel */}
           <AnimatePresence>
             {showNotifications && (
@@ -387,7 +424,7 @@ export default function Home() {
                       {convertDigits(getNotifications().length, isBn)} {isBn ? 'টি' : 'Items'}
                     </span>
                   </div>
- 
+
                   <div className="space-y-3 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
                     {getNotifications().length === 0 ? (
                       <div className="py-10 text-center">
@@ -445,17 +482,19 @@ export default function Home() {
       )}
  
       {/* Balance Section */}
-      <div className="relative mb-16 w-full">
+      <div className="relative mb-12 w-full">
         {/* Main blue card */}
-        <div className="neu-raised rounded-[24px] px-5 pt-5 pb-16 relative overflow-hidden flex flex-col justify-between transition-colors border-0">
+        <div className="rounded-[24px] px-5 pt-5 pb-10 relative overflow-hidden flex flex-col justify-between transition-colors" style={{background:'linear-gradient(135deg,rgba(37,99,235,0.18) 0%,rgba(99,102,241,0.12) 100%)',backdropFilter:'blur(20px)',border:'1px solid rgba(99,102,241,0.25)',boxShadow:'0 8px 32px -8px rgba(37,99,235,0.18)'}}>
+          <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-blue-400/20 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-indigo-500/15 blur-2xl pointer-events-none" />
           {/* Header row */}
-          <div className="flex justify-between items-start mb-2">
-            <div className="flex items-center gap-2 bg-gray-200/50 dark:bg-gray-800/40 px-3 py-1 rounded-full border border-gray-300/10 self-start">
-              <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 leading-none">{isBn ? 'পোর্টফোলিও ব্যালেন্স' : 'Portfolio Balances'}</span>
+          <div className="flex justify-between items-start mb-2 relative z-10">
+            <div className="flex items-center gap-2 bg-white/20 dark:bg-white/10 px-3 py-1 rounded-full border border-white/25 self-start backdrop-blur-sm">
+              <span className="text-[10px] font-black text-blue-700 dark:text-blue-200 leading-none">{isBn ? 'পোর্টফোলিও ব্যালেন্স' : 'Portfolio Balances'}</span>
               <button 
                 type="button" 
                 onClick={() => setBalanceVisible(!balanceVisible)} 
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors bg-transparent border-0 cursor-pointer p-0 flex items-center"
+                className="text-blue-500 dark:text-blue-300 hover:text-blue-700 dark:hover:text-white transition-colors bg-transparent border-0 cursor-pointer p-0 flex items-center"
               >
                 {balanceVisible ? <Eye size={12} /> : <EyeOff size={12} />}
               </button>
@@ -464,23 +503,18 @@ export default function Home() {
  
           {/* Grid of Balances */}
           <div className="grid grid-cols-2 gap-3.5 relative z-10 my-4 pb-2">
-            <div className="neu-sunken p-3.5 rounded-2xl border-0">
-              <p className="text-[10px] text-gray-400 dark:text-gray-500 font-extrabold mb-1.5 uppercase tracking-wider">{isBn ? 'মোট ব্যালেন্স' : 'Total Balance'}</p>
-              <h2 className="text-xl font-black tracking-tight text-gray-900 dark:text-white leading-none">
-                {balanceVisible
-                  ? formatCurrency(stats?.totalBalance || 0, isBn)
-                  : (isBn ? '৳•••••' : '৳•••••')
-                }
+            <div className="rounded-2xl p-3.5 relative overflow-hidden" style={{background:'linear-gradient(135deg,rgba(16,185,129,0.18) 0%,rgba(5,150,105,0.10) 100%)',border:'1px solid rgba(16,185,129,0.32)'}}>
+              <div className="absolute top-0 left-0 w-1 h-full rounded-l-2xl bg-gradient-to-b from-emerald-400 to-green-600" />
+              <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold mb-1.5 uppercase tracking-wider pl-2">{isBn ? 'মোট ব্যালেন্স' : 'Total Balance'}</p>
+              <h2 className="text-xl font-black tracking-tight text-gray-900 dark:text-white leading-none pl-2">
+                {balanceVisible ? formatCurrency(stats?.totalBalance || 0, isBn) : '৳•••••'}
               </h2>
             </div>
-            
-            <div className="neu-sunken p-3.5 rounded-2xl border-0">
-              <p className="text-[10px] text-gray-400 dark:text-gray-500 font-extrabold mb-1.5 uppercase tracking-wider">{isBn ? 'সঞ্চয় ব্যালেন্স' : 'Savings Balance'}</p>
-              <h2 className="text-xl font-black tracking-tight text-gray-900 dark:text-white leading-none">
-                {balanceVisible
-                  ? formatCurrency(stats?.savingsBalance || 0, isBn)
-                  : (isBn ? '৳•••••' : '৳•••••')
-                }
+            <div className="rounded-2xl p-3.5 relative overflow-hidden" style={{background:'linear-gradient(135deg,rgba(139,92,246,0.18) 0%,rgba(109,40,217,0.10) 100%)',border:'1px solid rgba(139,92,246,0.32)'}}>
+              <div className="absolute top-0 left-0 w-1 h-full rounded-l-2xl bg-gradient-to-b from-violet-400 to-purple-600" />
+              <p className="text-[10px] text-violet-600 dark:text-violet-400 font-extrabold mb-1.5 uppercase tracking-wider pl-2">{isBn ? 'সঞ্চয় ব্যালেন্স' : 'Savings Balance'}</p>
+              <h2 className="text-xl font-black tracking-tight text-gray-900 dark:text-white leading-none pl-2">
+                {balanceVisible ? formatCurrency(stats?.savingsBalance || 0, isBn) : '৳•••••'}
               </h2>
             </div>
           </div>
@@ -496,38 +530,31 @@ export default function Home() {
         </div>
  
         {/* Floating Deposit & Withdraw cards */}
-        <div className="absolute -bottom-10 left-4 right-4 flex gap-4">
+        <div className="absolute -bottom-8 left-4 right-4 flex gap-4">
           <Link
             to="/deposit"
-            className="flex-1 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 rounded-2xl p-3.5 flex items-center gap-3 active:scale-95 hover:scale-[1.02] transition-all duration-300 neu-raised"
+            className="flex-1 rounded-full p-3 pl-4 pr-5 flex items-center gap-3 active:scale-95 hover:scale-[1.02] transition-all duration-300"
+            style={{background:'linear-gradient(135deg,#10b981,#059669)',boxShadow:'0 6px 20px -4px rgba(16,185,129,0.45)',border:'1px solid rgba(16,185,129,0.5)'}}
           >
-            <div className="w-10 h-10 rounded-full neu-badge-green flex items-center justify-center shrink-0 border-0">
-              <ArrowDownToLine size={18} className="text-white" />
+            <div className="w-9 h-9 rounded-full bg-white/25 flex items-center justify-center shrink-0">
+              <ArrowDownToLine size={16} className="text-white" />
             </div>
             <div>
-              <p className="text-[9px] text-emerald-600/70 dark:text-emerald-400/70 uppercase tracking-widest font-black leading-none mb-1">
-                {isBn ? 'ডিপোজিট' : 'DEPOSIT'}
-              </p>
-              <p className="text-base font-black leading-none text-gray-800 dark:text-gray-200">
-                {balanceVisible ? formatCurrency(stats?.depositBalance || 0, isBn) : '৳•••'}
-              </p>
+              <p className="text-[9px] text-white/75 uppercase tracking-widest font-black leading-none mb-0.5">{isBn ? 'ডিপোজিট' : 'DEPOSIT'}</p>
+              <p className="text-sm font-black leading-none text-white">{balanceVisible ? formatCurrency(stats?.depositBalance || 0, isBn) : '৳•••'}</p>
             </div>
           </Link>
- 
           <Link
             to="/withdraw"
-            className="flex-1 bg-rose-500/10 hover:bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25 rounded-2xl p-3.5 flex items-center gap-3 active:scale-95 hover:scale-[1.02] transition-all duration-300 neu-raised"
+            className="flex-1 rounded-full p-3 pl-4 pr-5 flex items-center gap-3 active:scale-95 hover:scale-[1.02] transition-all duration-300"
+            style={{background:'linear-gradient(135deg,#f43f5e,#e11d48)',boxShadow:'0 6px 20px -4px rgba(244,63,94,0.45)',border:'1px solid rgba(244,63,94,0.5)'}}
           >
-            <div className="w-10 h-10 rounded-full neu-badge-red flex items-center justify-center shrink-0 border-0">
-              <ArrowUpFromLine size={18} className="text-white" />
+            <div className="w-9 h-9 rounded-full bg-white/25 flex items-center justify-center shrink-0">
+              <ArrowUpFromLine size={16} className="text-white" />
             </div>
             <div>
-              <p className="text-[9px] text-rose-600/70 dark:text-rose-400/70 uppercase tracking-widest font-black leading-none mb-1">
-                {isBn ? 'উত্তোলন' : 'WITHDRAW'}
-              </p>
-              <p className="text-base font-black leading-none text-gray-800 dark:text-gray-200">
-                {balanceVisible ? formatCurrency(stats?.withdrawBalance || 0, isBn) : '৳•••'}
-              </p>
+              <p className="text-[9px] text-white/75 uppercase tracking-widest font-black leading-none mb-0.5">{isBn ? 'উত্তোলন' : 'WITHDRAW'}</p>
+              <p className="text-sm font-black leading-none text-white">{balanceVisible ? formatCurrency(stats?.withdrawBalance || 0, isBn) : '৳•••'}</p>
             </div>
           </Link>
         </div>
@@ -711,101 +738,116 @@ export default function Home() {
  
       {/* Success Stories */}
       {stories.length > 0 && (
-        <div>
+        <div className="w-full overflow-hidden">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-extrabold text-gray-900 dark:text-white text-base transition-colors">
               {isBn ? 'সাফল্যের গল্প' : 'Success Stories'}
             </h3>
+            <span className="text-[10px] font-black text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 px-2.5 py-1 rounded-full">
+              {convertDigits(stories.length, isBn)} {isBn ? 'জন' : 'Members'}
+            </span>
           </div>
-          <div className="relative pb-6 px-1 h-[210px]">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentStoryIndex}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="absolute inset-0 px-1"
-              >
-                <div className="relative w-full h-full neu-raised rounded-[24px] p-5 border-0 overflow-hidden transition-colors flex flex-col justify-between">
-                  {/* ── Decorative Background Layer ── */}
-                  {/* Gradient mesh blob - top right */}
-                  <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-gradient-to-bl from-blue-400/15 via-indigo-400/10 to-transparent dark:from-blue-500/10 dark:via-indigo-500/5 blur-2xl z-0 transition-colors" />
-                  {/* Gradient mesh blob - bottom left */}
-                  <div className="absolute -bottom-6 -left-6 w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-400/12 via-teal-400/8 to-transparent dark:from-emerald-500/8 dark:via-teal-500/4 blur-2xl z-0 transition-colors" />
-                  {/* Subtle center accent */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full bg-gradient-to-br from-purple-300/5 via-pink-300/5 to-transparent dark:from-purple-500/3 dark:via-pink-500/3 blur-3xl z-0 transition-colors" />
+          {/* Horizontal scrollable card list */}
+          <div
+            ref={storyScrollRef}
+            className="flex gap-3 overflow-x-auto pb-3 hide-scrollbar -mx-5 px-5 snap-x snap-mandatory"
+            onMouseEnter={() => { storyScrollPaused.current = true; }}
+            onMouseLeave={() => { storyScrollPaused.current = false; }}
+            onTouchStart={() => { storyScrollPaused.current = true; }}
+            onTouchEnd={() => { setTimeout(() => { storyScrollPaused.current = false; }, 1500); }}
+          >
+            {(() => {
+              // 10 deep colors — harmonious with app's primary #13bcff cyan-blue palette
+              const storyColors = [
+                { bg: 'linear-gradient(145deg, #003d66, #001f33)', border: 'rgba(19, 188, 255, 0.45)', accent: 'rgba(19, 188, 255, 0.25)', textMuted: 'text-cyan-200' },
+                { bg: 'linear-gradient(145deg, #005c99, #002b47)', border: 'rgba(0, 153, 230, 0.45)', accent: 'rgba(0, 153, 230, 0.25)', textMuted: 'text-blue-200' },
+                { bg: 'linear-gradient(145deg, #064e3b, #022c22)', border: 'rgba(16, 185, 129, 0.45)', accent: 'rgba(16, 185, 129, 0.25)', textMuted: 'text-emerald-200' },
+                { bg: 'linear-gradient(145deg, #312e81, #1e1b4b)', border: 'rgba(99, 102, 241, 0.45)', accent: 'rgba(99, 102, 241, 0.25)', textMuted: 'text-indigo-200' },
+                { bg: 'linear-gradient(145deg, #115e59, #042f2e)', border: 'rgba(20, 184, 166, 0.45)', accent: 'rgba(20, 184, 166, 0.25)', textMuted: 'text-teal-200' },
+                { bg: 'linear-gradient(145deg, #164e63, #083344)', border: 'rgba(6, 182, 212, 0.45)', accent: 'rgba(6, 182, 212, 0.25)', textMuted: 'text-cyan-200' },
+                { bg: 'linear-gradient(145deg, #1e3a8a, #172554)', border: 'rgba(59, 130, 246, 0.45)', accent: 'rgba(59, 130, 246, 0.25)', textMuted: 'text-blue-200' },
+                { bg: 'linear-gradient(145deg, #4c1d95, #2e1065)', border: 'rgba(139, 92, 246, 0.45)', accent: 'rgba(139, 92, 246, 0.25)', textMuted: 'text-purple-200' },
+                { bg: 'linear-gradient(145deg, #78350f, #451a03)', border: 'rgba(245, 158, 11, 0.45)', accent: 'rgba(245, 158, 11, 0.25)', textMuted: 'text-amber-200' },
+                { bg: 'linear-gradient(145deg, #881337, #4c0519)', border: 'rgba(244, 63, 94, 0.45)', accent: 'rgba(244, 63, 94, 0.25)', textMuted: 'text-rose-200' },
+              ];
 
-                  {/* Geometric pattern overlay */}
-                  <div className="absolute inset-0 z-0 opacity-[0.03] dark:opacity-[0.04]" style={{
-                    backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
-                    backgroundSize: '20px 20px'
-                  }} />
+              // Triplicate for seamless infinite scroll
+              const loopedStories = [...stories.slice(0, 10), ...stories.slice(0, 10), ...stories.slice(0, 10)];
 
-                  {/* Decorative shapes */}
-                  <div className="absolute top-6 right-14 w-5 h-5 border-2 border-blue-300/15 dark:border-blue-400/10 rounded rotate-45 z-0 transition-colors" />
-                  <div className="absolute bottom-8 right-8 w-3 h-3 bg-emerald-400/10 dark:bg-emerald-400/8 rounded-full z-0 transition-colors" />
-                  <div className="absolute top-14 right-6 w-2 h-2 bg-amber-400/15 dark:bg-amber-400/10 rounded-full z-0 transition-colors" />
-                  <div className="absolute bottom-12 left-6 w-4 h-4 border border-purple-300/10 dark:border-purple-400/8 rounded-full z-0 transition-colors" />
+              return loopedStories.map((story, i) => {
+                const realIndex = i % storyColors.length;
+                const theme = storyColors[realIndex];
+                const serialNum = (i % stories.slice(0, 10).length) + 1;
+                return (
+                  <div
+                    key={`${story.id || i}-${i}`}
+                    className="shrink-0 w-[320px] rounded-[22px] p-4 flex flex-col relative overflow-hidden shadow-lg snap-center"
+                    style={{
+                      background: theme.bg,
+                      minHeight: '195px',
+                    }}
+                  >
+                    {/* Dot grid watermark */}
+                    <div className="absolute inset-0 z-0 opacity-[0.07]" style={{
+                      backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,1) 1px, transparent 0)`,
+                      backgroundSize: '16px 16px'
+                    }} />
 
-                  {/* Bottom gradient fade */}
-                  <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white/40 via-white/10 to-transparent dark:from-gray-900/30 dark:via-gray-900/5 z-0 pointer-events-none transition-colors" />
+                    {/* Glow orb */}
+                    <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full pointer-events-none z-0"
+                      style={{ background: theme.accent, filter: 'blur(20px)' }} />
 
-                  {/* Quote icon watermark */}
-                  <div className="absolute top-4 right-4 text-blue-200/30 dark:text-blue-800/20 transition-colors z-0">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg>
-                  </div>
- 
-                  <div className="flex gap-3 mb-2 relative z-10 w-full overflow-hidden items-center">
-                    <div className="w-12 h-12 rounded-full p-[2px] bg-gradient-to-tr from-pink-500 via-red-500 via-yellow-400 via-green-400 via-blue-500 to-purple-600 flex items-center justify-center shrink-0 shadow-sm">
-                      <img
-                        src={stories[safeStoryIndex].avatar_url || `https://ui-avatars.com/api/?name=${stories[safeStoryIndex].name}&background=random`}
-                        alt={stories[safeStoryIndex].name}
-                        onError={(e) => {
-                          const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(stories[safeStoryIndex].name)}&background=random`;
-                          if (e.currentTarget.src !== fallback) {
-                            e.currentTarget.src = fallback;
-                          }
-                        }}
-                        className="w-full h-full rounded-full object-cover bg-white dark:bg-gray-800"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="font-extrabold text-xs text-gray-900 dark:text-white flex items-center gap-1 transition-colors truncate">
-                        {stories[safeStoryIndex].name}
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="#3b82f6" className="shrink-0"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
-                      </h4>
-                      <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 transition-colors truncate">{stories[safeStoryIndex].loan_type}</p>
-                    </div>
-                  </div>
-                  <div className="mb-1.5 relative z-10">
-                    <p className="text-base font-black text-primary-600 dark:text-primary-400 transition-colors leading-none mb-1">{formatCurrency(stories[safeStoryIndex].amount || 0, isBn)}</p>
-                    <p className="text-[9px] font-extrabold text-gray-500 dark:text-gray-400 transition-colors truncate">{convertDigits(stories[safeStoryIndex].approval_time, isBn)}</p>
-                  </div>
-                  <div className="flex justify-between items-center relative z-10 w-full mt-1.5">
-                    {/* Rating Stars (Left) */}
-                    <div className="flex gap-0.5 text-yellow-400">
-                      {[...Array(Math.min(stories[safeStoryIndex].rating || 5, 5))].map((_, i) => (
-                        <Star key={i} size={10} fill="currentColor" className="border-0" />
-                      ))}
-                    </div>
-                    {/* Story Indicator Dots (Right) */}
-                    <div className="flex items-center gap-1.5">
-                      {stories.map((_, i) => (
-                        <div
-                          key={i}
-                          className={`rounded-full transition-all duration-300 ${
-                            i === safeStoryIndex
-                              ? 'w-4 h-1.5 bg-primary-500 dark:bg-primary-400'
-                              : 'w-1.5 h-1.5 bg-gray-300 dark:bg-gray-600'
-                          }`}
+                    {/* Avatar + Name row — full width, no badge overlap */}
+                    <div className="flex items-center gap-2.5 relative z-10 mb-3 pr-0">
+                      <div className="w-11 h-11 rounded-full p-[2px] bg-white/20 flex items-center justify-center shrink-0 border border-white/25">
+                        <img
+                          src={story.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(story.name)}&background=random`}
+                          alt={story.name}
+                          onError={(e) => {
+                            const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(story.name)}&background=random`;
+                            if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
+                          }}
+                          className="w-full h-full rounded-full object-cover"
                         />
-                      ))}
+                      </div>
+                      <div className="min-w-0 flex-1 overflow-hidden">
+                        <p className="text-[11px] font-black text-white flex items-center gap-1 whitespace-nowrap overflow-hidden" style={{textOverflow:'ellipsis'}}>
+                          <span className="truncate">{story.name}</span>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="shrink-0 text-white/70"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
+                        </p>
+                        <p className={`text-[9px] font-bold truncate mt-0.5 ${theme.textMuted}`}>{story.loan_type}</p>
+                      </div>
+                    </div>
+
+                    {/* Amount */}
+                    <div className="relative z-10 mb-3 flex-1">
+                      <p className="text-[10px] text-white/50 font-bold uppercase tracking-wider mb-0.5">
+                        {isBn ? 'লোন পরিমাণ' : 'Loan Amount'}
+                      </p>
+                      <p className="text-xl font-black text-white leading-none">
+                        {formatCurrency(story.amount || 0, isBn)}
+                      </p>
+                      <p className={`text-[9px] font-bold mt-0.5 ${theme.textMuted}`}>
+                        {convertDigits(story.approval_time, isBn)}
+                      </p>
+                    </div>
+
+                    {/* Bottom row: Stars + Serial badge */}
+                    <div className="flex items-center justify-between relative z-10">
+                      <div className="flex gap-0.5 text-yellow-400">
+                        {[...Array(Math.min(story.rating || 5, 5))].map((_, si) => (
+                          <Star key={si} size={9} fill="currentColor" />
+                        ))}
+                      </div>
+                      {/* Serial number badge — bottom right, no overlap */}
+                      <div className="w-5 h-5 rounded-full bg-white/15 flex items-center justify-center border border-white/25">
+                        <span className="text-[8px] font-black text-white leading-none">{convertDigits(serialNum, isBn)}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
+                );
+              });
+            })()}
           </div>
         </div>
       )}

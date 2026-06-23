@@ -1,21 +1,52 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, FileText, PlusCircle, CreditCard, User, MessageCircle } from 'lucide-react';
+import { Home, FileText, PlusCircle, CreditCard, HelpCircle } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppStore } from '../lib/store';
+import { supabase } from '../lib/supabase';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const { language } = useAppStore();
   const isBn = language === 'bn';
+  const [adminOnline, setAdminOnline] = useState<boolean | null>(null);
+
+  // Real-time admin online status
+  useEffect(() => {
+    // Fetch initial status
+    supabase
+      .from('admin_status')
+      .select('is_online')
+      .eq('id', 1)
+      .single()
+      .then(({ data }) => {
+        if (data) setAdminOnline(data.is_online);
+      });
+
+    // Subscribe to real-time changes
+    const channel = supabase
+      .channel('admin-status-channel')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'admin_status', filter: 'id=eq.1' },
+        (payload) => {
+          setAdminOnline(payload.new.is_online);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const navItems = [
     { name: isBn ? 'হোম' : 'Home', path: '/', icon: Home },
     { name: isBn ? 'লোন' : 'Loans', path: '/loans', icon: FileText },
     { name: isBn ? 'আবেদন' : 'Apply', path: '/apply', icon: PlusCircle, isPrimary: true },
     { name: isBn ? 'লেনদেন' : 'History', path: '/transactions', icon: CreditCard },
-    { name: isBn ? 'প্রোফাইল' : 'Profile', path: '/profile', icon: User },
+    { name: isBn ? 'শর্তাবলী' : 'FAQ', path: '/terms', icon: HelpCircle },
   ];
 
   const isSupportPage = location.pathname === '/support';
@@ -24,7 +55,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="flex flex-col h-full sm:h-[90vh] sm:max-h-[850px] w-full max-w-md mx-auto neu-bg sm:rounded-[2.5rem] relative overflow-hidden shadow-2xl sm:border-[8px] border-gray-900 my-auto transition-colors">
       {/* Main Content Area */}
       <div className={cn(
-        "flex-1 scroll-smooth",
+        "flex-1 scroll-smooth overflow-x-hidden",
         isSupportPage ? "overflow-hidden pb-0" : "overflow-y-auto pb-24"
       )}>
         <AnimatePresence mode="wait">
@@ -41,29 +72,93 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
       </div>
 
-      {/* Bottom Navigation */}
-      
       {/* Support / Live Chat FAB - only on home page */}
       {location.pathname === '/' && (
         <>
+
           <style>{`
-            @keyframes waterFlow {
-              0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.7), 0 0 0 4px rgba(239,68,68,0.3); }
-              50%  { box-shadow: 0 0 0 6px rgba(239,68,68,0.2), 0 0 0 12px rgba(239,68,68,0.05); }
-              100% { box-shadow: 0 0 0 0 rgba(239,68,68,0), 0 0 0 0 rgba(239,68,68,0); }
+            @keyframes floatBounce {
+              0%, 100% { transform: translateY(0px) rotate(-2deg); }
+              25%       { transform: translateY(-8px) rotate(1deg); }
+              50%       { transform: translateY(-5px) rotate(-1deg); }
+              75%       { transform: translateY(-10px) rotate(2deg); }
             }
-            .live-badge {
-              animation: waterFlow 1.8s ease-out infinite;
+            @keyframes liveDotPing {
+              0%, 100% { transform: scale(1); opacity: 1; }
+              50%       { transform: scale(1.6); opacity: 0; }
+            }
+            .chat-fab {
+              animation: floatBounce 2.8s ease-in-out infinite;
+            }
+            .chat-fab:hover {
+              animation-play-state: paused;
+            }
+            .live-dot {
+              animation: liveDotPing 1.2s ease-in-out infinite;
             }
           `}</style>
+
           <Link
             to="/support"
-            className="absolute bottom-28 right-5 bg-red-600 rounded-full w-12 h-12 z-40 active:scale-90 transition-transform live-badge flex items-center justify-center text-white shadow-lg shadow-red-600/30 cursor-pointer"
+            className="absolute bottom-28 right-5 w-16 h-16 z-40 cursor-pointer chat-fab"
+            style={{ background: 'none', position: 'absolute' }}
           >
-            <MessageCircle size={22} strokeWidth={2.5} />
+            {/* Live dot indicator — green=online, red=offline, gray=loading */}
+            <span className="absolute -top-1 -right-1 flex w-4 h-4 items-center justify-center z-10">
+              <span
+                className="live-dot absolute inline-flex w-full h-full rounded-full opacity-75"
+                style={{ backgroundColor: adminOnline === null ? '#9ca3af' : adminOnline ? '#4ade80' : '#f87171' }}
+              ></span>
+              <span
+                className="relative inline-flex w-2.5 h-2.5 rounded-full border-2 border-white"
+                style={{ backgroundColor: adminOnline === null ? '#6b7280' : adminOnline ? '#22c55e' : '#ef4444' }}
+              ></span>
+            </span>
+
+            <svg viewBox="0 0 100 100" className="w-full h-full" style={{ background: 'transparent', overflow: 'visible' }}>
+              {/* Red Bubble Background */}
+              <path 
+                d="M 68, 48 C 80, 48 90, 55 90, 63 C 90, 68 87, 72 82, 75 C 84, 81 89, 84 89, 84 C 89, 84 82, 82 77, 78 C 74, 78 71, 78 68, 78 C 56, 78 46, 71 46, 63 C 46, 55 56, 48 68, 48 Z" 
+                fill="#dc2626" 
+              />
+              
+              {/* Main White Bubble Background */}
+              <path 
+                d="M 42, 10 C 62, 10 78, 22 78, 38 C 78, 54 62, 66 42, 66 C 37, 66 33, 65 29, 63 C 20, 69 9, 70 9, 70 C 9, 70 15, 64 17, 58 C 11, 53 7, 46 7, 38 C 7, 22 23, 10 42, 10 Z" 
+                fill="#ffffff" 
+              />
+              
+
+              
+              {/* Text inside main bubble */}
+              <text 
+                x="42" 
+                y="31" 
+                fill="#1a1a1a" 
+                fontSize="17" 
+                fontWeight="900" 
+                fontFamily="'Outfit', 'Inter', 'Arial', sans-serif" 
+                textAnchor="middle"
+              >
+                Live
+              </text>
+              <text 
+                x="42" 
+                y="51" 
+                fill="#dc2626" 
+                fontSize="20" 
+                fontWeight="900" 
+                fontFamily="'Outfit', 'Inter', 'Arial', sans-serif" 
+                textAnchor="middle"
+              >
+                Chat
+              </text>
+            </svg>
           </Link>
         </>
       )}
+      
+
 
       {!isSupportPage && (
         <div className="absolute bottom-4 left-4 right-4 neu-raised px-4 py-2 rounded-[24px] transition-colors z-50">

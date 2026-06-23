@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, MessageCircle, Copy, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, MessageCircle, Copy, ArrowLeft, Edit2 } from 'lucide-react';
 import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
@@ -72,6 +72,10 @@ export default function AdminDashboard() {
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [adminReplyText, setAdminReplyText] = useState('');
+  const [replyingToMsg, setReplyingToMsg] = useState<any>(null);
+  const [editingMsgId, setEditingMsgId] = useState<string | null>(null);
+  const [userTyping, setUserTyping] = useState(false);
+  const adminTypingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // New Story Form State
   const [newStory, setNewStory] = useState({
@@ -267,6 +271,39 @@ export default function AdminDashboard() {
     fetchData();
   }, []);
 
+  // ── Admin Online Presence ──────────────────────────────────────────────
+  useEffect(() => {
+    const setOnline = async () => {
+      await supabase
+        .from('admin_status')
+        .update({ is_online: true, last_seen: new Date().toISOString(), updated_at: new Date().toISOString() })
+        .eq('id', 1);
+    };
+
+    const setOffline = async () => {
+      await supabase
+        .from('admin_status')
+        .update({ is_online: false, last_seen: new Date().toISOString(), updated_at: new Date().toISOString() })
+        .eq('id', 1);
+    };
+
+    // Mark online immediately
+    setOnline();
+
+    // Heartbeat every 30 seconds to keep "online" fresh
+    const heartbeat = setInterval(setOnline, 30_000);
+
+    // Mark offline when admin closes tab or navigates away
+    const handleBeforeUnload = () => { setOffline(); };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      clearInterval(heartbeat);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      setOffline();
+    };
+  }, []);
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -321,11 +358,21 @@ export default function AdminDashboard() {
 
         setChatUsers(sortedUsers);
 
-        // If there's a selected user, update their messages
+        // If there's a selected user, update their messages and mark unseen as seen
         if (selectedChatId) {
           const selectedGroup = userGroups[selectedChatId];
           if (selectedGroup) {
             setChatMessages(selectedGroup.messages);
+            
+            // Mark user messages as seen
+            const unseenUserMsgs = selectedGroup.messages.filter((m: any) => m.sender === 'user' && !m.is_seen);
+            if (unseenUserMsgs.length > 0) {
+              supabase
+                .from('support_messages')
+                .update({ is_seen: true })
+                .in('id', unseenUserMsgs.map((m: any) => m.id))
+                .then();
+            }
           }
         }
       }
@@ -342,28 +389,46 @@ export default function AdminDashboard() {
     setAdminReplyText('');
 
     try {
-      const { error } = await supabase.from('support_messages').insert({
-        chat_id: selectedChatId,
-        sender: 'admin',
-        message: replyMsg
-      });
+      if (editingMsgId) {
+        // Edit mode
+        const { error } = await supabase.from('support_messages').update({
+          message: replyMsg,
+          is_edited: true
+        }).eq('id', editingMsgId);
 
-      if (!error) {
-        setChatMessages(prev => [
-          ...prev,
-          {
-            id: Math.random().toString(),
-            chat_id: selectedChatId,
-            sender: 'admin',
-            message: replyMsg,
-            created_at: new Date().toISOString()
-          }
-        ]);
+        if (!error) {
+          setEditingMsgId(null);
+        } else {
+          console.error('Error editing admin reply:', error);
+        }
       } else {
-        console.error('Error sending admin reply:', error);
+        // Send new mode
+        const { error } = await supabase.from('support_messages').insert({
+          chat_id: selectedChatId,
+          sender: 'admin',
+          message: replyMsg,
+          reply_to: replyingToMsg?.id || null
+        });
+
+        if (!error) {
+          setReplyingToMsg(null);
+        } else {
+          console.error('Error sending admin reply:', error);
+        }
       }
     } catch (err) {
-      console.error('Error sending admin reply:', err);
+      console.error('Error with admin reply:', err);
+    }
+  };
+
+  const handleAdminTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAdminReplyText(e.target.value);
+    if (selectedChatId) {
+      supabase.channel(`typing_chat_${selectedChatId}`).send({
+        type: 'broadcast',
+        event: 'typing',
+        payload: { sender: 'admin' }
+      });
     }
   };
 
@@ -387,6 +452,8 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
+    let typingChannel: any;
+
     if (activeTab === 'chat') {
       fetchAllChatData();
 
@@ -401,8 +468,26 @@ export default function AdminDashboard() {
         )
         .subscribe();
 
+      // Listen for user typing
+      if (selectedChatId) {
+        typingChannel = supabase.channel(`typing_chat_${selectedChatId}`);
+        typingChannel
+          .on('broadcast', { event: 'typing' }, (payload: any) => {
+            if (payload.payload.sender === 'user') {
+              setUserTyping(true);
+              if (adminTypingTimeoutRef.current) clearTimeout(adminTypingTimeoutRef.current);
+              adminTypingTimeoutRef.current = setTimeout(() => {
+                setUserTyping(false);
+              }, 3000);
+            }
+          })
+          .subscribe();
+      }
+
       return () => {
         supabase.removeChannel(channel);
+        if (typingChannel) supabase.removeChannel(typingChannel);
+        if (adminTypingTimeoutRef.current) clearTimeout(adminTypingTimeoutRef.current);
       };
     }
   }, [activeTab, selectedChatId, profiles]);
@@ -1852,17 +1937,49 @@ export default function AdminDashboard() {
                                         <Trash2 size={14} />
                                       </button>
                                     )}
-                                    <div className={`max-w-[70%] rounded-[18px] px-4 py-2.5 shadow-sm text-xs font-semibold leading-relaxed ${
+                                    <div className={`max-w-[70%] rounded-[18px] px-4 py-2.5 shadow-sm text-xs font-semibold leading-relaxed relative ${
                                       isUser 
                                         ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-tl-none border border-gray-100 dark:border-gray-850'
                                         : 'bg-primary-600 text-white rounded-tr-none'
                                     }`}>
+                                      {msg.reply_to && (
+                                        <div className={`mb-2 pl-2 border-l-2 text-[10px] opacity-75 rounded bg-black/5 dark:bg-white/5 p-1 ${isUser ? 'border-gray-400' : 'border-blue-300'}`}>
+                                          {chatMessages.find(m => m.id === msg.reply_to)?.message || 'Original message deleted'}
+                                        </div>
+                                      )}
                                       <p className="break-words whitespace-pre-wrap">{msg.message}</p>
-                                      <span className={`text-[8px] block text-right mt-1.5 opacity-60 font-mono ${
-                                        isUser ? 'text-gray-400 dark:text-gray-500' : 'text-primary-100'
-                                      }`}>
-                                        {new Date(msg.created_at).toLocaleTimeString(isBn ? 'bn-BD' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
-                                      </span>
+                                      
+                                      <div className={`flex items-center justify-end gap-1 mt-1.5 opacity-80 ${isUser ? 'text-gray-400' : 'text-primary-100'}`}>
+                                        {msg.is_edited && <span className="text-[8px] italic mr-1">edited</span>}
+                                        <span className="text-[8px] block font-mono">
+                                          {new Date(msg.created_at).toLocaleTimeString(isBn ? 'bn-BD' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                        {!isUser && (
+                                          <span className="text-[10px]">
+                                            {msg.is_seen ? <span className="text-blue-300 dark:text-blue-200">✓✓</span> : <span className="opacity-70">✓</span>}
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      {/* Reply & Edit Buttons */}
+                                      <div className={`absolute top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 ${isUser ? '-right-14' : '-left-14'}`}>
+                                        <button 
+                                          onClick={() => setReplyingToMsg(msg)}
+                                          className="w-6 h-6 flex items-center justify-center rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-500 hover:text-primary-500"
+                                          title="Reply"
+                                        >
+                                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg>
+                                        </button>
+                                        {!isUser && (
+                                          <button 
+                                            onClick={() => { setEditingMsgId(msg.id); setAdminReplyText(msg.message); setReplyingToMsg(null); }}
+                                            className="w-6 h-6 flex items-center justify-center rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-500 hover:text-primary-500"
+                                            title="Edit"
+                                          >
+                                            <Edit2 size={10} />
+                                          </button>
+                                        )}
+                                      </div>
                                     </div>
                                     {isUser && (
                                       <button
@@ -1879,6 +1996,31 @@ export default function AdminDashboard() {
                               })}
                             </div>
 
+                            {/* Typing Indicator */}
+                            {userTyping && (
+                              <div className="px-5 py-1 text-xs text-gray-500 dark:text-gray-400 font-semibold animate-pulse">
+                                {isBn ? 'গ্রাহক টাইপ করছেন...' : 'User is typing...'}
+                              </div>
+                            )}
+
+                            {/* Replying/Editing Preview */}
+                            {(replyingToMsg || editingMsgId) && (
+                              <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-xs">
+                                <div className="truncate text-gray-600 dark:text-gray-300">
+                                  {editingMsgId ? (
+                                    <span className="font-bold text-amber-500 flex items-center gap-1"><Edit2 size={10} /> Editing Message:</span>
+                                  ) : (
+                                    <>
+                                      <span className="font-bold text-primary-500">Replying to {replyingToMsg.sender === 'admin' ? 'yourself' : 'user'}:</span> {replyingToMsg.message}
+                                    </>
+                                  )}
+                                </div>
+                                <button onClick={() => { setReplyingToMsg(null); setEditingMsgId(null); setAdminReplyText(''); }} className="text-gray-400 hover:text-gray-600">
+                                  <XCircle size={14} />
+                                </button>
+                              </div>
+                            )}
+
                             {/* Reply Input Form */}
                             <form 
                               onSubmit={handleSendAdminReply}
@@ -1887,7 +2029,7 @@ export default function AdminDashboard() {
                               <input
                                 type="text"
                                 value={adminReplyText}
-                                onChange={(e) => setAdminReplyText(e.target.value)}
+                                onChange={handleAdminTyping}
                                 placeholder={isBn ? 'গ্রাহককে উত্তর লিখুন...' : 'Type a reply...'}
                                 className="flex-1 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-xs font-medium outline-none focus:border-primary-500 text-gray-900 dark:text-white"
                               />
@@ -1896,7 +2038,7 @@ export default function AdminDashboard() {
                                 disabled={!adminReplyText.trim()}
                                 className="bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 px-4 py-2.5 rounded-xl font-bold text-xs shadow active:scale-95 transition-all"
                               >
-                                {isBn ? 'পাঠান' : 'Reply'}
+                                {editingMsgId ? (isBn ? 'সেভ করুন' : 'Save') : (isBn ? 'পাঠান' : 'Reply')}
                               </button>
                             </form>
                           </>

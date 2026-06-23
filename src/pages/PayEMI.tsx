@@ -340,15 +340,15 @@ export default function PayEMI() {
           </div>
           
           <div className="flex gap-3 relative z-10">
-            <button onClick={openWhatsApp} type="button" className="flex-1 neu-btn py-3.5 rounded-xl flex items-center justify-center gap-2 font-bold text-sm active:scale-95 transition-all text-gray-750 dark:text-gray-200">
+            <button onClick={openWhatsApp} type="button" className="flex-1 neu-btn py-3.5 rounded-full flex items-center justify-center gap-2 font-bold text-sm active:scale-95 transition-all text-gray-750 dark:text-gray-200">
               <MessageCircle size={18} className="text-green-500" /> WhatsApp
             </button>
-            <button onClick={openTelegram} type="button" className="flex-1 neu-btn py-3.5 rounded-xl flex items-center justify-center gap-2 font-bold text-sm active:scale-95 transition-all text-gray-755 dark:text-gray-200">
+            <button onClick={openTelegram} type="button" className="flex-1 neu-btn py-3.5 rounded-full flex items-center justify-center gap-2 font-bold text-sm active:scale-95 transition-all text-gray-755 dark:text-gray-200">
               <Send size={18} className="text-sky-500" /> Telegram
             </button>
           </div>
           
-          <div className="mt-5 neu-sunken p-3 rounded-xl border border-white/20 flex items-start gap-3 relative z-10">
+          <div className="mt-5 neu-sunken p-3 px-5 rounded-full border border-white/20 flex items-start gap-3 relative z-10">
               <AlertCircle size={16} className="text-primary-600 dark:text-primary-400 mt-0.5 shrink-0" />
               <p className="text-xs text-gray-600 dark:text-gray-300 leading-tight font-medium">
                 {isBn 
@@ -389,7 +389,7 @@ export default function PayEMI() {
                     step="any"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="w-full neu-input rounded-2xl py-4 pl-10 pr-4 text-xl font-black text-gray-900 dark:text-white focus:ring-0 transition-all outline-none" 
+                    className="w-full neu-input rounded-full py-4 pl-10 pr-4 text-xl font-black text-gray-900 dark:text-white focus:ring-0 transition-all outline-none" 
                     placeholder="0" 
                   />
                 </div>
@@ -404,7 +404,7 @@ export default function PayEMI() {
                   required
                   value={senderNo}
                   onChange={(e) => setSenderNo(e.target.value)}
-                  className="w-full neu-input rounded-2xl px-4 py-4 text-base font-bold text-gray-900 dark:text-white outline-none transition-all" 
+                  className="w-full neu-input rounded-full px-6 py-4 text-base font-bold text-gray-900 dark:text-white outline-none transition-all" 
                   placeholder="01XXXXXXXXX" 
                 />
               </div>
@@ -418,7 +418,7 @@ export default function PayEMI() {
                   required
                   value={trxId}
                   onChange={(e) => setTrxId(e.target.value)}
-                  className="w-full neu-input rounded-2xl px-4 py-4 text-base font-bold text-gray-900 dark:text-white outline-none uppercase font-mono tracking-wider transition-all" 
+                  className="w-full neu-input rounded-full px-6 py-4 text-base font-bold text-gray-900 dark:text-white outline-none uppercase font-mono tracking-wider transition-all" 
                   placeholder="A8B9C7D6E5" 
                 />
               </div>
@@ -449,7 +449,7 @@ export default function PayEMI() {
                    />
                    <label 
                      htmlFor="screenshot-upload" 
-                     className="w-full bg-transparent border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl py-6 flex flex-col items-center justify-center gap-3 active:scale-[0.99] transition-all cursor-pointer neu-raised-sm"
+                     className="w-full bg-transparent border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-[24px] py-6 flex flex-col items-center justify-center gap-3 active:scale-[0.99] transition-all cursor-pointer neu-raised-sm"
                    >
                      {uploading ? (
                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mb-1"></div>
@@ -480,7 +480,7 @@ export default function PayEMI() {
             <button
               type="submit"
               disabled={!amount || Number(amount) <= 0 || !senderNo || !trxId || submitted}
-              className="w-full mt-6 neu-btn-primary disabled:opacity-70 disabled:active:scale-100 text-white py-4 rounded-[20px] font-bold text-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              className="w-full mt-6 neu-btn-primary disabled:opacity-70 disabled:active:scale-100 text-white py-4 rounded-full font-bold text-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
               {submitted ? (
                 <span className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -514,13 +514,13 @@ export default function PayEMI() {
             <div className="flex gap-3">
               <button 
                 onClick={() => setShowConfirmModal(false)}
-                className="flex-1 py-3 rounded-xl font-bold neu-btn text-gray-700 dark:text-gray-300"
+                className="flex-1 py-3 rounded-full font-bold neu-btn text-gray-700 dark:text-gray-300"
               >
                 {isBn ? 'বাতিল' : 'Cancel'}
               </button>
               <button 
                 onClick={processPayment}
-                className="flex-1 py-3 rounded-xl font-bold neu-btn-primary text-white"
+                className="flex-1 py-3 rounded-full font-bold neu-btn-primary text-white"
               >
                 {isBn ? 'হ্যাঁ, সাবমিট' : 'Yes, Submit'}
               </button>
