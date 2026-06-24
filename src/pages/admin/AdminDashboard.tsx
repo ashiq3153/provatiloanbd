@@ -1331,8 +1331,9 @@ export default function AdminDashboard() {
                                   </svg>
                                 </a>
                               </div>
-                            </td>
-                            <td className="px-6 py-4 font-mono text-gray-600 dark:text-gray-400 text-xs">{user.chat_id}</td>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-mono text-gray-600 dark:text-gray-400 text-xs">{user.chat_id}</td>
                             <td className="px-6 py-4 font-bold text-primary-600 dark:text-primary-400">
                               <div className="flex items-center gap-1">
                                 <span>@{user.username || '-'}</span>
