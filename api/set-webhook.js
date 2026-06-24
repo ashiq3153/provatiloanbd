@@ -6,7 +6,7 @@
  * Visit: https://your-vercel-app.vercel.app/api/set-webhook
  */
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || process.env.VITE_TELEGRAM_BOT_TOKEN;
 
 export default async function handler(req, res) {
   const host = req.headers.host || "";
