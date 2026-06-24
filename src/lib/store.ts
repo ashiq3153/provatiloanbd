@@ -15,7 +15,7 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
-      theme: 'light',
+      theme: 'dark',
       language: 'bn', // Defaulting to Bangla as requested context implies Bangla might be preferred, or English
       systemSettings: null,
       soundEnabled: true,

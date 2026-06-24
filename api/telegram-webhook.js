@@ -8,6 +8,8 @@
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const MINI_APP_URL = process.env.MINI_APP_URL || "https://provatiloanbd.vercel.app";
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
 
 /**
  * Send a message via Telegram Bot API.
@@ -31,6 +33,33 @@ async function sendMessage(chatId, text, replyMarkup) {
     }
   );
   return res.json();
+}
+
+/**
+ * Save user to Supabase 'profiles' table.
+ */
+async function saveUserProfile(chatId, firstName, lastName, username) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return;
+  
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        "Content-Type": "application/json",
+        "Prefer": "resolution=merge-duplicates"
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        first_name: firstName || "",
+        last_name: lastName || null,
+        username: username || null
+      }),
+    });
+  } catch (err) {
+    console.error("Failed to save user profile:", err);
+  }
 }
 
 /**
@@ -79,6 +108,9 @@ export default async function handler(req, res) {
       // Ignore /start command (welcome message is sent from the frontend)
       // but still reply if you want — just remove this check to always reply
       if (text === "/start") {
+        // Save user to DB on /start
+        await saveUserProfile(chatId, message.chat.first_name, message.chat.last_name, message.chat.username);
+
         // Optionally send welcome for /start too
         await sendMessage(
           chatId,

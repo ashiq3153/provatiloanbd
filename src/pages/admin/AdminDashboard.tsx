@@ -12,8 +12,20 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { supabase } from '../../lib/supabase';
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings' | 'chat'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings' | 'chat' | 'broadcast'>('overview');
   const [settingsSubTab, setSettingsSubTab] = useState<'general' | 'payments' | 'announcements' | 'categories'>('general');
+
+  // Broadcast & Direct Message State
+  const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [broadcastIncludeButton, setBroadcastIncludeButton] = useState(true);
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const [broadcastStats, setBroadcastStats] = useState({ total: 0, delivered: 0, failed: 0 });
+  const [broadcastProgress, setBroadcastProgress] = useState(0);
+
+  const [showDirectMessageModal, setShowDirectMessageModal] = useState(false);
+  const [directMessageUser, setDirectMessageUser] = useState<Profile | null>(null);
+  const [directMessageText, setDirectMessageText] = useState('');
+  const [isSendingDirect, setIsSendingDirect] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loans, setLoans] = useState<LoanApplication[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -492,6 +504,73 @@ export default function AdminDashboard() {
     }
   }, [activeTab, selectedChatId, profiles]);
 
+  const handleBulkBroadcast = async () => {
+    if (!broadcastMessage.trim()) return toast.error(isBn ? 'মেসেজ লিখুন' : 'Please enter a message');
+    if (profiles.length === 0) return toast.error('No users found');
+    if (!window.confirm(isBn ? `আপনি কি ${profiles.length} জন ইউজারকে মেসেজ পাঠাতে চান?` : `Send message to ${profiles.length} users?`)) return;
+
+    setIsBroadcasting(true);
+    let delivered = 0;
+    let failed = 0;
+    
+    setBroadcastStats({ total: profiles.length, delivered: 0, failed: 0 });
+    setBroadcastProgress(0);
+
+    const miniAppUrl = import.meta.env.VITE_MINI_APP_URL || "https://provatiloanbd.vercel.app";
+    const replyMarkup = broadcastIncludeButton ? {
+      inline_keyboard: [[{ text: "📝 Open App", web_app: { url: miniAppUrl } }]]
+    } : undefined;
+
+    for (let i = 0; i < profiles.length; i++) {
+      const user = profiles[i];
+      try {
+        // We use fetch directly here to support inline keyboard
+        const response = await fetch(`https://api.telegram.org/bot${config.telegramBotToken}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: user.chat_id,
+            text: broadcastMessage,
+            parse_mode: "HTML",
+            reply_markup: replyMarkup
+          }),
+        });
+
+        if (response.ok) delivered++;
+        else failed++;
+      } catch (err) {
+        failed++;
+      }
+      setBroadcastStats({ total: profiles.length, delivered, failed });
+      setBroadcastProgress(Math.round(((i + 1) / profiles.length) * 100));
+      
+      // Delay to respect Telegram limits (30 msgs/sec)
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    setIsBroadcasting(false);
+    toast.success(isBn ? 'ব্রডকাস্ট সম্পন্ন হয়েছে' : 'Broadcast completed!');
+  };
+
+  const handleSendDirectMessage = async () => {
+    if (!directMessageUser || !directMessageText.trim()) return;
+    setIsSendingDirect(true);
+    try {
+      const success = await sendTelegramNotification(directMessageUser.chat_id, directMessageText, config.telegramBotToken);
+      if (success) {
+        toast.success(isBn ? 'মেসেজ পাঠানো হয়েছে' : 'Message sent successfully');
+        setShowDirectMessageModal(false);
+        setDirectMessageText('');
+      } else {
+        toast.error(isBn ? 'মেসেজ পাঠাতে ব্যর্থ' : 'Failed to send message');
+      }
+    } catch (err) {
+      toast.error('Error sending message');
+    } finally {
+      setIsSendingDirect(false);
+    }
+  };
+
   const handleSaveSettings = async () => {
     const loadingId = toast.loading('Saving settings...');
     const newSettings = {
@@ -745,6 +824,7 @@ export default function AdminDashboard() {
     { id: 'withdrawals', label: isBn ? 'উত্তোলন সমূহ' : 'Withdrawals', icon: Upload },
     { id: 'users', label: isBn ? 'ইউজার নিয়ন্ত্রণ' : 'Manage Users', icon: Users },
     { id: 'chat', label: isBn ? 'লাইভ চ্যাট' : 'Support Chat', icon: MessageCircle },
+    { id: 'broadcast', label: isBn ? 'ব্রডকাস্ট' : 'Broadcast', icon: Megaphone },
     { id: 'stories', label: isBn ? 'সফলতার গল্প' : 'Success Stories', icon: Star },
     { id: 'settings', label: isBn ? 'সিস্টেম সেটিংস' : 'System Settings', icon: Settings },
   ] as const;
@@ -827,6 +907,7 @@ export default function AdminDashboard() {
                   deposits: 'ডিপোজিট সমূহ',
                   withdrawals: 'উত্তোলন সমূহ',
                   users: 'ইউজার নিয়ন্ত্রণ',
+                  broadcast: 'টেলিগ্রাম ব্রডকাস্ট',
                   stories: 'সফলতার গল্প',
                   settings: 'সিস্টেম সেটিংস'
                 };
@@ -1231,17 +1312,105 @@ export default function AdminDashboard() {
                                 {user.is_banned ? <><CheckCircle size={14} /> Unban</> : <><Ban size={14} /> Suspend</>}
                               </button>
                               <button 
-                                onClick={() => handleDeleteUser(user.chat_id)}
-                                className="p-2 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl transition-colors"
-                                title="Delete User & Data"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </td>
+                                <button 
+                                  onClick={() => {
+                                    setDirectMessageUser(user);
+                                    setShowDirectMessageModal(true);
+                                  }}
+                                  className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl transition-colors"
+                                  title="Send Message"
+                                >
+                                  <MessageCircle size={16} />
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteUser(user.chat_id)}
+                                  className="p-2 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl transition-colors"
+                                  title="Delete User & Data"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </td>
                           </motion.tr>
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                </div>
+                </div>
+              )}
+
+              {activeTab === 'broadcast' && (
+                <div className="bg-white dark:bg-gray-800 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden p-8">
+                  <div className="mb-6">
+                    <h2 className="font-bold text-gray-900 dark:text-white text-xl flex items-center gap-2"><Megaphone size={24} className="text-primary-500" /> Telegram Broadcast</h2>
+                    <p className="text-sm text-gray-500 mt-1">Send promotional messages or announcements to all registered Telegram users.</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2 space-y-6">
+                      <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[20px] border border-gray-200 dark:border-gray-700">
+                        <label className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 block">Message Text (Supports HTML)</label>
+                        <textarea 
+                          value={broadcastMessage}
+                          onChange={(e) => setBroadcastMessage(e.target.value)}
+                          placeholder={`<b>Hello!</b>\n\nWe have a new offer for you...`}
+                          className="w-full h-40 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-none font-mono"
+                          disabled={isBroadcasting}
+                        />
+                        
+                        <div className="mt-4 flex items-center justify-between">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input 
+                              type="checkbox" 
+                              checked={broadcastIncludeButton}
+                              onChange={(e) => setBroadcastIncludeButton(e.target.checked)}
+                              disabled={isBroadcasting}
+                              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-4 h-4"
+                            />
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Include "Open App" Button</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <button 
+                        onClick={handleBulkBroadcast}
+                        disabled={isBroadcasting || !broadcastMessage.trim()}
+                        className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all shadow-md flex justify-center items-center gap-2 text-lg"
+                      >
+                        {isBroadcasting ? (
+                          <><Activity className="animate-spin" /> Broadcasting... {broadcastProgress}%</>
+                        ) : (
+                          <><Megaphone size={20} /> Send to {profiles.length} Users</>
+                        )}
+                      </button>
+
+                      {isBroadcasting && (
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-4 overflow-hidden">
+                          <div className="bg-primary-500 h-2 transition-all duration-300" style={{ width: `${broadcastProgress}%` }}></div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="lg:col-span-1 space-y-4">
+                      <div className="bg-white dark:bg-gray-800 p-6 rounded-[20px] border border-gray-200 dark:border-gray-700 shadow-sm relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 text-primary-500"><Users size={48} /></div>
+                        <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase mb-1">Total Audience</h3>
+                        <p className="text-3xl font-black text-gray-900 dark:text-white">{convertDigits(profiles.length, isBn)}</p>
+                      </div>
+
+                      <div className="bg-white dark:bg-gray-800 p-6 rounded-[20px] border border-emerald-200 dark:border-emerald-800/30 shadow-sm relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 text-emerald-500"><CheckCircle size={48} /></div>
+                        <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase mb-1">Delivered Successfully</h3>
+                        <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{convertDigits(broadcastStats.delivered, isBn)}</p>
+                      </div>
+
+                      <div className="bg-white dark:bg-gray-800 p-6 rounded-[20px] border border-rose-200 dark:border-rose-800/30 shadow-sm relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 text-rose-500"><XCircle size={48} /></div>
+                        <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase mb-1">Failed to Deliver</h3>
+                        <p className="text-3xl font-black text-rose-600 dark:text-rose-400">{convertDigits(broadcastStats.failed, isBn)}</p>
+                        <p className="text-[10px] text-gray-400 mt-1">Users might have blocked the bot.</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -2614,6 +2783,46 @@ export default function AdminDashboard() {
               </motion.div>
             </motion.div>
           </>
+        )}
+
+        {showDirectMessageModal && directMessageUser && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setShowDirectMessageModal(false)}></div>
+            <div className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-md p-6 relative z-10 shadow-2xl border border-gray-200 dark:border-gray-700">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <MessageCircle className="text-blue-500" /> Message User
+                </h3>
+                <button onClick={() => setShowDirectMessageModal(false)} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="mb-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400">To: <span className="font-bold text-gray-900 dark:text-white">{directMessageUser.first_name} {directMessageUser.last_name || ''}</span></p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <textarea
+                    value={directMessageText}
+                    onChange={(e) => setDirectMessageText(e.target.value)}
+                    placeholder="Type your message here..."
+                    className="w-full h-32 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-none"
+                    disabled={isSendingDirect}
+                  ></textarea>
+                </div>
+                <button
+                  onClick={handleSendDirectMessage}
+                  disabled={!directMessageText.trim() || isSendingDirect}
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                >
+                  {isSendingDirect ? <Activity className="animate-spin" size={18} /> : <MessageCircle size={18} />}
+                  {isSendingDirect ? 'Sending...' : 'Send Message'}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </AnimatePresence>
 
