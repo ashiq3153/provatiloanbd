@@ -21,7 +21,7 @@ import Terms from './pages/Terms';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import { Toaster } from 'sonner';
 import { useAppStore } from './lib/store';
-import { getTelegramUser } from './lib/telegram';
+import { getTelegramUser, sendTelegramNotification } from './lib/telegram';
 import { upsertProfile } from './lib/api';
 import { getSystemSettings } from './lib/adminApi';
 import { playUIClick, playUITap } from './lib/sound';
@@ -84,6 +84,23 @@ export default function App() {
         username: user.username || null,
         photo_url: user.photo_url || null,
       }).catch(err => console.error("Global profile sync error:", err));
+
+      // Send welcome message once per user (on /start)
+      const welcomeKey = `provati_welcome_sent_${user.id}`;
+      if (!localStorage.getItem(welcomeKey)) {
+        const welcomeMsg =
+          `🏦 <b>PROVATI LOAN-এ আপনাকে স্বাগতম।</b>\n\n` +
+          `ব্যক্তিগত, ব্যবসায়ী, প্রবাসী ও অন্যান্য ঋণের জন্য আবেদন করতে নিচের "লোন আবেদন করুন" অপশনটি নির্বাচন করুন।\n\n` +
+          `✅ দ্রুত আবেদন\n` +
+          `✅ অনলাইন প্রক্রিয়া\n` +
+          `✅ আবেদন স্ট্যাটাস ট্র্যাকিং`;
+
+        sendTelegramNotification(user.id, welcomeMsg)
+          .then(sent => {
+            if (sent) localStorage.setItem(welcomeKey, '1');
+          })
+          .catch(err => console.error("Welcome message error:", err));
+      }
     }
 
     // Fetch system settings
