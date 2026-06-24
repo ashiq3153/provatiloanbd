@@ -63,6 +63,27 @@ async function saveUserProfile(chatId, firstName, lastName, username) {
 }
 
 /**
+ * Update bot_status in Supabase 'profiles' table.
+ */
+async function updateBotStatus(chatId, botStatus) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return;
+  
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/profiles?chat_id=eq.${chatId}`, {
+      method: "PATCH",
+      headers: {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ bot_status: botStatus }),
+    });
+  } catch (err) {
+    console.error("Failed to update bot status:", err);
+  }
+}
+
+/**
  * The fixed support reply message.
  */
 const SUPPORT_MESSAGE =
@@ -124,6 +145,21 @@ export default async function handler(req, res) {
       } else {
         // Any other text → always send the fixed support message
         await sendMessage(chatId, SUPPORT_MESSAGE, getMiniAppKeyboard());
+      }
+    }
+
+    // Handle bot block/unblock
+    if (update?.my_chat_member) {
+      const myChatMember = update.my_chat_member;
+      const chatId = myChatMember.chat?.id;
+      const newStatus = myChatMember.new_chat_member?.status;
+
+      if (chatId && newStatus) {
+        let botStatus = 'active';
+        if (newStatus === 'kicked') botStatus = 'blocked';
+        else if (newStatus === 'member') botStatus = 'active';
+        
+        await updateBotStatus(chatId, botStatus);
       }
     }
 

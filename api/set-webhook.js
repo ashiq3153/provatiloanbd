@@ -21,7 +21,7 @@ export default async function handler(req, res) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           url: webhookUrl,
-          allowed_updates: ["message"],
+          allowed_updates: ["message", "my_chat_member"],
         }),
       }
     );

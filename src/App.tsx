@@ -25,6 +25,7 @@ import { getTelegramUser, sendTelegramNotification } from './lib/telegram';
 import { upsertProfile } from './lib/api';
 import { getSystemSettings } from './lib/adminApi';
 import { playUIClick, playUITap } from './lib/sound';
+import { supabase } from './lib/supabase';
 
 export default function App() {
   const theme = useAppStore(state => state.theme);
@@ -101,6 +102,23 @@ export default function App() {
           })
           .catch(err => console.error("Welcome message error:", err));
       }
+
+      // Initialize Realtime Presence for this user
+      const presenceChannel = supabase.channel('online_users', {
+        config: {
+          presence: { key: user.id.toString() }
+        }
+      });
+      
+      presenceChannel.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await presenceChannel.track({
+            chat_id: user.id,
+            first_name: user.first_name,
+            online_at: new Date().toISOString()
+          });
+        }
+      });
     }
 
     // Fetch system settings

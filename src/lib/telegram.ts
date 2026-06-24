@@ -60,6 +60,14 @@ export async function sendTelegramNotification(
     if (!response.ok) {
       const errData = await response.json();
       console.error("Telegram API Error:", errData);
+      
+      if (response.status === 403) {
+        try {
+          const { supabase } = await import('./supabase');
+          await supabase.from('profiles').update({ bot_status: 'unreachable' }).eq('chat_id', chatId);
+        } catch (e) {}
+      }
+      
       return false;
     }
 

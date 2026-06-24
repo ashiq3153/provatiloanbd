@@ -12,6 +12,7 @@ export interface Profile {
   address: string | null;
   nid_number: string | null;
   is_banned: boolean;
+  bot_status?: 'active' | 'blocked' | 'unreachable';
   created_at: string;
 }
 

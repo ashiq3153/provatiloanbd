@@ -36,7 +36,28 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<LoanApplication | null>(null);
 
-  // States for revision request flagged sections
+  const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
+
+  useEffect(() => {
+    const channel = supabase.channel('online_users');
+    
+    channel.on('presence', { event: 'sync' }, () => {
+      const state = channel.presenceState();
+      const onlineIds: number[] = [];
+      for (const id in state) {
+        if (state[id] && state[id].length > 0) {
+          onlineIds.push(Number(id));
+        }
+      }
+      setOnlineUsers(onlineIds);
+    });
+
+    channel.subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
   const [flaggedPersonal, setFlaggedPersonal] = useState(false);
   const [flaggedProfessional, setFlaggedProfessional] = useState(false);
   const [flaggedBank, setFlaggedBank] = useState(false);
@@ -963,7 +984,15 @@ export default function AdminDashboard() {
                       <div className="absolute -right-6 -top-6 w-28 h-28 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all duration-500"></div>
                       <div className="flex justify-between items-start relative z-10">
                         <div className="w-14 h-14 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center border border-blue-100/50 dark:border-blue-500/20 shadow-inner"><Users size={28} /></div>
-                        <span className="text-[10px] font-bold text-blue-500 bg-blue-500/10 px-2.5 py-1 rounded-full uppercase tracking-wider font-sans">{isBn ? 'সক্রিয়' : 'Active'}</span>
+                        <div className="flex items-center gap-1.5 bg-green-500/10 text-green-600 dark:text-green-400 px-2.5 py-1 rounded-full border border-green-500/20">
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                          </span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider font-sans">
+                            {isBn ? 'লাইভ: ' : 'Live: '} {convertDigits(onlineUsers.length, isBn)}
+                          </span>
+                        </div>
                       </div>
                       <h3 className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mt-5 relative z-10">{isBn ? 'মোট ইউজার' : 'Total Users'}</h3>
                       <p className="text-3xl font-black text-slate-800 dark:text-white mt-1.5 relative z-10 tracking-tight">{convertDigits(profiles.length, isBn)}</p>
@@ -1312,9 +1341,34 @@ export default function AdminDashboard() {
                             <td className="px-6 py-4 flex items-center gap-4">
                               <div className="relative">
                                 <img src={user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name}`} alt="" className="w-10 h-10 rounded-full shadow-sm" />
-                                {!user.is_banned && (
-                                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></div>
-                                )}
+                                {(() => {
+                                  if (user.is_banned) return null;
+                                  
+                                  let dotColor = 'bg-gray-400';
+                                  let dotTitle = 'Offline';
+                                  const isOnline = onlineUsers.includes(user.chat_id);
+                                  
+                                  if (user.bot_status === 'blocked') {
+                                    dotColor = 'bg-red-500';
+                                    dotTitle = 'Blocked Bot';
+                                  } else if (user.bot_status === 'unreachable') {
+                                    dotColor = 'bg-yellow-500';
+                                    dotTitle = 'Unreachable';
+                                  } else if (isOnline) {
+                                    dotColor = 'bg-green-500';
+                                    dotTitle = 'Online in App';
+                                  } else {
+                                    dotColor = 'bg-blue-500';
+                                    dotTitle = 'Active (Offline)';
+                                  }
+
+                                  return (
+                                    <div 
+                                      className={`absolute bottom-0 right-0 w-3 h-3 ${dotColor} border-2 border-white dark:border-gray-800 rounded-full`}
+                                      title={dotTitle}
+                                    ></div>
+                                  );
+                                })()}
                               </div>
                               <div className="flex flex-col">
                                 <div className="flex items-center gap-1.5">
