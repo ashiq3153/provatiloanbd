@@ -320,7 +320,8 @@ export default function ApplyLoan() {
     personal: true,
     professional: false,
     bank: false,
-    nominee: false
+    nominee: false,
+    guarantor: false
   });
 
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -330,6 +331,7 @@ export default function ApplyLoan() {
     professional: false,
     bank: false,
     nominee: false,
+    guarantor: false,
     documents: false
   });
   const [originalData, setOriginalData] = useState<any>(null);
@@ -437,6 +439,7 @@ export default function ApplyLoan() {
             professional: false,
             bank: false,
             nominee: false,
+            guarantor: false,
             documents: false
           };
 
@@ -451,6 +454,7 @@ export default function ApplyLoan() {
                     professional: !!parsed.flagged.professional,
                     bank: !!parsed.flagged.bank,
                     nominee: !!parsed.flagged.nominee,
+                    guarantor: !!parsed.flagged.guarantor,
                     documents: !!parsed.flagged.documents
                   };
                 }
@@ -473,11 +477,12 @@ export default function ApplyLoan() {
               personal: flagged.personal,
               professional: flagged.professional,
               bank: flagged.bank,
-              nominee: flagged.nominee
+              nominee: flagged.nominee,
+              guarantor: flagged.guarantor
             });
 
             // Auto navigate step
-            if (flagged.personal || flagged.professional || flagged.bank || flagged.nominee) {
+            if (flagged.personal || flagged.professional || flagged.bank || flagged.nominee || flagged.guarantor) {
               setStep(3);
             } else if (flagged.documents) {
               setStep(4);
@@ -572,12 +577,10 @@ export default function ApplyLoan() {
         // Validate address fields manually
         const validateAddr = (addr: AddressValue, isBn: boolean) => {
           const errs: Partial<Record<keyof AddressValue, string>> = {};
-          if (!addr.division) errs.division = isBn ? "বিভাগ নির্বাচন করুন" : "Select division";
           if (!addr.district) errs.district = isBn ? "জেলা নির্বাচন করুন" : "Select district";
           if (!addr.upazila) errs.upazila = isBn ? "উপজেলা নির্বাচন করুন" : "Select upazila";
           if (!addr.union) errs.union = isBn ? "ইউনিয়ন/পৌরসভা লিখুন" : "Enter union";
           if (!addr.village) errs.village = isBn ? "গ্রাম/মহল্লা লিখুন" : "Enter village";
-          if (!addr.postOffice) errs.postOffice = isBn ? "পোস্ট অফিস লিখুন" : "Enter post office";
           if (!addr.postCode || addr.postCode.length < 4) errs.postCode = isBn ? "পোস্ট কোড দিন" : "Enter post code";
           return errs;
         };
@@ -593,16 +596,49 @@ export default function ApplyLoan() {
         const personalFields: (keyof LoanFormData)[] = ['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'mobile', 'whatsapp', 'email', 'nidNumber'];
         
         let profFields: (keyof LoanFormData)[] = [];
-        if (category?.id === 'personal') profFields = ['companyName', 'designation', 'workDuration', 'monthlyIncome'];
-        else if (category?.id === 'business' || category?.id === 'women') profFields = ['businessName', 'shopAddress', 'tradeLicense', 'monthlyIncome'];
-        else if (category?.id === 'expat') profFields = ['workingCountry', 'visaType', 'passportNumber', 'monthlyIncome'];
-        else if (category?.id === 'student') profFields = ['institutionName', 'studentId', 'guardianIncome'];
-        else if (category?.id === 'emergency') profFields = ['professionName', 'emergencyReason', 'monthlyIncome'];
+        if (category?.id === 'personal') profFields = ['companyName', 'designation', 'workDuration', 'monthlyIncome', 'jobAddress'];
+        else if (category?.id === 'business') profFields = [
+          'businessName', 'brandName', 'shopAddress', 'tradeLicense', 'tradeLicenseIssueDate', 
+          'vatBinNumber', 'rjscNumber', 'factoryAddress', 'showroomCount', 'totalEmployees', 
+          'yearsInProfit', 'avgMonthlySales', 'seasonalSales', 'cogs', 'netProfitMargin', 
+          'accountsReceivable', 'accountsPayable', 'currentStockValue', 'loanPurposeDetails', 
+          'mainCurrentAccount', 'ccOdLimit', 'otherActiveLoans', 'monthlyIncome'
+        ];
+        else if (category?.id === 'women') profFields = [
+          'businessName', 'brandName', 'shopAddress', 'tradeLicense', 'tradeLicenseIssueDate', 
+          'vatBinNumber', 'rjscNumber', 'equityPercentage', 'applicantRole', 'productType', 
+          'rawMaterialSource', 'salesChannel', 'govtScheme', 'monthlyIncome'
+        ];
+        else if (category?.id === 'expat') profFields = [
+          'workingCountry', 'visaType', 'passportNumber', 'passportIssueDate', 'passportExpiryDate',
+          'iqamaNumber', 'foreignAddress', 'foreignMobile', 'foreignWhatsapp', 'foreignCompanyName',
+          'foreignCompanyContact', 'workerCategory', 'supervisorNameContact', 'avgMonthlyRemittance',
+          'remittanceChannel', 'receiverBankAccount', 'coApplicantName', 'coApplicantRelation',
+          'coApplicantProfession', 'coApplicantIncome', 'coApplicantNid', 'coApplicantCurrentAddress',
+          'coApplicantPermanentAddress', 'monthlyIncome'
+        ];
+        else if (category?.id === 'student') profFields = [
+          'sscRoll', 'sscReg', 'sscBoard', 'sscGpa', 'sscYear', 'sscInstitution',
+          'hscRoll', 'hscReg', 'hscBoard', 'hscGpa', 'hscYear', 'hscInstitution',
+          'gradRoll', 'gradReg', 'gradBoard', 'gradCgpa', 'gradYear', 'gradInstitution',
+          'targetUniversity', 'targetDepartment', 'courseRanking', 'creditHours', 'tuitionFee',
+          'accommodationCost', 'healthInsurance', 'otherFees', 'sponsorName', 'sponsorRelation',
+          'sponsorIncomeSource', 'sponsorJobDetails', 'sponsorTaxableIncome', 'sponsorNetWorth'
+        ];
+        else if (category?.id === 'emergency') profFields = [
+          'professionName', 'patientName', 'patientRelation', 'patientNid', 'patientCondition',
+          'hospitalName', 'referringDoctor', 'doctorBmdc', 'hospitalDepartment', 'treatmentType',
+          'estimatedCost', 'applicantContribution', 'insuranceCoverage', 'insuranceAmount', 'shortfallAmount', 'hrContactNumber'
+        ];
         
         const bankFields: (keyof LoanFormData)[] = ['bankName', 'accountName', 'accountNumber', 'routingNumber', 'mobileBanking'];
         const nomineeFields: (keyof LoanFormData)[] = ['nomineeName', 'nomineeRelation', 'nomineeMobile', 'nomineeNid'];
+        let guarantorFields: (keyof LoanFormData)[] = [];
+        if (category?.id === 'personal') {
+          guarantorFields = ['g1Name', 'g1Relation', 'g1Nid', 'g1Mobile', 'g1Address', 'g1Profession', 'g2Name', 'g2Designation', 'g2OfficialId', 'g2Email', 'g2Mobile'];
+        }
         
-        const allFields = [...personalFields, ...profFields, ...bankFields, ...nomineeFields];
+        const allFields = [...personalFields, ...profFields, ...bankFields, ...nomineeFields, ...guarantorFields];
         const isValid = await trigger(allFields);
         
         if (!isValid || hasAddrError) {
@@ -612,11 +648,13 @@ export default function ApplyLoan() {
           const hasProfError = profFields.some(f => errors[f]);
           const hasBankError = bankFields.some(f => errors[f]);
           const hasNomineeError = nomineeFields.some(f => errors[f]);
+          const hasGuarantorError = guarantorFields.some(f => errors[f]);
           
           if (hasPersonalError) newExpanded.personal = true;
           if (hasProfError) newExpanded.professional = true;
           if (hasBankError) newExpanded.bank = true;
           if (hasNomineeError) newExpanded.nominee = true;
+          if (hasGuarantorError) newExpanded.guarantor = true;
           
           setExpanded(newExpanded);
           toast.error(isBn ? 'অনুগ্রহ করে লাল চিহ্নিত ত্রুটিযুক্ত তথ্যগুলো সঠিকভাবে পূরণ করুন।' : 'Please correct the errors marked in red.');
@@ -689,24 +727,146 @@ export default function ApplyLoan() {
         professionalInfo.designation = formData.designation || '';
         professionalInfo.workDuration = formData.workDuration || '';
         professionalInfo.monthlyIncome = formData.monthlyIncome || '';
+        
+        // Extra personal info
+        professionalInfo.eTin = formData.eTin || '';
+        professionalInfo.bloodGroup = formData.bloodGroup || '';
+        professionalInfo.maritalStatus = formData.maritalStatus || '';
+        professionalInfo.spouseProfession = formData.spouseProfession || '';
+        professionalInfo.spouseIncome = formData.spouseIncome || '';
+
+        // HR & Salary
+        professionalInfo.corporateCode = formData.corporateCode || '';
+        professionalInfo.joiningDate = formData.joiningDate || '';
+        professionalInfo.confirmationDate = formData.confirmationDate || '';
+        professionalInfo.hrName = formData.hrName || '';
+        professionalInfo.hrDesignation = formData.hrDesignation || '';
+        professionalInfo.hrEmail = formData.hrEmail || '';
+        professionalInfo.hrMobile = formData.hrMobile || '';
+        professionalInfo.basicSalary = formData.basicSalary || '';
+        professionalInfo.houseRentAllowance = formData.houseRentAllowance || '';
+        professionalInfo.festivalBonus = formData.festivalBonus || '';
+        professionalInfo.providentFundDeduction = formData.providentFundDeduction || '';
+        professionalInfo.netTakeHomePay = formData.netTakeHomePay || '';
+        professionalInfo.existingLoanBank = formData.existingLoanBank || '';
+        professionalInfo.existingLoanEmi = formData.existingLoanEmi || '';
+        professionalInfo.existingCreditCardOutstanding = formData.existingCreditCardOutstanding || '';
+
+        // Guarantors
+        professionalInfo.g1Name = formData.g1Name || '';
+        professionalInfo.g1Relation = formData.g1Relation || '';
+        professionalInfo.g1Nid = formData.g1Nid || '';
+        professionalInfo.g1Mobile = formData.g1Mobile || '';
+        professionalInfo.g1Address = formData.g1Address || '';
+        professionalInfo.g1Profession = formData.g1Profession || '';
+        professionalInfo.g2Name = formData.g2Name || '';
+        professionalInfo.g2Designation = formData.g2Designation || '';
+        professionalInfo.g2OfficialId = formData.g2OfficialId || '';
+        professionalInfo.g2Email = formData.g2Email || '';
+        professionalInfo.g2Mobile = formData.g2Mobile || '';
       } else if (category?.id === 'business' || category?.id === 'women') {
         professionalInfo.businessName = formData.businessName || '';
+        professionalInfo.brandName = formData.brandName || '';
         professionalInfo.shopAddress = formData.shopAddress || '';
         professionalInfo.tradeLicense = formData.tradeLicense || '';
+        professionalInfo.tradeLicenseIssueDate = formData.tradeLicenseIssueDate || '';
+        professionalInfo.vatBinNumber = formData.vatBinNumber || '';
+        professionalInfo.rjscNumber = formData.rjscNumber || '';
+        professionalInfo.factoryAddress = formData.factoryAddress || '';
+        professionalInfo.showroomCount = formData.showroomCount || '';
+        professionalInfo.totalEmployees = formData.totalEmployees || '';
+        professionalInfo.yearsInProfit = formData.yearsInProfit || '';
+        professionalInfo.avgMonthlySales = formData.avgMonthlySales || '';
+        professionalInfo.seasonalSales = formData.seasonalSales || '';
+        professionalInfo.cogs = formData.cogs || '';
+        professionalInfo.netProfitMargin = formData.netProfitMargin || '';
+        professionalInfo.accountsReceivable = formData.accountsReceivable || '';
+        professionalInfo.accountsPayable = formData.accountsPayable || '';
+        professionalInfo.currentStockValue = formData.currentStockValue || '';
+        professionalInfo.loanPurposeDetails = formData.loanPurposeDetails || '';
+        professionalInfo.mainCurrentAccount = formData.mainCurrentAccount || '';
+        professionalInfo.ccOdLimit = formData.ccOdLimit || '';
+        professionalInfo.otherActiveLoans = formData.otherActiveLoans || '';
         professionalInfo.monthlyIncome = formData.monthlyIncome || '';
       } else if (category?.id === 'expat') {
         professionalInfo.workingCountry = formData.workingCountry || '';
         professionalInfo.visaType = formData.visaType || '';
         professionalInfo.passportNumber = formData.passportNumber || '';
+        professionalInfo.passportIssueDate = formData.passportIssueDate || '';
+        professionalInfo.passportExpiryDate = formData.passportExpiryDate || '';
+        professionalInfo.iqamaNumber = formData.iqamaNumber || '';
+        professionalInfo.foreignAddress = formData.foreignAddress || '';
+        professionalInfo.foreignMobile = formData.foreignMobile || '';
+        professionalInfo.foreignWhatsapp = formData.foreignWhatsapp || '';
+        professionalInfo.foreignCompanyName = formData.foreignCompanyName || '';
+        professionalInfo.foreignCompanyContact = formData.foreignCompanyContact || '';
+        professionalInfo.workerCategory = formData.workerCategory || '';
+        professionalInfo.supervisorNameContact = formData.supervisorNameContact || '';
+        professionalInfo.avgMonthlyRemittance = formData.avgMonthlyRemittance || '';
+        professionalInfo.remittanceChannel = formData.remittanceChannel || '';
+        professionalInfo.receiverBankAccount = formData.receiverBankAccount || '';
+        professionalInfo.coApplicantName = formData.coApplicantName || '';
+        professionalInfo.coApplicantRelation = formData.coApplicantRelation || '';
+        professionalInfo.coApplicantProfession = formData.coApplicantProfession || '';
+        professionalInfo.coApplicantIncome = formData.coApplicantIncome || '';
+        professionalInfo.coApplicantNid = formData.coApplicantNid || '';
+        professionalInfo.coApplicantCurrentAddress = formData.coApplicantCurrentAddress || '';
+        professionalInfo.coApplicantPermanentAddress = formData.coApplicantPermanentAddress || '';
         professionalInfo.monthlyIncome = formData.monthlyIncome || '';
       } else if (category?.id === 'student') {
-        professionalInfo.institutionName = formData.institutionName || '';
-        professionalInfo.studentId = formData.studentId || '';
-        professionalInfo.guardianIncome = formData.guardianIncome || '';
+        professionalInfo.sscRoll = formData.sscRoll || '';
+        professionalInfo.sscReg = formData.sscReg || '';
+        professionalInfo.sscBoard = formData.sscBoard || '';
+        professionalInfo.sscGpa = formData.sscGpa || '';
+        professionalInfo.sscYear = formData.sscYear || '';
+        professionalInfo.sscInstitution = formData.sscInstitution || '';
+
+        professionalInfo.hscRoll = formData.hscRoll || '';
+        professionalInfo.hscReg = formData.hscReg || '';
+        professionalInfo.hscBoard = formData.hscBoard || '';
+        professionalInfo.hscGpa = formData.hscGpa || '';
+        professionalInfo.hscYear = formData.hscYear || '';
+        professionalInfo.hscInstitution = formData.hscInstitution || '';
+
+        professionalInfo.gradRoll = formData.gradRoll || '';
+        professionalInfo.gradReg = formData.gradReg || '';
+        professionalInfo.gradBoard = formData.gradBoard || '';
+        professionalInfo.gradCgpa = formData.gradCgpa || '';
+        professionalInfo.gradYear = formData.gradYear || '';
+        professionalInfo.gradInstitution = formData.gradInstitution || '';
+
+        professionalInfo.targetUniversity = formData.targetUniversity || '';
+        professionalInfo.targetDepartment = formData.targetDepartment || '';
+        professionalInfo.courseRanking = formData.courseRanking || '';
+        professionalInfo.creditHours = formData.creditHours || '';
+        professionalInfo.tuitionFee = formData.tuitionFee || '';
+        professionalInfo.accommodationCost = formData.accommodationCost || '';
+        professionalInfo.healthInsurance = formData.healthInsurance || '';
+        professionalInfo.otherFees = formData.otherFees || '';
+
+        professionalInfo.sponsorName = formData.sponsorName || '';
+        professionalInfo.sponsorRelation = formData.sponsorRelation || '';
+        professionalInfo.sponsorIncomeSource = formData.sponsorIncomeSource || '';
+        professionalInfo.sponsorJobDetails = formData.sponsorJobDetails || '';
+        professionalInfo.sponsorTaxableIncome = formData.sponsorTaxableIncome || '';
+        professionalInfo.sponsorNetWorth = formData.sponsorNetWorth || '';
       } else if (category?.id === 'emergency') {
         professionalInfo.professionName = formData.professionName || '';
-        professionalInfo.emergencyReason = formData.emergencyReason || '';
-        professionalInfo.monthlyIncome = formData.monthlyIncome || '';
+        professionalInfo.patientName = formData.patientName || '';
+        professionalInfo.patientRelation = formData.patientRelation || '';
+        professionalInfo.patientNid = formData.patientNid || '';
+        professionalInfo.patientCondition = formData.patientCondition || '';
+        professionalInfo.hospitalName = formData.hospitalName || '';
+        professionalInfo.referringDoctor = formData.referringDoctor || '';
+        professionalInfo.doctorBmdc = formData.doctorBmdc || '';
+        professionalInfo.hospitalDepartment = formData.hospitalDepartment || '';
+        professionalInfo.treatmentType = formData.treatmentType || '';
+        professionalInfo.estimatedCost = formData.estimatedCost || '';
+        professionalInfo.applicantContribution = formData.applicantContribution || '';
+        professionalInfo.insuranceCoverage = formData.insuranceCoverage || '';
+        professionalInfo.insuranceAmount = formData.insuranceAmount || '';
+        professionalInfo.shortfallAmount = formData.shortfallAmount || '';
+        professionalInfo.hrContactNumber = formData.hrContactNumber || '';
       }
 
       let updatedFeedbackJson = '';
@@ -748,6 +908,7 @@ export default function ApplyLoan() {
                 professional: false,
                 bank: false,
                 nominee: false,
+                guarantor: false,
                 documents: false
               },
               history: existingHistory
@@ -900,10 +1061,25 @@ export default function ApplyLoan() {
         professionalInfo.designation = formData.designation || '';
         professionalInfo.workDuration = formData.workDuration || '';
         professionalInfo.monthlyIncome = formData.monthlyIncome || '';
-      } else if (category?.id === 'business' || category?.id === 'women') {
+      } else if (category?.id === 'business') {
         professionalInfo.businessName = formData.businessName || '';
         professionalInfo.shopAddress = formData.shopAddress || '';
         professionalInfo.tradeLicense = formData.tradeLicense || '';
+        professionalInfo.monthlyIncome = formData.monthlyIncome || '';
+      } else if (category?.id === 'women') {
+        professionalInfo.businessName = formData.businessName || '';
+        professionalInfo.brandName = formData.brandName || '';
+        professionalInfo.shopAddress = formData.shopAddress || '';
+        professionalInfo.tradeLicense = formData.tradeLicense || '';
+        professionalInfo.tradeLicenseIssueDate = formData.tradeLicenseIssueDate || '';
+        professionalInfo.vatBinNumber = formData.vatBinNumber || '';
+        professionalInfo.rjscNumber = formData.rjscNumber || '';
+        professionalInfo.equityPercentage = formData.equityPercentage || '';
+        professionalInfo.applicantRole = formData.applicantRole || '';
+        professionalInfo.productType = formData.productType || '';
+        professionalInfo.rawMaterialSource = formData.rawMaterialSource || '';
+        professionalInfo.salesChannel = formData.salesChannel || '';
+        professionalInfo.govtScheme = formData.govtScheme || '';
         professionalInfo.monthlyIncome = formData.monthlyIncome || '';
       } else if (category?.id === 'expat') {
         professionalInfo.workingCountry = formData.workingCountry || '';
@@ -916,8 +1092,21 @@ export default function ApplyLoan() {
         professionalInfo.guardianIncome = formData.guardianIncome || '';
       } else if (category?.id === 'emergency') {
         professionalInfo.professionName = formData.professionName || '';
-        professionalInfo.emergencyReason = formData.emergencyReason || '';
-        professionalInfo.monthlyIncome = formData.monthlyIncome || '';
+        professionalInfo.patientName = formData.patientName || '';
+        professionalInfo.patientRelation = formData.patientRelation || '';
+        professionalInfo.patientNid = formData.patientNid || '';
+        professionalInfo.patientCondition = formData.patientCondition || '';
+        professionalInfo.hospitalName = formData.hospitalName || '';
+        professionalInfo.referringDoctor = formData.referringDoctor || '';
+        professionalInfo.doctorBmdc = formData.doctorBmdc || '';
+        professionalInfo.hospitalDepartment = formData.hospitalDepartment || '';
+        professionalInfo.treatmentType = formData.treatmentType || '';
+        professionalInfo.estimatedCost = formData.estimatedCost || '';
+        professionalInfo.applicantContribution = formData.applicantContribution || '';
+        professionalInfo.insuranceCoverage = formData.insuranceCoverage || '';
+        professionalInfo.insuranceAmount = formData.insuranceAmount || '';
+        professionalInfo.shortfallAmount = formData.shortfallAmount || '';
+        professionalInfo.hrContactNumber = formData.hrContactNumber || '';
       }
 
       let updatedFeedbackJson = '';
@@ -1067,17 +1256,23 @@ export default function ApplyLoan() {
                 {/* Text Content */}
                 <div className="flex-1 p-5 relative z-10 flex flex-col justify-between min-w-0">
                   <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 neu-sunken ${getIconColor(cat.color)}`}>
-                        <cat.icon size={20} />
+                    <div className="flex items-start justify-between mb-2 gap-2">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 neu-sunken ${getIconColor(cat.color)}`}>
+                          <cat.icon size={20} />
+                        </div>
+                        <div>
+                          <h3 className="font-extrabold text-gray-900 dark:text-white text-lg transition-colors group-hover:text-primary-600 dark:group-hover:text-primary-400 leading-tight">
+                            {cat.title}
+                          </h3>
+                          <p className="text-xs font-bold text-gray-550 dark:text-gray-400 uppercase tracking-wide mt-0.5">
+                            {isBn ? "সর্বোচ্চঃ" : "Up to"} {cat.limit} {isBn ? "টাকা" : ""}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-extrabold text-gray-900 dark:text-white text-lg transition-colors group-hover:text-primary-600 dark:group-hover:text-primary-400">
-                          {cat.title}
-                        </h3>
-                        <p className="text-xs font-bold text-gray-550 dark:text-gray-400 uppercase tracking-wide">
-                          {isBn ? "সর্বোচ্চঃ" : "Up to"} {cat.limit} {isBn ? "টাকা" : ""}
-                        </p>
+                      <div className="shrink-0 px-3 py-1.5 rounded-full neu-btn-primary text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-md hover:scale-105 active:scale-95 transition-all">
+                        {isBn ? "নির্বাচন করুন" : "Select"}
+                        <ChevronRight size={12} />
                       </div>
                     </div>
                   </div>
@@ -1110,6 +1305,23 @@ export default function ApplyLoan() {
                       </span>
                     ))}
                   </div>
+
+                  {/* Required Documents */}
+                  {(cat as any).reqDocs && (
+                    <div className="mt-3">
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                        <FileText size={10} />
+                        {isBn ? "প্রয়োজনীয় কাগজপত্র:" : "Required Documents:"}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {(cat as any).reqDocs.map((doc: string, i: number) => (
+                          <span key={`doc-${i}`} className="px-2 py-0.5 text-[9px] rounded bg-gray-100 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold shadow-sm">
+                            {doc}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Right side Image wrapper with fade mask */}
@@ -1200,10 +1412,29 @@ export default function ApplyLoan() {
         </div>
 
         {/* Breakdown */}
-        <div className="bg-gradient-to-br from-[#1b2330] via-[#0f131a] to-[#0b0c10] border border-white/10 dark:border-white/5 rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden">
+        <div className="bg-gradient-to-br from-[#1b2330] via-[#0f131a] to-[#0b0c10] border border-white/10 dark:border-white/5 rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden mt-2">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 dark:bg-white/5 rounded-bl-[100px] -mr-8 -mt-8"></div>
           
           <div className="relative z-10 flex flex-col gap-4">
+            {/* Selected Loan Summary */}
+            <div className="grid grid-cols-3 gap-2 pb-4 border-b border-white/10 text-center">
+              <div>
+                <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">{isBn ? "ক্যাটাগরি" : "Category"}</p>
+                <div className="flex items-center justify-center gap-1.5">
+                  <category.icon size={12} className="text-primary-400" />
+                  <p className="font-bold text-sm text-gray-100">{category?.title}</p>
+                </div>
+              </div>
+              <div className="border-x border-white/10">
+                <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">{isBn ? "পরিমাণ" : "Amount"}</p>
+                <p className="font-bold text-sm text-primary-400">{formatCurrency(amount, isBn)}</p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">{isBn ? "সময়কাল" : "Tenure"}</p>
+                <p className="font-bold text-sm text-gray-100">{convertDigits(tenure, isBn)} {isBn ? "মাস" : "Months"}</p>
+              </div>
+            </div>
+
             <div className="flex justify-between items-center pb-4 border-b border-white/10">
                <div>
                  <p className="text-gray-400 text-xs font-medium mb-1 uppercase tracking-wider">{isBn ? "মাসিক কিস্তি" : "Monthly EMI"}</p>
@@ -1246,14 +1477,28 @@ export default function ApplyLoan() {
 
 
   const Step3CombinedInfo = () => {
-    const personalFields: (keyof LoanFormData)[] = ['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'mobile', 'whatsapp', 'email', 'currentAddress', 'permanentAddress', 'nidNumber'];
+    const personalFields: (keyof LoanFormData)[] = ['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'mobile', 'whatsapp', 'email', 'currentAddress', 'permanentAddress', 'nidNumber', 'eTin', 'bloodGroup', 'maritalStatus', 'spouseProfession', 'spouseIncome'];
     
     let profFields: (keyof LoanFormData)[] = [];
-    if (category?.id === 'personal') profFields = ['companyName', 'designation', 'workDuration', 'monthlyIncome'];
-    else if (category?.id === 'business' || category?.id === 'women') profFields = ['businessName', 'shopAddress', 'tradeLicense', 'monthlyIncome'];
+    if (category?.id === 'personal') profFields = [
+      'companyName', 'corporateCode', 'designation', 'joiningDate', 'confirmationDate', 
+      'hrName', 'hrDesignation', 'hrEmail', 'hrMobile',
+      'basicSalary', 'houseRentAllowance', 'festivalBonus', 'providentFundDeduction', 
+      'netTakeHomePay', 'existingLoanBank', 'existingLoanEmi', 'existingCreditCardOutstanding'
+    ];
+    else if (category?.id === 'business') profFields = ['businessName', 'shopAddress', 'tradeLicense', 'monthlyIncome'];
+    else if (category?.id === 'women') profFields = [
+      'businessName', 'brandName', 'shopAddress', 'tradeLicense', 'tradeLicenseIssueDate', 
+      'vatBinNumber', 'rjscNumber', 'equityPercentage', 'applicantRole', 'productType', 
+      'rawMaterialSource', 'salesChannel', 'govtScheme', 'monthlyIncome'
+    ];
     else if (category?.id === 'expat') profFields = ['workingCountry', 'visaType', 'passportNumber', 'monthlyIncome'];
     else if (category?.id === 'student') profFields = ['institutionName', 'studentId', 'guardianIncome'];
-    else if (category?.id === 'emergency') profFields = ['professionName', 'emergencyReason', 'monthlyIncome'];
+    else if (category?.id === 'emergency') profFields = [
+      'professionName', 'patientName', 'patientRelation', 'patientNid', 'patientCondition',
+      'hospitalName', 'referringDoctor', 'doctorBmdc', 'hospitalDepartment', 'treatmentType',
+      'estimatedCost', 'applicantContribution', 'insuranceCoverage', 'insuranceAmount', 'shortfallAmount', 'hrContactNumber'
+    ];
     
     const bankFields: (keyof LoanFormData)[] = ['bankName', 'accountName', 'accountNumber', 'routingNumber', 'mobileBanking'];
     const nomineeFields: (keyof LoanFormData)[] = ['nomineeName', 'nomineeRelation', 'nomineeMobile', 'nomineeNid'];
@@ -1334,6 +1579,50 @@ export default function ApplyLoan() {
                 <ErrorText field="gender" />
               </div>
             </div>
+            {category?.id === 'personal' && (
+              <>
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ই-টিন (e-TIN)" : "e-TIN Number"}</label>
+                    <input type="text" {...register("eTin")} className={`w-full neu-input ${errors.eTin ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e-TIN" />
+                    <ErrorText field="eTin" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রক্তের গ্রুপ" : "Blood Group"}</label>
+                    <select {...register("bloodGroup")} className={`w-full neu-input ${errors.bloodGroup ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
+                      <option value="">{isBn ? "নির্বাচন করুন" : "Select"}</option>
+                      {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => <option key={bg} value={bg}>{bg}</option>)}
+                    </select>
+                    <ErrorText field="bloodGroup" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div className="col-span-2">
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বৈবাহিক অবস্থা" : "Marital Status"}</label>
+                    <select {...register("maritalStatus")} className={`w-full neu-input ${errors.maritalStatus ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
+                      <option value="">{isBn ? "নির্বাচন করুন" : "Select"}</option>
+                      <option value="Single">{isBn ? "অবিবাহিত" : "Single"}</option>
+                      <option value="Married">{isBn ? "বিবাহিত" : "Married"}</option>
+                    </select>
+                    <ErrorText field="maritalStatus" />
+                  </div>
+                  {methods.watch('maritalStatus') === 'Married' && (
+                    <>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "জীবনসঙ্গীর পেশা" : "Spouse's Profession"}</label>
+                        <input type="text" {...register("spouseProfession")} className={`w-full neu-input ${errors.spouseProfession ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Profession" />
+                        <ErrorText field="spouseProfession" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "জীবনসঙ্গীর মাসিক আয়" : "Spouse's Income"}</label>
+                        <input type="number" {...register("spouseIncome")} className={`w-full neu-input ${errors.spouseIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                        <ErrorText field="spouseIncome" />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
             <div className="grid grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল নাম্বার" : "Mobile Number"}</label>
@@ -1368,6 +1657,8 @@ export default function ApplyLoan() {
               isBn={isBn}
               errors={addressErrors.current}
               prefix="current"
+              showDetailedFields={category?.id === 'personal'}
+              showOwnershipFields={category?.id === 'personal'}
             />
             <AddressSelector
               label={isBn ? "স্থায়ী ঠিকানা (NID অনুযায়ী)" : "Permanent Address (as per NID)"}
@@ -1385,6 +1676,7 @@ export default function ApplyLoan() {
               isBn={isBn}
               errors={addressErrors.permanent}
               prefix="permanent"
+              showDetailedFields={category?.id === 'personal'}
             />
           </div>
         </AccordionSection>
@@ -1405,52 +1697,369 @@ export default function ApplyLoan() {
             {category?.id === 'personal' && (
               <>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কোম্পানির নাম / পেশা" : "Company/Profession Name"}</label>
-                  <input type="text" {...register("companyName")} className={`w-full neu-input ${errors.companyName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "কোম্পানি বা পেশার নাম" : "Company or Profession name"} />
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কর্মস্থলের নাম / কোম্পানির নাম" : "Company / Organization Name"}</label>
+                  <input type="text" {...register("companyName")} className={`w-full neu-input ${errors.companyName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "কোম্পানির নাম" : "Company Name"} />
                   <ErrorText field="companyName" />
                 </div>
                 <div className="grid grid-cols-2 gap-3.5">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পদবী" : "Designation"}</label>
-                    <input type="text" {...register("designation")} className={`w-full neu-input ${errors.designation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Manager/Worker" />
-                    <ErrorText field="designation" />
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কর্পোরেট কোড (যদি থাকে)" : "Corporate Code (If Any)"}</label>
+                    <input type="text" {...register("corporateCode")} className={`w-full neu-input ${errors.corporateCode ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Code" />
+                    <ErrorText field="corporateCode" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কাজের মেয়াদ" : "Work Duration"}</label>
-                    <input type="text" {...register("workDuration")} className={`w-full neu-input ${errors.workDuration ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: ৩ বছর" : "e.g. 3 years"} />
-                    <ErrorText field="workDuration" />
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পদবী" : "Designation"}</label>
+                    <input type="text" {...register("designation")} className={`w-full neu-input ${errors.designation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Designation" />
+                    <ErrorText field="designation" />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
-                  <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
-                  <ErrorText field="monthlyIncome" />
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "যোগদানের তারিখ" : "Joining Date"}</label>
+                    <input type="date" {...register("joiningDate")} className={`w-full neu-input ${errors.joiningDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} />
+                    <ErrorText field="joiningDate" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "চাকরি স্থায়ীকরণের তারিখ" : "Confirmation Date"}</label>
+                    <input type="date" {...register("confirmationDate")} className={`w-full neu-input ${errors.confirmationDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} />
+                    <ErrorText field="confirmationDate" />
+                  </div>
+                </div>
+                
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3">{isBn ? "এইচআর/অ্যাডমিন এর তথ্য" : "HR/Admin Info"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নাম" : "Name"}</label>
+                      <input type="text" {...register("hrName")} className={`w-full neu-input ${errors.hrName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "এইচআর এর নাম" : "HR Name"} />
+                      <ErrorText field="hrName" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পদবী" : "Designation"}</label>
+                      <input type="text" {...register("hrDesignation")} className={`w-full neu-input ${errors.hrDesignation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="HR Designation" />
+                      <ErrorText field="hrDesignation" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ইমেইল" : "Email"}</label>
+                      <input type="email" {...register("hrEmail")} className={`w-full neu-input ${errors.hrEmail ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="hr@company.com" />
+                      <ErrorText field="hrEmail" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল" : "Mobile"}</label>
+                      <input type="tel" {...register("hrMobile")} className={`w-full neu-input ${errors.hrMobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
+                      <ErrorText field="hrMobile" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3">{isBn ? "আর্থিক ও স্যালারি ব্রেকডাউন" : "Financial & Salary Breakdown"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বেসিক স্যালারি" : "Basic Salary"}</label>
+                      <input type="number" {...register("basicSalary")} className={`w-full neu-input ${errors.basicSalary ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <ErrorText field="basicSalary" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বাড়ি ভাড়া ভাতা (HRA)" : "House Rent Allowance"}</label>
+                      <input type="number" {...register("houseRentAllowance")} className={`w-full neu-input ${errors.houseRentAllowance ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <ErrorText field="houseRentAllowance" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "উৎসব বোনাস" : "Festival Bonus"}</label>
+                      <input type="number" {...register("festivalBonus")} className={`w-full neu-input ${errors.festivalBonus ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <ErrorText field="festivalBonus" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "প্রভিডেন্ট ফান্ড কর্তন" : "Provident Fund Deduction"}</label>
+                      <input type="number" {...register("providentFundDeduction")} className={`w-full neu-input ${errors.providentFundDeduction ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <ErrorText field="providentFundDeduction" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নেট টেক হোম পে" : "Net Take Home Pay"}</label>
+                    <input type="number" {...register("netTakeHomePay")} className={`w-full neu-input ${errors.netTakeHomePay ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                    <ErrorText field="netTakeHomePay" />
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3">{isBn ? "অন্যান্য ঋণ/কার্ডের তথ্য" : "Existing Loan/Card Info"}</h4>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বর্তমান লোন ব্যাংক/আর্থিক প্রতিষ্ঠান" : "Existing Loan Bank"}</label>
+                    <input type="text" {...register("existingLoanBank")} className={`w-full neu-input ${errors.existingLoanBank ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: ব্র্যাক ব্যাংক" : "e.g. BRAC Bank"} />
+                    <ErrorText field="existingLoanBank" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mt-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "লোনের মাসিক কিস্তি (EMI)" : "Loan EMI"}</label>
+                      <input type="number" {...register("existingLoanEmi")} className={`w-full neu-input ${errors.existingLoanEmi ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <ErrorText field="existingLoanEmi" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ক্রেডিট কার্ডের বকেয়া (যদি থাকে)" : "Credit Card Outstanding"}</label>
+                      <input type="number" {...register("existingCreditCardOutstanding")} className={`w-full neu-input ${errors.existingCreditCardOutstanding ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <ErrorText field="existingCreditCardOutstanding" />
+                    </div>
+                  </div>
                 </div>
               </>
             )}
 
-            {(category?.id === 'business' || category?.id === 'women') && (
+            {category?.id === 'business' && (
               <>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্যবসার নাম" : "Business Name"}</label>
-                  <input type="text" {...register("businessName")} className={`w-full neu-input ${errors.businessName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="আপনার স্টোর বা কোম্পানির নাম" />
-                  <ErrorText field="businessName" />
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "কোম্পানির লিগ্যাল প্রোফাইল" : "Company Legal Profile"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্যবসার নিবন্ধিত নাম" : "Registered Business Name"}</label>
+                      <input type="text" {...register("businessName")} className={`w-full neu-input ${errors.businessName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Business Name" />
+                      <ErrorText field="businessName" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্র্যান্ডের নাম (যদি ভিন্ন হয়)" : "Brand Name (If different)"}</label>
+                      <input type="text" {...register("brandName")} className={`w-full neu-input ${errors.brandName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Brand Name" />
+                      <ErrorText field="brandName" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ট্রেড লাইসেন্স নম্বর" : "Trade License No"}</label>
+                      <input type="text" {...register("tradeLicense")} className={`w-full neu-input ${errors.tradeLicense ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Tr xxx-xxx" />
+                      <ErrorText field="tradeLicense" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ইস্যুর তারিখ" : "Issue Date"}</label>
+                      <input type="date" {...register("tradeLicenseIssueDate")} className={`w-full neu-input ${errors.tradeLicenseIssueDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} />
+                      <ErrorText field="tradeLicenseIssueDate" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ভ্যাট/বিআইএন (BIN) নম্বর" : "VAT/BIN Number"}</label>
+                      <input type="text" {...register("vatBinNumber")} className={`w-full neu-input ${errors.vatBinNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="BIN Number" />
+                      <ErrorText field="vatBinNumber" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "আরজেএসসি (RJSC) নম্বর" : "RJSC Reg Number"}</label>
+                      <input type="text" {...register("rjscNumber")} className={`w-full neu-input ${errors.rjscNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Limited Company Only" />
+                      <ErrorText field="rjscNumber" />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "দোকান / অফিসের ঠিকানা" : "Shop / Office Address"}</label>
-                  <textarea rows={1.5} {...register("shopAddress")} className={`w-full neu-input ${errors.shopAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder={isBn ? "ঠিকানা লিখুন" : "Enter Address"} />
-                  <ErrorText field="shopAddress" />
-                </div>
-                <div className="grid grid-cols-2 gap-3.5">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ট্রেড লাইসেন্স নম্বর" : "Trade License No"}</label>
-                    <input type="text" {...register("tradeLicense")} className={`w-full neu-input ${errors.tradeLicense ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Tr xxx-xxx" />
-                    <ErrorText field="tradeLicense" />
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "অপারেশনাল ডিটেইলস" : "Operational Details"}</h4>
+                  <div className="grid grid-cols-1 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মূল কার্যালয়ের ঠিকানা" : "Main Office Address"}</label>
+                      <textarea rows={2} {...register("shopAddress")} className={`w-full neu-input ${errors.shopAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Head Office Address" />
+                      <ErrorText field="shopAddress" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ফ্যাক্টরি/ওয়ারহাউজের ঠিকানা" : "Factory/Warehouse Address"}</label>
+                      <textarea rows={2} {...register("factoryAddress")} className={`w-full neu-input ${errors.factoryAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Factory/Warehouse Address" />
+                      <ErrorText field="factoryAddress" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "শোরুমের সংখ্যা" : "No. of Showrooms"}</label>
+                      <input type="number" {...register("showroomCount")} className={`w-full neu-input ${errors.showroomCount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. 3" />
+                      <ErrorText field="showroomCount" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোট কর্মচারী" : "Total Employees"}</label>
+                      <input type="number" {...register("totalEmployees")} className={`w-full neu-input ${errors.totalEmployees ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Permanent/Temporary" />
+                      <ErrorText field="totalEmployees" />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্যবসাটি কত বছর ধরে লাভজনক?" : "Years in Profitability"}</label>
+                    <input type="text" {...register("yearsInProfit")} className={`w-full neu-input ${errors.yearsInProfit ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. 5 Years" />
+                    <ErrorText field="yearsInProfit" />
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "আর্থিক ইন-ডেপথ" : "Financial In-Depth"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক গড় বিক্রয়" : "Avg Monthly Sales"}</label>
+                      <input type="number" {...register("avgMonthlySales")} className={`w-full neu-input ${errors.avgMonthlySales ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <ErrorText field="avgMonthlySales" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ঋতুভিত্তিক বিক্রয়ের তারতম্য" : "Seasonal Sales Var."}</label>
+                      <input type="text" {...register("seasonalSales")} className={`w-full neu-input ${errors.seasonalSales ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. High in Winter" />
+                      <ErrorText field="seasonalSales" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কস্ট অফ গুডস সোল্ড (COGS)" : "COGS"}</label>
+                      <input type="number" {...register("cogs")} className={`w-full neu-input ${errors.cogs ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <ErrorText field="cogs" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নেট প্রফিট মার্জিন (%)" : "Net Profit Margin (%)"}</label>
+                      <input type="number" {...register("netProfitMargin")} className={`w-full neu-input ${errors.netProfitMargin ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="%" />
+                      <ErrorText field="netProfitMargin" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "দেনাদার (Accounts Receivable)" : "Accounts Receivable"}</label>
+                      <input type="number" {...register("accountsReceivable")} className={`w-full neu-input ${errors.accountsReceivable ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <ErrorText field="accountsReceivable" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পাওনাদার (Accounts Payable)" : "Accounts Payable"}</label>
+                      <input type="number" {...register("accountsPayable")} className={`w-full neu-input ${errors.accountsPayable ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <ErrorText field="accountsPayable" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বর্তমান স্টকের বাজারমূল্য" : "Current Stock Value"}</label>
+                      <input type="number" {...register("currentStockValue")} className={`w-full neu-input ${errors.currentStockValue ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <ErrorText field="currentStockValue" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "অন্যান্য আয় (যদি থাকে)" : "Other Income / Monthly"}</label>
+                      <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <ErrorText field="monthlyIncome" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "লোনের উদ্দেশ্য ও ব্যাংকিং হিস্ট্রি" : "Loan Purpose & Banking"}</h4>
+                  <div className="mb-3">
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "লোন ইউটিলাইজেশন প্ল্যান" : "Loan Utilization Plan"}</label>
+                    <textarea rows={2} {...register("loanPurposeDetails")} className={`w-full neu-input ${errors.loanPurposeDetails ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder={isBn ? "Working Capital, CapEx, নাকি Expansion?" : "Working Capital, CapEx, or Expansion?"} />
+                    <ErrorText field="loanPurposeDetails" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "প্রধান কারেন্ট অ্যাকাউন্ট" : "Main Current Account"}</label>
+                      <input type="text" {...register("mainCurrentAccount")} className={`w-full neu-input ${errors.mainCurrentAccount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Account Number & Bank" />
+                      <ErrorText field="mainCurrentAccount" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "সিসি/ওডি (CC/OD) লিমিট" : "CC/OD Limit Account"}</label>
+                      <input type="text" {...register("ccOdLimit")} className={`w-full neu-input ${errors.ccOdLimit ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="If any" />
+                      <ErrorText field="ccOdLimit" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "অন্যান্য সক্রিয় লোন/লিজ" : "Other Active Loans/Leases"}</label>
+                    <input type="text" {...register("otherActiveLoans")} className={`w-full neu-input ${errors.otherActiveLoans ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Details of active loans" />
+                    <ErrorText field="otherActiveLoans" />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {category?.id === 'women' && (
+              <>
+                <div className="mb-4">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "উদ্যোক্তার প্রোফাইল ও শেয়ারহোল্ডিং" : "Entrepreneur Profile & Shareholding"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্যবসার নাম" : "Business Name"}</label>
+                      <input type="text" {...register("businessName")} className={`w-full neu-input ${errors.businessName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="আপনার স্টোর বা কোম্পানির নাম" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্র্যান্ডের নাম (যদি ভিন্ন হয়)" : "Brand Name"}</label>
+                      <input type="text" {...register("brandName")} className={`w-full neu-input ${errors.brandName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. MyBrand" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "আপনার শেয়ার বা ইক্যুইটি (%)" : "Your Share/Equity (%)"}</label>
+                      <input type="text" {...register("equityPercentage")} className={`w-full neu-input ${errors.equityPercentage ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. 51%" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "আপনার পদবী" : "Applicant Role"}</label>
+                      <select {...register("applicantRole")} className={`w-full neu-input ${errors.applicantRole ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
+                        <option value="">{isBn ? "নির্বাচন করুন" : "Select"}</option>
+                        <option value="Proprietor">{isBn ? "প্রোপরাইটর" : "Proprietor"}</option>
+                        <option value="Managing Director">{isBn ? "ম্যানেজিং ডিরেক্টর" : "Managing Director"}</option>
+                        <option value="Partner">{isBn ? "পার্টনার" : "Partner"}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "ব্যবসায়িক মডেল ও উদ্ভাবন" : "Business Model & Innovation"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পণ্য বা সেবার ধরন" : "Product/Service Type"}</label>
+                      <input type="text" {...register("productType")} className={`w-full neu-input ${errors.productType ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Boutique, E-commerce" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কাঁচামালের উৎস" : "Raw Material Source"}</label>
+                      <input type="text" {...register("rawMaterialSource")} className={`w-full neu-input ${errors.rawMaterialSource ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Local/Imported" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বিক্রির মূল চ্যানেল" : "Main Sales Channel"}</label>
+                    <select {...register("salesChannel")} className={`w-full neu-input ${errors.salesChannel ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
+                      <option value="">{isBn ? "নির্বাচন করুন" : "Select"}</option>
+                      <option value="Facebook Page">{isBn ? "ফেসবুক পেজ" : "Facebook Page"}</option>
+                      <option value="Website">{isBn ? "ওয়েবসাইট" : "Website"}</option>
+                      <option value="Physical Showroom">{isBn ? "ফিজিক্যাল শোরুম" : "Physical Showroom"}</option>
+                      <option value="Both">{isBn ? "উভয়" : "Both"}</option>
+                    </select>
+                  </div>
+                  <div className="mt-3">
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "দোকান / অফিসের ঠিকানা" : "Shop / Office Address"}</label>
+                    <textarea rows={1.5} {...register("shopAddress")} className={`w-full neu-input ${errors.shopAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder={isBn ? "ঠিকানা লিখুন" : "Enter Address"} />
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "লাইসেন্স ও সরকারি স্কিম" : "Licenses & Govt. Schemes"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ট্রেড লাইসেন্স নম্বর" : "Trade License No"}</label>
+                      <input type="text" {...register("tradeLicense")} className={`w-full neu-input ${errors.tradeLicense ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Tr xxx-xxx" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "লাইসেন্স ইস্যুর তারিখ" : "License Issue Date"}</label>
+                      <input type="date" {...register("tradeLicenseIssueDate")} className={`w-full neu-input ${errors.tradeLicenseIssueDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ভ্যাট/বিআইএন (BIN)" : "VAT/BIN No"}</label>
+                      <input type="text" {...register("vatBinNumber")} className={`w-full neu-input ${errors.vatBinNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="If any" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "আরজেএসসি (RJSC) রেজিঃ" : "RJSC Reg (Ltd Co)"}</label>
+                      <input type="text" {...register("rjscNumber")} className={`w-full neu-input ${errors.rjscNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="If any" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "সরকারি স্কিম/ফান্ডিং (বাংলাদেশ ব্যাংক/SME)" : "Govt. Scheme / SME Funding"}</label>
+                    <select {...register("govtScheme")} className={`w-full neu-input ${errors.govtScheme ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
+                      <option value="">{isBn ? "সাধারণ লোন" : "General Loan"}</option>
+                      <option value="BB Refinancing">{isBn ? "বাংলাদেশ ব্যাংক রিফাইন্যান্সিং" : "BB Refinancing Scheme"}</option>
+                      <option value="SME Foundation">{isBn ? "এসএমই ফাউন্ডেশন" : "SME Foundation"}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়/বিক্রি" : "Monthly Income/Sales"}</label>
                     <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
-                    <ErrorText field="monthlyIncome" />
                   </div>
                 </div>
               </>
@@ -1458,28 +2067,164 @@ export default function ApplyLoan() {
 
             {category?.id === 'expat' && (
               <>
-                <div className="grid grid-cols-2 gap-3.5">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কর্মরত দেশের নাম" : "Working Country"}</label>
-                    <input type="text" {...register("workingCountry")} className={`w-full neu-input ${errors.workingCountry ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Dubai / KSA" />
-                    <ErrorText field="workingCountry" />
+                <div>
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "আবেদনকারীর আন্তর্জাতিক প্রোফাইল" : "Applicant's International Profile"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কর্মরত দেশের নাম" : "Working Country"}</label>
+                      <input type="text" {...register("workingCountry")} className={`w-full neu-input ${errors.workingCountry ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Dubai / KSA" />
+                      <ErrorText field="workingCountry" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ভিসার ধরন" : "Visa Type"}</label>
+                      <input type="text" {...register("visaType")} className={`w-full neu-input ${errors.visaType ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Work Visa" />
+                      <ErrorText field="visaType" />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ভিসার ধরন" : "Visa Type"}</label>
-                    <input type="text" {...register("visaType")} className={`w-full neu-input ${errors.visaType ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Work Visa" />
-                    <ErrorText field="visaType" />
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পাসপোর্ট নম্বর" : "Passport Number"}</label>
+                      <input type="text" {...register("passportNumber")} className={`w-full neu-input ${errors.passportNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="AXXXXXXXX" />
+                      <ErrorText field="passportNumber" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পাসপোর্ট ইস্যুর তারিখ" : "Passport Issue Date"}</label>
+                      <input type="date" {...register("passportIssueDate")} className={`w-full neu-input ${errors.passportIssueDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} />
+                      <ErrorText field="passportIssueDate" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পাসপোর্টের মেয়াদ" : "Passport Expiry Date"}</label>
+                      <input type="date" {...register("passportExpiryDate")} className={`w-full neu-input ${errors.passportExpiryDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} />
+                      <ErrorText field="passportExpiryDate" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রেসিডেন্স কার্ড/আকামা (Iqama)" : "Residence Card/Iqama No"}</label>
+                      <input type="text" {...register("iqamaNumber")} className={`w-full neu-input ${errors.iqamaNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Iqama Number" />
+                      <ErrorText field="iqamaNumber" />
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বিদেশে বর্তমান থাকার ঠিকানা" : "Current Foreign Address"}</label>
+                    <textarea rows={2} {...register("foreignAddress")} className={`w-full neu-input ${errors.foreignAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Foreign Address" />
+                    <ErrorText field="foreignAddress" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বিদেশী মোবাইল নম্বর" : "Foreign Mobile No"}</label>
+                      <input type="tel" {...register("foreignMobile")} className={`w-full neu-input ${errors.foreignMobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="+XX..." />
+                      <ErrorText field="foreignMobile" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বিদেশী হোয়াটসঅ্যাপ নম্বর" : "Foreign WhatsApp No"}</label>
+                      <input type="tel" {...register("foreignWhatsapp")} className={`w-full neu-input ${errors.foreignWhatsapp ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="+XX..." />
+                      <ErrorText field="foreignWhatsapp" />
+                    </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3.5">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পাসপোর্ট নম্বর" : "Passport Number"}</label>
-                    <input type="text" {...register("passportNumber")} className={`w-full neu-input ${errors.passportNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="AXXXXXXXX" />
-                    <ErrorText field="passportNumber" />
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "বৈদেশিক কর্মসংস্থানের ইন-ডেপথ" : "Foreign Employment Details"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বিদেশী কোম্পানির নাম" : "Foreign Company Name"}</label>
+                      <input type="text" {...register("foreignCompanyName")} className={`w-full neu-input ${errors.foreignCompanyName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Company Name" />
+                      <ErrorText field="foreignCompanyName" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কোম্পানির ল্যান্ডলাইন/ওয়েবসাইট" : "Company Website/Phone"}</label>
+                      <input type="text" {...register("foreignCompanyContact")} className={`w-full neu-input ${errors.foreignCompanyContact ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Contact info" />
+                      <ErrorText field="foreignCompanyContact" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "শ্রমিকের ক্যাটাগরি" : "Worker Category"}</label>
+                      <select {...register("workerCategory")} className={`w-full neu-input ${errors.workerCategory ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
+                        <option value="">{isBn ? "নির্বাচন করুন" : "Select"}</option>
+                        <option value="Skilled">{isBn ? "স্কিলড" : "Skilled"}</option>
+                        <option value="Unskilled">{isBn ? "আনস্কিলড" : "Unskilled"}</option>
+                        <option value="Professional">{isBn ? "প্রফেশনাল" : "Professional"}</option>
+                      </select>
+                      <ErrorText field="workerCategory" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয় (বিডিটি)" : "Monthly Income (BDT)"}</label>
+                      <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <ErrorText field="monthlyIncome" />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
-                    <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
-                    <ErrorText field="monthlyIncome" />
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "সুপারভাইজারের নাম ও কন্টাক্ট" : "Supervisor's Name & Contact"}</label>
+                    <input type="text" {...register("supervisorNameContact")} className={`w-full neu-input ${errors.supervisorNameContact ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Name, Phone" />
+                    <ErrorText field="supervisorNameContact" />
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "রেমিট্যান্স ও ব্যাংকিং চ্যানেল" : "Remittance & Banking Channel"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "গড়ে কত টাকা পাঠান" : "Avg Monthly Remittance"}</label>
+                      <input type="number" {...register("avgMonthlyRemittance")} className={`w-full neu-input ${errors.avgMonthlyRemittance ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <ErrorText field="avgMonthlyRemittance" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "টাকা পাঠানোর মাধ্যম" : "Remittance Channel"}</label>
+                      <input type="text" {...register("remittanceChannel")} className={`w-full neu-input ${errors.remittanceChannel ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. bKash, Western Union" />
+                      <ErrorText field="remittanceChannel" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "দেশে টাকা গ্রহণকারীর ব্যাংক অ্যাকাউন্ট" : "Receiver's Bank Account (BD)"}</label>
+                    <input type="text" {...register("receiverBankAccount")} className={`w-full neu-input ${errors.receiverBankAccount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Bank, Account Number" />
+                    <ErrorText field="receiverBankAccount" />
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "স্থানীয় অ্যাটর্নি/কো-অ্যার্প্লিকেন্ট (Local Co-Applicant)" : "Local Attorney / Co-Applicant"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কো-অ্যার্প্লিকেন্টের নাম" : "Co-Applicant Name"}</label>
+                      <input type="text" {...register("coApplicantName")} className={`w-full neu-input ${errors.coApplicantName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Full Name" />
+                      <ErrorText field="coApplicantName" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "প্রবাসীর সাথে সম্পর্ক" : "Relation with Expat"}</label>
+                      <input type="text" {...register("coApplicantRelation")} className={`w-full neu-input ${errors.coApplicantRelation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Relation" />
+                      <ErrorText field="coApplicantRelation" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পেশা" : "Profession"}</label>
+                      <input type="text" {...register("coApplicantProfession")} className={`w-full neu-input ${errors.coApplicantProfession ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Profession" />
+                      <ErrorText field="coApplicantProfession" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
+                      <input type="number" {...register("coApplicantIncome")} className={`w-full neu-input ${errors.coApplicantIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <ErrorText field="coApplicantIncome" />
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "এনআইডি (NID) নম্বর" : "NID Number"}</label>
+                    <input type="text" {...register("coApplicantNid")} className={`w-full neu-input ${errors.coApplicantNid ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="NID Number" />
+                    <ErrorText field="coApplicantNid" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বর্তমান ঠিকানা" : "Current Address"}</label>
+                      <textarea rows={2} {...register("coApplicantCurrentAddress")} className={`w-full neu-input ${errors.coApplicantCurrentAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Current Address" />
+                      <ErrorText field="coApplicantCurrentAddress" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "স্থায়ী ঠিকানা" : "Permanent Address"}</label>
+                      <textarea rows={2} {...register("coApplicantPermanentAddress")} className={`w-full neu-input ${errors.coApplicantPermanentAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Permanent Address" />
+                      <ErrorText field="coApplicantPermanentAddress" />
+                    </div>
                   </div>
                 </div>
               </>
@@ -1488,20 +2233,154 @@ export default function ApplyLoan() {
             {category?.id === 'student' && (
               <>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "প্রতিষ্ঠানের নাম" : "Institution Name"}</label>
-                  <input type="text" {...register("institutionName")} className={`w-full neu-input ${errors.institutionName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="University Name" />
-                  <ErrorText field="institutionName" />
-                </div>
-                <div className="grid grid-cols-2 gap-3.5">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "শিক্ষার্থীর একাডেমিক হিস্ট্রি" : "Student's Academic History"}</h4>
+                  
+                  {/* SSC */}
+                  <div className="mb-4">
+                    <h5 className="text-xs font-bold text-primary-600 mb-2">SSC / O-Level</h5>
+                    <div className="grid grid-cols-2 gap-3.5 mb-2">
+                      <div>
+                        <input type="text" {...register("sscRoll")} className={`w-full neu-input ${errors.sscRoll ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রোল নম্বর" : "Roll Number"} />
+                      </div>
+                      <div>
+                        <input type="text" {...register("sscReg")} className={`w-full neu-input ${errors.sscReg ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রেজিস্ট্রেশন নম্বর" : "Registration No"} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3.5 mb-2">
+                      <div>
+                        <input type="text" {...register("sscBoard")} className={`w-full neu-input ${errors.sscBoard ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "বোর্ড" : "Board"} />
+                      </div>
+                      <div>
+                        <input type="text" {...register("sscGpa")} className={`w-full neu-input ${errors.sscGpa ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="GPA" />
+                      </div>
+                      <div>
+                        <input type="text" {...register("sscYear")} className={`w-full neu-input ${errors.sscYear ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "পাসের সন" : "Passing Year"} />
+                      </div>
+                    </div>
+                    <div>
+                      <input type="text" {...register("sscInstitution")} className={`w-full neu-input ${errors.sscInstitution ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "প্রতিষ্ঠানের নাম" : "Institution Name"} />
+                    </div>
+                  </div>
+
+                  {/* HSC */}
+                  <div className="mb-4">
+                    <h5 className="text-xs font-bold text-primary-600 mb-2">HSC / A-Level / Diploma</h5>
+                    <div className="grid grid-cols-2 gap-3.5 mb-2">
+                      <div>
+                        <input type="text" {...register("hscRoll")} className={`w-full neu-input ${errors.hscRoll ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রোল নম্বর" : "Roll Number"} />
+                      </div>
+                      <div>
+                        <input type="text" {...register("hscReg")} className={`w-full neu-input ${errors.hscReg ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রেজিস্ট্রেশন নম্বর" : "Registration No"} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3.5 mb-2">
+                      <div>
+                        <input type="text" {...register("hscBoard")} className={`w-full neu-input ${errors.hscBoard ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "বোর্ড" : "Board"} />
+                      </div>
+                      <div>
+                        <input type="text" {...register("hscGpa")} className={`w-full neu-input ${errors.hscGpa ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="GPA" />
+                      </div>
+                      <div>
+                        <input type="text" {...register("hscYear")} className={`w-full neu-input ${errors.hscYear ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "পাসের সন" : "Passing Year"} />
+                      </div>
+                    </div>
+                    <div>
+                      <input type="text" {...register("hscInstitution")} className={`w-full neu-input ${errors.hscInstitution ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "প্রতিষ্ঠানের নাম" : "Institution Name"} />
+                    </div>
+                  </div>
+
+                  {/* Graduation */}
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "স্টুডেন্ট আইডি" : "Student ID"}</label>
-                    <input type="text" {...register("studentId")} className={`w-full neu-input ${errors.studentId ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="201-xx-xx" />
-                    <ErrorText field="studentId" />
+                    <h5 className="text-xs font-bold text-primary-600 mb-2">Graduation / Bachelor (If applicable)</h5>
+                    <div className="grid grid-cols-2 gap-3.5 mb-2">
+                      <div>
+                        <input type="text" {...register("gradRoll")} className={`w-full neu-input ${errors.gradRoll ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রোল নম্বর" : "Roll Number"} />
+                      </div>
+                      <div>
+                        <input type="text" {...register("gradReg")} className={`w-full neu-input ${errors.gradReg ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রেজিস্ট্রেশন নম্বর" : "Registration No"} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3.5 mb-2">
+                      <div>
+                        <input type="text" {...register("gradBoard")} className={`w-full neu-input ${errors.gradBoard ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "ইউনিভার্সিটি" : "University"} />
+                      </div>
+                      <div>
+                        <input type="text" {...register("gradCgpa")} className={`w-full neu-input ${errors.gradCgpa ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="CGPA" />
+                      </div>
+                      <div>
+                        <input type="text" {...register("gradYear")} className={`w-full neu-input ${errors.gradYear ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "পাসের সন" : "Passing Year"} />
+                      </div>
+                    </div>
+                    <div>
+                      <input type="text" {...register("gradInstitution")} className={`w-full neu-input ${errors.gradInstitution ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "প্রতিষ্ঠানের নাম" : "Institution Name"} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "ভর্তিচ্ছু কোর্স ও গন্তব্য" : "Target Course & Destination"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বিশ্ববিদ্যালয়ের নাম" : "Target University Name"}</label>
+                      <input type="text" {...register("targetUniversity")} className={`w-full neu-input ${errors.targetUniversity ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="University Name" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ফ্যাকাল্টি/ডিপার্টমেন্ট" : "Faculty/Department"}</label>
+                      <input type="text" {...register("targetDepartment")} className={`w-full neu-input ${errors.targetDepartment ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Department" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কোর্সের গ্লোবাল র্যাংকিং" : "Course Global Ranking"}</label>
+                      <input type="text" {...register("courseRanking")} className={`w-full neu-input ${errors.courseRanking ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Top 500" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ক্রেডিট আওয়ার" : "Credit Hours"}</label>
+                      <input type="text" {...register("creditHours")} className={`w-full neu-input ${errors.creditHours ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Total Credits" />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "অভিভাবকের আয়" : "Guardian's Income"}</label>
-                    <input type="number" {...register("guardianIncome")} className={`w-full neu-input ${errors.guardianIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
-                    <ErrorText field="guardianIncome" />
+                    <h5 className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">{isBn ? "সেমিস্টার ভিত্তিক খরচ (Breakdown)" : "Semester-wise Cost Breakdown"}</h5>
+                    <div className="grid grid-cols-2 gap-3.5 mb-2">
+                      <input type="number" {...register("tuitionFee")} className={`w-full neu-input rounded-xl px-3 py-2 text-xs font-medium outline-none`} placeholder={isBn ? "টিউশন ফি" : "Tuition Fee"} />
+                      <input type="number" {...register("accommodationCost")} className={`w-full neu-input rounded-xl px-3 py-2 text-xs font-medium outline-none`} placeholder={isBn ? "আবাসন খরচ" : "Accommodation Cost"} />
+                      <input type="number" {...register("healthInsurance")} className={`w-full neu-input rounded-xl px-3 py-2 text-xs font-medium outline-none`} placeholder={isBn ? "হেলথ ইন্সুরেন্স" : "Health Insurance"} />
+                      <input type="number" {...register("otherFees")} className={`w-full neu-input rounded-xl px-3 py-2 text-xs font-medium outline-none`} placeholder={isBn ? "বই ও অন্যান্য ফি" : "Books & Other Fees"} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "কো-অ্যার্প্লিকেন্ট/স্পনসরের আর্থিক প্রোফাইল" : "Sponsor's Financial Profile"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "স্পনসরের নাম" : "Sponsor Name"}</label>
+                      <input type="text" {...register("sponsorName")} className={`w-full neu-input ${errors.sponsorName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Full Name" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "শিক্ষার্থীর সাথে সম্পর্ক" : "Relation to Student"}</label>
+                      <input type="text" {...register("sponsorRelation")} className={`w-full neu-input ${errors.sponsorRelation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Father/Mother" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "আয়ের উৎস" : "Income Source"}</label>
+                      <input type="text" {...register("sponsorIncomeSource")} className={`w-full neu-input ${errors.sponsorIncomeSource ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Job/Business" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "চাকরি বা ব্যবসার বিস্তারিত" : "Job/Business Details"}</label>
+                      <input type="text" {...register("sponsorJobDetails")} className={`w-full neu-input ${errors.sponsorJobDetails ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Company / Position" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "করযোগ্য আয় (Taxable Income)" : "Taxable Income"}</label>
+                      <input type="number" {...register("sponsorTaxableIncome")} className={`w-full neu-input ${errors.sponsorTaxableIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নেট ওর্থ (Net Worth)" : "Net Worth"}</label>
+                      <input type="text" {...register("sponsorNetWorth")} className={`w-full neu-input ${errors.sponsorNetWorth ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Property Details" />
+                    </div>
                   </div>
                 </div>
               </>
@@ -1509,20 +2388,97 @@ export default function ApplyLoan() {
 
             {category?.id === 'emergency' && (
               <>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পেশা" : "Profession"}</label>
-                  <input type="text" {...register("professionName")} className={`w-full neu-input ${errors.professionName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-855 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "পেশা" : "Profession"} />
-                  <ErrorText field="professionName" />
+                <div className="mb-4">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "আবেদনকারী ও রোগীর সম্পর্ক" : "Applicant & Patient Relation"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পেশা" : "Profession"}</label>
+                      <input type="text" {...register("professionName")} className={`w-full neu-input ${errors.professionName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-855 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "পেশা" : "Profession"} />
+                      <ErrorText field="professionName" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রোগীর নাম" : "Patient Name"}</label>
+                      <input type="text" {...register("patientName")} className={`w-full neu-input ${errors.patientName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Full Name" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রোগী আবেদনকারীর কে হন" : "Relation with Patient"}</label>
+                      <input type="text" {...register("patientRelation")} className={`w-full neu-input ${errors.patientRelation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Father/Mother" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রোগীর এনআইডি/জন্ম নিবন্ধন" : "Patient NID/Birth Reg."}</label>
+                      <input type="text" {...register("patientNid")} className={`w-full neu-input ${errors.patientNid ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Number" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রোগীর বর্তমান শারীরিক অবস্থা" : "Patient's Current Condition"}</label>
+                    <textarea rows={2} {...register("patientCondition")} className={`w-full neu-input ${errors.patientCondition ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Current Status" />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "জরুরি কারণ" : "Emergency Reason"}</label>
-                  <textarea rows={1.5} {...register("emergencyReason")} className={`w-full neu-input ${errors.emergencyReason ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="জরুরি লোন কেন প্রয়োজন?" />
-                  <ErrorText field="emergencyReason" />
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "ক্লিনিকাল ডিটেইলস" : "Clinical Details"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "হাসপাতালের নাম" : "Hospital Name"}</label>
+                      <input type="text" {...register("hospitalName")} className={`w-full neu-input ${errors.hospitalName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Hospital Name" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ডিপার্টমেন্ট" : "Department"}</label>
+                      <input type="text" {...register("hospitalDepartment")} className={`w-full neu-input ${errors.hospitalDepartment ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Cardiology" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রেফারিং ডাক্তারের নাম" : "Referring Doctor"}</label>
+                      <input type="text" {...register("referringDoctor")} className={`w-full neu-input ${errors.referringDoctor ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Doctor Name" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ডাক্তারের বিএমডিসি (BMDC) রেজিঃ" : "Doctor BMDC Reg."}</label>
+                      <input type="text" {...register("doctorBmdc")} className={`w-full neu-input ${errors.doctorBmdc ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Reg. Number" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "চিকিৎসার ধরন" : "Treatment Type"}</label>
+                    <input type="text" {...register("treatmentType")} className={`w-full neu-input ${errors.treatmentType ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Surgery, ICU" />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
-                  <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
-                  <ErrorText field="monthlyIncome" />
+
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "আর্থিক জরুরি অবস্থা" : "Financial Emergency"}</h4>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোট এস্টিমেটেড খরচ" : "Total Estimated Cost"}</label>
+                      <input type="number" {...register("estimatedCost")} className={`w-full neu-input ${errors.estimatedCost ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নিজে কত টাকা বহন করছেন" : "Applicant's Contribution"}</label>
+                      <input type="number" {...register("applicantContribution")} className={`w-full neu-input ${errors.applicantContribution ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5 mb-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ইন্সুরেন্স কভারেজ আছে কি?" : "Insurance Coverage?"}</label>
+                      <select {...register("insuranceCoverage")} className={`w-full neu-input ${errors.insuranceCoverage ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`}>
+                        <option value="">{isBn ? "নির্বাচন করুন" : "Select"}</option>
+                        <option value="yes">{isBn ? "হ্যাঁ" : "Yes"}</option>
+                        <option value="no">{isBn ? "না" : "No"}</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ইন্সুরেন্স কত দিচ্ছে" : "Insurance Amount"}</label>
+                      <input type="number" {...register("insuranceAmount")} className={`w-full neu-input ${errors.insuranceAmount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ঘাটতি বা লোনের পরিমাণ" : "Shortfall/Loan Amount"}</label>
+                    <input type="number" {...register("shortfallAmount")} className={`w-full neu-input ${errors.shortfallAmount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "এইচআর/কলিগের জরুরি কন্টাক্ট নম্বর" : "HR/Colleague Emergency Contact"}</label>
+                    <input type="text" {...register("hrContactNumber")} className={`w-full neu-input ${errors.hrContactNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="01XXX-XXXXXX" />
+                  </div>
                 </div>
               </>
             )}
@@ -1609,6 +2565,98 @@ export default function ApplyLoan() {
             </div>
           </div>
         </AccordionSection>
+
+        {/* 5. Guarantor Information (Personal Loan Only) */}
+        {category?.id === 'personal' && (
+          <AccordionSection
+            sectionKey="guarantor"
+            title={isBn ? "৫. গ্যারান্টরের তথ্য" : "5. Guarantor Details"}
+            icon={<Users size={18} />}
+            fields={['g1Name', 'g1Relation', 'g1Nid', 'g1Mobile', 'g1Address', 'g1Profession', 'g2Name', 'g2Designation', 'g2OfficialId', 'g2Email', 'g2Mobile']}
+            isExpanded={expanded.guarantor}
+            onToggle={() => toggleSection('guarantor')}
+            isBn={isBn}
+            category={category}
+            flagged={flaggedSections.guarantor}
+          >
+            <div className="space-y-4 text-xs">
+              <div>
+                <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "গ্যারান্টর ১ (পরিবারের সদস্য/আত্মীয়)" : "Guarantor 1 (Family/Relative)"}</h4>
+                <div className="space-y-3.5">
+                  <div className="grid grid-cols-2 gap-3.5">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নাম" : "Name"}</label>
+                      <input type="text" {...register("g1Name")} className={`w-full neu-input ${errors.g1Name ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Name" />
+                      <ErrorText field="g1Name" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "সম্পর্ক" : "Relation"}</label>
+                      <input type="text" {...register("g1Relation")} className={`w-full neu-input ${errors.g1Relation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Relation" />
+                      <ErrorText field="g1Relation" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "এনআইডি" : "NID"}</label>
+                      <input type="text" {...register("g1Nid")} className={`w-full neu-input ${errors.g1Nid ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="NID No" />
+                      <ErrorText field="g1Nid" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল" : "Mobile"}</label>
+                      <input type="tel" {...register("g1Mobile")} className={`w-full neu-input ${errors.g1Mobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
+                      <ErrorText field="g1Mobile" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ঠিকানা" : "Address"}</label>
+                    <input type="text" {...register("g1Address")} className={`w-full neu-input ${errors.g1Address ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Address" />
+                    <ErrorText field="g1Address" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পেশা" : "Profession"}</label>
+                    <input type="text" {...register("g1Profession")} className={`w-full neu-input ${errors.g1Profession ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Profession" />
+                    <ErrorText field="g1Profession" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "গ্যারান্টর ২ (সহকর্মী/অফিসিয়াল)" : "Guarantor 2 (Colleague/Official)"}</h4>
+                <div className="space-y-3.5">
+                  <div className="grid grid-cols-2 gap-3.5">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নাম" : "Name"}</label>
+                      <input type="text" {...register("g2Name")} className={`w-full neu-input ${errors.g2Name ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Name" />
+                      <ErrorText field="g2Name" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পদবী" : "Designation"}</label>
+                      <input type="text" {...register("g2Designation")} className={`w-full neu-input ${errors.g2Designation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Designation" />
+                      <ErrorText field="g2Designation" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "অফিসিয়াল আইডি" : "Official ID"}</label>
+                    <input type="text" {...register("g2OfficialId")} className={`w-full neu-input ${errors.g2OfficialId ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="ID No" />
+                    <ErrorText field="g2OfficialId" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3.5">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "অফিসিয়াল ইমেইল" : "Official Email"}</label>
+                      <input type="email" {...register("g2Email")} className={`w-full neu-input ${errors.g2Email ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Email" />
+                      <ErrorText field="g2Email" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল" : "Mobile"}</label>
+                      <input type="tel" {...register("g2Mobile")} className={`w-full neu-input ${errors.g2Mobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
+                      <ErrorText field="g2Mobile" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </AccordionSection>
+        )}
       </div>
     );
   };
@@ -1691,8 +2739,9 @@ export default function ApplyLoan() {
           {renderFileUploader("selfie", isBn ? "সেলফি (NID সহ)" : "Selfie (with NID)")}
           {renderFileUploader("photo", isBn ? "পাসপোর্ট সাইজ ছবি" : "Passport Size Photo")}
         </div>
-        <div className="mt-3.5 border-t border-gray-200/50 dark:border-gray-700/50 pt-3.5">
+        <div className="mt-3.5 border-t border-gray-200/50 dark:border-gray-700/50 pt-3.5 grid grid-cols-2 gap-3.5">
           {renderFileUploader("nominee_photo", isBn ? "নমিনির ছবি (ঐচ্ছিক)" : "Nominee Photo (Optional)")}
+          {category?.id === 'personal' && renderFileUploader("passport_copy", isBn ? "পাসপোর্ট কপি (যদি থাকে)" : "Passport Copy (If Any)")}
         </div>
       </div>
 
@@ -1703,42 +2752,103 @@ export default function ApplyLoan() {
         </h3>
         <div className="grid grid-cols-1 gap-3.5">
           {category?.id === 'personal' && (
-            <>
-              {renderFileUploader("office_id", isBn ? "অফিস আইডি কার্ড (Job ID)" : "Office ID Card")}
-              {renderFileUploader("salary_cert", isBn ? "বেতনের প্রমাণপত্র (Salary Certificate)" : "Salary Certificate")}
-              {renderFileUploader("appointment_letter", isBn ? "অ্যাপয়েন্টমেন্ট লেটার (Appointment Letter)" : "Appointment Letter")}
-            </>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3.5">
+                {renderFileUploader("office_id", isBn ? "অফিস আইডি কপি" : "Office ID")}
+                {renderFileUploader("hr_noc", isBn ? "HR লেটার/NOC" : "HR Letter/NOC")}
+                {renderFileUploader("salary_statement", isBn ? "বেতন স্টেটমেন্ট (৬ মাস)" : "Salary Statement (6 Months)")}
+                {renderFileUploader("bank_statement", isBn ? "ব্যাংক স্টেটমেন্ট (৬ মাস)" : "Bank Statement (6 Months)")}
+                {renderFileUploader("etin_cert", isBn ? "e-TIN/ট্যাক্স রিটার্ন" : "e-TIN/Tax Return")}
+                {renderFileUploader("utility_bill", isBn ? "ইউটিলিটি বিল (বর্তমান বাসা)" : "Utility Bill (Current Home)")}
+              </div>
+
+              <div className="border-t border-gray-200/50 dark:border-gray-800 pt-4">
+                <h4 className="text-xs font-bold text-gray-805 dark:text-gray-300 mb-3">{isBn ? "গ্যারান্টর ১ ডকুমেন্টস" : "Guarantor 1 Documents"}</h4>
+                <div className="grid grid-cols-2 gap-3.5">
+                  {renderFileUploader("guarantor1_nid", isBn ? "এনআইডি কপি" : "NID Copy")}
+                  {renderFileUploader("guarantor1_photo", isBn ? "পাসপোর্ট সাইজ ছবি" : "Photo")}
+                  {renderFileUploader("guarantor1_income", isBn ? "ব্যাংক/ইনকাম প্রুফ" : "Income/Bank Proof")}
+                </div>
+              </div>
+
+              <div className="border-t border-gray-200/50 dark:border-gray-800 pt-4">
+                <h4 className="text-xs font-bold text-gray-805 dark:text-gray-300 mb-3">{isBn ? "গ্যারান্টর ২ ডকুমেন্টস" : "Guarantor 2 Documents"}</h4>
+                <div className="grid grid-cols-2 gap-3.5">
+                  {renderFileUploader("guarantor2_nid", isBn ? "এনআইডি কপি" : "NID Copy")}
+                  {renderFileUploader("guarantor2_photo", isBn ? "পাসপোর্ট সাইজ ছবি" : "Photo")}
+                  {renderFileUploader("guarantor2_income", isBn ? "ব্যাংক/ইনকাম প্রুফ" : "Income/Bank Proof")}
+                </div>
+              </div>
+            </div>
           )}
 
-          {(category?.id === 'business' || category?.id === 'women') && (
-            <>
-              {renderFileUploader("trade_license", isBn ? "ট্রেড লাইসেন্স কপি (Trade License Copy)" : "Trade License Copy")}
-              {renderFileUploader("shop_photo", isBn ? "দোকান/প্রতিষ্ঠানের ছবি" : "Shop/Institution Photo")}
-              {renderFileUploader("business_docs", isBn ? "ব্যবসায়িক অন্যান্য ডকুমেন্টস" : "Business Documents")}
-            </>
+          {category?.id === 'business' && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3.5">
+                {renderFileUploader("trade_license_3yrs", isBn ? "ট্রেড লাইসেন্স (বিগত ৩ বছর)" : "Trade License (Last 3 Years)")}
+                {renderFileUploader("bank_statement_12m", isBn ? "ব্যাংক স্টেটমেন্ট (১২ মাস)" : "Bank Statement (12 Months)")}
+                {renderFileUploader("premise_ownership_docs", isBn ? "জায়গার মালিকানা/ভাড়ার দলিল" : "Ownership Deed/Rent Agreement")}
+                {renderFileUploader("supplier_buyer_invoices", isBn ? "সাপ্লায়ার এবং ক্রেতার ইনভয়েস" : "Supplier & Buyer Invoices")}
+                {renderFileUploader("company_formation_docs", isBn ? "MOA/AOA/পার্টনারশিপ ডিড" : "MOA/AOA/Partnership Deed")}
+                {renderFileUploader("audited_financials", isBn ? "অডিটেড ফাইন্যান্সিয়ালস (৩ বছর)" : "Audited Financials (3 Yrs)")}
+              </div>
+              <div className="border-t border-gray-200/50 dark:border-gray-800 pt-4">
+                <h4 className="text-xs font-bold text-gray-805 dark:text-gray-300 mb-3">{isBn ? "পার্টনার/ডিরেক্টরদের KYC" : "Partners/Directors KYC"}</h4>
+                <div className="grid grid-cols-2 gap-3.5">
+                  {renderFileUploader("director_kyc", isBn ? "NID, ছবি ও e-TIN (একসাথে স্ক্যান)" : "NID, Photo & e-TIN (Combined)")}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {category?.id === 'women' && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3.5">
+                {renderFileUploader("women_trade_license", isBn ? "নারী উদ্যোক্তার নিজস্ব ট্রেড লাইসেন্স" : "Trade License (Self)")}
+                {renderFileUploader("rjsc_shareholding", isBn ? "আরজেএসসি (RJSC) শেয়ারহোল্ডিং (লিমিটেড হলে)" : "RJSC Shareholding (If Ltd)")}
+                {renderFileUploader("women_bank_statement", isBn ? "ব্যবসার ব্যাংক স্টেটমেন্ট (৬-১২ মাস)" : "Business Bank Statement (6-12m)")}
+                {renderFileUploader("ecommerce_proof", isBn ? "ই-কমার্স ডোমেইন/ফেসবুক পেমেন্ট হিস্ট্রি" : "E-commerce/F-commerce Proof")}
+                {renderFileUploader("chamber_membership", isBn ? "উইমেন চেম্বার/ই-ক্যাব মেম্বারশিপ (BWCCI/WE)" : "Chamber Membership (BWCCI/e-CAB/WE)")}
+              </div>
+            </div>
           )}
 
           {category?.id === 'expat' && (
-            <>
-              {renderFileUploader("passport_copy", isBn ? "পাসপোর্ট কপি (Passport Copy)" : "Passport Copy")}
-              {renderFileUploader("visa_copy", isBn ? "ভিসা কপি (Visa Copy)" : "Visa Copy")}
-              {renderFileUploader("work_permit", isBn ? "ওয়ার্ক পারমিট / ওভারসিস আইডি" : "Work Permit / Overseas ID")}
-            </>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3.5">
+                {renderFileUploader("passport_scan_pages", isBn ? "পাসপোর্টের কপি (১-৫ পৃষ্ঠা ও সিল)" : "Passport Copy (Pages 1-5 & Seals)")}
+                {renderFileUploader("visa_iqama_copy", isBn ? "ওয়ার্ক ভিসা/আকামা কপি" : "Work Visa/Iqama Copy")}
+                {renderFileUploader("employment_contract", isBn ? "বর্তমান চাকরির চুক্তিনামা" : "Employment Contract")}
+                {renderFileUploader("bmet_card", isBn ? "বিএমইটি (BMET) কার্ড" : "BMET Card")}
+                {renderFileUploader("remittance_statement_9m", isBn ? "রেমিট্যান্স স্টেটমেন্ট (৯ মাস)" : "Remittance Statement (9 Months)")}
+                {renderFileUploader("power_of_attorney", isBn ? "পাওয়ার অফ অ্যাটর্নি (Power of Attorney)" : "Power of Attorney (Local)")}
+              </div>
+            </div>
           )}
 
           {category?.id === 'student' && (
-            <>
-              {renderFileUploader("student_id", isBn ? "স্টুডেন্ট আইডি কার্ড" : "Student ID Card")}
-              {renderFileUploader("guardian_nid", isBn ? "অভিভাবকের NID কপি" : "Guardian's NID Copy")}
-              {renderFileUploader("guardian_income", isBn ? "অভিভাবকের আয়ের প্রমাণপত্র" : "Guardian's Income Proof")}
-            </>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3.5">
+                {renderFileUploader("academic_certificates", isBn ? "একাডেমিক সার্টিফিকেট/মার্কশিট" : "Academic Certificates")}
+                {renderFileUploader("admission_letter", isBn ? "অফার লেটার (Offer/Admission Letter)" : "Offer/Admission Letter")}
+                {renderFileUploader("i20_cas_letter", isBn ? "আই-২০/সিএএস (I-20/CAS Letter)" : "I-20 / CAS Letter")}
+                {renderFileUploader("english_proficiency", isBn ? "ইংরেজি দক্ষতা (IELTS/TOEFL)" : "English Proficiency (IELTS/TOEFL)")}
+                {renderFileUploader("sponsor_income_proof", isBn ? "স্পনসরের আয়ের প্রমাণপত্র" : "Sponsor's Income Proof")}
+                {renderFileUploader("sponsor_bank_statement_1yr", isBn ? "স্পনসরের ব্যাংক স্টেটমেন্ট (১ বছর)" : "Sponsor's Bank Statement (1 Yr)")}
+                {renderFileUploader("lien_property_fdr", isBn ? "লিয়েন/বন্ধকী সম্পত্তির দলিল (যদি থাকে)" : "Lien Property/FDR (If any)")}
+              </div>
+            </div>
           )}
 
           {category?.id === 'emergency' && (
-            <>
-              {renderFileUploader("income_proof", isBn ? "আয়ের প্রমাণপত্র / ব্যাংক স্টেটমেন্ট" : "Income Proof / Bank Statement")}
-              {renderFileUploader("emergency_docs", isBn ? "মেডিকেল বা জরুরি ডকুমেন্টস (যদি থাকে)" : "Medical or Emergency Documents (if any)")}
-            </>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3.5">
+                {renderFileUploader("diagnosis_report", isBn ? "অফিশিয়াল ডায়াগনসিস রিপোর্ট ও প্রেসক্রিপশন" : "Diagnosis Report & Prescription")}
+                {renderFileUploader("cost_estimation_letter", isBn ? "খরচের বাজেট লেটার (সীল ও স্বাক্ষরসহ)" : "Cost Budget Letter")}
+                {renderFileUploader("admission_slip", isBn ? "ভর্তির টিকিট ও রানিং বিল (যদি থাকে)" : "Admission Slip & Running Bill")}
+                {renderFileUploader("income_proof_quick", isBn ? "আয়ের দ্রুত প্রমাণ (ইন্টারনেট ব্যাংকিং)" : "Quick Income Proof")}
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -1916,8 +3026,8 @@ export default function ApplyLoan() {
       </div>
 
       {/* Bottom Action Bar - Compact */}
-      {step < 5 && (
-        <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md transition-colors border-t border-gray-200/50 dark:border-gray-855/50 z-40 flex gap-2">
+      {step > 1 && step < 5 && (
+        <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md transition-colors border-t border-gray-200/50 dark:border-gray-855/50 z-40 flex justify-between gap-2">
           {step > 1 && (
             <button
               type="button"
@@ -1931,7 +3041,7 @@ export default function ApplyLoan() {
             type="button"
             onClick={nextStep}
             disabled={(step === 1 && !category) || (step === 4 && !acceptedTerms) || isSubmitting}
-            className="flex-1 neu-btn-primary disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-650 disabled:shadow-none py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-1"
+            className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm neu-btn-primary shrink-0 disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-650 disabled:shadow-none ml-auto"
           >
             {isSubmitting
               ? (isBn ? 'অপেক্ষা করুন...' : 'Please wait...')

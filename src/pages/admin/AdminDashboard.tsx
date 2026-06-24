@@ -425,6 +425,18 @@ export default function AdminDashboard() {
 
         if (!error) {
           setReplyingToMsg(null);
+          
+          // Send notification to user
+          const miniAppUrl = import.meta.env.VITE_MINI_APP_URL || "https://provatiloanbd.vercel.app";
+          const notificationMsg = `📩 <b>নতুন বার্তা এসেছে</b>\n\nPROVATI LOAN Support থেকে একটি নতুন মেসেজ পেয়েছেন।\n\nবিস্তারিত দেখতে "Live Chat" খুলুন।`;
+          
+          sendTelegramNotification(
+            selectedChatId, 
+            notificationMsg, 
+            config.telegramBotToken,
+            { inline_keyboard: [[{ text: "💬 Live Chat", web_app: { url: `${miniAppUrl}/support` } }]] }
+          );
+          
         } else {
           console.error('Error sending admin reply:', error);
         }
@@ -1240,9 +1252,21 @@ export default function AdminDashboard() {
 
               {activeTab === 'users' && (
                 <div className="bg-white dark:bg-gray-800 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-                  <div className="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-                    <h2 className="font-bold text-gray-900 dark:text-white text-xl">Registered Users</h2>
-                    <p className="text-sm text-gray-500 mt-1">Manage platform users and access controls.</p>
+                  <div className="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                      <h2 className="font-bold text-gray-900 dark:text-white text-xl">Registered Users</h2>
+                      <p className="text-sm text-gray-500 mt-1">Manage platform users and access controls.</p>
+                    </div>
+                    <div className="relative w-full sm:w-64">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input 
+                        type="text" 
+                        placeholder={isBn ? "নাম, ইউজারনেম বা আইডি খুঁজুন..." : "Search name, username, ID..."}
+                        className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm transition-shadow"
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                      />
+                    </div>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
@@ -1268,7 +1292,11 @@ export default function AdminDashboard() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                        {profiles.map(user => (
+                        {profiles.filter(p => 
+                          (p.first_name + ' ' + (p.last_name || '')).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (p.username || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          p.chat_id.toString().includes(searchTerm)
+                        ).map(user => (
                           <motion.tr layout key={user.chat_id} className={`hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors ${user.is_banned ? 'bg-red-50/30 dark:bg-red-900/10' : ''}`}>
                             <td className="px-6 py-4">
                               <input 
@@ -1282,10 +1310,16 @@ export default function AdminDashboard() {
                               />
                             </td>
                             <td className="px-6 py-4 flex items-center gap-4">
-                              <img src={user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name}`} alt="" className="w-10 h-10 rounded-full shadow-sm" />
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-gray-900 dark:text-white text-base">{user.first_name} {user.last_name}</span>
-                                <a 
+                              <div className="relative">
+                                <img src={user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name}`} alt="" className="w-10 h-10 rounded-full shadow-sm" />
+                                {!user.is_banned && (
+                                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></div>
+                                )}
+                              </div>
+                              <div className="flex flex-col">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-bold text-gray-900 dark:text-white text-base">{user.first_name} {user.last_name}</span>
+                                  <a 
                                   href={user.username ? `https://t.me/${user.username}` : `tg://user?id=${user.chat_id}`} 
                                   target="_blank" 
                                   rel="noopener noreferrer" 
@@ -1336,13 +1370,23 @@ export default function AdminDashboard() {
                               </button>
                               <button 
                                 onClick={() => {
+                                  setSelectedChatId(user.chat_id);
+                                  setActiveTab('chat');
+                                }}
+                                className="p-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-xl transition-colors"
+                                title={isBn ? "লাইভ চ্যাট শুরু করুন" : "Start Live Chat"}
+                              >
+                                <MessageCircle size={16} />
+                              </button>
+                              <button 
+                                onClick={() => {
                                   setDirectMessageUsers([user]);
                                   setShowDirectMessageModal(true);
                                 }}
                                 className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl transition-colors"
-                                title="Send Message"
+                                title="Send Broadcast/Alert"
                               >
-                                <MessageCircle size={16} />
+                                <Megaphone size={16} />
                               </button>
                               <button 
                                 onClick={() => handleDeleteUser(user.chat_id)}

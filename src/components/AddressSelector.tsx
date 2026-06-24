@@ -9,13 +9,18 @@ import {
 } from "../lib/bdGeoData";
 
 export interface AddressValue {
-  division: string;
   district: string;
   upazila: string;
   union: string;
   village: string;
-  postOffice: string;
   postCode: string;
+  houseNo?: string;
+  flatNo?: string;
+  holdingNo?: string;
+  roadNo?: string;
+  ownership?: string;
+  rentAmount?: string;
+  stayDuration?: string;
 }
 
 interface AddressSelectorProps {
@@ -25,6 +30,8 @@ interface AddressSelectorProps {
   isBn: boolean;
   errors?: Partial<Record<keyof AddressValue, string>>;
   prefix?: string; // for unique id
+  showDetailedFields?: boolean; // For house/flat/road
+  showOwnershipFields?: boolean; // For rent/ownership
 }
 
 const selectClass = (hasError?: boolean) =>
@@ -64,26 +71,17 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
   isBn,
   errors,
   prefix = "addr",
+  showDetailedFields = false,
+  showOwnershipFields = false,
 }) => {
-  const [filteredDistricts, setFilteredDistricts] = useState(
-    value.division ? getDistrictsByDivision(
-      divisions.find(d => d.name === value.division || d.bn_name === value.division)?.id || ""
-    ) : []
-  );
+  const [filteredDistricts, setFilteredDistricts] = useState(districts);
   const [filteredUpazilas, setFilteredUpazilas] = useState(
     value.district ? getUpazilasByDistrict(
       districts.find(d => d.name === value.district || d.bn_name === value.district)?.id || ""
     ) : []
   );
 
-  const handleDivisionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const divName = e.target.value;
-    const div = divisions.find(d => (isBn ? d.bn_name : d.name) === divName);
-    const newDistricts = div ? getDistrictsByDivision(div.id) : [];
-    setFilteredDistricts(newDistricts);
-    setFilteredUpazilas([]);
-    onChange({ ...value, division: divName, district: "", upazila: "", union: "" });
-  };
+
 
   const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const distName = e.target.value;
@@ -99,40 +97,21 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
 
   // Sync filtered lists when value changes externally (e.g., on edit load)
   useEffect(() => {
-    if (value.division) {
-      const div = divisions.find(
-        d => d.bn_name === value.division || d.name === value.division
+    setFilteredDistricts(districts);
+    if (value.district) {
+      const dist = districts.find(
+        d => d.bn_name === value.district || d.name === value.district
       );
-      if (div) {
-        const dists = getDistrictsByDivision(div.id);
-        setFilteredDistricts(dists);
-        if (value.district) {
-          const dist = dists.find(
-            d => d.bn_name === value.district || d.name === value.district
-          );
-          if (dist) {
-            setFilteredUpazilas(getUpazilasByDistrict(dist.id));
-          }
-        }
+      if (dist) {
+        setFilteredUpazilas(getUpazilasByDistrict(dist.id));
       }
     }
-  }, [value.division, value.district]);
+  }, [value.district]);
 
   // Language auto-translation/correction
   useEffect(() => {
     let updated = false;
     const newValue = { ...value };
-
-    if (value.division) {
-      const div = divisions.find(d => d.name === value.division || d.bn_name === value.division);
-      if (div) {
-        const correctDivName = isBn ? div.bn_name : div.name;
-        if (value.division !== correctDivName) {
-          newValue.division = correctDivName;
-          updated = true;
-        }
-      }
-    }
 
     if (value.district) {
       const dist = districts.find(d => d.name === value.district || d.bn_name === value.district);
@@ -159,7 +138,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
     if (updated) {
       onChange(newValue);
     }
-  }, [isBn, value.division, value.district, value.upazila, onChange]);
+  }, [isBn, value.district, value.upazila, onChange]);
 
   const t = (en: string, bn: string) => (isBn ? bn : en);
 
@@ -176,27 +155,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
       <div className="p-3 space-y-2.5">
         {/* Row 1: Division + District */}
         <div className="grid grid-cols-2 gap-2">
-          <div>
-            <FieldLabel>{t("Division", "বিভাগ")}</FieldLabel>
-            <SelectWrapper>
-              <select
-                id={`${prefix}-division`}
-                value={value.division}
-                onChange={handleDivisionChange}
-                className={selectClass(!!errors?.division)}
-              >
-                <option value="">{t("Select Division", "বিভাগ বেছে নিন")}</option>
-                {divisions.map(d => (
-                  <option key={d.id} value={isBn ? d.bn_name : d.name}>
-                    {isBn ? d.bn_name : d.name}
-                  </option>
-                ))}
-              </select>
-            </SelectWrapper>
-            {errors?.division && (
-              <p className="text-red-500 text-[10px] mt-0.5 font-medium">{errors.division}</p>
-            )}
-          </div>
+
 
           <div>
             <FieldLabel>{t("District", "জেলা")}</FieldLabel>
@@ -205,8 +164,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
                 id={`${prefix}-district`}
                 value={value.district}
                 onChange={handleDistrictChange}
-                disabled={!value.division}
-                className={selectClass(!!errors?.district) + ((!value.division) ? " opacity-50 cursor-not-allowed" : "")}
+                className={selectClass(!!errors?.district)}
               >
                 <option value="">{t("Select District", "জেলা বেছে নিন")}</option>
                 {filteredDistricts.map(d => (
@@ -279,22 +237,59 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
           )}
         </div>
 
-        {/* Row 4: Post Office + Post Code */}
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <FieldLabel>{t("Post Office", "পোস্ট অফিস")}</FieldLabel>
-            <input
-              id={`${prefix}-postOffice`}
-              type="text"
-              value={value.postOffice}
-              onChange={e => onChange({ ...value, postOffice: e.target.value })}
-              placeholder={t("Post Office name", "পোস্ট অফিসের নাম")}
-              className={inputClass(!!errors?.postOffice)}
-            />
-            {errors?.postOffice && (
-              <p className="text-red-500 text-[10px] mt-0.5 font-medium">{errors.postOffice}</p>
-            )}
+        {/* Detailed Fields (House, Flat, Holding, Road) */}
+        {showDetailedFields && (
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            <div>
+              <FieldLabel>{t("House No", "বাসার নম্বর")}</FieldLabel>
+              <input
+                id={`${prefix}-houseNo`}
+                type="text"
+                value={value.houseNo || ""}
+                onChange={e => onChange({ ...value, houseNo: e.target.value })}
+                placeholder={t("House Number", "বাসার নম্বর")}
+                className={inputClass(!!errors?.houseNo)}
+              />
+            </div>
+            <div>
+              <FieldLabel>{t("Flat No", "ফ্ল্যাট নম্বর")}</FieldLabel>
+              <input
+                id={`${prefix}-flatNo`}
+                type="text"
+                value={value.flatNo || ""}
+                onChange={e => onChange({ ...value, flatNo: e.target.value })}
+                placeholder={t("Flat Number", "ফ্ল্যাট নম্বর")}
+                className={inputClass(!!errors?.flatNo)}
+              />
+            </div>
+            <div>
+              <FieldLabel>{t("Holding No", "হোল্ডিং নম্বর")}</FieldLabel>
+              <input
+                id={`${prefix}-holdingNo`}
+                type="text"
+                value={value.holdingNo || ""}
+                onChange={e => onChange({ ...value, holdingNo: e.target.value })}
+                placeholder={t("Holding Number", "হোল্ডিং নম্বর")}
+                className={inputClass(!!errors?.holdingNo)}
+              />
+            </div>
+            <div>
+              <FieldLabel>{t("Road Name/No", "রাস্তার নাম/নম্বর")}</FieldLabel>
+              <input
+                id={`${prefix}-roadNo`}
+                type="text"
+                value={value.roadNo || ""}
+                onChange={e => onChange({ ...value, roadNo: e.target.value })}
+                placeholder={t("Road Info", "রাস্তার নাম/নম্বর")}
+                className={inputClass(!!errors?.roadNo)}
+              />
+            </div>
           </div>
+        )}
+
+        {/* Row 4: Post Code */}
+        <div className="grid grid-cols-2 gap-2">
+
           <div>
             <FieldLabel>{t("Post Code", "পোস্ট কোড")}</FieldLabel>
             <input
@@ -312,6 +307,60 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
             )}
           </div>
         </div>
+
+        {/* Ownership Fields (Only if requested, mostly for current address) */}
+        {showOwnershipFields && (
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+            <FieldLabel>{t("Current House Ownership", "বর্তমান বাসার ধরন")}</FieldLabel>
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {['নিজস্ব', 'বাবার', 'ভাড়া'].map((type, idx) => {
+                const enTypes = ['Own', 'Parents', 'Rented'];
+                const currentVal = value.ownership || "";
+                const isSelected = currentVal === type || currentVal === enTypes[idx];
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => onChange({ ...value, ownership: isBn ? type : enTypes[idx] })}
+                    className={`py-2 px-1 text-[10px] font-bold rounded-lg transition-all border ${
+                      isSelected
+                        ? "bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-300"
+                        : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
+                    }`}
+                  >
+                    {isBn ? type : enTypes[idx]}
+                  </button>
+                );
+              })}
+            </div>
+
+            {(value.ownership === 'ভাড়া' || value.ownership === 'Rented') && (
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <div>
+                  <FieldLabel>{t("Monthly Rent", "মাসিক ভাড়া")}</FieldLabel>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={value.rentAmount || ""}
+                    onChange={e => onChange({ ...value, rentAmount: e.target.value.replace(/\D/g, "") })}
+                    placeholder={t("Amount", "পরিমাণ")}
+                    className={inputClass(!!errors?.rentAmount)}
+                  />
+                </div>
+                <div>
+                  <FieldLabel>{t("Stay Duration", "কত বছর যাবৎ আছেন")}</FieldLabel>
+                  <input
+                    type="text"
+                    value={value.stayDuration || ""}
+                    onChange={e => onChange({ ...value, stayDuration: e.target.value })}
+                    placeholder={t("e.g. 5 Years", "যেমন: ৫ বছর")}
+                    className={inputClass(!!errors?.stayDuration)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -320,12 +369,14 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
 // Helper: serialize AddressValue to a single string for DB storage
 export function serializeAddress(addr: AddressValue): string {
   const parts = [
+    addr.houseNo ? `House: ${addr.houseNo}` : "",
+    addr.flatNo ? `Flat: ${addr.flatNo}` : "",
+    addr.holdingNo ? `Holding: ${addr.holdingNo}` : "",
+    addr.roadNo ? `Road: ${addr.roadNo}` : "",
     addr.village,
     addr.union,
-    addr.postOffice ? `P.O. ${addr.postOffice}` : "",
     addr.upazila,
     addr.district,
-    addr.division,
     addr.postCode ? `- ${addr.postCode}` : "",
   ].filter(Boolean);
   return parts.join(", ");
@@ -334,12 +385,17 @@ export function serializeAddress(addr: AddressValue): string {
 // Helper: create empty AddressValue
 export function emptyAddress(): AddressValue {
   return {
-    division: "",
     district: "",
     upazila: "",
     union: "",
     village: "",
-    postOffice: "",
     postCode: "",
+    houseNo: "",
+    flatNo: "",
+    holdingNo: "",
+    roadNo: "",
+    ownership: "",
+    rentAmount: "",
+    stayDuration: "",
   };
 }

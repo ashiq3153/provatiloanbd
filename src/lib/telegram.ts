@@ -29,7 +29,8 @@ export const getTelegramUser = (): TelegramUser => {
 export async function sendTelegramNotification(
   chatId: number,
   message: string,
-  botToken?: string
+  botToken?: string,
+  replyMarkup?: any
 ): Promise<boolean> {
   const token = botToken || import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
   if (!token) {
@@ -38,16 +39,22 @@ export async function sendTelegramNotification(
   }
 
   try {
+    const payload: any = {
+      chat_id: chatId,
+      text: message,
+      parse_mode: "HTML",
+    };
+    
+    if (replyMarkup) {
+      payload.reply_markup = replyMarkup;
+    }
+
     const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: message,
-        parse_mode: "HTML",
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
