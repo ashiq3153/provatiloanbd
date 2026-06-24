@@ -1371,7 +1371,9 @@ export default function AdminDashboard() {
                               </button>
                               <button 
                                 onClick={() => {
+                                  const cUser = chatUsers.find(u => u.chat_id === user.chat_id);
                                   setSelectedChatId(user.chat_id);
+                                  setChatMessages(cUser ? cUser.messages : []);
                                   setActiveTab('chat');
                                 }}
                                 className="p-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-xl transition-colors"
@@ -2092,7 +2094,7 @@ export default function AdminDashboard() {
               {activeTab === 'chat' && (
                 <div className="bg-white dark:bg-gray-800 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden h-[calc(100vh-220px)] flex flex-col md:flex-row">
                   {/* Left Column: Users List */}
-                  <div className={`w-full md:w-80 border-r border-gray-100 dark:border-gray-700 flex flex-col shrink-0 ${selectedChatId ? 'hidden md:flex' : 'flex'}`}>
+                  <div className={`w-full md:w-80 border-r border-gray-100 dark:border-gray-700 flex flex-col h-full overflow-hidden shrink-0 ${selectedChatId ? 'hidden md:flex' : 'flex'}`}>
                     <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
                       <h3 className="font-bold text-gray-900 dark:text-white text-base">{isBn ? 'গ্রাহক তালিকা' : 'Active Support Chats'}</h3>
                       <p className="text-xs text-gray-500 mt-1">{isBn ? 'সাপোর্ট চ্যাট এবং সাহায্য বার্তা সমূহ' : 'Select a user to review support logs.'}</p>
@@ -2145,7 +2147,11 @@ export default function AdminDashboard() {
                   <div className={`flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 h-full overflow-hidden ${selectedChatId ? 'flex' : 'hidden md:flex'}`}>
                     {selectedChatId ? (
                       (() => {
-                        const selectedUser = chatUsers.find(u => u.chat_id === selectedChatId);
+                        const chatUserMatch = chatUsers.find(u => u.chat_id === selectedChatId);
+                        const profileMatch = profiles.find(p => p.chat_id === selectedChatId);
+                        const chatName = chatUserMatch?.name || (profileMatch ? `${profileMatch.first_name} ${profileMatch.last_name || ''}`.trim() : 'User');
+                        const chatAvatar = chatUserMatch?.avatar || profileMatch?.photo_url;
+
                         return (
                           <>
                             {/* Chat Header */}
@@ -2158,14 +2164,14 @@ export default function AdminDashboard() {
                                 <ArrowLeft size={18} />
                               </button>
                               <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-600 flex items-center justify-center font-bold">
-                                {selectedUser?.avatar ? (
-                                  <img src={selectedUser.avatar} alt={selectedUser.name} className="w-full h-full rounded-full object-cover" />
+                                {chatAvatar ? (
+                                  <img src={chatAvatar} alt={chatName} className="w-full h-full rounded-full object-cover" />
                                 ) : (
-                                  selectedUser?.name.charAt(0) || 'U'
+                                  chatName.charAt(0) || 'U'
                                 )}
                               </div>
                               <div>
-                                <h4 className="font-bold text-sm text-gray-900 dark:text-white leading-tight">{selectedUser?.name}</h4>
+                                <h4 className="font-bold text-sm text-gray-900 dark:text-white leading-tight">{chatName}</h4>
                                 <p className="text-[10px] text-gray-400 font-mono mt-0.5">Telegram ID: {selectedChatId}</p>
                               </div>
                             </div>
