@@ -584,6 +584,7 @@ export default function AdminDashboard() {
 
     setIsBroadcasting(false);
     toast.success(isBn ? 'ব্রডকাস্ট সম্পন্ন হয়েছে' : 'Broadcast completed!');
+    getAllProfiles().then(setProfiles);
   };
 
   const handleSendDirectMessage = async () => {
@@ -603,6 +604,7 @@ export default function AdminDashboard() {
     setDirectMessageText('');
     setSelectedUserIds([]);
     setIsSendingDirect(false);
+    getAllProfiles().then(setProfiles);
   };
 
   const handleSaveSettings = async () => {

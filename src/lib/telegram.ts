@@ -7,6 +7,8 @@ export interface TelegramUser {
   photo_url?: string;
 }
 
+import { supabase } from './supabase';
+
 export const getTelegramUser = (): TelegramUser => {
   // @ts-ignore
   if (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user) {
@@ -58,14 +60,19 @@ export async function sendTelegramNotification(
     });
 
     if (!response.ok) {
-      const errData = await response.json();
+      let errData;
+      try {
+        errData = await response.json();
+      } catch (e) {
+        errData = await response.text();
+      }
       console.error("Telegram API Error:", errData);
       
-      if (response.status === 403) {
-        try {
-          const { supabase } = await import('./supabase');
-          await supabase.from('profiles').update({ bot_status: 'unreachable' }).eq('chat_id', chatId);
-        } catch (e) {}
+      // Update status to unreachable for any Telegram error (403 forbidden, 400 chat not found, etc)
+      try {
+        await supabase.from('profiles').update({ bot_status: 'unreachable' }).eq('chat_id', chatId);
+      } catch (e) {
+        console.error("Failed to update bot_status:", e);
       }
       
       return false;
