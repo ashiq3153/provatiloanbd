@@ -6,8 +6,8 @@
  * plus an inline button to open the Telegram Mini App.
  */
 
-const BOT_TOKEN = process.env.VITE_TELEGRAM_BOT_TOKEN || "8539494845:AAEbWQfOpCrAzulsbefYn25uTeyiQ_By6Mg";
-const MINI_APP_URL = process.env.VITE_MINI_APP_URL || "https://provatiloanbd.vercel.app";
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const MINI_APP_URL = process.env.MINI_APP_URL || "https://provatiloanbd.vercel.app";
 
 /**
  * Send a message via Telegram Bot API.
