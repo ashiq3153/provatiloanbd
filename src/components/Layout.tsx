@@ -5,12 +5,15 @@ import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppStore } from '../lib/store';
 import { supabase } from '../lib/supabase';
+import { getTelegramUser } from '../lib/telegram';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const { language } = useAppStore();
   const isBn = language === 'bn';
   const [adminOnline, setAdminOnline] = useState<boolean | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const user = getTelegramUser();
 
   // Real-time admin online status
   useEffect(() => {
@@ -40,6 +43,47 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  // Real-time unread messages count
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const fetchUnreadCount = () => {
+      supabase
+        .from('support_messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('chat_id', user.id)
+        .eq('sender', 'admin')
+        .eq('is_seen', false)
+        .then(({ count, error }) => {
+          if (!error && count !== null) {
+            setUnreadCount(count);
+          }
+        });
+    };
+
+    fetchUnreadCount();
+
+    const channel = supabase
+      .channel(`unread_count_${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'support_messages',
+          filter: `chat_id=eq.${user.id}`
+        },
+        () => {
+          fetchUnreadCount();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   const navItems = [
     { name: isBn ? 'হোম' : 'Home', path: '/', icon: Home },
@@ -114,6 +158,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 style={{ backgroundColor: adminOnline === null ? '#6b7280' : adminOnline ? '#22c55e' : '#ef4444' }}
               ></span>
             </span>
+
+            {/* Unread Messages Badge */}
+            {unreadCount > 0 && (
+              <span className="absolute -top-3 -left-3 bg-red-500 text-white text-[11px] font-black w-6 h-6 flex items-center justify-center rounded-full border-[2.5px] border-white shadow-md z-20">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
 
             <svg viewBox="0 0 100 100" className="w-full h-full" style={{ background: 'transparent', overflow: 'visible' }}>
               {/* Red Bubble Background */}
