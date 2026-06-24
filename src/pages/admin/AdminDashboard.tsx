@@ -1312,30 +1312,28 @@ export default function AdminDashboard() {
                                 {user.is_banned ? <><CheckCircle size={14} /> Unban</> : <><Ban size={14} /> Suspend</>}
                               </button>
                               <button 
-                                <button 
-                                  onClick={() => {
-                                    setDirectMessageUser(user);
-                                    setShowDirectMessageModal(true);
-                                  }}
-                                  className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl transition-colors"
-                                  title="Send Message"
-                                >
-                                  <MessageCircle size={16} />
-                                </button>
-                                <button 
-                                  onClick={() => handleDeleteUser(user.chat_id)}
-                                  className="p-2 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl transition-colors"
-                                  title="Delete User & Data"
-                                >
-                                  <Trash2 size={16} />
-                                </button>
-                              </td>
+                                onClick={() => {
+                                  setDirectMessageUser(user);
+                                  setShowDirectMessageModal(true);
+                                }}
+                                className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl transition-colors"
+                                title="Send Message"
+                              >
+                                <MessageCircle size={16} />
+                              </button>
+                              <button 
+                                onClick={() => handleDeleteUser(user.chat_id)}
+                                className="p-2 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl transition-colors"
+                                title="Delete User & Data"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </td>
                           </motion.tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
-                </div>
                 </div>
               )}
 
