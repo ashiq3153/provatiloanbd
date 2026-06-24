@@ -23,9 +23,10 @@ export default function AdminDashboard() {
   const [broadcastProgress, setBroadcastProgress] = useState(0);
 
   const [showDirectMessageModal, setShowDirectMessageModal] = useState(false);
-  const [directMessageUser, setDirectMessageUser] = useState<Profile | null>(null);
+  const [directMessageUsers, setDirectMessageUsers] = useState<Profile[]>([]);
   const [directMessageText, setDirectMessageText] = useState('');
   const [isSendingDirect, setIsSendingDirect] = useState(false);
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loans, setLoans] = useState<LoanApplication[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -553,22 +554,22 @@ export default function AdminDashboard() {
   };
 
   const handleSendDirectMessage = async () => {
-    if (!directMessageUser || !directMessageText.trim()) return;
+    if (directMessageUsers.length === 0 || !directMessageText.trim()) return;
     setIsSendingDirect(true);
-    try {
-      const success = await sendTelegramNotification(directMessageUser.chat_id, directMessageText, config.telegramBotToken);
-      if (success) {
-        toast.success(isBn ? 'মেসেজ পাঠানো হয়েছে' : 'Message sent successfully');
-        setShowDirectMessageModal(false);
-        setDirectMessageText('');
-      } else {
-        toast.error(isBn ? 'মেসেজ পাঠাতে ব্যর্থ' : 'Failed to send message');
-      }
-    } catch (err) {
-      toast.error('Error sending message');
-    } finally {
-      setIsSendingDirect(false);
+    let delivered = 0;
+    for (const user of directMessageUsers) {
+      try {
+        const success = await sendTelegramNotification(user.chat_id, directMessageText, config.telegramBotToken);
+        if (success) delivered++;
+      } catch (err) {}
+      await new Promise(resolve => setTimeout(resolve, 50));
     }
+    
+    toast.success(isBn ? `${delivered} জনকে মেসেজ পাঠানো হয়েছে` : `Message sent to ${delivered} users`);
+    setShowDirectMessageModal(false);
+    setDirectMessageText('');
+    setSelectedUserIds([]);
+    setIsSendingDirect(false);
   };
 
   const handleSaveSettings = async () => {
@@ -1247,6 +1248,17 @@ export default function AdminDashboard() {
                     <table className="w-full text-sm text-left">
                       <thead className="bg-gray-50/80 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider text-xs border-b border-gray-200 dark:border-gray-700">
                         <tr>
+                          <th className="px-6 py-4 w-10">
+                            <input 
+                              type="checkbox" 
+                              checked={profiles.length > 0 && selectedUserIds.length === profiles.length}
+                              onChange={(e) => {
+                                if(e.target.checked) setSelectedUserIds(profiles.map(p => p.chat_id));
+                                else setSelectedUserIds([]);
+                              }}
+                              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-4 h-4"
+                            />
+                          </th>
                           <th className="px-6 py-4">Profile</th>
                           <th className="px-6 py-4">Chat ID</th>
                           <th className="px-6 py-4">Username</th>
@@ -1258,6 +1270,17 @@ export default function AdminDashboard() {
                       <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                         {profiles.map(user => (
                           <motion.tr layout key={user.chat_id} className={`hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors ${user.is_banned ? 'bg-red-50/30 dark:bg-red-900/10' : ''}`}>
+                            <td className="px-6 py-4">
+                              <input 
+                                type="checkbox" 
+                                checked={selectedUserIds.includes(user.chat_id)}
+                                onChange={(e) => {
+                                  if(e.target.checked) setSelectedUserIds([...selectedUserIds, user.chat_id]);
+                                  else setSelectedUserIds(selectedUserIds.filter(id => id !== user.chat_id));
+                                }}
+                                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-4 h-4"
+                              />
+                            </td>
                             <td className="px-6 py-4 flex items-center gap-4">
                               <img src={user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name}`} alt="" className="w-10 h-10 rounded-full shadow-sm" />
                               <div className="flex items-center gap-1.5">
@@ -1313,7 +1336,7 @@ export default function AdminDashboard() {
                               </button>
                               <button 
                                 onClick={() => {
-                                  setDirectMessageUser(user);
+                                  setDirectMessageUsers([user]);
                                   setShowDirectMessageModal(true);
                                 }}
                                 className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl transition-colors"
@@ -1334,6 +1357,23 @@ export default function AdminDashboard() {
                       </tbody>
                     </table>
                   </div>
+                  {selectedUserIds.length > 0 && (
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-t border-blue-100 dark:border-blue-800/30 flex items-center justify-between">
+                      <span className="text-sm font-bold text-blue-700 dark:text-blue-400">
+                        {selectedUserIds.length} {isBn ? 'জন ইউজার নির্বাচিত' : 'Users Selected'}
+                      </span>
+                      <button 
+                        onClick={() => {
+                          const selectedProfiles = profiles.filter(p => selectedUserIds.includes(p.chat_id));
+                          setDirectMessageUsers(selectedProfiles);
+                          setShowDirectMessageModal(true);
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-xl transition-colors shadow-sm text-sm"
+                      >
+                        {isBn ? 'মেসেজ পাঠান' : 'Send Broadcast to Selected'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -2783,13 +2823,13 @@ export default function AdminDashboard() {
           </>
         )}
 
-        {showDirectMessageModal && directMessageUser && (
+        {showDirectMessageModal && directMessageUsers.length > 0 && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setShowDirectMessageModal(false)}></div>
             <div className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-md p-6 relative z-10 shadow-2xl border border-gray-200 dark:border-gray-700">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <MessageCircle className="text-blue-500" /> Message User
+                  <MessageCircle className="text-blue-500" /> {directMessageUsers.length > 1 ? 'Bulk Message' : 'Message User'}
                 </h3>
                 <button onClick={() => setShowDirectMessageModal(false)} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                   <X size={20} />
@@ -2797,7 +2837,13 @@ export default function AdminDashboard() {
               </div>
 
               <div className="mb-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400">To: <span className="font-bold text-gray-900 dark:text-white">{directMessageUser.first_name} {directMessageUser.last_name || ''}</span></p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  To: <span className="font-bold text-gray-900 dark:text-white">
+                    {directMessageUsers.length === 1 
+                      ? `${directMessageUsers[0].first_name} ${directMessageUsers[0].last_name || ''}`
+                      : `${directMessageUsers.length} Selected Users`}
+                  </span>
+                </p>
               </div>
 
               <div className="space-y-4">
