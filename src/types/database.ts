@@ -85,6 +85,11 @@ export interface SuccessStory {
   approval_time: string | null;
   rating: number;
   is_verified: boolean;
+  location?: string;
+  profession?: string;
+  loan_tenure?: string;
+  deposit_payment?: string;
+  created_at?: string;
   like_count?: number;
   dislike_count?: number;
   love_count?: number;

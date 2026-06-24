@@ -119,6 +119,10 @@ export default function AdminDashboard() {
     approval_time: '',
     rating: 5,
     avatar_url: '',
+    location: '',
+    profession: '',
+    loan_tenure: '',
+    deposit_payment: '',
     like_count: 0,
     dislike_count: 0,
     love_count: 0,
@@ -1584,6 +1588,22 @@ export default function AdminDashboard() {
                           <input type="text" placeholder="e.g. In 24 Hours" value={newStory.approval_time} onChange={e => setNewStory({...newStory, approval_time: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
                         </div>
                         <div>
+                          <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase mb-1 block">Location</label>
+                          <input type="text" placeholder="e.g. Dhaka, Bangladesh" value={newStory.location} onChange={e => setNewStory({...newStory, location: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase mb-1 block">Profession</label>
+                          <input type="text" placeholder="e.g. Teacher" value={newStory.profession} onChange={e => setNewStory({...newStory, profession: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase mb-1 block">Loan Tenure</label>
+                          <input type="text" placeholder="e.g. 24 Months" value={newStory.loan_tenure} onChange={e => setNewStory({...newStory, loan_tenure: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase mb-1 block">Deposit Payment</label>
+                          <input type="text" placeholder="e.g. 100% Completed" value={newStory.deposit_payment} onChange={e => setNewStory({...newStory, deposit_payment: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+                        </div>
+                        <div>
                           <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase mb-1 block">Avatar URL (Optional)</label>
                           <input type="text" placeholder="https://..." value={newStory.avatar_url} onChange={e => setNewStory({...newStory, avatar_url: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
                         </div>
@@ -1603,6 +1623,10 @@ export default function AdminDashboard() {
                               approval_time: newStory.approval_time,
                               rating: newStory.rating,
                               avatar_url: newStory.avatar_url || null,
+                              location: newStory.location || '',
+                              profession: newStory.profession || '',
+                              loan_tenure: newStory.loan_tenure || '',
+                              deposit_payment: newStory.deposit_payment || '',
                               is_verified: true
                             });
                             if (added) {
@@ -1615,6 +1639,10 @@ export default function AdminDashboard() {
                                 approval_time: '',
                                 rating: 5,
                                 avatar_url: '',
+                                location: '',
+                                profession: '',
+                                loan_tenure: '',
+                                deposit_payment: '',
                                 like_count: 0,
                                 dislike_count: 0,
                                 love_count: 0,

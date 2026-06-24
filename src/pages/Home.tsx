@@ -781,10 +781,9 @@ export default function Home() {
                 return (
                   <div
                     key={`${story.id || i}-${i}`}
-                    className="shrink-0 w-[320px] rounded-[22px] p-4 flex flex-col relative overflow-hidden shadow-lg snap-center"
+                    className="shrink-0 w-[320px] rounded-[22px] p-4 flex flex-col relative overflow-hidden shadow-lg snap-center min-h-[220px]"
                     style={{
-                      background: theme.bg,
-                      minHeight: '195px',
+                      background: theme.bg
                     }}
                   >
                     {/* Dot grid watermark */}
@@ -831,6 +830,36 @@ export default function Home() {
                         {convertDigits(story.approval_time, isBn)}
                       </p>
                     </div>
+
+                    {/* Additional Details */}
+                    {(story.profession || story.location || story.loan_tenure || story.deposit_payment) && (
+                      <div className="relative z-10 mb-3 grid grid-cols-2 gap-1.5">
+                        {story.profession && (
+                          <div className="bg-white/10 border border-white/10 rounded-md px-2 py-1 text-[9px] text-white flex flex-col">
+                            <span className="opacity-50 uppercase tracking-wider text-[7px] mb-0.5">{isBn ? 'পেশা' : 'Profession'}</span>
+                            <span className="font-bold truncate">{story.profession}</span>
+                          </div>
+                        )}
+                        {story.location && (
+                          <div className="bg-white/10 border border-white/10 rounded-md px-2 py-1 text-[9px] text-white flex flex-col">
+                            <span className="opacity-50 uppercase tracking-wider text-[7px] mb-0.5">{isBn ? 'লোকেশন' : 'Location'}</span>
+                            <span className="font-bold truncate">{story.location}</span>
+                          </div>
+                        )}
+                        {story.loan_tenure && (
+                          <div className="bg-white/10 border border-white/10 rounded-md px-2 py-1 text-[9px] text-white flex flex-col">
+                            <span className="opacity-50 uppercase tracking-wider text-[7px] mb-0.5">{isBn ? 'মেয়াদ' : 'Tenure'}</span>
+                            <span className="font-bold truncate">{story.loan_tenure}</span>
+                          </div>
+                        )}
+                        {story.deposit_payment && (
+                          <div className="bg-white/10 border border-white/10 rounded-md px-2 py-1 text-[9px] text-white flex flex-col">
+                            <span className="opacity-50 uppercase tracking-wider text-[7px] mb-0.5">{isBn ? 'ডিপোজিট' : 'Deposit'}</span>
+                            <span className="font-bold text-green-300 truncate">{story.deposit_payment}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Bottom row: Stars + Serial badge */}
                     <div className="flex items-center justify-between relative z-10">
