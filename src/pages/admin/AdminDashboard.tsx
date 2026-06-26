@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, MessageCircle, Copy, ArrowLeft, Edit2 } from 'lucide-react';
-import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser } from '../../lib/adminApi';
+import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, MessageCircle, Copy, ArrowLeft, Edit2, Lock, Unlock } from 'lucide-react';
+import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
 import { useAppStore } from '../../lib/store';
@@ -14,6 +14,10 @@ import { supabase } from '../../lib/supabase';
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings' | 'chat' | 'broadcast'>('overview');
   const [settingsSubTab, setSettingsSubTab] = useState<'general' | 'payments' | 'announcements' | 'categories'>('general');
+
+  const [showLockModal, setShowLockModal] = useState<number | null>(null);
+  const [lockReason, setLockReason] = useState('Scam');
+  const [customLockReason, setCustomLockReason] = useState('');
 
   // Broadcast & Direct Message State
   const [broadcastMessage, setBroadcastMessage] = useState('');
@@ -792,6 +796,35 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleUnlockUser = async (chatId: number) => {
+    const success = await lockUser(chatId, false);
+    if (success) {
+      toast.success(isBn ? 'ইউজার আনলক করা হয়েছে' : 'User unlocked successfully');
+      setProfiles(profiles.map(p => p.chat_id === chatId ? { ...p, is_locked: false, lock_reason: null } : p));
+    } else {
+      toast.error('Failed to unlock user');
+    }
+  };
+
+  const handleLockSubmit = async () => {
+    if (!showLockModal) return;
+    const reason = lockReason === 'Other' ? customLockReason : lockReason;
+    if (!reason.trim()) {
+      toast.error('Please provide a reason');
+      return;
+    }
+    const success = await lockUser(showLockModal, true, reason);
+    if (success) {
+      toast.success(isBn ? 'ইউজার লক করা হয়েছে' : 'User locked successfully');
+      setProfiles(profiles.map(p => p.chat_id === showLockModal ? { ...p, is_locked: true, lock_reason: reason } : p));
+      setShowLockModal(null);
+      setCustomLockReason('');
+      setLockReason('Scam');
+    } else {
+      toast.error('Failed to lock user');
+    }
+  };
+
   const handleDeleteUser = async (chatId: number) => {
     if (!window.confirm('Are you sure you want to completely delete this user and all their data? This action cannot be undone.')) return;
     const success = await deleteUser(chatId);
@@ -1331,7 +1364,19 @@ export default function AdminDashboard() {
                           (p.first_name + ' ' + (p.last_name || '')).toLowerCase().includes(searchTerm.toLowerCase()) ||
                           (p.username || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                           p.chat_id.toString().includes(searchTerm)
-                        ).map(user => (
+                        ).sort((a, b) => {
+                          const getScore = (u: Profile) => {
+                            const isOnline = onlineUsers.includes(u.chat_id);
+                            if (u.bot_status === 'blocked') return 4;
+                            if (u.bot_status === 'unreachable') return 3;
+                            if (isOnline) return 1;
+                            return 2;
+                          };
+                          const scoreA = getScore(a);
+                          const scoreB = getScore(b);
+                          if (scoreA !== scoreB) return scoreA - scoreB;
+                          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                        }).map(user => (
                           <motion.tr layout key={user.chat_id} className={`hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors ${user.is_banned ? 'bg-red-50/30 dark:bg-red-900/10' : ''}`}>
                             <td className="px-6 py-4">
                               <input 
@@ -1422,6 +1467,13 @@ export default function AdminDashboard() {
                               )}
                             </td>
                             <td className="px-6 py-4 flex justify-end gap-2">
+                              <button 
+                                onClick={() => user.is_locked ? handleUnlockUser(user.chat_id) : setShowLockModal(user.chat_id)}
+                                className={`px-3 py-2 rounded-xl transition-colors font-bold text-xs flex items-center gap-1.5 ${user.is_locked ? 'bg-teal-100 text-teal-700 hover:bg-teal-200 dark:bg-teal-900/30 dark:text-teal-400' : 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400'}`}
+                                title={user.is_locked ? 'Unlock User' : 'Lock User'}
+                              >
+                                {user.is_locked ? <><Unlock size={14} /> Unlock</> : <><Lock size={14} /> Lock</>}
+                              </button>
                               <button 
                                 onClick={() => handleBanUser(user.chat_id, !user.is_banned)} 
                                 className={`px-3 py-2 rounded-xl transition-colors font-bold text-xs flex items-center gap-1.5 ${user.is_banned ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'}`}
@@ -3003,6 +3055,74 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
+
+        {showLockModal && (
+          <div className="fixed inset-0 z-[100] bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 w-full max-w-md shadow-2xl border border-gray-100 dark:border-gray-700 relative">
+              <button onClick={() => setShowLockModal(null)} className="absolute top-4 right-4 p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+              
+              <div className="mb-6 flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                  <Lock className="text-red-600 dark:text-red-500" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                    {isBn ? 'ইউজার লক করুন' : 'Lock User'}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {isBn ? 'এই ইউজারকে সাময়িকভাবে ব্লক করুন।' : 'Temporarily restrict this user.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                    {isBn ? 'লক করার কারণ' : 'Reason for Locking'}
+                  </label>
+                  <select 
+                    value={lockReason} 
+                    onChange={(e) => setLockReason(e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                  >
+                    <option value="Scam">Scam (প্রতারণা)</option>
+                    <option value="Fraud">Fraud (জালিয়াতি)</option>
+                    <option value="Hacker">Hacker (হ্যাকার)</option>
+                    <option value="Bullying">Bullying (হয়রানি)</option>
+                    <option value="Rule Break">Rule Break (নিয়ম ভঙ্গ)</option>
+                    <option value="Other">Other (অন্যান্য)</option>
+                  </select>
+                </div>
+
+                {lockReason === 'Other' && (
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                      {isBn ? 'কারণ লিখুন' : 'Custom Reason'}
+                    </label>
+                    <input 
+                      type="text" 
+                      value={customLockReason}
+                      onChange={(e) => setCustomLockReason(e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                      placeholder={isBn ? "লক করার কারণ লিখুন..." : "Type custom reason..."}
+                    />
+                  </div>
+                )}
+                
+                <button
+                  onClick={handleLockSubmit}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 mt-2 shadow-lg shadow-red-500/30"
+                >
+                  <Lock size={18} />
+                  {isBn ? 'লক নিশ্চিত করুন' : 'Confirm Lock'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </AnimatePresence>
 
         </main>

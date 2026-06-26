@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, FileText, PlusCircle, CreditCard, HelpCircle } from 'lucide-react';
+import { Home, FileText, PlusCircle, CreditCard, HelpCircle, ShieldAlert, MessageCircle } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppStore } from '../lib/store';
@@ -9,7 +9,7 @@ import { getTelegramUser } from '../lib/telegram';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
-  const { language } = useAppStore();
+  const { language, userProfile } = useAppStore();
   const isBn = language === 'bn';
   const [adminOnline, setAdminOnline] = useState<boolean | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -97,6 +97,39 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex flex-col h-full sm:h-[90vh] sm:max-h-[850px] w-full max-w-md mx-auto neu-bg sm:rounded-[2.5rem] relative overflow-hidden shadow-2xl sm:border-[8px] border-gray-900 my-auto transition-colors">
+      {userProfile?.is_locked && !isSupportPage && (
+        <div className="absolute inset-0 z-[100] bg-gray-900/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-red-100 dark:border-red-900/30 flex flex-col items-center">
+            <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-6 shadow-inner">
+              <ShieldAlert className="text-red-600 dark:text-red-500" size={40} />
+            </div>
+            <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
+              {isBn ? 'অ্যাকাউন্ট লকড' : 'Account Locked'}
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 font-medium mb-6 text-sm">
+              {isBn ? 'আপনার প্রোফাইল বা অ্যাক্টিভিটি সাময়িকভাবে লক করা হয়েছে।' : 'Your profile or activity has been temporarily locked.'}
+            </p>
+            {userProfile.lock_reason && (
+              <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 w-full mb-8 border border-red-100 dark:border-red-800/30 text-left">
+                <span className="text-[10px] font-black text-red-800 dark:text-red-400 uppercase tracking-wider block mb-1">
+                  {isBn ? 'কারণ:' : 'Reason:'}
+                </span>
+                <span className="text-red-700 dark:text-red-300 font-bold text-sm">
+                  {userProfile.lock_reason}
+                </span>
+              </div>
+            )}
+            <Link 
+              to="/support"
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-red-500/30"
+            >
+              <MessageCircle size={20} />
+              {isBn ? 'সাপোর্টে যোগাযোগ করুন' : 'Contact Support'}
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Main Content Area */}
       <div className={cn(
         "flex-1 scroll-smooth overflow-x-hidden",
@@ -211,7 +244,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       
 
 
-      {!isSupportPage && (
+      {!isSupportPage && !userProfile?.is_locked && (
         <div className="absolute bottom-4 left-4 right-4 neu-raised px-4 py-2 rounded-[24px] transition-colors z-50">
           <div className="flex justify-between items-center relative">
             {navItems.map((item) => {

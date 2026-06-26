@@ -19,6 +19,19 @@ export async function banUser(chatId: number, isBanned: boolean): Promise<boolea
   return true;
 }
 
+export async function lockUser(chatId: number, isLocked: boolean, reason?: string | null): Promise<boolean> {
+  const updateData: any = { is_locked: isLocked };
+  if (isLocked && reason) updateData.lock_reason = reason;
+  if (!isLocked) updateData.lock_reason = null;
+
+  const { error } = await supabase.from('profiles').update(updateData).eq('chat_id', chatId);
+  if (error) {
+    console.error('lockUser error:', error);
+    return false;
+  }
+  return true;
+}
+
 export async function deleteUser(chatId: number): Promise<boolean> {
   // Since we don't have cascade delete set up in foreign keys for all tables maybe,
   // we delete transactions and loan applications first to be safe, then the profile.

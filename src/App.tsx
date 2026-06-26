@@ -84,6 +84,8 @@ export default function App() {
         last_name: user.last_name || null,
         username: user.username || null,
         photo_url: user.photo_url || null,
+      }).then(profile => {
+        if (profile) useAppStore.getState().setUserProfile(profile);
       }).catch(err => console.error("Global profile sync error:", err));
 
       // Send welcome message once per user (on /start)
