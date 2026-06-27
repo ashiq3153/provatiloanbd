@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AlertTriangle, Clock, X, MessageCircle, CreditCard } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { getTelegramUser } from '../lib/telegram';
 import { getLoanApplications, getDepositStatus } from '../lib/api';
 import { useAppStore } from '../lib/store';
@@ -14,6 +14,7 @@ export default function FeeWarningPopup() {
   const [isExpired, setIsExpired] = useState(false);
   const { language } = useAppStore();
   const isBn = language === 'bn';
+  const location = useLocation();
 
   useEffect(() => {
     const user = getTelegramUser();
@@ -46,7 +47,7 @@ export default function FeeWarningPopup() {
     }, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!pendingLoan) return;
