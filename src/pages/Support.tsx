@@ -274,12 +274,23 @@ export default function Support() {
     try {
       let attachmentUrl = null;
       if (fileToUpload) {
-        attachmentUrl = await uploadDocument(fileToUpload, user.id, 'support_chat');
-        if (!attachmentUrl) {
-          toast.error(isBn ? 'ফাইল আপলোড ব্যর্থ হয়েছে!' : 'File upload failed!');
+        const fileExt = fileToUpload.name.split('.').pop();
+        const fileName = `chat_${Date.now()}.${fileExt}`;
+        const filePath = `${user.id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('loan_documents')
+          .upload(filePath, fileToUpload, { upsert: true });
+
+        if (uploadError) {
+          console.error('Storage upload error:', uploadError);
+          toast.error(isBn ? `ফাইল আপলোড ব্যর্থ হয়েছে: ${uploadError.message}` : `File upload failed: ${uploadError.message}`);
           setSending(false);
           return;
         }
+
+        const { data: urlData } = supabase.storage.from('loan_documents').getPublicUrl(filePath);
+        attachmentUrl = urlData.publicUrl;
       }
 
       const { error } = await supabase.from('support_messages').insert({
@@ -292,7 +303,7 @@ export default function Support() {
 
       if (error) {
         console.error('Error sending message:', error);
-        toast.error(isBn ? 'মেসেজ পাঠানো যায়নি!' : 'Failed to send message!');
+        toast.error(isBn ? `মেসেজ পাঠানো যায়নি: ${error.message}` : `Failed to send message: ${error.message}`);
       } else {
         setNewMessage('');
         clearSelectedFile();
@@ -583,11 +594,8 @@ export default function Support() {
               </div>
             )}
 
-            {/* Input Form */}
-            <form 
-              onSubmit={handleSendMessage}
-              className="p-4 flex gap-2.5 items-center transition-colors relative z-10 bg-transparent shrink-0"
-            >
+            {/* Input Area */}
+            <div className="p-4 flex gap-2.5 items-center transition-colors relative z-10 bg-transparent shrink-0">
               {/* Attachment Button */}
               <label className="w-11 h-11 rounded-full neu-btn flex items-center justify-center cursor-pointer active:scale-95 transition-all text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 shrink-0 border-0">
                 <Paperclip size={18} />
@@ -603,11 +611,12 @@ export default function Support() {
                 type="text"
                 value={newMessage}
                 onChange={handleTyping}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(e as any); } }}
                 placeholder={isBn ? 'মেসেজ লিখুন...' : 'Type a message...'}
                 className="flex-1 neu-input rounded-2xl px-4 py-3 text-sm outline-none text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600 font-bold"
               />
               <button
-                type="submit"
+                type="button"
                 onClick={handleSendMessage}
                 disabled={(!newMessage.trim() && !selectedFile) || sending}
                 className="w-11 h-11 neu-btn-primary disabled:opacity-50 text-white rounded-full flex items-center justify-center active:scale-95 transition-all shrink-0 border-0 cursor-pointer"
@@ -618,7 +627,7 @@ export default function Support() {
                   <Send size={16} />
                 )}
               </button>
-            </form>
+            </div>
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto p-5 space-y-4.5 custom-scrollbar">
