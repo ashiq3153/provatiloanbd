@@ -1353,31 +1353,15 @@ export default function ApplyLoan() {
           <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors">{isBn ? "আপনার প্রয়োজনের উপর ভিত্তি করে হিসাব করুন" : "Calculate based on your needs"}</p>
         </div>
 
-        {/* Amount Slider & Chips */}
+        {/* Amount Chips */}
         <div className="neu-raised p-5 rounded-3xl">
-          <div className="flex justify-between items-center mb-4">
-            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 transition-colors">{isBn ? "লোনের পরিমাণ" : "Loan Amount"}</label>
-            <span className="text-base font-black text-primary-500 bg-primary-500/10 dark:bg-primary-500/20 px-3 py-1 rounded-xl">
-              {formatCurrency(amount, isBn)}
-            </span>
-          </div>
-
-          <input
-            type="range"
-            min={50000}
-            max={category?.maxAmount || 5000000}
-            step={25000}
-            value={amount}
-            onChange={(e) => handleAmountChange(Number(e.target.value))}
-            className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-500 mb-6"
-          />
-
+          <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-4 transition-colors">{isBn ? "লোনের পরিমাণ" : "Loan Amount"}</label>
           <div className="flex flex-wrap gap-2">
-            {amountPackages.filter(amt => amt <= (category?.maxAmount || 5000000)).map(pkg => (
+             {amountPackages.filter(amt => amt <= (category?.maxAmount || 5000000)).map(pkg => (
               <button
                 key={pkg}
                 onClick={() => handleAmountChange(pkg)}
-                className={`py-2.5 px-3 rounded-xl font-bold text-xs transition-all border flex-grow text-center ${
+                className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all border flex-grow text-center ${
                   amount === pkg 
                     ? "neu-btn-primary" 
                     : "neu-btn text-gray-605 dark:text-gray-300"
@@ -1389,62 +1373,40 @@ export default function ApplyLoan() {
           </div>
         </div>
 
-        {/* Tenure Slider & Chips */}
+        {/* Tenure Snap Slider */}
         <div className="neu-raised p-5 rounded-3xl">
-          <div className="flex justify-between items-center mb-4">
-            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 transition-colors">{isBn ? "সময়কাল (মাস)" : "Tenure (Months)"}</label>
-            <span className="text-base font-black text-primary-500 bg-primary-500/10 dark:bg-primary-500/20 px-3 py-1 rounded-xl">
-              {convertDigits(tenure, isBn)} {isBn ? "মাস" : "Months"}
-            </span>
-          </div>
+          <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-4 transition-colors">{isBn ? "সময়কাল (মাস)" : "Tenure (Months)"}</label>
           
-          {(() => {
-            const rawAllowed = getAllowedTenure(amount);
-            const minAllowed = Math.max(rawAllowed[0], category?.minTenure ?? 12);
-            const maxAllowed = Math.min(rawAllowed[1], category?.maxTenure ?? 60);
+          <div className="flex flex-wrap gap-2">
+            {snapPoints.map(months => {
+              const rawAllowed = getAllowedTenure(amount);
+              const minAllowed = Math.max(rawAllowed[0], category?.minTenure ?? 12);
+              const maxAllowed = Math.min(rawAllowed[1], category?.maxTenure ?? 60);
+              const isAllowed = months >= minAllowed && months <= maxAllowed;
+              const isSelected = tenure === months;
+              
+              let btnClass = "py-3 px-4 rounded-xl font-bold text-sm transition-all flex-grow text-center ";
+              if (isSelected) {
+                btnClass += "neu-btn-primary";
+              } else if (isAllowed) {
+                btnClass += "neu-btn text-gray-700 dark:text-gray-350";
+              } else {
+                btnClass += "neu-sunken opacity-40 cursor-not-allowed shadow-none text-gray-400 dark:text-gray-650";
+              }
 
-            return (
-              <>
-                <input
-                  type="range"
-                  min={minAllowed}
-                  max={maxAllowed}
-                  step={6}
-                  value={tenure}
-                  onChange={(e) => setTenure(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary-500 mb-6"
-                />
-
-                <div className="flex flex-wrap gap-2">
-                  {snapPoints.map(months => {
-                    const isAllowed = months >= minAllowed && months <= maxAllowed;
-                    const isSelected = tenure === months;
-                    
-                    let btnClass = "py-3 px-4 rounded-xl font-bold text-xs transition-all flex-grow text-center ";
-                    if (isSelected) {
-                      btnClass += "neu-btn-primary";
-                    } else if (isAllowed) {
-                      btnClass += "neu-btn text-gray-700 dark:text-gray-350";
-                    } else {
-                      btnClass += "neu-sunken opacity-40 cursor-not-allowed shadow-none text-gray-400 dark:text-gray-650";
-                    }
-
-                    return (
-                      <button
-                        key={months}
-                        disabled={!isAllowed}
-                        onClick={() => setTenure(months)}
-                        className={btnClass}
-                      >
-                        {convertDigits(months, isBn)}
-                      </button>
-                    );
-                  })}
-                </div>
-              </>
-            );
-          })()}
-          <p className="text-[10px] text-gray-400 mt-3 font-semibold text-center">
+              return (
+                <button
+                  key={months}
+                  disabled={!isAllowed}
+                  onClick={() => setTenure(months)}
+                  className={btnClass}
+                >
+                  {convertDigits(months, isBn)}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-gray-400 mt-3 font-medium text-center">
             {formatCurrency(amount, isBn)} {isBn ? "টাকার জন্য" : "Taka allows"} {convertDigits(getAllowedTenure(amount)[0], isBn)} - {convertDigits(getAllowedTenure(amount)[1], isBn)} {isBn ? "মাস অনুমোদিত" : "months"}
           </p>
         </div>
