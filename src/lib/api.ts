@@ -247,8 +247,8 @@ export async function uploadDocument(file: File, userId: number, docType: string
 
 export async function uploadSupportAttachment(file: File, userId: number): Promise<string | null> {
   const fileExt = file.name.split('.').pop();
-  const fileName = `chat_${userId}_${Date.now()}.${fileExt}`;
-  const filePath = `support_attachments/${userId}/${fileName}`;
+  const fileName = `chat_${Date.now()}.${fileExt}`;
+  const filePath = `${userId}/${fileName}`;
 
   const { error } = await supabase.storage
     .from('loan_documents')
