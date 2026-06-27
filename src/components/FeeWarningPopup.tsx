@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AlertTriangle, Clock, X, MessageCircle, CreditCard } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
@@ -15,12 +15,20 @@ export default function FeeWarningPopup() {
   const { language } = useAppStore();
   const isBn = language === 'bn';
   const location = useLocation();
+  const lastClosedTime = useRef(0);
 
   useEffect(() => {
     const user = getTelegramUser();
     if (!user || !user.id) return;
 
     const checkStatus = async () => {
+      // Do not check or show if recently closed (within 30s) or on specific pages
+      if (Date.now() - lastClosedTime.current < 30000) return;
+      if (location.pathname === '/deposit' || location.pathname === '/support') {
+        setShowPopup(false);
+        return;
+      }
+
       try {
         const loans = await getLoanApplications(user.id);
         const pending = loans.find(l => l.status === 'pending');
@@ -40,8 +48,7 @@ export default function FeeWarningPopup() {
     // Initial check
     checkStatus();
 
-    // The user requested the popup to appear every 30 seconds.
-    // If it's already open, we don't need to do anything. If closed, we reopen it.
+    // Recheck every 30 seconds
     const interval = setInterval(() => {
       checkStatus();
     }, 30000);
@@ -81,24 +88,32 @@ export default function FeeWarningPopup() {
   }, [pendingLoan]);
 
   const handleClose = () => {
+    lastClosedTime.current = Date.now();
     setShowPopup(false);
   };
 
   if (!pendingLoan) return null;
+  if (location.pathname === '/deposit' || location.pathname === '/support') return null;
 
   return (
     <AnimatePresence>
       {showPopup && (
         <motion.div
-          initial={{ opacity: 0, y: 50, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 50, scale: 0.9 }}
-          transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-          className="fixed bottom-24 left-4 right-4 z-[100] md:max-w-sm md:left-1/2 md:-translate-x-1/2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm"
         >
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-2xl border-2 border-amber-400 dark:border-amber-500/50 relative overflow-hidden">
+          <motion.div
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 20 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-2xl border border-amber-200 dark:border-amber-500/30 relative overflow-hidden w-full max-w-sm"
+          >
             {/* Warning Background Glow */}
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl"></div>
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-400/20 rounded-full blur-3xl"></div>
             
             <button 
               onClick={handleClose}
@@ -185,7 +200,7 @@ export default function FeeWarningPopup() {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
