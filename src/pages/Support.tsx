@@ -6,7 +6,7 @@ import { getTelegramUser } from '../lib/telegram';
 import { supabase } from '../lib/supabase';
 import { useLocation, useNavigate } from 'react-router-dom';
 import logoImg from '../assets/logo.png';
-import { uploadSupportAttachment } from '../lib/api';
+import { uploadDocument } from '../lib/api';
 import { toast } from 'sonner';
 
 interface SupportMessage {
@@ -276,7 +276,7 @@ export default function Support() {
     try {
       let attachmentUrl = null;
       if (fileToUpload) {
-        attachmentUrl = await uploadSupportAttachment(fileToUpload, user.id);
+        attachmentUrl = await uploadDocument(fileToUpload, user.id, 'support_chat');
         if (!attachmentUrl) {
           toast.error(isBn ? 'ফাইল আপলোড ব্যর্থ হয়েছে!' : 'File upload failed!');
           setSending(false);
