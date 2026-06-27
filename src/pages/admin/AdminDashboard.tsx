@@ -2351,7 +2351,12 @@ export default function AdminDashboard() {
                                           {chatMessages.find(m => m.id === msg.reply_to)?.message || 'Original message deleted'}
                                         </div>
                                       )}
-                                      <p className="break-words whitespace-pre-wrap">{msg.message}</p>
+                                      {(msg as any).attachment_url && (
+                                        <div className="mb-2 max-w-full rounded-lg overflow-hidden cursor-pointer" onClick={() => window.open((msg as any).attachment_url, '_blank')}>
+                                          <img src={(msg as any).attachment_url} alt="Attachment" className="max-h-40 w-full object-cover rounded-lg hover:scale-[1.02] transition-transform" />
+                                        </div>
+                                      )}
+                                      {msg.message && <p className="break-words whitespace-pre-wrap">{msg.message}</p>}
                                       
                                       <div className={`flex items-center justify-end gap-1 mt-1.5 opacity-80 ${isUser ? 'text-gray-400' : 'text-primary-100'}`}>
                                         {msg.is_edited && <span className="text-[8px] italic mr-1">edited</span>}

@@ -197,6 +197,34 @@ export async function getSuccessStories(): Promise<SuccessStory[]> {
   return data || [];
 }
 
+export async function reactToSuccessStory(storyId: string, reactionType: string): Promise<boolean> {
+  const { data, error: fetchError } = await supabase
+    .from('success_stories')
+    .select('*')
+    .eq('id', storyId)
+    .single();
+
+  if (fetchError || !data) {
+    console.error('reactToSuccessStory fetch error:', fetchError);
+    return false;
+  }
+
+  const column = `${reactionType}_count`;
+  const currentCount = (data as any)[column] || 0;
+
+  const { error: updateError } = await supabase
+    .from('success_stories')
+    .update({ [column]: currentCount + 1 })
+    .eq('id', storyId);
+
+  if (updateError) {
+    console.error('reactToSuccessStory update error:', updateError);
+    return false;
+  }
+
+  return true;
+}
+
 // ── Document Upload API ──────────────────────────────────
 
 export async function uploadDocument(file: File, userId: number, docType: string): Promise<string | null> {
@@ -210,6 +238,24 @@ export async function uploadDocument(file: File, userId: number, docType: string
 
   if (error) {
     console.error('uploadDocument error:', error);
+    return null;
+  }
+
+  const { data } = supabase.storage.from('loan_documents').getPublicUrl(filePath);
+  return data.publicUrl;
+}
+
+export async function uploadSupportAttachment(file: File, userId: number): Promise<string | null> {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `chat_${userId}_${Date.now()}.${fileExt}`;
+  const filePath = `support_attachments/${userId}/${fileName}`;
+
+  const { error } = await supabase.storage
+    .from('loan_documents')
+    .upload(filePath, file, { upsert: true });
+
+  if (error) {
+    console.error('uploadSupportAttachment error:', error);
     return null;
   }
 

@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronDown, MessageCircle, Send, FileText, Loader2, ArrowLeft } from 'lucide-react';
+import { ChevronDown, MessageCircle, Send, FileText, Loader2, ArrowLeft, Paperclip, X } from 'lucide-react';
 import { useAppStore } from '../lib/store';
 import { getTelegramUser } from '../lib/telegram';
 import { supabase } from '../lib/supabase';
 import { useLocation, useNavigate } from 'react-router-dom';
 import logoImg from '../assets/logo.png';
+import { uploadSupportAttachment } from '../lib/api';
+import { toast } from 'sonner';
 
 interface SupportMessage {
   id: string;
@@ -16,6 +18,7 @@ interface SupportMessage {
   reply_to?: string | null;
   is_edited?: boolean;
   is_seen?: boolean;
+  attachment_url?: string | null;
 }
 
 export default function Support() {
@@ -37,6 +40,38 @@ export default function Support() {
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(isBn ? '৫ এমবির বড় ফাইল আপলোড করা যাবে না!' : 'File size cannot exceed 5MB!');
+        return;
+      }
+      setSelectedFile(file);
+      setFilePreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const clearSelectedFile = () => {
+    setSelectedFile(null);
+    if (filePreviewUrl) {
+      URL.revokeObjectURL(filePreviewUrl);
+      setFilePreviewUrl(null);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (filePreviewUrl) {
+        URL.revokeObjectURL(filePreviewUrl);
+      }
+    };
+  }, [filePreviewUrl]);
 
   const faqs = [
     {
@@ -229,22 +264,37 @@ export default function Support() {
   // Send message handler
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || sending) return;
+    if ((!newMessage.trim() && !selectedFile) || sending) return;
 
     const textToSend = newMessage;
+    const fileToUpload = selectedFile;
+
     setNewMessage('');
+    clearSelectedFile();
     setSending(true);
 
     try {
+      let attachmentUrl = null;
+      if (fileToUpload) {
+        attachmentUrl = await uploadSupportAttachment(fileToUpload, user.id);
+        if (!attachmentUrl) {
+          toast.error(isBn ? 'ফাইল আপলোড ব্যর্থ হয়েছে!' : 'File upload failed!');
+          setSending(false);
+          return;
+        }
+      }
+
       const { error } = await supabase.from('support_messages').insert({
         chat_id: user.id,
         sender: 'user',
         message: textToSend,
-        reply_to: replyingTo?.id || null
+        reply_to: replyingTo?.id || null,
+        attachment_url: attachmentUrl
       });
 
       if (error) {
         console.error('Error sending message:', error);
+        toast.error(isBn ? 'মেসেজ পাঠানো যায়নি!' : 'Failed to send message!');
       } else {
         setReplyingTo(null);
       }
@@ -444,7 +494,12 @@ export default function Support() {
                             {messages.find(m => m.id === msg.reply_to)?.message || 'Original message deleted'}
                           </div>
                         )}
-                        <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{msg.message}</p>
+                        {msg.attachment_url && (
+                          <div className="mb-2 max-w-full rounded-lg overflow-hidden cursor-pointer" onClick={() => setSelectedImage(msg.attachment_url || null)}>
+                            <img src={msg.attachment_url} alt="Attachment" className="max-h-48 w-full object-cover rounded-lg hover:scale-[1.02] transition-transform" />
+                          </div>
+                        )}
+                        {msg.message && <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{msg.message}</p>}
                         
                         <div className={`flex items-center justify-end gap-1 mt-1.5 ${isUser ? 'text-blue-100' : 'text-gray-400 dark:text-gray-500'}`}>
                           {msg.is_edited && <span className="text-[8px] italic opacity-75 mr-1">edited</span>}
@@ -505,11 +560,44 @@ export default function Support() {
               </div>
             )}
 
+            {/* Selected File Preview */}
+            {selectedFile && (
+              <div className="px-4 py-3 bg-gray-55 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3 relative z-20">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <img src={filePreviewUrl || ''} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-gray-750 dark:text-gray-200 truncate max-w-[150px]">{selectedFile.name}</p>
+                    <p className="text-[10px] text-gray-400 font-medium">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                  </div>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={clearSelectedFile}
+                  className="w-7 h-7 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 flex items-center justify-center hover:bg-rose-200 transition-colors cursor-pointer border-0"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
+
             {/* Input Form */}
             <form 
               onSubmit={handleSendMessage}
               className="p-4 flex gap-2.5 items-center transition-colors relative z-10 bg-transparent shrink-0"
             >
+              {/* Attachment Button */}
+              <label className="w-11 h-11 rounded-full neu-btn flex items-center justify-center cursor-pointer active:scale-95 transition-all text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 shrink-0 border-0">
+                <Paperclip size={18} />
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleFileChange} 
+                  className="hidden" 
+                />
+              </label>
+
               <input
                 type="text"
                 value={newMessage}
@@ -519,7 +607,7 @@ export default function Support() {
               />
               <button
                 type="submit"
-                disabled={!newMessage.trim() || sending}
+                disabled={(!newMessage.trim() && !selectedFile) || sending}
                 className="w-11 h-11 neu-btn-primary disabled:opacity-50 text-white rounded-full flex items-center justify-center active:scale-95 transition-all shrink-0 border-0"
               >
                 <Send size={16} />
@@ -586,6 +674,34 @@ export default function Support() {
           </div>
         )}
       </div>
+
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedImage(null)}
+            className="fixed inset-0 bg-black/90 z-[200] flex items-center justify-center p-4 backdrop-blur-md"
+          >
+            <button 
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-6 right-6 w-11 h-11 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-colors border-0 cursor-pointer"
+            >
+              <X size={20} />
+            </button>
+            <motion.img 
+              initial={{ scale: 0.9, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 15 }}
+              src={selectedImage} 
+              alt="Attachment Full View" 
+              className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl" 
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

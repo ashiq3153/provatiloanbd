@@ -9,7 +9,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Skeleton } from '../components/Skeleton';
 import { toast } from 'sonner';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { getDashboardStats, getActiveLoans, getSuccessStories, getTransactions, getLoanApplications } from '../lib/api';
+import { getDashboardStats, getActiveLoans, getSuccessStories, getTransactions, getLoanApplications, reactToSuccessStory } from '../lib/api';
 import type { DashboardStats } from '../lib/api';
 import type { LoanApplication, SuccessStory, Transaction } from '../types/database';
 import personalImg from '../assets/categories/personal.png';
@@ -33,6 +33,51 @@ export default function Home() {
   const [userLoans, setUserLoans] = useState<LoanApplication[]>([]);
   const [userTransactions, setUserTransactions] = useState<Transaction[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [reactedStories, setReactedStories] = useState<Record<string, string[]>>({});
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('provati_story_reactions');
+      if (saved) setReactedStories(JSON.parse(saved));
+    } catch (e) {
+      console.error("Failed to load story reactions:", e);
+    }
+  }, []);
+
+  const handleReact = async (storyId: string, reactionType: string) => {
+    const list = reactedStories[storyId] || [];
+    if (list.includes(reactionType)) {
+      toast.error(isBn ? 'আপনি ইতিমধ্যে এই রিঅ্যাকশনটি দিয়েছেন!' : 'You already reacted with this!');
+      return;
+    }
+
+    const success = await reactToSuccessStory(storyId, reactionType);
+    if (success) {
+      const newReacted = {
+        ...reactedStories,
+        [storyId]: [...list, reactionType]
+      };
+      setReactedStories(newReacted);
+      localStorage.setItem('provati_story_reactions', JSON.stringify(newReacted));
+      
+      // Update stories local state
+      setStories((prev) => 
+        prev.map((s) => {
+          if (s.id === storyId) {
+            const countKey = `${reactionType}_count`;
+            return {
+              ...s,
+              [countKey]: ((s as any)[countKey] || 0) + 1
+            };
+          }
+          return s;
+        })
+      );
+      toast.success(isBn ? 'রিঅ্যাকশন সফল হয়েছে!' : 'Reaction submitted!');
+    } else {
+      toast.error(isBn ? 'রিঅ্যাকশন সাবমিট করা যায়নি।' : 'Failed to react.');
+    }
+  };
 
   const user = getTelegramUser();
   const navigate = useNavigate();
@@ -861,16 +906,56 @@ export default function Home() {
                       </div>
                     )}
 
-                    {/* Bottom row: Stars + Serial badge */}
-                    <div className="flex items-center justify-between relative z-10">
-                      <div className="flex gap-0.5 text-yellow-400">
-                        {[...Array(Math.min(story.rating || 5, 5))].map((_, si) => (
-                          <Star key={si} size={9} fill="currentColor" />
-                        ))}
+                    {/* Bottom row: Reactions + Stars + Serial */}
+                    <div className="relative z-10 mt-auto pt-3 border-t border-white/10 flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          {[
+                            { type: 'like', emoji: '👍' },
+                            { type: 'love', emoji: '❤️' },
+                            { type: 'wow', emoji: '😮' },
+                            { type: 'congratulation', emoji: '🎉' }
+                          ].map((rx) => {
+                            const countKey = `${rx.type}_count`;
+                            const count = (story as any)[countKey] || 0;
+                            const hasReacted = reactedStories[story.id]?.includes(rx.type);
+
+                            return (
+                              <button
+                                key={rx.type}
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleReact(story.id, rx.type);
+                                }}
+                                className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] transition-all border cursor-pointer select-none ${
+                                  hasReacted 
+                                    ? 'bg-white/25 border-white/40 font-black scale-105 shadow-sm' 
+                                    : 'bg-white/5 border-transparent hover:bg-white/10 active:scale-95'
+                                } text-white`}
+                              >
+                                <span>{rx.emoji}</span>
+                                {count > 0 && <span className="font-extrabold">{convertDigits(count, isBn)}</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        
+                        <div className="w-5 h-5 rounded-full bg-white/15 flex items-center justify-center border border-white/25 shrink-0">
+                          <span className="text-[8px] font-black text-white leading-none">{convertDigits(serialNum, isBn)}</span>
+                        </div>
                       </div>
-                      {/* Serial number badge — bottom right, no overlap */}
-                      <div className="w-5 h-5 rounded-full bg-white/15 flex items-center justify-center border border-white/25">
-                        <span className="text-[8px] font-black text-white leading-none">{convertDigits(serialNum, isBn)}</span>
+
+                      <div className="flex justify-between items-center">
+                        <div className="flex gap-0.5 text-yellow-400">
+                          {[...Array(Math.min(story.rating || 5, 5))].map((_, si) => (
+                            <Star key={si} size={9} fill="currentColor" />
+                          ))}
+                        </div>
+                        <span className="text-[7px] font-bold text-white/40 uppercase tracking-widest">
+                          {isBn ? 'ভেরিফাইড' : 'Verified'}
+                        </span>
                       </div>
                     </div>
                   </div>
