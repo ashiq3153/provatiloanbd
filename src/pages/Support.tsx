@@ -44,8 +44,10 @@ export default function Support() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [uploadedAttachmentUrl, setUploadedAttachmentUrl] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
@@ -54,11 +56,31 @@ export default function Support() {
       }
       setSelectedFile(file);
       setFilePreviewUrl(URL.createObjectURL(file));
+      setUploadingAttachment(true);
+
+      try {
+        const url = await uploadDocument(file, user.id, 'support_chat');
+        if (url) {
+          setUploadedAttachmentUrl(url);
+          toast.success(isBn ? 'ফাইল আপলোড সফল হয়েছে' : 'File uploaded successfully');
+        } else {
+          toast.error(isBn ? 'ফাইল আপলোড ব্যর্থ হয়েছে!' : 'File upload failed!');
+          clearSelectedFile();
+        }
+      } catch (err: any) {
+        console.error('File upload error:', err);
+        toast.error(isBn ? `আপলোড এরর: ${err.message}` : `Upload error: ${err.message}`);
+        clearSelectedFile();
+      } finally {
+        setUploadingAttachment(false);
+      }
     }
   };
 
   const clearSelectedFile = () => {
     setSelectedFile(null);
+    setUploadedAttachmentUrl(null);
+    setUploadingAttachment(false);
     if (filePreviewUrl) {
       URL.revokeObjectURL(filePreviewUrl);
       setFilePreviewUrl(null);
@@ -264,35 +286,14 @@ export default function Support() {
   // Send message handler
   const handleSendMessage = async (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
-    if ((!newMessage.trim() && !selectedFile) || sending) return;
+    if ((!newMessage.trim() && !uploadedAttachmentUrl) || sending || uploadingAttachment) return;
 
     const textToSend = newMessage;
-    const fileToUpload = selectedFile;
+    const attachmentUrl = uploadedAttachmentUrl;
 
     setSending(true);
 
     try {
-      let attachmentUrl = null;
-      if (fileToUpload) {
-        const fileExt = fileToUpload.name.split('.').pop();
-        const fileName = `chat_${Date.now()}.${fileExt}`;
-        const filePath = `${user.id}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('loan_documents')
-          .upload(filePath, fileToUpload, { upsert: true });
-
-        if (uploadError) {
-          console.error('Storage upload error:', uploadError);
-          toast.error(isBn ? `ফাইল আপলোড ব্যর্থ হয়েছে: ${uploadError.message}` : `File upload failed: ${uploadError.message}`);
-          setSending(false);
-          return;
-        }
-
-        const { data: urlData } = supabase.storage.from('loan_documents').getPublicUrl(filePath);
-        attachmentUrl = urlData.publicUrl;
-      }
-
       const { error } = await supabase.from('support_messages').insert({
         chat_id: user.id,
         sender: 'user',
@@ -576,12 +577,19 @@ export default function Support() {
             {selectedFile && (
               <div className="px-4 py-3 bg-gray-55 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3 relative z-20">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                  <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 relative">
                     <img src={filePreviewUrl || ''} alt="Preview" className="w-full h-full object-cover" />
+                    {uploadingAttachment && (
+                      <div className="absolute inset-0 bg-black/45 flex items-center justify-center">
+                        <Loader2 className="animate-spin text-white" size={14} />
+                      </div>
+                    )}
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-gray-750 dark:text-gray-200 truncate max-w-[150px]">{selectedFile.name}</p>
-                    <p className="text-[10px] text-gray-400 font-medium">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                    <p className="text-[10px] text-gray-400 font-medium">
+                      {uploadingAttachment ? (isBn ? 'আপলোড হচ্ছে...' : 'Uploading...') : `${(selectedFile.size / 1024).toFixed(1)} KB`}
+                    </p>
                   </div>
                 </div>
                 <button 
@@ -618,7 +626,7 @@ export default function Support() {
               <button
                 type="button"
                 onClick={handleSendMessage}
-                disabled={(!newMessage.trim() && !selectedFile) || sending}
+                disabled={(!newMessage.trim() && !uploadedAttachmentUrl) || sending || uploadingAttachment}
                 className="w-11 h-11 neu-btn-primary disabled:opacity-50 text-white rounded-full flex items-center justify-center active:scale-95 transition-all shrink-0 border-0 cursor-pointer"
               >
                 {sending ? (
