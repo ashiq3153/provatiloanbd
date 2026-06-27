@@ -262,15 +262,13 @@ export default function Support() {
   }, [user.id, location.state]);
 
   // Send message handler
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
     if ((!newMessage.trim() && !selectedFile) || sending) return;
 
     const textToSend = newMessage;
     const fileToUpload = selectedFile;
 
-    setNewMessage('');
-    clearSelectedFile();
     setSending(true);
 
     try {
@@ -296,6 +294,8 @@ export default function Support() {
         console.error('Error sending message:', error);
         toast.error(isBn ? 'মেসেজ পাঠানো যায়নি!' : 'Failed to send message!');
       } else {
+        setNewMessage('');
+        clearSelectedFile();
         setReplyingTo(null);
       }
     } catch (err: any) {
