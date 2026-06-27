@@ -298,8 +298,9 @@ export default function Support() {
       } else {
         setReplyingTo(null);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error sending message:', err);
+      toast.error(err.message || (isBn ? 'মেসেজ পাঠাতে সমস্যা হয়েছে!' : 'Failed to send message!'));
     } finally {
       setSending(false);
     }
@@ -607,10 +608,15 @@ export default function Support() {
               />
               <button
                 type="submit"
+                onClick={handleSendMessage}
                 disabled={(!newMessage.trim() && !selectedFile) || sending}
-                className="w-11 h-11 neu-btn-primary disabled:opacity-50 text-white rounded-full flex items-center justify-center active:scale-95 transition-all shrink-0 border-0"
+                className="w-11 h-11 neu-btn-primary disabled:opacity-50 text-white rounded-full flex items-center justify-center active:scale-95 transition-all shrink-0 border-0 cursor-pointer"
               >
-                <Send size={16} />
+                {sending ? (
+                  <Loader2 className="animate-spin" size={16} />
+                ) : (
+                  <Send size={16} />
+                )}
               </button>
             </form>
           </div>
