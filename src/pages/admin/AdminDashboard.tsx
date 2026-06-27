@@ -1192,7 +1192,17 @@ export default function AdminDashboard() {
                                   );
                                 })()}
                               </div>
-                              <div className="text-xs text-gray-500 font-mono mt-0.5">#{loan.id.split('-')[0]}</div>
+                              <div className="text-xs text-gray-500 font-mono mt-1 flex items-center gap-2">
+                                <span>#{loan.id.split('-')[0]}</span>
+                                <button 
+                                  onClick={() => copyToClipboard(loan.chat_id.toString())}
+                                  className="flex items-center gap-1 bg-gray-200/50 dark:bg-gray-700/50 hover:bg-gray-200 dark:hover:bg-gray-700 px-1.5 py-0.5 rounded text-[10px] transition-colors"
+                                  title={isBn ? "চ্যাট আইডি কপি করুন" : "Copy Chat ID"}
+                                >
+                                  <Copy size={10} />
+                                  {loan.chat_id}
+                                </button>
+                              </div>
                             </td>
                             <td className="px-6 py-4">
                                <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs font-bold capitalize">

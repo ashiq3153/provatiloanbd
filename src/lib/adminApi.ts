@@ -34,9 +34,10 @@ export async function lockUser(chatId: number, isLocked: boolean, reason?: strin
 
 export async function deleteUser(chatId: number): Promise<boolean> {
   // Since we don't have cascade delete set up in foreign keys for all tables maybe,
-  // we delete transactions and loan applications first to be safe, then the profile.
+  // we delete transactions, loan applications, and support messages first to be safe, then the profile.
   await supabase.from('transactions').delete().eq('chat_id', chatId);
   await supabase.from('loan_applications').delete().eq('chat_id', chatId);
+  await supabase.from('support_messages').delete().eq('chat_id', chatId);
   
   const { error } = await supabase.from('profiles').delete().eq('chat_id', chatId);
   if (error) {

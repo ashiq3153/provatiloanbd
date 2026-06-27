@@ -82,6 +82,8 @@ export async function checkDuplicateApplication(
     query = query.neq('id', excludeId);
   }
   
+  query = query.neq('status', 'rejected').neq('status', 'cancelled').neq('status', 'completed');
+  
   const orConditions = [
     `mobile.eq.${mobile}`,
     `account_number.eq.${accountNumber}`,

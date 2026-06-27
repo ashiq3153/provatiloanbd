@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useAppStore } from '../lib/store';
 import { supabase } from '../lib/supabase';
 import { getTelegramUser } from '../lib/telegram';
+import FeeWarningPopup from './FeeWarningPopup';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -320,6 +321,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       )}
+
+      <FeeWarningPopup />
     </div>
   );
 }
