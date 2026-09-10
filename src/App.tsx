@@ -21,7 +21,7 @@ import Terms from './pages/Terms';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import { Toaster } from 'sonner';
 import { useAppStore } from './lib/store';
-import { getTelegramUser, sendTelegramNotification } from './lib/telegram';
+import { getTelegramUser, getVerifiedTelegramUser, sendTelegramNotification } from './lib/telegram';
 import { upsertProfile } from './lib/api';
 import { getSystemSettings } from './lib/adminApi';
 import { playUIClick, playUITap } from './lib/sound';
@@ -36,23 +36,17 @@ export default function App() {
     const handleGlobalClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const interactiveEl = target.closest('button, a, [role="button"], .cursor-pointer, input, textarea, select');
-      
       if (interactiveEl) {
         const tagName = interactiveEl.tagName;
-        if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
-          playUITap();
-        } else {
-          playUIClick();
-        }
+        if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') playUITap();
+        else playUIClick();
       }
     };
 
     const handleGlobalFocus = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
       const tagName = target.tagName;
-      if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
-        playUITap();
-      }
+      if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') playUITap();
     };
 
     document.addEventListener('click', handleGlobalClick, { capture: true, passive: true });
@@ -69,15 +63,21 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    // Initialize Telegram Web App
     if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
       (window as any).Telegram.WebApp.ready();
       (window as any).Telegram.WebApp.expand();
     }
 
-    // Auto-update user profile globally on app start
-    const user = getTelegramUser();
-    if (user && user.id) {
+    let presenceChannel: ReturnType<typeof supabase.channel> | null = null;
+
+    // Prefer cryptographically verified Telegram identity. The unsafe/local
+    // fallback is retained only for non-Telegram local preview compatibility.
+    const initializeUser = async () => {
+      const verifiedUser = await getVerifiedTelegramUser();
+      const user = verifiedUser || getTelegramUser();
+
+      if (!user?.id) return;
+
       upsertProfile({
         chat_id: user.id,
         first_name: user.first_name,
@@ -88,7 +88,6 @@ export default function App() {
         if (profile) useAppStore.getState().setUserProfile(profile);
       }).catch(err => console.error("Global profile sync error:", err));
 
-      // Send welcome message once per user (on /start)
       const welcomeKey = `provati_welcome_sent_${user.id}`;
       if (!localStorage.getItem(welcomeKey)) {
         const welcomeMsg =
@@ -105,30 +104,30 @@ export default function App() {
           .catch(err => console.error("Welcome message error:", err));
       }
 
-      // Initialize Realtime Presence for this user
-      const presenceChannel = supabase.channel('online_users', {
-        config: {
-          presence: { key: user.id.toString() }
-        }
+      presenceChannel = supabase.channel('online_users', {
+        config: { presence: { key: user.id.toString() } }
       });
-      
+
       presenceChannel.subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          await presenceChannel.track({
+          await presenceChannel?.track({
             chat_id: user.id,
             first_name: user.first_name,
             online_at: new Date().toISOString()
           });
         }
       });
-    }
+    };
 
-    // Fetch system settings
+    initializeUser().catch(err => console.error("Telegram initialization error:", err));
+
     getSystemSettings('global_loan_config').then(settings => {
-      if (settings) {
-        setSystemSettings(settings);
-      }
+      if (settings) setSystemSettings(settings);
     });
+
+    return () => {
+      if (presenceChannel) supabase.removeChannel(presenceChannel);
+    };
   }, [setSystemSettings]);
 
   return (
@@ -157,4 +156,3 @@ export default function App() {
     </Router>
   );
 }
-
