@@ -8,18 +8,18 @@ export interface TelegramUser {
 }
 
 /**
- * Returns the Telegram user supplied by the Mini App runtime.
- * This is UI-only data and MUST NOT be used for authorization.
+ * Returns only the Telegram runtime user for display/UI purposes.
+ * This data MUST NOT be used for authorization.
+ * Throws when Telegram user data is unavailable so callers cannot silently
+ * continue with a fabricated identity.
  */
-export const getTelegramUser = (): TelegramUser | null => {
+export const getTelegramUser = (): TelegramUser => {
   // @ts-ignore
-  if (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user) {
-    // @ts-ignore
-    return window.Telegram.WebApp.initDataUnsafe.user;
+  const user = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initDataUnsafe?.user : undefined;
+  if (!user?.id) {
+    throw new Error('Telegram user is unavailable');
   }
-
-  // No mock identity in the security-sensitive v1.1 flow.
-  return null;
+  return user as TelegramUser;
 };
 
 /**
@@ -50,8 +50,7 @@ export async function getVerifiedTelegramUser(): Promise<TelegramUser | null> {
 
 /**
  * Sends a Telegram notification through the server-side Vercel function.
- * In a Telegram Mini App, raw initData is included so the server can
- * cryptographically verify the caller before sending to that chat.
+ * The server verifies raw Telegram initData and enforces chat ownership.
  */
 export async function sendTelegramNotification(
   chatId: number,
