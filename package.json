@@ -1,7 +1,7 @@
 {
   "name": "provati-loan-bd",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -29,7 +29,6 @@
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
     "@tailwindcss/vite": "^4.1.6",
-    "@vitejs/plugin-react": "^4.5.2",
     "tailwindcss": "^4.1.6",
     "typescript": "~5.8.3",
     "vite": "^6.3.5"
