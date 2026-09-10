@@ -9,23 +9,17 @@ export interface TelegramUser {
 
 /**
  * Returns the Telegram user supplied by the Mini App runtime.
- * Do not use initDataUnsafe for authorization; use getVerifiedTelegramUser().
+ * This is UI-only data and MUST NOT be used for authorization.
  */
-export const getTelegramUser = (): TelegramUser => {
+export const getTelegramUser = (): TelegramUser | null => {
   // @ts-ignore
   if (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user) {
     // @ts-ignore
     return window.Telegram.WebApp.initDataUnsafe.user;
   }
 
-  // Mock user for local development / preview only.
-  return {
-    id: 123456789,
-    first_name: 'Arif',
-    last_name: 'Hossain',
-    username: 'arif_hossain',
-    photo_url: 'https://i.pravatar.cc/150?u=arif_hossain',
-  };
+  // No mock identity in the security-sensitive v1.1 flow.
+  return null;
 };
 
 /**
@@ -34,7 +28,8 @@ export const getTelegramUser = (): TelegramUser => {
  */
 export async function getVerifiedTelegramUser(): Promise<TelegramUser | null> {
   // @ts-ignore
-  const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData : '';
+  const webApp = typeof window !== 'undefined' ? window.Telegram?.WebApp : undefined;
+  const initData = webApp?.initData || '';
   if (!initData) return null;
 
   try {
@@ -55,7 +50,8 @@ export async function getVerifiedTelegramUser(): Promise<TelegramUser | null> {
 
 /**
  * Sends a Telegram notification through the server-side Vercel function.
- * The bot token is intentionally never read by browser code.
+ * In a Telegram Mini App, raw initData is included so the server can
+ * cryptographically verify the caller before sending to that chat.
  */
 export async function sendTelegramNotification(
   chatId: number,
@@ -64,6 +60,8 @@ export async function sendTelegramNotification(
   replyMarkup?: any
 ): Promise<boolean> {
   try {
+    // @ts-ignore
+    const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
     const response = await fetch('/api/telegram-send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -71,6 +69,7 @@ export async function sendTelegramNotification(
         chat_id: chatId,
         text: message,
         reply_markup: replyMarkup,
+        initData,
       }),
     });
 
