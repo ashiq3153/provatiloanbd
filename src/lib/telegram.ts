@@ -9,8 +9,7 @@ export interface TelegramUser {
 
 /**
  * Returns the Telegram user supplied by the Mini App runtime.
- * Server-side initData verification is being introduced in v1.1 before
- * ownership-based RLS is enabled. Do not use initDataUnsafe for authorization.
+ * Do not use initDataUnsafe for authorization; use getVerifiedTelegramUser().
  */
 export const getTelegramUser = (): TelegramUser => {
   // @ts-ignore
@@ -28,6 +27,31 @@ export const getTelegramUser = (): TelegramUser => {
     photo_url: 'https://i.pravatar.cc/150?u=arif_hossain',
   };
 };
+
+/**
+ * Sends raw Telegram initData to the server for cryptographic validation.
+ * The browser never receives or handles the bot token.
+ */
+export async function getVerifiedTelegramUser(): Promise<TelegramUser | null> {
+  // @ts-ignore
+  const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData : '';
+  if (!initData) return null;
+
+  try {
+    const response = await fetch('/api/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData }),
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data?.ok && data?.user?.id ? data.user : null;
+  } catch (error) {
+    console.error('Telegram server authentication error:', error);
+    return null;
+  }
+}
 
 /**
  * Sends a Telegram notification through the server-side Vercel function.
