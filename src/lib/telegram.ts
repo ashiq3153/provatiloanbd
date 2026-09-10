@@ -7,15 +7,19 @@ export interface TelegramUser {
   photo_url?: string;
 }
 
-import { supabase } from './supabase';
-
+/**
+ * Returns the Telegram user supplied by the Mini App runtime.
+ * Server-side initData verification is being introduced in v1.1 before
+ * ownership-based RLS is enabled. Do not use initDataUnsafe for authorization.
+ */
 export const getTelegramUser = (): TelegramUser => {
   // @ts-ignore
   if (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user) {
     // @ts-ignore
     return window.Telegram.WebApp.initDataUnsafe.user;
   }
-  // Mock user for local development / preview
+
+  // Mock user for local development / preview only.
   return {
     id: 123456789,
     first_name: 'Arif',
@@ -26,62 +30,41 @@ export const getTelegramUser = (): TelegramUser => {
 };
 
 /**
- * Sends a notification message to a user via the Telegram Bot API.
+ * Sends a Telegram notification through the server-side Vercel function.
+ * The bot token is intentionally never read by browser code.
  */
 export async function sendTelegramNotification(
   chatId: number,
   message: string,
-  botToken?: string,
+  _botToken?: string,
   replyMarkup?: any
 ): Promise<boolean> {
-  const token = botToken || import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
-  if (!token) {
-    console.warn("⚠️ Telegram Bot Token is missing. Notification not sent.");
-    return false;
-  }
-
   try {
-    const payload: any = {
-      chat_id: chatId,
-      text: message,
-      parse_mode: "HTML",
-    };
-    
-    if (replyMarkup) {
-      payload.reply_markup = replyMarkup;
-    }
-
-    const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
+    const response = await fetch('/api/telegram-send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: message,
+        reply_markup: replyMarkup,
+      }),
     });
 
     if (!response.ok) {
-      let errData;
+      let errData: any;
       try {
         errData = await response.json();
-      } catch (e) {
-        errData = await response.text();
+      } catch {
+        errData = { error: await response.text() };
       }
-      console.error("Telegram API Error:", errData);
-      
-      // Update status to unreachable for any Telegram error (403 forbidden, 400 chat not found, etc)
-      try {
-        await supabase.from('profiles').update({ bot_status: 'unreachable' }).eq('chat_id', chatId);
-      } catch (e) {
-        console.error("Failed to update bot_status:", e);
-      }
-      
+      console.error('Telegram API Error:', errData);
       return false;
     }
 
-    return true;
+    const data = await response.json().catch(() => ({ ok: true }));
+    return data?.ok !== false;
   } catch (error) {
-    console.error("Error sending Telegram notification:", error);
+    console.error('Error sending Telegram notification:', error);
     return false;
   }
 }
-
