@@ -21,7 +21,7 @@ import Terms from './pages/Terms';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import { Toaster } from 'sonner';
 import { useAppStore } from './lib/store';
-import { getTelegramUser, getVerifiedTelegramUser, sendTelegramNotification } from './lib/telegram';
+import { getVerifiedTelegramUser, sendTelegramNotification } from './lib/telegram';
 import { upsertProfile } from './lib/api';
 import { getSystemSettings } from './lib/adminApi';
 import { playUIClick, playUITap } from './lib/sound';
@@ -31,7 +31,6 @@ export default function App() {
   const theme = useAppStore(state => state.theme);
   const setSystemSettings = useAppStore(state => state.setSystemSettings);
 
-  // Setup global interactive click/focus sound effects
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -70,13 +69,12 @@ export default function App() {
 
     let presenceChannel: ReturnType<typeof supabase.channel> | null = null;
 
-    // Prefer cryptographically verified Telegram identity. The unsafe/local
-    // fallback is retained only for non-Telegram local preview compatibility.
     const initializeUser = async () => {
-      const verifiedUser = await getVerifiedTelegramUser();
-      const user = verifiedUser || getTelegramUser();
-
-      if (!user?.id) return;
+      const user = await getVerifiedTelegramUser();
+      if (!user?.id) {
+        console.error('Telegram identity verification failed; user initialization stopped.');
+        return;
+      }
 
       upsertProfile({
         chat_id: user.id,
