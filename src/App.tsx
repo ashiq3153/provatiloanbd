@@ -12,7 +12,6 @@ import Deposit from './pages/Deposit';
 import Withdraw from './pages/Withdraw';
 import Transactions from './pages/Transactions';
 import Loans from './pages/Loans';
-import PlaceholderPage from './pages/PlaceholderPage';
 import PayEMI from './pages/PayEMI';
 import ApplicationDetails from './pages/ApplicationDetails';
 import Profile from './pages/Profile';
@@ -21,11 +20,11 @@ import Terms from './pages/Terms';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import { Toaster } from 'sonner';
 import { useAppStore } from './lib/store';
-import { getVerifiedTelegramUser, sendTelegramNotification } from './lib/telegram';
+import { sendTelegramNotification } from './lib/telegram';
 import { upsertProfile } from './lib/api';
 import { getSystemSettings } from './lib/adminApi';
 import { playUIClick, playUITap } from './lib/sound';
-import { supabase } from './lib/supabase';
+import { ensureSupabaseAuthSession, supabase } from './lib/supabase';
 
 export default function App() {
   const theme = useAppStore(state => state.theme);
@@ -70,11 +69,25 @@ export default function App() {
     let presenceChannel: ReturnType<typeof supabase.channel> | null = null;
 
     const initializeUser = async () => {
-      const user = await getVerifiedTelegramUser();
-      if (!user?.id) {
-        console.error('Telegram identity verification failed; user initialization stopped.');
+      const telegramWebApp = (window as any).Telegram?.WebApp;
+      const initData = telegramWebApp?.initData;
+      if (!initData) {
+        console.error('Telegram initData is unavailable; user initialization stopped.');
         return;
       }
+
+      const session = await ensureSupabaseAuthSession();
+      const response = await fetch('/api/telegram-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ initData, accessToken: session.access_token }),
+      });
+      const authResult = await response.json();
+      if (!response.ok || !authResult?.ok || !authResult?.user?.id || !authResult.identityBound) {
+        throw new Error(authResult?.error || 'Telegram/Supabase identity binding failed');
+      }
+
+      const user = authResult.user;
 
       upsertProfile({
         chat_id: user.id,
@@ -84,7 +97,7 @@ export default function App() {
         photo_url: user.photo_url || null,
       }).then(profile => {
         if (profile) useAppStore.getState().setUserProfile(profile);
-      }).catch(err => console.error("Global profile sync error:", err));
+      }).catch(err => console.error('Global profile sync error:', err));
 
       const welcomeKey = `provati_welcome_sent_${user.id}`;
       if (!localStorage.getItem(welcomeKey)) {
@@ -99,7 +112,7 @@ export default function App() {
           .then(sent => {
             if (sent) localStorage.setItem(welcomeKey, '1');
           })
-          .catch(err => console.error("Welcome message error:", err));
+          .catch(err => console.error('Welcome message error:', err));
       }
 
       presenceChannel = supabase.channel('online_users', {
@@ -117,7 +130,7 @@ export default function App() {
       });
     };
 
-    initializeUser().catch(err => console.error("Telegram initialization error:", err));
+    initializeUser().catch(err => console.error('Telegram initialization error:', err));
 
     getSystemSettings('global_loan_config').then(settings => {
       if (settings) setSystemSettings(settings);
