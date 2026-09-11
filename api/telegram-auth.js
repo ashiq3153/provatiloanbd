@@ -9,7 +9,7 @@ import crypto from "node:crypto";
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const MAX_AUTH_AGE_SECONDS = 24 * 60 * 60;
 
-function verifyInitData(initData) {
+export function verifyInitData(initData) {
   if (!BOT_TOKEN || typeof initData !== "string" || !initData.trim()) return null;
 
   const params = new URLSearchParams(initData);
@@ -47,8 +47,10 @@ function verifyInitData(initData) {
   if (!userRaw) return null;
 
   try {
+    const user = JSON.parse(userRaw);
+    if (!user?.id) return null;
     return {
-      user: JSON.parse(userRaw),
+      user,
       auth_date: authDate,
     };
   } catch {
