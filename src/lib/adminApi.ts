@@ -1,8 +1,8 @@
 import { supabase } from './supabase';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../types/database';
 
-// Helper for admin APIs. Assumes RLS policies allow these operations or service role is used.
-// (In a real app, you would use a service role key for admin operations, or proper RLS rules where is_admin = true)
+// Admin authorization is enforced separately. These client helpers must not be
+// treated as an authorization boundary; the database/server must enforce it.
 
 export async function getAllProfiles(): Promise<Profile[]> {
   const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
@@ -38,7 +38,7 @@ export async function deleteUser(chatId: number): Promise<boolean> {
   await supabase.from('transactions').delete().eq('chat_id', chatId);
   await supabase.from('loan_applications').delete().eq('chat_id', chatId);
   await supabase.from('support_messages').delete().eq('chat_id', chatId);
-  
+
   const { error } = await supabase.from('profiles').delete().eq('chat_id', chatId);
   if (error) {
     console.error('deleteUser error:', error);
@@ -55,71 +55,30 @@ export async function getAllLoanApplications(): Promise<LoanApplication[]> {
 
 export async function updateLoanApplicationStatus(id: string, status: LoanApplication['status'], feedback?: string): Promise<boolean> {
   if (status === 'approved') {
-    // 1. Fetch loan details first to get chat_id and amount
-    const { data: loan, error: fetchError } = await supabase
-      .from('loan_applications')
-      .select('chat_id, amount, id, loan_category, account_number')
-      .eq('id', id)
-      .single();
-    
-    if (fetchError || !loan) {
-      console.error('Error fetching loan for disbursement:', fetchError);
-      return false;
-    }
+    // Approval + disbursement must be atomic. The database function locks the
+    // loan row, updates it, and creates the completed disbursement as one unit.
+    const { error } = await supabase.rpc('approve_loan_atomic', {
+      p_loan_id: id,
+      p_feedback: feedback || null,
+    });
 
-    // 2. Update status of loan
-    const { error: updateError } = await supabase
-      .from('loan_applications')
-      .update({ status, admin_feedback: feedback, approved_at: new Date().toISOString() })
-      .eq('id', id);
-
-    if (updateError) {
-      console.error('updateLoanApplicationStatus error:', updateError);
-      return false;
-    }
-
-    // 3. Check if a disbursement transaction already exists for this loan
-    const { data: existingTxn, error: checkError } = await supabase
-      .from('transactions')
-      .select('id')
-      .eq('loan_id', loan.id)
-      .eq('type', 'disbursement')
-      .maybeSingle();
-
-    if (!checkError && !existingTxn) {
-      // 4. Create completed disbursement transaction to credit the user's balance
-      const { error: txnError } = await supabase
-        .from('transactions')
-        .insert({
-          chat_id: loan.chat_id,
-          loan_id: loan.id,
-          type: 'disbursement',
-          deposit_type: null,
-          amount: loan.amount,
-          payment_method: 'bank',
-          sender_number: loan.account_number,
-          trx_id: `DISB-${loan.id.slice(0, 8).toUpperCase()}`,
-          screenshot_url: null,
-          status: 'completed'
-        });
-
-      if (txnError) {
-        console.error('Error creating disbursement transaction:', txnError);
-      }
-    }
-    return true;
-  } else {
-    // Standard update for non-approved statuses
-    const { error } = await supabase
-      .from('loan_applications')
-      .update({ status, admin_feedback: feedback, approved_at: null })
-      .eq('id', id);
     if (error) {
-      console.error('updateLoanApplicationStatus error:', error);
+      console.error('approve_loan_atomic error:', error);
       return false;
     }
     return true;
   }
+
+  // Standard update for non-approved statuses
+  const { error } = await supabase
+    .from('loan_applications')
+    .update({ status, admin_feedback: feedback, approved_at: null })
+    .eq('id', id);
+  if (error) {
+    console.error('updateLoanApplicationStatus error:', error);
+    return false;
+  }
+  return true;
 }
 
 export async function getAllTransactions(): Promise<Transaction[]> {
@@ -152,7 +111,7 @@ export async function getSystemSettings(key: string): Promise<any> {
 export async function updateSystemSettings(key: string, value: any): Promise<boolean> {
   // Try to update first
   const { data: existing } = await supabase.from('system_settings').select('id').eq('key', key).single();
-  
+
   if (existing) {
     const { error } = await supabase.from('system_settings').update({ value }).eq('key', key);
     if (error) {
