@@ -17,7 +17,9 @@ type AdminAction =
   | 'delete_success_story';
 
 async function callAdmin<T>(adminAction: AdminAction, payload: Record<string, unknown> = {}): Promise<T | null> {
-  const initData = window.Telegram?.WebApp?.initData;
+  // Telegram's WebApp global is provided at runtime by the Telegram client.
+  const telegramWebApp = (window as Window & { Telegram?: { WebApp?: { initData?: string } } }).Telegram?.WebApp;
+  const initData = telegramWebApp?.initData;
   if (!initData) {
     console.error('Admin gateway: Telegram initData is missing');
     return null;
