@@ -26,10 +26,7 @@ export function verifyInitData(initData) {
   if (expected.length !== received.length || !crypto.timingSafeEqual(expected, received)) return null;
   const userRaw = params.get("user");
   if (!userRaw) return null;
-  try {
-    const user = JSON.parse(userRaw);
-    return user?.id ? { user, auth_date: authDate } : null;
-  } catch { return null; }
+  try { const user = JSON.parse(userRaw); return user?.id ? { user, auth_date: authDate } : null; } catch { return null; }
 }
 
 function adminClient() {
@@ -59,28 +56,58 @@ async function adminAction(action, payload) {
     case "get_transactions": return (await db.from("transactions").select("*").order("created_at", { ascending: false })).data || [];
     case "get_success_stories": return (await db.from("success_stories").select("*").order("rating", { ascending: false })).data || [];
     case "get_system_setting": return (await db.from("system_settings").select("value").eq("key", payload.key).single()).data?.value || null;
-    case "ban_user": return !!(await db.from("profiles").update({ is_banned: !!payload.isBanned }).eq("chat_id", payload.chatId)).error === false;
-    case "lock_user": return !!(await db.from("profiles").update({ is_locked: !!payload.isLocked, lock_reason: payload.isLocked ? (payload.reason || null) : null }).eq("chat_id", payload.chatId)).error === false;
+    case "ban_user": return !(await db.from("profiles").update({ is_banned: !!payload.isBanned }).eq("chat_id", payload.chatId)).error;
+    case "lock_user": return !(await db.from("profiles").update({ is_locked: !!payload.isLocked, lock_reason: payload.isLocked ? (payload.reason || null) : null }).eq("chat_id", payload.chatId)).error;
     case "delete_user":
       for (const table of ["transactions", "loan_applications", "support_messages"]) await db.from(table).delete().eq("chat_id", payload.chatId);
-      return !!(await db.from("profiles").delete().eq("chat_id", payload.chatId)).error === false;
-    case "update_transaction": return !!(await db.from("transactions").update({ status: payload.status }).eq("id", payload.id)).error === false;
+      return !(await db.from("profiles").delete().eq("chat_id", payload.chatId)).error;
+    case "update_transaction": return !(await db.from("transactions").update({ status: payload.status }).eq("id", payload.id)).error;
     case "update_loan": {
       if (payload.status === "approved") {
         const { error } = await db.rpc("approve_loan_atomic", { p_loan_id: payload.id, p_feedback: payload.feedback || null });
         if (error) throw error;
         return true;
       }
-      return !!(await db.from("loan_applications").update({ status: payload.status, admin_feedback: payload.feedback || null, approved_at: null }).eq("id", payload.id)).error === false;
+      return !(await db.from("loan_applications").update({ status: payload.status, admin_feedback: payload.feedback || null, approved_at: null }).eq("id", payload.id)).error;
     }
     case "update_system_setting": {
       const existing = await db.from("system_settings").select("id").eq("key", payload.key).maybeSingle();
-      if (existing.data) return !!(await db.from("system_settings").update({ value: payload.value }).eq("key", payload.key)).error === false;
-      return !!(await db.from("system_settings").insert({ key: payload.key, value: payload.value })).error === false;
+      if (existing.data) return !(await db.from("system_settings").update({ value: payload.value }).eq("key", payload.key)).error;
+      return !(await db.from("system_settings").insert({ key: payload.key, value: payload.value })).error;
     }
-    case "add_success_story": return !!(await db.from("success_stories").insert(payload.story)).error === false;
-    case "delete_success_story": return !!(await db.from("success_stories").delete().eq("id", payload.id)).error === false;
+    case "add_success_story": return !(await db.from("success_stories").insert(payload.story)).error;
+    case "delete_success_story": return !(await db.from("success_stories").delete().eq("id", payload.id)).error;
+    case "get_chat_messages": return (await db.from("support_messages").select("*").order("created_at", { ascending: true })).data || [];
+    case "send_chat_message": {
+      const { error } = await db.from("support_messages").insert({ chat_id: payload.chatId, sender: "admin", message: payload.message, reply_to: payload.replyTo || null, attachment_url: payload.attachmentUrl || null });
+      if (error) throw error;
+      return true;
+    }
+    case "edit_chat_message": return !(await db.from("support_messages").update({ message: payload.message, is_edited: true }).eq("id", payload.id)).error;
+    case "mark_chat_seen": return !(await db.from("support_messages").update({ is_seen: true }).in("id", Array.isArray(payload.ids) ? payload.ids : [])).error;
+    case "delete_chat_message": return !(await db.from("support_messages").delete().eq("id", payload.id)).error;
     default: throw new Error("Unsupported admin action");
+  }
+}
+
+async function chatAction(telegramChatId, action, payload) {
+  const db = adminClient();
+  switch (action) {
+    case "get_messages": return (await db.from("support_messages").select("*").eq("chat_id", telegramChatId).order("created_at", { ascending: true })).data || [];
+    case "send_message": {
+      const message = typeof payload.message === "string" ? payload.message.trim() : "";
+      const attachmentUrl = typeof payload.attachmentUrl === "string" ? payload.attachmentUrl : null;
+      if (!message && !attachmentUrl) throw new Error("Message or attachment is required");
+      const { error } = await db.from("support_messages").insert({ chat_id: telegramChatId, sender: "user", message, reply_to: payload.replyTo || null, attachment_url: attachmentUrl });
+      if (error) throw error;
+      return true;
+    }
+    case "mark_seen": {
+      const ids = Array.isArray(payload.ids) ? payload.ids.filter(id => typeof id === "string") : [];
+      if (!ids.length) return true;
+      return !(await db.from("support_messages").update({ is_seen: true }).eq("chat_id", telegramChatId).eq("sender", "admin").in("id", ids)).error;
+    }
+    default: throw new Error("Unsupported chat action");
   }
 }
 
@@ -89,18 +116,19 @@ export default async function handler(req, res) {
   try {
     const result = verifyInitData(req.body?.initData);
     if (!result?.user?.id) return res.status(401).json({ ok: false, error: "Invalid Telegram initData" });
-
     if (req.body?.accessToken) {
       const bridged = await bridgeIdentity(Number(result.user.id), req.body.accessToken);
       if (!bridged) return res.status(401).json({ ok: false, error: "Supabase identity binding failed" });
     }
-
     if (req.body?.action === "admin") {
       if (!ADMIN_CHAT_IDS.has(String(result.user.id))) return res.status(403).json({ ok: false, error: "Admin access denied" });
       const data = await adminAction(req.body.adminAction, req.body.payload || {});
       return res.status(200).json({ ok: true, data });
     }
-
+    if (req.body?.action === "chat") {
+      const data = await chatAction(Number(result.user.id), req.body.chatAction, req.body.payload || {});
+      return res.status(200).json({ ok: true, data });
+    }
     return res.status(200).json({ ok: true, user: result.user, identityBound: Boolean(req.body?.accessToken) });
   } catch (error) {
     console.error("Telegram authentication error:", error);
