@@ -48,6 +48,27 @@ async function bridgeIdentity(telegramChatId, accessToken) {
   return true;
 }
 
+/**
+ * Sends a single Telegram Bot API message using the server-only bot token.
+ * Never exposed to the browser; callers only ever pass chat_id + text.
+ */
+async function sendTelegramBotMessage(chatId, text, replyMarkup) {
+  if (!BOT_TOKEN) throw new Error("Telegram bot token is not configured on the server");
+  const numericChatId = Number(chatId);
+  const trimmedText = typeof text === "string" ? text.trim() : "";
+  if (!numericChatId || !trimmedText) throw new Error("chatId and message are required");
+  const body = { chat_id: numericChatId, text: trimmedText, parse_mode: "HTML" };
+  if (replyMarkup) body.reply_markup = replyMarkup;
+  const tgResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const tgData = await tgResponse.json().catch(() => ({}));
+  if (!tgResponse.ok || !tgData.ok) throw new Error(tgData.description || "Telegram API request failed");
+  return true;
+}
+
 async function adminAction(action, payload) {
   const db = adminClient();
   switch (action) {
@@ -86,6 +107,7 @@ async function adminAction(action, payload) {
     case "edit_chat_message": return !(await db.from("support_messages").update({ message: payload.message, is_edited: true }).eq("id", payload.id)).error;
     case "mark_chat_seen": return !(await db.from("support_messages").update({ is_seen: true }).in("id", Array.isArray(payload.ids) ? payload.ids : [])).error;
     case "delete_chat_message": return !(await db.from("support_messages").delete().eq("id", payload.id)).error;
+    case "send_telegram_message": return await sendTelegramBotMessage(payload.chatId, payload.message, payload.replyMarkup);
     default: throw new Error("Unsupported admin action");
   }
 }
