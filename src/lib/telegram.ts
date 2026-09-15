@@ -7,81 +7,86 @@ export interface TelegramUser {
   photo_url?: string;
 }
 
-import { supabase } from './supabase';
-
+/**
+ * Returns only the Telegram runtime user for display/UI purposes.
+ * This data MUST NOT be used for authorization.
+ * Throws when Telegram user data is unavailable so callers cannot silently
+ * continue with a fabricated identity.
+ */
 export const getTelegramUser = (): TelegramUser => {
   // @ts-ignore
-  if (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user) {
-    // @ts-ignore
-    return window.Telegram.WebApp.initDataUnsafe.user;
+  const user = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initDataUnsafe?.user : undefined;
+  if (!user?.id) {
+    throw new Error('Telegram user is unavailable');
   }
-  // Mock user for local development / preview
-  return {
-    id: 123456789,
-    first_name: 'Arif',
-    last_name: 'Hossain',
-    username: 'arif_hossain',
-    photo_url: 'https://i.pravatar.cc/150?u=arif_hossain',
-  };
+  return user as TelegramUser;
 };
 
 /**
- * Sends a notification message to a user via the Telegram Bot API.
+ * Sends raw Telegram initData to the server for cryptographic validation.
+ * The browser never receives or handles the bot token.
+ */
+export async function getVerifiedTelegramUser(): Promise<TelegramUser | null> {
+  // @ts-ignore
+  const webApp = typeof window !== 'undefined' ? window.Telegram?.WebApp : undefined;
+  const initData = webApp?.initData || '';
+  if (!initData) return null;
+
+  try {
+    const response = await fetch('/api/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData }),
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data?.ok && data?.user?.id ? data.user : null;
+  } catch (error) {
+    console.error('Telegram server authentication error:', error);
+    return null;
+  }
+}
+
+/**
+ * Sends a Telegram notification through the server-side Vercel function.
+ * The server verifies raw Telegram initData and enforces chat ownership.
  */
 export async function sendTelegramNotification(
   chatId: number,
   message: string,
-  botToken?: string,
+  _botToken?: string,
   replyMarkup?: any
 ): Promise<boolean> {
-  const token = botToken || import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
-  if (!token) {
-    console.warn("⚠️ Telegram Bot Token is missing. Notification not sent.");
-    return false;
-  }
-
   try {
-    const payload: any = {
-      chat_id: chatId,
-      text: message,
-      parse_mode: "HTML",
-    };
-    
-    if (replyMarkup) {
-      payload.reply_markup = replyMarkup;
-    }
-
-    const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
+    // @ts-ignore
+    const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+    const response = await fetch('/api/telegram-send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: message,
+        reply_markup: replyMarkup,
+        initData,
+      }),
     });
 
     if (!response.ok) {
-      let errData;
+      let errData: any;
       try {
         errData = await response.json();
-      } catch (e) {
-        errData = await response.text();
+      } catch {
+        errData = { error: await response.text() };
       }
-      console.error("Telegram API Error:", errData);
-      
-      // Update status to unreachable for any Telegram error (403 forbidden, 400 chat not found, etc)
-      try {
-        await supabase.from('profiles').update({ bot_status: 'unreachable' }).eq('chat_id', chatId);
-      } catch (e) {
-        console.error("Failed to update bot_status:", e);
-      }
-      
+      console.error('Telegram API Error:', errData);
       return false;
     }
 
-    return true;
+    const data = await response.json().catch(() => ({ ok: true }));
+    return data?.ok !== false;
   } catch (error) {
-    console.error("Error sending Telegram notification:", error);
+    console.error('Error sending Telegram notification:', error);
     return false;
   }
 }
-

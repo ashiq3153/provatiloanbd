@@ -8,7 +8,6 @@ import { convertDigits, formatCurrency } from '../../lib/translation';
 import { reactToSuccessStory } from '../../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { sendTelegramNotification } from '../../lib/telegram';
-import { sendEmailNotification } from '../../lib/email';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { supabase } from '../../lib/supabase';
 
@@ -174,9 +173,6 @@ export default function AdminDashboard() {
     securityDeposit: 10,
     insuranceEnabled: false,
     insuranceRate: 1.0,
-    emailEnabled: false,
-    resendApiKey: '',
-    senderEmail: 'Provati Loan <noreply@provatiloanbd.com>',
     minRatePersonal: 0.55,
     minRateBusiness: 0.55,
     minRateExpat: 0.50,
@@ -246,9 +242,6 @@ export default function AdminDashboard() {
         securityDeposit: systemSettings.secDeposit ? systemSettings.secDeposit * 100 : 10,
         insuranceEnabled: !!systemSettings.insuranceEnabled,
         insuranceRate: systemSettings.insuranceRate ? systemSettings.insuranceRate * 100 : 1.0,
-        emailEnabled: !!systemSettings.emailEnabled,
-        resendApiKey: systemSettings.resendApiKey || '',
-        senderEmail: systemSettings.senderEmail || 'Provati Loan <noreply@provatiloanbd.com>',
         minRatePersonal: systemSettings.minRatePersonal ? systemSettings.minRatePersonal * 100 : 0.55,
         minRateBusiness: systemSettings.minRateBusiness ? systemSettings.minRateBusiness * 100 : 0.55,
         minRateExpat: systemSettings.minRateExpat ? systemSettings.minRateExpat * 100 : 0.50,
@@ -623,9 +616,6 @@ export default function AdminDashboard() {
       secDeposit: config.securityDeposit / 100,
       insuranceEnabled: config.insuranceEnabled,
       insuranceRate: config.insuranceRate / 100,
-      emailEnabled: config.emailEnabled,
-      resendApiKey: config.resendApiKey,
-      senderEmail: config.senderEmail,
       minRatePersonal: config.minRatePersonal / 100,
       minRateBusiness: config.minRateBusiness / 100,
       minRateExpat: config.minRateExpat / 100,
@@ -701,16 +691,6 @@ export default function AdminDashboard() {
           sendTelegramNotification(loan.chat_id, msg, config.telegramBotToken);
         }
 
-        // Email Notification
-        if (config.emailEnabled && loan.email) {
-          sendEmailNotification(
-            { ...loan, status, admin_feedback: feedback || null },
-            status,
-            feedback || null,
-            { apiKey: config.resendApiKey, senderEmail: config.senderEmail, enabled: config.emailEnabled },
-            isBn
-          );
-        }
       }
     } else {
       toast.error('Failed to update loan status');
@@ -1961,57 +1941,6 @@ export default function AdminDashboard() {
                               </div>
                             </div>
 
-                            {/* Email Settings Panel */}
-                            <div className="bg-gray-50 dark:bg-gray-900/40 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700/60 shadow-sm space-y-5">
-                              <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-primary-600 dark:text-primary-400">
-                                ✉️ {isBn ? 'ইমেইল নোটিফিকেশন সেটিংস (Resend)' : 'Email Notifications Settings (Resend)'}
-                              </h3>
-                              
-                              <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700">
-                                <div>
-                                  <h4 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-1">{isBn ? 'ইমেইল নোটিফিকেশন সক্রিয়' : 'Enable Email Notifications'}</h4>
-                                  <p className="text-[10px] text-gray-500">{isBn ? 'লোনের স্ট্যাটাস পরিবর্তনের সাথে সাথে ইউজারদের ইমেইল নোটিফিকেশন পাঠাতে এটি চালু করুন।' : 'Enable transactional status updates sent to applicants via email.'}</p>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => setConfig({...config, emailEnabled: !config.emailEnabled})}
-                                  className="text-primary-600 dark:text-primary-400 focus:outline-none hover:scale-105 transition-transform"
-                                >
-                                  {config.emailEnabled ? <ToggleRight size={44} /> : <ToggleLeft size={44} />}
-                                </button>
-                              </div>
-
-                              {config.emailEnabled && (
-                                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 pt-2">
-                                  <div>
-                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'রিসেন্ড এপিআই কি (Resend API Key)' : 'Resend API Key'}</label>
-                                    <input 
-                                      type="password" 
-                                      placeholder="re_xxxxxxxxxxxxxxxxxxxxxxxx" 
-                                      value={config.resendApiKey || ''} 
-                                      onChange={e => setConfig({...config, resendApiKey: e.target.value})} 
-                                      className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm font-mono text-sm" 
-                                    />
-                                    <p className="text-[10px] text-gray-500 mt-1">
-                                      {isBn ? 'Resend.com ড্যাশবোর্ড থেকে প্রাপ্ত API Key দিন।' : 'Go to Resend.com to generate your API key.'}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'প্রেরক ইমেইল (Sender Email)' : 'Sender Email'}</label>
-                                    <input 
-                                      type="text" 
-                                      placeholder="Provati Loan <support@yourdomain.com>" 
-                                      value={config.senderEmail || ''} 
-                                      onChange={e => setConfig({...config, senderEmail: e.target.value})} 
-                                      className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm text-sm" 
-                                    />
-                                    <p className="text-[10px] text-gray-500 mt-1">
-                                      {isBn ? 'আপনার ভেরিফাইড ডোমেনের প্রেরক ইমেইল এড্রেস।' : 'Enter a sender identity verified in your Resend account.'}
-                                    </p>
-                                  </div>
-                                </motion.div>
-                              )}
-                            </div>
                           </div>
                         )}
 

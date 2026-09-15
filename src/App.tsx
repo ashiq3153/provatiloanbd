@@ -12,7 +12,6 @@ import Deposit from './pages/Deposit';
 import Withdraw from './pages/Withdraw';
 import Transactions from './pages/Transactions';
 import Loans from './pages/Loans';
-import PlaceholderPage from './pages/PlaceholderPage';
 import PayEMI from './pages/PayEMI';
 import ApplicationDetails from './pages/ApplicationDetails';
 import Profile from './pages/Profile';
@@ -21,38 +20,30 @@ import Terms from './pages/Terms';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import { Toaster } from 'sonner';
 import { useAppStore } from './lib/store';
-import { getTelegramUser, sendTelegramNotification } from './lib/telegram';
-import { upsertProfile } from './lib/api';
-import { getSystemSettings } from './lib/adminApi';
+import { sendTelegramNotification } from './lib/telegram';
+import { upsertProfile, getPublicSettings } from './lib/api';
 import { playUIClick, playUITap } from './lib/sound';
-import { supabase } from './lib/supabase';
+import { ensureSupabaseAuthSession, supabase } from './lib/supabase';
 
 export default function App() {
   const theme = useAppStore(state => state.theme);
   const setSystemSettings = useAppStore(state => state.setSystemSettings);
 
-  // Setup global interactive click/focus sound effects
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const interactiveEl = target.closest('button, a, [role="button"], .cursor-pointer, input, textarea, select');
-      
       if (interactiveEl) {
         const tagName = interactiveEl.tagName;
-        if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
-          playUITap();
-        } else {
-          playUIClick();
-        }
+        if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') playUITap();
+        else playUIClick();
       }
     };
 
     const handleGlobalFocus = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
       const tagName = target.tagName;
-      if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
-        playUITap();
-      }
+      if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') playUITap();
     };
 
     document.addEventListener('click', handleGlobalClick, { capture: true, passive: true });
@@ -69,15 +60,34 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    // Initialize Telegram Web App
     if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
       (window as any).Telegram.WebApp.ready();
       (window as any).Telegram.WebApp.expand();
     }
 
-    // Auto-update user profile globally on app start
-    const user = getTelegramUser();
-    if (user && user.id) {
+    let presenceChannel: ReturnType<typeof supabase.channel> | null = null;
+
+    const initializeUser = async () => {
+      const telegramWebApp = (window as any).Telegram?.WebApp;
+      const initData = telegramWebApp?.initData;
+      if (!initData) {
+        console.error('Telegram initData is unavailable; user initialization stopped.');
+        return;
+      }
+
+      const session = await ensureSupabaseAuthSession();
+      const response = await fetch('/api/telegram-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ initData, accessToken: session.access_token }),
+      });
+      const authResult = await response.json();
+      if (!response.ok || !authResult?.ok || !authResult?.user?.id || !authResult.identityBound) {
+        throw new Error(authResult?.error || 'Telegram/Supabase identity binding failed');
+      }
+
+      const user = authResult.user;
+
       upsertProfile({
         chat_id: user.id,
         first_name: user.first_name,
@@ -86,9 +96,8 @@ export default function App() {
         photo_url: user.photo_url || null,
       }).then(profile => {
         if (profile) useAppStore.getState().setUserProfile(profile);
-      }).catch(err => console.error("Global profile sync error:", err));
+      }).catch(err => console.error('Global profile sync error:', err));
 
-      // Send welcome message once per user (on /start)
       const welcomeKey = `provati_welcome_sent_${user.id}`;
       if (!localStorage.getItem(welcomeKey)) {
         const welcomeMsg =
@@ -102,33 +111,35 @@ export default function App() {
           .then(sent => {
             if (sent) localStorage.setItem(welcomeKey, '1');
           })
-          .catch(err => console.error("Welcome message error:", err));
+          .catch(err => console.error('Welcome message error:', err));
       }
 
-      // Initialize Realtime Presence for this user
-      const presenceChannel = supabase.channel('online_users', {
-        config: {
-          presence: { key: user.id.toString() }
-        }
+      presenceChannel = supabase.channel('online_users', {
+        config: { presence: { key: user.id.toString() } }
       });
-      
+
       presenceChannel.subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          await presenceChannel.track({
+          await presenceChannel?.track({
             chat_id: user.id,
             first_name: user.first_name,
             online_at: new Date().toISOString()
           });
         }
       });
-    }
+    };
 
-    // Fetch system settings
-    getSystemSettings('global_loan_config').then(settings => {
-      if (settings) {
-        setSystemSettings(settings);
-      }
+    initializeUser().catch(err => console.error('Telegram initialization error:', err));
+
+    // Uses the direct RLS-scoped read (safe: system_settings no longer stores
+    // secrets), so this works for every authenticated user, not just admins.
+    getPublicSettings('global_loan_config').then(settings => {
+      if (settings) setSystemSettings(settings);
     });
+
+    return () => {
+      if (presenceChannel) supabase.removeChannel(presenceChannel);
+    };
   }, [setSystemSettings]);
 
   return (
@@ -157,4 +168,3 @@ export default function App() {
     </Router>
   );
 }
-

@@ -1,194 +1,83 @@
 import { supabase } from './supabase';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../types/database';
 
-// Helper for admin APIs. Assumes RLS policies allow these operations or service role is used.
-// (In a real app, you would use a service role key for admin operations, or proper RLS rules where is_admin = true)
+type AdminAction =
+  | 'get_profiles'
+  | 'get_loans'
+  | 'get_transactions'
+  | 'get_success_stories'
+  | 'get_system_setting'
+  | 'ban_user'
+  | 'lock_user'
+  | 'delete_user'
+  | 'update_transaction'
+  | 'update_loan'
+  | 'update_system_setting'
+  | 'add_success_story'
+  | 'delete_success_story'
+  | 'get_chat_messages'
+  | 'send_chat_message'
+  | 'edit_chat_message'
+  | 'mark_chat_seen'
+  | 'delete_chat_message'
+  | 'send_telegram_message';
 
-export async function getAllProfiles(): Promise<Profile[]> {
-  const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
-  if (error) console.error('getAllProfiles error:', error);
-  return data || [];
-}
-
-export async function banUser(chatId: number, isBanned: boolean): Promise<boolean> {
-  const { error } = await supabase.from('profiles').update({ is_banned: isBanned }).eq('chat_id', chatId);
-  if (error) {
-    console.error('banUser error:', error);
-    return false;
-  }
-  return true;
-}
-
-export async function lockUser(chatId: number, isLocked: boolean, reason?: string | null): Promise<boolean> {
-  const updateData: any = { is_locked: isLocked };
-  if (isLocked && reason) updateData.lock_reason = reason;
-  if (!isLocked) updateData.lock_reason = null;
-
-  const { error } = await supabase.from('profiles').update(updateData).eq('chat_id', chatId);
-  if (error) {
-    console.error('lockUser error:', error);
-    return false;
-  }
-  return true;
-}
-
-export async function deleteUser(chatId: number): Promise<boolean> {
-  // Since we don't have cascade delete set up in foreign keys for all tables maybe,
-  // we delete transactions, loan applications, and support messages first to be safe, then the profile.
-  await supabase.from('transactions').delete().eq('chat_id', chatId);
-  await supabase.from('loan_applications').delete().eq('chat_id', chatId);
-  await supabase.from('support_messages').delete().eq('chat_id', chatId);
-  
-  const { error } = await supabase.from('profiles').delete().eq('chat_id', chatId);
-  if (error) {
-    console.error('deleteUser error:', error);
-    return false;
-  }
-  return true;
-}
-
-export async function getAllLoanApplications(): Promise<LoanApplication[]> {
-  const { data, error } = await supabase.from('loan_applications').select('*').order('applied_at', { ascending: false });
-  if (error) console.error('getAllLoanApplications error:', error);
-  return data || [];
-}
-
-export async function updateLoanApplicationStatus(id: string, status: LoanApplication['status'], feedback?: string): Promise<boolean> {
-  if (status === 'approved') {
-    // 1. Fetch loan details first to get chat_id and amount
-    const { data: loan, error: fetchError } = await supabase
-      .from('loan_applications')
-      .select('chat_id, amount, id, loan_category, account_number')
-      .eq('id', id)
-      .single();
-    
-    if (fetchError || !loan) {
-      console.error('Error fetching loan for disbursement:', fetchError);
-      return false;
-    }
-
-    // 2. Update status of loan
-    const { error: updateError } = await supabase
-      .from('loan_applications')
-      .update({ status, admin_feedback: feedback, approved_at: new Date().toISOString() })
-      .eq('id', id);
-
-    if (updateError) {
-      console.error('updateLoanApplicationStatus error:', updateError);
-      return false;
-    }
-
-    // 3. Check if a disbursement transaction already exists for this loan
-    const { data: existingTxn, error: checkError } = await supabase
-      .from('transactions')
-      .select('id')
-      .eq('loan_id', loan.id)
-      .eq('type', 'disbursement')
-      .maybeSingle();
-
-    if (!checkError && !existingTxn) {
-      // 4. Create completed disbursement transaction to credit the user's balance
-      const { error: txnError } = await supabase
-        .from('transactions')
-        .insert({
-          chat_id: loan.chat_id,
-          loan_id: loan.id,
-          type: 'disbursement',
-          deposit_type: null,
-          amount: loan.amount,
-          payment_method: 'bank',
-          sender_number: loan.account_number,
-          trx_id: `DISB-${loan.id.slice(0, 8).toUpperCase()}`,
-          screenshot_url: null,
-          status: 'completed'
-        });
-
-      if (txnError) {
-        console.error('Error creating disbursement transaction:', txnError);
-      }
-    }
-    return true;
-  } else {
-    // Standard update for non-approved statuses
-    const { error } = await supabase
-      .from('loan_applications')
-      .update({ status, admin_feedback: feedback, approved_at: null })
-      .eq('id', id);
-    if (error) {
-      console.error('updateLoanApplicationStatus error:', error);
-      return false;
-    }
-    return true;
-  }
-}
-
-export async function getAllTransactions(): Promise<Transaction[]> {
-  const { data, error } = await supabase.from('transactions').select('*').order('created_at', { ascending: false });
-  if (error) console.error('getAllTransactions error:', error);
-  return data || [];
-}
-
-export async function updateTransactionStatus(id: string, status: Transaction['status']): Promise<boolean> {
-  const { error } = await supabase
-    .from('transactions')
-    .update({ status })
-    .eq('id', id);
-  if (error) {
-    console.error('updateTransactionStatus error:', error);
-    return false;
-  }
-  return true;
-}
-
-export async function getSystemSettings(key: string): Promise<any> {
-  const { data, error } = await supabase.from('system_settings').select('value').eq('key', key).single();
-  if (error) {
-    console.error('getSystemSettings error:', error);
+async function callAdmin<T>(adminAction: AdminAction, payload: Record<string, unknown> = {}): Promise<T | null> {
+  const telegramWebApp = (window as Window & { Telegram?: { WebApp?: { initData?: string } } }).Telegram?.WebApp;
+  const initData = telegramWebApp?.initData;
+  if (!initData) {
+    console.error('Admin gateway: Telegram initData is missing');
     return null;
   }
-  return data?.value || null;
-}
 
-export async function updateSystemSettings(key: string, value: any): Promise<boolean> {
-  // Try to update first
-  const { data: existing } = await supabase.from('system_settings').select('id').eq('key', key).single();
-  
-  if (existing) {
-    const { error } = await supabase.from('system_settings').update({ value }).eq('key', key);
-    if (error) {
-      console.error('updateSystemSettings error:', error);
-      return false;
-    }
-  } else {
-    const { error } = await supabase.from('system_settings').insert([{ key, value }]);
-    if (error) {
-      console.error('insertSystemSettings error:', error);
-      return false;
-    }
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError || !sessionData.session?.access_token) {
+    console.error('Admin gateway: authenticated session is missing', sessionError);
+    return null;
   }
-  return true;
-}
 
-export async function getAllAdminSuccessStories(): Promise<SuccessStory[]> {
-  const { data, error } = await supabase.from('success_stories').select('*').order('rating', { ascending: false });
-  if (error) console.error('getAllAdminSuccessStories error:', error);
-  return data || [];
-}
-
-export async function addSuccessStory(story: Omit<SuccessStory, 'id'>): Promise<boolean> {
-  const { error } = await supabase.from('success_stories').insert([story]);
-  if (error) {
-    console.error('addSuccessStory error:', error);
-    return false;
+  const response = await fetch('/api/telegram-auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ initData, accessToken: sessionData.session.access_token, action: 'admin', adminAction, payload }),
+  });
+  const result = await response.json().catch(() => null);
+  if (!response.ok || !result?.ok) {
+    console.error('Admin gateway request failed:', result?.error || response.statusText);
+    return null;
   }
-  return true;
+  return result.data as T;
 }
 
-export async function deleteSuccessStory(id: string): Promise<boolean> {
-  const { error } = await supabase.from('success_stories').delete().eq('id', id);
-  if (error) {
-    console.error('deleteSuccessStory error:', error);
-    return false;
-  }
-  return true;
+export async function getAllProfiles(): Promise<Profile[]> { return (await callAdmin<Profile[]>('get_profiles')) || []; }
+export async function banUser(chatId: number, isBanned: boolean): Promise<boolean> { return (await callAdmin<boolean>('ban_user', { chatId, isBanned })) === true; }
+export async function lockUser(chatId: number, isLocked: boolean, reason?: string | null): Promise<boolean> { return (await callAdmin<boolean>('lock_user', { chatId, isLocked, reason: reason || null })) === true; }
+export async function deleteUser(chatId: number): Promise<boolean> { return (await callAdmin<boolean>('delete_user', { chatId })) === true; }
+export async function getAllLoanApplications(): Promise<LoanApplication[]> { return (await callAdmin<LoanApplication[]>('get_loans')) || []; }
+export async function updateLoanApplicationStatus(id: string, status: LoanApplication['status'], feedback?: string): Promise<boolean> { return (await callAdmin<boolean>('update_loan', { id, status, feedback: feedback || null })) === true; }
+export async function getAllTransactions(): Promise<Transaction[]> { return (await callAdmin<Transaction[]>('get_transactions')) || []; }
+export async function updateTransactionStatus(id: string, status: Transaction['status']): Promise<boolean> { return (await callAdmin<boolean>('update_transaction', { id, status })) === true; }
+export async function getSystemSettings(key: string): Promise<any> { return await callAdmin<any>('get_system_setting', { key }); }
+export async function updateSystemSettings(key: string, value: any): Promise<boolean> { return (await callAdmin<boolean>('update_system_setting', { key, value })) === true; }
+export async function getAllAdminSuccessStories(): Promise<SuccessStory[]> { return (await callAdmin<SuccessStory[]>('get_success_stories')) || []; }
+export async function addSuccessStory(story: Omit<SuccessStory, 'id'>): Promise<boolean> { return (await callAdmin<boolean>('add_success_story', { story })) === true; }
+export async function deleteSuccessStory(id: string): Promise<boolean> { return (await callAdmin<boolean>('delete_success_story', { id })) === true; }
+
+export async function getAllChatMessages(): Promise<any[]> { return (await callAdmin<any[]>('get_chat_messages')) || []; }
+export async function sendAdminChatMessage(chatId: number, message: string, replyTo?: string | null, attachmentUrl?: string | null): Promise<boolean> {
+  return (await callAdmin<boolean>('send_chat_message', { chatId, message, replyTo: replyTo || null, attachmentUrl: attachmentUrl || null })) === true;
 }
+export async function editChatMessage(id: string, message: string): Promise<boolean> { return (await callAdmin<boolean>('edit_chat_message', { id, message })) === true; }
+export async function markChatMessagesSeen(ids: string[]): Promise<boolean> { if (!ids.length) return true; return (await callAdmin<boolean>('mark_chat_seen', { ids })) === true; }
+export async function deleteChatMessage(id: string): Promise<boolean> { return (await callAdmin<boolean>('delete_chat_message', { id })) === true; }
+
+/**
+ * Sends a Telegram Bot API message to any chat_id on the admin's behalf.
+ * The bot token stays server-only (TELEGRAM_BOT_TOKEN env var) and is never
+ * sent to or handled by the browser. Requires the caller to be a verified admin
+ * (checked server-side against TELEGRAM_ADMIN_CHAT_IDS).
+ */
+export async function sendAdminTelegramMessage(chatId: number, message: string, replyMarkup?: any): Promise<boolean> {
+  return (await callAdmin<boolean>('send_telegram_message', { chatId, message, replyMarkup })) === true;
+}
+
