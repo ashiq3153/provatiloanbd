@@ -6,7 +6,7 @@ import { getTelegramUser } from '../lib/telegram';
 import { supabase } from '../lib/supabase';
 import { useLocation, useNavigate } from 'react-router-dom';
 import logoImg from '../assets/logo.png';
-import { uploadDocument } from '../lib/api';
+import { uploadDocument, markMyChatMessagesSeen } from '../lib/api';
 import { toast } from 'sonner';
 
 interface SupportMessage {
@@ -51,7 +51,7 @@ export default function Support() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error(isBn ? '৫ এমবির বড় ফাইল আপলোড করা যাবে না!' : 'File size cannot exceed 5MB!');
+        toast.error(isBn ? '৫ এমবির বড় ফাইল আপলোড করা যাবে না!' : 'File size cannot exceed 5MB!');
         return;
       }
       setSelectedFile(file);
@@ -62,9 +62,9 @@ export default function Support() {
         const url = await uploadDocument(file, user.id, 'support_chat');
         if (url) {
           setUploadedAttachmentUrl(url);
-          toast.success(isBn ? 'ফাইল আপলোড সফল হয়েছে' : 'File uploaded successfully');
+          toast.success(isBn ? 'ফাইল আপলোড সফল হয়েছে' : 'File uploaded successfully');
         } else {
-          toast.error(isBn ? 'ফাইল আপলোড ব্যর্থ হয়েছে!' : 'File upload failed!');
+          toast.error(isBn ? 'ফাইল আপলোড ব্যর্থ হয়েছে!' : 'File upload failed!');
           clearSelectedFile();
         }
       } catch (err: any) {
@@ -97,27 +97,27 @@ export default function Support() {
 
   const faqs = [
     {
-      q: isBn ? "লোন প্রসেসিং ফি এবং সঞ্চয় আমানত কত এবং কেন দিতে হয়?" : "What are the processing fees and savings deposits?",
+      q: isBn ? "লোন প্রসেসিং ফি এবং সঞ্চয় আমানত কত এবং কেন দিতে হয়?" : "What are the processing fees and savings deposits?",
       a: isBn 
-        ? "আমাদের সমবায় নীতিমালা অনুযায়ী, আবেদন যাচাইয়ের জন্য ১% প্রসেসিং ফি (১০ লাখ টাকার উপরে ০.৫%) জমা দিতে হয়। এটি সম্পূর্ণ অফেরতযোগ্য। এছাড়া সদস্যদের আমানত সুরক্ষার্থে লোনের ১০% (৫ লাখ টাকার উপরে ৫%) সঞ্চয় আমানত হিসেবে জমা রাখা বাধ্যতামূলক। এই সঞ্চয় আপনার একাউন্টেই জমা থাকে এবং সুরক্ষিত থাকে।" 
+        ? "আমাদের সমবায় নীতিমালা অনুযায়ী, আবেদন যাচাইয়ের জন্য ১% প্রসেসিং ফি (১০ লাখ টাকার উপরে ০.৫%) জমা দিতে হয়। এটি সম্পূর্ণ অফেরতযোগ্য। এছাড়া সদস্যদের আমানত সুরক্ষার্থে লোনের ১০% (৫ লাখ টাকার উপরে ৫%) সঞ্চয় আমানত হিসেবে জমা রাখা বাধ্যতামূলক। এই সঞ্চয় আপনার একাউন্টেই জমা থাকে এবং সুরক্ষিত থাকে।" 
         : "According to cooperative bylaws, a 1% processing fee (0.5% for loans above 1M BDT) is required to review files and is non-refundable. In addition, a 10% savings deposit (5% for loans above 500k BDT) must be funded to secure credit limits. These savings remain safely locked in your account."
     },
     {
-      q: isBn ? "লোন চূড়ান্ত অনুমোদন হতে কত সময় লাগে?" : "How long does loan approval take?",
+      q: isBn ? "লোন চূড়ান্ত অনুমোদন হতে কত সময় লাগে?" : "How long does loan approval take?",
       a: isBn 
-        ? "ডিপোজিট প্রমাণপত্র ও প্রয়োজনীয় ডকুমেন্টস সাবমিট করার পর, তথ্য সঠিক থাকলে ১২ থেকে ২৪ ঘণ্টার মধ্যে ফাইলটি অনুমোদিত হয়। কোনো ভুল বা অস্পষ্টতা থাকলে সংশোধন নোট পাঠানো হয় যা আপনার টেলিগ্রামে তাৎক্ষণিক নোটিফাই করা হয়।" 
+        ? "ডিপোজিট প্রমাণপত্র ও প্রয়োজনীয় ডকুমেন্টস সাবমিট করার পর, তথ্য সঠিক থাকলে ১২ থেকে ২৪ ঘণ্টার মধ্যে ফাইলটি অনুমোদিত হয়। কোনো ভুল বা অস্পষ্টতা থাকলে সংশোধন নোট পাঠানো হয় যা আপনার টেলিগ্রামে তাৎক্ষণিক নোটিফাই করা হয়।" 
         : "Once deposit proof and required files are submitted, verification takes 12 to 24 hours. If clarifications are needed, revision comments are issued and immediately sent to your Telegram."
     },
     {
-      q: isBn ? "আমি লোন পাওয়ার পর কিভাবে টাকা উত্তোলন করব?" : "How can I withdraw my approved loan?",
+      q: isBn ? "আমি লোন পাওয়ার পর কিভাবে টাকা উত্তোলন করব?" : "How can I withdraw my approved loan?",
       a: isBn 
-        ? "লোন অনুমোদনের পর অনুমোদিত অর্থ আপনার 'মোট ব্যালেন্স' এ চলে যাবে। আপনি সেখান থেকে উইথড্র রিকোয়েস্ট দিতে পারবেন যা এডমিন প্যানেল ভেরিফাই করে আপনার একাউন্টে পাঠিয়ে দেবে। উত্তোলনের পর মোট ব্যালেন্স হ্রাস পাবে কিন্তু সঞ্চয় ব্যালেন্স সম্পূর্ণ অপরিবর্তিত থাকবে।" 
+        ? "লোন অনুমোদনের পর অনুমোদিত অর্থ আপনার 'মোট ব্যালেন্স' এ চলে যাবে। আপনি সেখান থেকে উইথড্র রিকোয়েস্ট দিতে পারবেন যা এডমিন প্যানেল ভেরিফাই করে আপনার একাউন্টে পাঠিয়ে দেবে। উত্তোলনের পর মোট ব্যালেন্স হ্রাস পাবে কিন্তু সঞ্চয় ব্যালেন্স সম্পূর্ণ অপরিবর্তিত থাকবে।" 
         : "After approval, the funds credit to your 'Total Balance'. You can request withdrawals, which admins disburse manually. Withdrawing reduces your Total Balance, but your Savings Balance remains untouched."
     },
     {
-      q: isBn ? "আমার একাউন্ট স্থগিত বা সাসপেন্ড হওয়ার কারণ কি?" : "Why would my account be suspended or banned?",
+      q: isBn ? "আমার একাউন্ট স্থগিত বা সাসপেন্ড হওয়ার কারণ কি?" : "Why would my account be suspended or banned?",
       a: isBn 
-        ? "ভুয়া স্ক্রিনশট বা অন্য কারো ট্রানজেকশন আইডি ব্যবহার করা, ডুপ্লিকেট একাউন্ট তৈরি করা, অথবা সময়মত ইএমআই পরিশোধ না করা হলে অ্যাকাউন্ট স্থায়ীভাবে বাতিল হতে পারে। সাসপেন্ডেড একাউন্ট থেকে কোনো আবেদন বা লেনদেন পরিচালনা করা যাবে না।" 
+        ? "ভুয়া স্ক্রিনশট বা অন্য কারো ট্রানজেকশন আইডি ব্যবহার করা, ডুপ্লিকেট একাউন্ট তৈরি করা, অথবা সময়মত ইএমআই পরিশোধ না করা হলে অ্যাকাউন্ট স্থায়ীভাবে বাতিল হতে পারে। সাসপেন্ডেড একাউন্ট থেকে কোনো আবেদন বা লেনদেন পরিচালনা করা যাবে না।" 
         : "Attempting fraud (fake screenshot uploads, duplicate transaction keys, impersonation) or default on EMI payments triggers profile suspension. Banned users are restricted from loan submissions or balance checks."
     }
   ];
@@ -134,13 +134,11 @@ export default function Support() {
 
       if (!error && data) {
         setMessages(data);
-        // Mark any unseen admin messages as seen
+        // Mark any unseen admin messages as seen (routed through the secure chat
+        // gateway; support_messages has no client-side UPDATE policy)
         const unseenAdminMsgs = data.filter(m => m.sender === 'admin' && !m.is_seen);
         if (unseenAdminMsgs.length > 0) {
-          await supabase
-            .from('support_messages')
-            .update({ is_seen: true })
-            .in('id', unseenAdminMsgs.map(m => m.id));
+          markMyChatMessagesSeen(unseenAdminMsgs.map(m => m.id));
         }
       }
     } catch (err) {
@@ -245,9 +243,9 @@ export default function Support() {
               if (prev.some((m) => m.id === newMsg.id)) return prev;
               return [...prev, newMsg];
             });
-            // If it's from admin, mark it as seen immediately
+            // If it's from admin, mark it as seen immediately (via secure chat gateway)
             if (newMsg.sender === 'admin') {
-              supabase.from('support_messages').update({ is_seen: true }).eq('id', newMsg.id).then();
+              markMyChatMessagesSeen([newMsg.id]);
             }
           } else if (payload.eventType === 'UPDATE') {
             const updatedMsg = payload.new as SupportMessage;
@@ -304,7 +302,7 @@ export default function Support() {
 
       if (error) {
         console.error('Error sending message:', error);
-        toast.error(isBn ? `মেসেজ পাঠানো যায়নি: ${error.message}` : `Failed to send message: ${error.message}`);
+        toast.error(isBn ? `মেসেজ পাঠানো যায়নি: ${error.message}` : `Failed to send message: ${error.message}`);
       } else {
         setNewMessage('');
         clearSelectedFile();
@@ -312,7 +310,7 @@ export default function Support() {
       }
     } catch (err: any) {
       console.error('Error sending message:', err);
-      toast.error(err.message || (isBn ? 'মেসেজ পাঠাতে সমস্যা হয়েছে!' : 'Failed to send message!'));
+      toast.error(err.message || (isBn ? 'মেসেজ পাঠাতে সমস্যা হয়েছে!' : 'Failed to send message!'));
     } finally {
       setSending(false);
     }
@@ -356,7 +354,7 @@ export default function Support() {
             {isBn ? 'সহায়তা ও চ্যাট' : 'Support & Chat'}
           </h1>
           <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 transition-colors">
-            {isBn ? 'যেকোনো প্রয়োজনে আমরা আছি' : "We're here to help"}
+            {isBn ? 'যেকোনো প্রয়োজনে আমরা আছি' : "We're here to help"}
           </p>
         </div>
       </div>
@@ -430,7 +428,7 @@ export default function Support() {
                 { id: 1, type: 'orange', labelBn: 'ডিপোজিট সমস্যা', labelEn: 'Deposit Issue', text: 'আমি ডিপোজিট করতে চাই, পেমেন্ট নম্বর দিন।' },
                 { id: 2, type: 'purple', labelBn: 'ঋণ অনুমোদন', labelEn: 'Loan Approval', text: 'আমার লোন আবেদনটি কতক্ষণে অনুমোদিত হবে?' },
                 { id: 3, type: 'green', labelBn: 'উত্তোলন সাহায্য', labelEn: 'Withdraw Help', text: 'অনুমোদিত লোন কিভাবে উত্তোলন করব?' },
-                { id: 7, type: 'red', labelBn: 'ইএমআই কিস্তি', labelEn: 'EMI Payment', text: 'কিস্তি পরিশোধের নিয়ম ও মাধ্যম কি?' }
+                { id: 7, type: 'red', labelBn: 'ইএমআই কিস্তি', labelEn: 'EMI Payment', text: 'কিস্তি পরিশোধের নিয়ম ও মাধ্যম কি?' }
               ].map((topic) => (
                 <button
                   key={topic.id}
@@ -684,7 +682,7 @@ export default function Support() {
               </h4>
               <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-4 max-w-xs mx-auto leading-relaxed font-bold">
                 {isBn 
-                  ? 'সমিতির ঋণ নিয়মনীতি, প্রসেসিং ফি, লোন উত্তোলন সীমা, গোপনীয়তা এবং ব্যবহারকারীর আইনি দায়বদ্ধতা সম্পর্কে বিস্তারিত পড়ুন।' 
+                  ? 'সমিতির ঋণ নিয়মনীতি, প্রসেসিং ফি, লোন উত্তোলন সীমা, গোপনীয়তা এবং ব্যবহারকারীর আইনি দায়বদ্ধতা সম্পর্কে বিস্তারিত পড়ুন।' 
                   : 'Read the complete terms regarding cooperative loan rules, processing fees, withdrawal limits, privacy, and legal declarations.'}
               </p>
               <button
