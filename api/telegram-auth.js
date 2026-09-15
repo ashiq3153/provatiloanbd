@@ -5,7 +5,6 @@ import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const ADMIN_CHAT_IDS = new Set(String(process.env.TELEGRAM_ADMIN_CHAT_IDS || "").split(",").map(v => v.trim()).filter(Boolean));
@@ -70,32 +69,6 @@ async function sendTelegramBotMessage(chatId, text, replyMarkup) {
   return true;
 }
 
-/**
- * Sends a single transactional email via Resend using the server-only API key.
- * The caller (admin dashboard) only ever builds the subject/html client-side
- * via a pure template function — the Resend key never reaches the browser.
- */
-async function sendResendEmail({ to, subject, html, senderEmail }) {
-  if (!RESEND_API_KEY) throw new Error("Resend API key is not configured on the server");
-  if (!to || !subject || !html) throw new Error("to, subject and html are required");
-  const from = typeof senderEmail === "string" && senderEmail.trim()
-    ? senderEmail
-    : "Provati Loan <noreply@provatiloanbd.com>";
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ from, to: [to], subject, html }),
-  });
-  if (!response.ok) {
-    const errText = await response.text().catch(() => "");
-    throw new Error(errText || "Resend API request failed");
-  }
-  return true;
-}
-
 async function adminAction(action, payload) {
   const db = adminClient();
   switch (action) {
@@ -135,7 +108,6 @@ async function adminAction(action, payload) {
     case "mark_chat_seen": return !(await db.from("support_messages").update({ is_seen: true }).in("id", Array.isArray(payload.ids) ? payload.ids : [])).error;
     case "delete_chat_message": return !(await db.from("support_messages").delete().eq("id", payload.id)).error;
     case "send_telegram_message": return await sendTelegramBotMessage(payload.chatId, payload.message, payload.replyMarkup);
-    case "send_email": return await sendResendEmail(payload);
     default: throw new Error("Unsupported admin action");
   }
 }
