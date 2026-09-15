@@ -21,8 +21,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import { Toaster } from 'sonner';
 import { useAppStore } from './lib/store';
 import { sendTelegramNotification } from './lib/telegram';
-import { upsertProfile } from './lib/api';
-import { getSystemSettings } from './lib/adminApi';
+import { upsertProfile, getPublicSettings } from './lib/api';
 import { playUIClick, playUITap } from './lib/sound';
 import { ensureSupabaseAuthSession, supabase } from './lib/supabase';
 
@@ -132,7 +131,9 @@ export default function App() {
 
     initializeUser().catch(err => console.error('Telegram initialization error:', err));
 
-    getSystemSettings('global_loan_config').then(settings => {
+    // Uses the direct RLS-scoped read (safe: system_settings no longer stores
+    // secrets), so this works for every authenticated user, not just admins.
+    getPublicSettings('global_loan_config').then(settings => {
       if (settings) setSystemSettings(settings);
     });
 
