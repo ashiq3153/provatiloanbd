@@ -1,25 +1,25 @@
 import type { LoanApplication } from '../types/database';
 
-interface EmailConfig {
-  apiKey: string;
-  senderEmail: string;
-  enabled: boolean;
+export interface BuiltEmail {
+  subject: string;
+  html: string;
 }
 
-export async function sendEmailNotification(
+/**
+ * Builds the subject + HTML body for a loan status update email.
+ * Pure template function — makes no network call and never touches any
+ * API key. Sending happens server-side via the admin gateway
+ * (adminApi.sendAdminEmail), which is the only place the Resend API key
+ * lives (RESEND_API_KEY env var).
+ */
+export function buildLoanStatusEmail(
   loan: LoanApplication,
   status: LoanApplication['status'],
   feedback: string | null,
-  config: EmailConfig,
   isBn: boolean
-): Promise<boolean> {
-  if (!config.enabled || !config.apiKey || !config.senderEmail || !loan.email) {
-    console.warn("⚠️ Email notifications are disabled or missing configuration.");
-    return false;
-  }
-
+): BuiltEmail {
   const categoryName = loan.loan_category === 'personal' ? (isBn ? 'ব্যক্তিগত' : 'Personal') :
-                       loan.loan_category === 'business' ? (isBn ? 'ব্যবসায়িক' : 'Business') :
+                       loan.loan_category === 'business' ? (isBn ? 'ব্যবসায়িক' : 'Business') :
                        loan.loan_category === 'expat' ? (isBn ? 'প্রবাসী' : 'Probashi') :
                        loan.loan_category === 'student' ? (isBn ? 'শিক্ষা' : 'Student') :
                        loan.loan_category === 'emergency' ? (isBn ? 'জরুরি' : 'Emergency') : (isBn ? 'নারী উদ্যোক্তা' : 'Women Entrepreneur');
@@ -39,26 +39,26 @@ export async function sendEmailNotification(
       case 'approved':
         statusTitle = 'অনুমোদিত (Approved)';
         statusColor = '#10b981'; // green
-        messageBody = `🎉 <b>অভিনন্দন!</b> আপনার <b>${categoryName} লোন</b> আবেদনটি সফলভাবে অনুমোদিত হয়েছে। শীঘ্রই আমাদের প্রতিনিধি আপনার সাথে যোগাযোগ করবেন।`;
+        messageBody = `🎉 <b>অভিনন্দন!</b> আপনার <b>${categoryName} লোন</b> আবেদনটি সফলভাবে অনুমোদিত হয়েছে। শীঘ্রই আমাদের প্রতিনিধি আপনার সাথে যোগাযোগ করবেন।`;
         break;
       case 'rejected':
         statusTitle = 'বাতিল (Rejected)';
         statusColor = '#ef4444'; // red
-        messageBody = `দুঃখিত, আপনার <b>${categoryName} লোন</b> আবেদনটি বাতিল করা হয়েছে। ${feedback ? `<br/><b>কারণ:</b> <i>${feedback}</i>` : ''}`;
+        messageBody = `দুঃখিত, আপনার <b>${categoryName} লোন</b> আবেদনটি বাতিল করা হয়েছে। ${feedback ? `<br/><b>কারণ:</b> <i>${feedback}</i>` : ''}`;
         break;
       case 'action_required':
-        statusTitle = 'সংশোধন প্রয়োজন (Action Required)';
+        statusTitle = 'সংশোধন প্রয়োজন (Action Required)';
         statusColor = '#f97316'; // orange
-        messageBody = `⚠️ আপনার <b>${categoryName} লোন</b> আবেদনে কিছু সংশোধনী বা অতিরিক্ত নথিপত্র প্রয়োজন। <br/><b>মন্তব্য:</b> <b>${feedback}</b><br/>অনুগ্রহ করে অ্যাপে লগইন করে তথ্য আপডেট করুন।`;
+        messageBody = `⚠️ আপনার <b>${categoryName} লোন</b> আবেদনে কিছু সংশোধনী বা অতিরিক্ত নথিপত্র প্রয়োজন। <br/><b>মন্তব্য:</b> <b>${feedback}</b><br/>অনুগ্রহ করে অ্যাপে লগইন করে তথ্য আপডেট করুন।`;
         break;
       case 'completed':
         statusTitle = 'সম্পূর্ণ (Completed)';
         statusColor = '#6b7280'; // gray
-        messageBody = `অভিনন্দন! আপনার <b>${categoryName} লোনটি</b> সফলভাবে পরিশোধ বা সম্পন্ন হয়েছে। আমাদের সাথে থাকার জন্য ধন্যবাদ।`;
+        messageBody = `অভিনন্দন! আপনার <b>${categoryName} লোনটি</b> সফলভাবে পরিশোধ বা সম্পন্ন হয়েছে। আমাদের সাথে থাকার জন্য ধন্যবাদ।`;
         break;
       default:
         statusTitle = status;
-        messageBody = `আপনার লোন স্ট্যাটাস পরিবর্তন হয়েছে: <b>${status}</b>`;
+        messageBody = `আপনার লোন স্ট্যাটাস পরিবর্তন হয়েছে: <b>${status}</b>`;
     }
   } else {
     switch (status) {
@@ -98,7 +98,7 @@ export async function sendEmailNotification(
     : `Loan Application Status: ${statusTitle} | Provati Loan`;
 
   // Premium, fully responsive, glassmorphic styled email template
-  const htmlContent = `
+  const html = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -217,7 +217,7 @@ export async function sendEmailNotification(
           <p>${isBn ? 'ঋণ সেবা লিমিটেড' : 'Loan Service Limited'}</p>
         </div>
         <div class="content">
-          <div class="greeting">${isBn ? `প্রিয় ${loan.full_name},` : `Dear ${loan.full_name},`}</div>
+          <div class="greeting">${isBn ? `প্রিয় ${loan.full_name},` : `Dear ${loan.full_name},`}</div>
           <div class="message">
             ${messageBody}
           </div>
@@ -247,7 +247,7 @@ export async function sendEmailNotification(
               <td style="color: #4f46e5; font-size: 16px; font-weight: 800;">৳${loan.amount.toLocaleString()} BDT</td>
             </tr>
             <tr>
-              <th>${isBn ? 'মেয়াদ' : 'Tenure'}</th>
+              <th>${isBn ? 'মেয়াদ' : 'Tenure'}</th>
               <td>${loan.tenure_months} ${isBn ? 'মাস' : 'Months'}</td>
             </tr>
             <tr>
@@ -258,37 +258,12 @@ export async function sendEmailNotification(
         </div>
         <div class="footer">
           <p>© ${new Date().getFullYear()} Provati Loan Service. All Rights Reserved.</p>
-          <p>${isBn ? 'যেকোনো প্রয়োজনে আমাদের সাপোর্ট সেন্টারে যোগাযোগ করুন।' : 'If you have any questions, please feel free to reach our support.'}</p>
+          <p>${isBn ? 'যেকোনো প্রয়োজনে আমাদের সাপোর্ট সেন্টারে যোগাযোগ করুন।' : 'If you have any questions, please feel free to reach our support.'}</p>
         </div>
       </div>
     </body>
     </html>
   `;
 
-  try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${config.apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from: config.senderEmail,
-        to: [loan.email],
-        subject: subject,
-        html: htmlContent
-      })
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("Resend API failed to send email:", errText);
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error("Error sending notification email via Resend:", error);
-    return false;
-  }
+  return { subject, html };
 }
