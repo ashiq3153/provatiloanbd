@@ -20,7 +20,8 @@ type AdminAction =
   | 'edit_chat_message'
   | 'mark_chat_seen'
   | 'delete_chat_message'
-  | 'send_telegram_message';
+  | 'send_telegram_message'
+  | 'send_email';
 
 async function callAdmin<T>(adminAction: AdminAction, payload: Record<string, unknown> = {}): Promise<T | null> {
   const telegramWebApp = (window as Window & { Telegram?: { WebApp?: { initData?: string } } }).Telegram?.WebApp;
@@ -79,4 +80,13 @@ export async function deleteChatMessage(id: string): Promise<boolean> { return (
  */
 export async function sendAdminTelegramMessage(chatId: number, message: string, replyMarkup?: any): Promise<boolean> {
   return (await callAdmin<boolean>('send_telegram_message', { chatId, message, replyMarkup })) === true;
+}
+
+/**
+ * Sends a transactional email via Resend on the admin's behalf. The Resend
+ * API key stays server-only (RESEND_API_KEY env var) — the browser only ever
+ * builds the subject/html via a pure template (see lib/email.ts).
+ */
+export async function sendAdminEmail(to: string, subject: string, html: string, senderEmail?: string): Promise<boolean> {
+  return (await callAdmin<boolean>('send_email', { to, subject, html, senderEmail })) === true;
 }
