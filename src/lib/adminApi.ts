@@ -19,7 +19,8 @@ type AdminAction =
   | 'send_chat_message'
   | 'edit_chat_message'
   | 'mark_chat_seen'
-  | 'delete_chat_message';
+  | 'delete_chat_message'
+  | 'send_telegram_message';
 
 async function callAdmin<T>(adminAction: AdminAction, payload: Record<string, unknown> = {}): Promise<T | null> {
   const telegramWebApp = (window as Window & { Telegram?: { WebApp?: { initData?: string } } }).Telegram?.WebApp;
@@ -69,3 +70,13 @@ export async function sendAdminChatMessage(chatId: number, message: string, repl
 export async function editChatMessage(id: string, message: string): Promise<boolean> { return (await callAdmin<boolean>('edit_chat_message', { id, message })) === true; }
 export async function markChatMessagesSeen(ids: string[]): Promise<boolean> { if (!ids.length) return true; return (await callAdmin<boolean>('mark_chat_seen', { ids })) === true; }
 export async function deleteChatMessage(id: string): Promise<boolean> { return (await callAdmin<boolean>('delete_chat_message', { id })) === true; }
+
+/**
+ * Sends a Telegram Bot API message to any chat_id on the admin's behalf.
+ * The bot token stays server-only (TELEGRAM_BOT_TOKEN env var) and is never
+ * sent to or handled by the browser. Requires the caller to be a verified admin
+ * (checked server-side against TELEGRAM_ADMIN_CHAT_IDS).
+ */
+export async function sendAdminTelegramMessage(chatId: number, message: string, replyMarkup?: any): Promise<boolean> {
+  return (await callAdmin<boolean>('send_telegram_message', { chatId, message, replyMarkup })) === true;
+}
