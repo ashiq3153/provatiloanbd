@@ -6,6 +6,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import AdminAuthGate from './components/AdminAuthGate';
 import Home from './pages/Home';
 import ApplyLoan from './pages/ApplyLoan';
 import Deposit from './pages/Deposit';
@@ -36,28 +37,21 @@ export default function App() {
     const handleGlobalClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const interactiveEl = target.closest('button, a, [role="button"], .cursor-pointer, input, textarea, select');
-      
       if (interactiveEl) {
         const tagName = interactiveEl.tagName;
-        if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
-          playUITap();
-        } else {
-          playUIClick();
-        }
+        if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') playUITap();
+        else playUIClick();
       }
     };
 
     const handleGlobalFocus = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
       const tagName = target.tagName;
-      if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
-        playUITap();
-      }
+      if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') playUITap();
     };
 
     document.addEventListener('click', handleGlobalClick, { capture: true, passive: true });
     document.addEventListener('focusin', handleGlobalFocus, { capture: true, passive: true });
-
     return () => {
       document.removeEventListener('click', handleGlobalClick, { capture: true });
       document.removeEventListener('focusin', handleGlobalFocus, { capture: true });
@@ -69,13 +63,11 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    // Initialize Telegram Web App
     if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
       (window as any).Telegram.WebApp.ready();
       (window as any).Telegram.WebApp.expand();
     }
 
-    // Auto-update user profile globally on app start
     const user = getTelegramUser();
     if (user && user.id) {
       upsertProfile({
@@ -86,9 +78,8 @@ export default function App() {
         photo_url: user.photo_url || null,
       }).then(profile => {
         if (profile) useAppStore.getState().setUserProfile(profile);
-      }).catch(err => console.error("Global profile sync error:", err));
+      }).catch(err => console.error('Global profile sync error:', err));
 
-      // Send welcome message once per user (on /start)
       const welcomeKey = `provati_welcome_sent_${user.id}`;
       if (!localStorage.getItem(welcomeKey)) {
         const welcomeMsg =
@@ -97,22 +88,15 @@ export default function App() {
           `✅ দ্রুত আবেদন\n` +
           `✅ অনলাইন প্রক্রিয়া\n` +
           `✅ আবেদন স্ট্যাটাস ট্র্যাকিং`;
-
         sendTelegramNotification(user.id, welcomeMsg)
-          .then(sent => {
-            if (sent) localStorage.setItem(welcomeKey, '1');
-          })
-          .catch(err => console.error("Welcome message error:", err));
+          .then(sent => { if (sent) localStorage.setItem(welcomeKey, '1'); })
+          .catch(err => console.error('Welcome message error:', err));
       }
 
-      // Initialize Realtime Presence for this user
       const presenceChannel = supabase.channel('online_users', {
-        config: {
-          presence: { key: user.id.toString() }
-        }
+        config: { presence: { key: user.id.toString() } }
       });
-      
-      presenceChannel.subscribe(async (status) => {
+      presenceChannel.subscribe(async status => {
         if (status === 'SUBSCRIBED') {
           await presenceChannel.track({
             chat_id: user.id,
@@ -123,11 +107,8 @@ export default function App() {
       });
     }
 
-    // Fetch system settings
     getSystemSettings('global_loan_config').then(settings => {
-      if (settings) {
-        setSystemSettings(settings);
-      }
+      if (settings) setSystemSettings(settings);
     });
   }, [setSystemSettings]);
 
@@ -135,7 +116,7 @@ export default function App() {
     <Router>
       <Toaster position="top-center" richColors theme={theme === 'dark' ? 'dark' : 'light'} />
       <Routes>
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin" element={<AdminAuthGate><AdminDashboard /></AdminAuthGate>} />
         <Route path="/*" element={
           <Layout>
             <Routes>
@@ -157,4 +138,3 @@ export default function App() {
     </Router>
   );
 }
-
