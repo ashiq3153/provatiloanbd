@@ -20,69 +20,51 @@ function adminClient() {
   });
 }
 
+function safeFileName(name) {
+  return String(name || "file").replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ ok: false, error: "Method Not Allowed" });
   }
 
   try {
-    const { initData, fileName, contentType, fileBase64 } = req.body || {};
+    const { initData, fileName, contentType, fileSize } = req.body || {};
     const verified = verifyInitData(initData);
 
     if (!verified?.user?.id) {
       return res.status(401).json({ ok: false, error: "Invalid Telegram initData" });
     }
 
-    if (typeof fileName !== "string" || !fileName.trim()) {
-      return res.status(400).json({ ok: false, error: "File name is required" });
-    }
-
     if (!ALLOWED_TYPES.has(contentType)) {
       return res.status(400).json({ ok: false, error: "Unsupported file type" });
     }
 
-    if (typeof fileBase64 !== "string" || !fileBase64) {
-      return res.status(400).json({ ok: false, error: "File data is required" });
-    }
-
-    const buffer = Buffer.from(fileBase64, "base64");
-    if (!buffer.length || buffer.length > MAX_BYTES) {
+    if (!Number.isFinite(Number(fileSize)) || Number(fileSize) <= 0 || Number(fileSize) > MAX_BYTES) {
       return res.status(413).json({ ok: false, error: "File is too large. Maximum size is 10 MB." });
     }
 
-    const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
     const telegramChatId = Number(verified.user.id);
-    const filePath = telegramChatId + "/" + Date.now() + "_" + safeName;
+    const filePath = telegramChatId + "/" + Date.now() + "_" + safeFileName(fileName);
 
     const db = adminClient();
-    const { error: uploadError } = await db.storage
+    const { data, error } = await db.storage
       .from("loan_documents")
-      .upload(filePath, buffer, {
-        contentType,
-        upsert: true,
-      });
+      .createSignedUploadUrl(filePath);
 
-    if (uploadError) {
-      console.error("telegram-upload storage error:", uploadError);
-      return res.status(500).json({ ok: false, error: "Storage upload failed" });
-    }
-
-    const { data, error: signedUrlError } = await db.storage
-      .from("loan_documents")
-      .createSignedUrl(filePath, 300);
-
-    if (signedUrlError || !data?.signedUrl) {
-      console.error("telegram-upload signed URL error:", signedUrlError);
-      return res.status(500).json({ ok: false, error: "Could not create file URL" });
+    if (error || !data?.token) {
+      console.error("telegram-upload signed upload URL error:", error);
+      return res.status(500).json({ ok: false, error: "Could not create upload URL" });
     }
 
     return res.status(200).json({
       ok: true,
-      url: data.signedUrl,
       path: filePath,
+      token: data.token,
     });
   } catch (error) {
     console.error("telegram-upload error:", error);
-    return res.status(400).json({ ok: false, error: "File upload failed" });
+    return res.status(400).json({ ok: false, error: "Could not prepare file upload" });
   }
 }
