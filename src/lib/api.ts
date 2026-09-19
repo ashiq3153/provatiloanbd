@@ -209,19 +209,16 @@ export async function reactToSuccessStory(storyId: string, reactionType: string)
     return false;
   }
 
-  const column = `${reactionType}_count`;
-  const currentCount = (data as any)[column] || 0;
-
-  const { error: updateError } = await supabase
-    .from('success_stories')
-    .update({ [column]: currentCount + 1 })
-    .eq('id', storyId);
-
-  if (updateError) {
-    console.error('reactToSuccessStory update error:', updateError);
+  const allowed = ['like','dislike','love','loveit','congratulation','wow','sad','hundred'];
+  if (!allowed.includes(reactionType)) return false;
+  const { error } = await supabase.rpc('increment_success_story_reaction', {
+    p_story_id: storyId,
+    p_reaction: reactionType,
+  });
+  if (error) {
+    console.error('reactToSuccessStory update error:', error);
     return false;
   }
-
   return true;
 }
 
@@ -241,8 +238,8 @@ export async function uploadDocument(file: File, userId: number, docType: string
     return null;
   }
 
-  const { data } = supabase.storage.from('loan_documents').getPublicUrl(filePath);
-  return data.publicUrl;
+  const { data } = await supabase.storage.from('loan_documents').createSignedUrl(filePath, 300);
+  return data?.signedUrl || null;
 }
 
 export async function uploadSupportAttachment(file: File, userId: number): Promise<string | null> {
@@ -259,8 +256,8 @@ export async function uploadSupportAttachment(file: File, userId: number): Promi
     return null;
   }
 
-  const { data } = supabase.storage.from('loan_documents').getPublicUrl(filePath);
-  return data.publicUrl;
+  const { data } = await supabase.storage.from('loan_documents').createSignedUrl(filePath, 300);
+  return data?.signedUrl || null;
 }
 
 // ── Dashboard Stats ──────────────────────────────────────
@@ -276,51 +273,12 @@ export interface DashboardStats {
 }
 
 export async function getDashboardStats(chatId: number): Promise<DashboardStats> {
-  const [transactions, loans] = await Promise.all([
-    getTransactions(chatId),
-    getLoanApplications(chatId),
-  ]);
-
-  const activeLoans = loans.filter(l => l.status === 'active' || l.status === 'approved');
-  const pendingApplications = loans.filter(l => l.status === 'pending');
-
-  // 1. Calculate approved loan amount
-  const approvedLoanAmount = activeLoans.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
-
-  // 2. Calculate savings balance (completed security_deposit transactions)
-  const savingsBalance = transactions
-    .filter(t => t.type === 'deposit' && t.deposit_type?.includes('security_deposit') && t.status === 'completed')
-    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-
-  // 3. Calculate deposit balance (completed deposits: processing fees, security deposits, other deposits)
-  const depositBalance = transactions
-    .filter(t => t.type === 'deposit' && t.status === 'completed')
-    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-
-  // 4. Calculate withdraw balance (completed withdrawals)
-  const withdrawBalance = transactions
-    .filter(t => t.type === 'withdraw' && t.status === 'completed')
-    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-
-  // 5. Calculate total withdrawn loan amount (both completed and pending withdrawals to reduce available balance)
-  const totalWithdrawnLoanAmount = transactions
-    .filter(t => t.type === 'withdraw' && (t.status === 'completed' || t.status === 'pending'))
-    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-
-  // 6. Calculate total balance (available for withdrawal)
-  const totalBalance = Math.max(0, approvedLoanAmount - totalWithdrawnLoanAmount);
-  
-  const totalOutstanding = activeLoans.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
-
-  return {
-    totalBalance,
-    depositBalance,
-    withdrawBalance,
-    savingsBalance,
-    activeLoansCount: activeLoans.length,
-    pendingApplications: pendingApplications.length,
-    totalOutstanding,
-  };
+  const { data, error } = await supabase.rpc('get_dashboard_stats', { p_chat_id: chatId });
+  if (error || !data) {
+    console.error('getDashboardStats error:', error);
+    return { totalBalance: 0, depositBalance: 0, withdrawBalance: 0, savingsBalance: 0, activeLoansCount: 0, pendingApplications: 0, totalOutstanding: 0 };
+  }
+  return data as DashboardStats;
 }
 
 // ── Deposit Status Check ─────────────────────────────────
