@@ -263,8 +263,8 @@ async function uploadViaTelegramServer(file: File): Promise<string | null> {
 
 export async function uploadDocument(file: File, _userId: number, _docType: string): Promise<string | null> {
   try {
-    if (file.size > 4 * 1024 * 1024) {
-      throw new Error('File is too large. Maximum size is 4 MB.');
+    if (file.size > 3 * 1024 * 1024) {
+      throw new Error('File is too large. Maximum size is 3 MB.');
     }
     if (!['image/jpeg', 'image/png', 'image/webp', 'application/pdf'].includes(file.type)) {
       throw new Error('Unsupported file type');
