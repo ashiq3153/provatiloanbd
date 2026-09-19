@@ -3,7 +3,7 @@ import { verifyInitData } from "./telegram-auth.js";
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const MAX_BYTES = 3 * 1024 * 1024;
+const MAX_BYTES = 10 * 1024 * 1024;
 const ALLOWED_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -47,7 +47,7 @@ export default async function handler(req, res) {
 
     const buffer = Buffer.from(fileBase64, "base64");
     if (!buffer.length || buffer.length > MAX_BYTES) {
-      return res.status(413).json({ ok: false, error: "File is too large. Maximum size is 3 MB." });
+      return res.status(413).json({ ok: false, error: "File is too large. Maximum size is 10 MB." });
     }
 
     const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
