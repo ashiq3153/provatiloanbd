@@ -209,16 +209,19 @@ export async function reactToSuccessStory(storyId: string, reactionType: string)
     return false;
   }
 
-  const allowed = ['like','dislike','love','loveit','congratulation','wow','sad','hundred'];
-  if (!allowed.includes(reactionType)) return false;
-  const { error } = await supabase.rpc('increment_success_story_reaction', {
-    p_story_id: storyId,
-    p_reaction: reactionType,
-  });
-  if (error) {
-    console.error('reactToSuccessStory update error:', error);
+  const column = `${reactionType}_count`;
+  const currentCount = (data as any)[column] || 0;
+
+  const { error: updateError } = await supabase
+    .from('success_stories')
+    .update({ [column]: currentCount + 1 })
+    .eq('id', storyId);
+
+  if (updateError) {
+    console.error('reactToSuccessStory update error:', updateError);
     return false;
   }
+
   return true;
 }
 
