@@ -232,33 +232,45 @@ async function uploadViaTelegramServer(file: File): Promise<string | null> {
   const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
   if (!initData) throw new Error('Telegram initData is missing');
 
-  const fileBase64 = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const value = String(reader.result || '');
-      const comma = value.indexOf(',');
-      resolve(comma >= 0 ? value.slice(comma + 1) : value);
-    };
-    reader.onerror = () => reject(reader.error || new Error('Could not read file'));
-    reader.readAsDataURL(file);
-  });
-
-  const response = await fetch('/api/telegram-upload', {
+  const prepareResponse = await fetch('/api/telegram-upload', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       initData,
       fileName: file.name,
       contentType: file.type,
-      fileBase64,
+      fileSize: file.size,
     }),
   });
 
-  const result = await response.json().catch(() => null);
-  if (!response.ok || !result?.ok || !result?.url) {
-    throw new Error(result?.error || 'File upload failed');
+  const prepared = await prepareResponse.json().catch(() => null);
+  if (!prepareResponse.ok || !prepared?.ok || !prepared?.path || !prepared?.token) {
+    throw new Error(prepared?.error || 'Could not prepare file upload');
   }
-  return result.url;
+
+  const { error: uploadError } = await supabase.storage
+    .from('loan_documents')
+    .uploadToSignedUrl(prepared.path, prepared.token, file, {
+      contentType: file.type,
+    });
+
+  if (uploadError) {
+    console.error('signed document upload error:', uploadError);
+    throw new Error(uploadError.message || 'File upload failed');
+  }
+
+  const urlResponse = await fetch('/api/telegram-document-url', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ initData, path: prepared.path }),
+  });
+
+  const urlResult = await urlResponse.json().catch(() => null);
+  if (!urlResponse.ok || !urlResult?.ok || !urlResult?.url) {
+    throw new Error(urlResult?.error || 'Could not create file URL');
+  }
+
+  return urlResult.url;
 }
 
 export async function uploadDocument(file: File, _userId: number, _docType: string): Promise<string | null> {
@@ -278,8 +290,8 @@ export async function uploadDocument(file: File, _userId: number, _docType: stri
 
 export async function uploadSupportAttachment(file: File, _userId: number): Promise<string | null> {
   try {
-    if (file.size > 4 * 1024 * 1024) {
-      throw new Error('File is too large. Maximum size is 4 MB.');
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error('File is too large. Maximum size is 10 MB.');
     }
     if (!['image/jpeg', 'image/png', 'image/webp', 'application/pdf'].includes(file.type)) {
       throw new Error('Unsupported file type');
