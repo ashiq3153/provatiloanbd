@@ -227,81 +227,66 @@ export async function reactToSuccessStory(storyId: string, reactionType: string)
 
 // ── Document Upload API ──────────────────────────────────
 
-async function ensureTelegramStorageIdentity(): Promise<void> {
-  const session = await ensureSupabaseAuthSession();
+async function uploadViaTelegramServer(file: File): Promise<string | null> {
   // @ts-ignore
   const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
   if (!initData) throw new Error('Telegram initData is missing');
 
-  const response = await fetch('/api/telegram-auth', {
+  const fileBase64 = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const value = String(reader.result || '');
+      const comma = value.indexOf(',');
+      resolve(comma >= 0 ? value.slice(comma + 1) : value);
+    };
+    reader.onerror = () => reject(reader.error || new Error('Could not read file'));
+    reader.readAsDataURL(file);
+  });
+
+  const response = await fetch('/api/telegram-upload', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ initData, accessToken: session.access_token }),
+    body: JSON.stringify({
+      initData,
+      fileName: file.name,
+      contentType: file.type,
+      fileBase64,
+    }),
   });
+
   const result = await response.json().catch(() => null);
-  if (!response.ok || !result?.ok || !result?.identityBound) {
-    throw new Error(result?.error || 'Supabase/Telegram identity binding failed');
+  if (!response.ok || !result?.ok || !result?.url) {
+    throw new Error(result?.error || 'File upload failed');
   }
+  return result.url;
 }
 
-export async function uploadDocument(file: File, userId: number, docType: string): Promise<string | null> {
+export async function uploadDocument(file: File, _userId: number, _docType: string): Promise<string | null> {
   try {
-    await ensureTelegramStorageIdentity();
-    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'bin';
-    const fileName = userId + '_' + docType + '_' + Date.now() + '.' + fileExt;
-    const filePath = userId + '/' + fileName;
-
-    const { error } = await supabase.storage
-      .from('loan_documents')
-      .upload(filePath, file, { upsert: true });
-
-    if (error) {
-      console.error('uploadDocument storage error:', error);
-      return null;
+    if (file.size > 4 * 1024 * 1024) {
+      throw new Error('File is too large. Maximum size is 4 MB.');
     }
-
-    const { data, error: signedUrlError } = await supabase.storage
-      .from('loan_documents')
-      .createSignedUrl(filePath, 300);
-
-    if (signedUrlError) {
-      console.error('uploadDocument signed URL error:', signedUrlError);
-      return null;
+    if (!['image/jpeg', 'image/png', 'image/webp', 'application/pdf'].includes(file.type)) {
+      throw new Error('Unsupported file type');
     }
-    return data?.signedUrl || null;
+    return await uploadViaTelegramServer(file);
   } catch (error) {
-    console.error('uploadDocument auth/upload error:', error);
+    console.error('uploadDocument error:', error);
     return null;
   }
 }
 
-export async function uploadSupportAttachment(file: File, userId: number): Promise<string | null> {
+export async function uploadSupportAttachment(file: File, _userId: number): Promise<string | null> {
   try {
-    await ensureTelegramStorageIdentity();
-    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'bin';
-    const fileName = 'chat_' + Date.now() + '.' + fileExt;
-    const filePath = userId + '/' + fileName;
-
-    const { error } = await supabase.storage
-      .from('loan_documents')
-      .upload(filePath, file, { upsert: true });
-
-    if (error) {
-      console.error('uploadSupportAttachment storage error:', error);
-      return null;
+    if (file.size > 4 * 1024 * 1024) {
+      throw new Error('File is too large. Maximum size is 4 MB.');
     }
-
-    const { data, error: signedUrlError } = await supabase.storage
-      .from('loan_documents')
-      .createSignedUrl(filePath, 300);
-
-    if (signedUrlError) {
-      console.error('uploadSupportAttachment signed URL error:', signedUrlError);
-      return null;
+    if (!['image/jpeg', 'image/png', 'image/webp', 'application/pdf'].includes(file.type)) {
+      throw new Error('Unsupported file type');
     }
-    return data?.signedUrl || null;
+    return await uploadViaTelegramServer(file);
   } catch (error) {
-    console.error('uploadSupportAttachment auth/upload error:', error);
+    console.error('uploadSupportAttachment error:', error);
     return null;
   }
 }
