@@ -2,7 +2,7 @@
 // Supabase API Service — Centralized DB Operations
 // ══════════════════════════════════════════════════════════
 
-import { supabase } from './supabase';
+import { supabase, ensureSupabaseAuthSession } from './supabase';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../types/database';
 
 // ── Profile APIs ─────────────────────────────────────────
@@ -227,40 +227,83 @@ export async function reactToSuccessStory(storyId: string, reactionType: string)
 
 // ── Document Upload API ──────────────────────────────────
 
+async function ensureTelegramStorageIdentity(): Promise<void> {
+  const session = await ensureSupabaseAuthSession();
+  // @ts-ignore
+  const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+  if (!initData) throw new Error('Telegram initData is missing');
+
+  const response = await fetch('/api/telegram-auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ initData, accessToken: session.access_token }),
+  });
+  const result = await response.json().catch(() => null);
+  if (!response.ok || !result?.ok || !result?.identityBound) {
+    throw new Error(result?.error || 'Supabase/Telegram identity binding failed');
+  }
+}
+
 export async function uploadDocument(file: File, userId: number, docType: string): Promise<string | null> {
-  const fileExt = file.name.split('.').pop();
-  const fileName = `${userId}_${docType}_${Date.now()}.${fileExt}`;
-  const filePath = `${userId}/${fileName}`;
+  try {
+    await ensureTelegramStorageIdentity();
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'bin';
+    const fileName = userId + '_' + docType + '_' + Date.now() + '.' + fileExt;
+    const filePath = userId + '/' + fileName;
 
-  const { error } = await supabase.storage
-    .from('loan_documents')
-    .upload(filePath, file, { upsert: true });
+    const { error } = await supabase.storage
+      .from('loan_documents')
+      .upload(filePath, file, { upsert: true });
 
-  if (error) {
-    console.error('uploadDocument error:', error);
+    if (error) {
+      console.error('uploadDocument storage error:', error);
+      return null;
+    }
+
+    const { data, error: signedUrlError } = await supabase.storage
+      .from('loan_documents')
+      .createSignedUrl(filePath, 300);
+
+    if (signedUrlError) {
+      console.error('uploadDocument signed URL error:', signedUrlError);
+      return null;
+    }
+    return data?.signedUrl || null;
+  } catch (error) {
+    console.error('uploadDocument auth/upload error:', error);
     return null;
   }
-
-  const { data } = await supabase.storage.from('loan_documents').createSignedUrl(filePath, 300);
-  return data?.signedUrl || null;
 }
 
 export async function uploadSupportAttachment(file: File, userId: number): Promise<string | null> {
-  const fileExt = file.name.split('.').pop();
-  const fileName = `chat_${Date.now()}.${fileExt}`;
-  const filePath = `${userId}/${fileName}`;
+  try {
+    await ensureTelegramStorageIdentity();
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'bin';
+    const fileName = 'chat_' + Date.now() + '.' + fileExt;
+    const filePath = userId + '/' + fileName;
 
-  const { error } = await supabase.storage
-    .from('loan_documents')
-    .upload(filePath, file, { upsert: true });
+    const { error } = await supabase.storage
+      .from('loan_documents')
+      .upload(filePath, file, { upsert: true });
 
-  if (error) {
-    console.error('uploadSupportAttachment error:', error);
+    if (error) {
+      console.error('uploadSupportAttachment storage error:', error);
+      return null;
+    }
+
+    const { data, error: signedUrlError } = await supabase.storage
+      .from('loan_documents')
+      .createSignedUrl(filePath, 300);
+
+    if (signedUrlError) {
+      console.error('uploadSupportAttachment signed URL error:', signedUrlError);
+      return null;
+    }
+    return data?.signedUrl || null;
+  } catch (error) {
+    console.error('uploadSupportAttachment auth/upload error:', error);
     return null;
   }
-
-  const { data } = await supabase.storage.from('loan_documents').createSignedUrl(filePath, 300);
-  return data?.signedUrl || null;
 }
 
 // ── Dashboard Stats ──────────────────────────────────────
