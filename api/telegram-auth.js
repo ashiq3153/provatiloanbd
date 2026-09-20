@@ -363,7 +363,27 @@ export default async function handler(req, res) {
     }
     if (req.body?.action === "admin") {
       if (!ADMIN_CHAT_IDS.has(String(result.user.id))) return res.status(403).json({ ok: false, error: "Admin access denied" });
-      const data = await adminAction(req.body.adminAction, req.body.payload || {});
+      const adminActionName = String(req.body.adminAction || "unknown");
+      const adminPayload = req.body.payload || {};
+      const data = await adminAction(adminActionName, adminPayload);
+
+      // Keep an immutable, server-side activity trail without storing secrets or message bodies.
+      const activityDetails = {
+        result_type: typeof data,
+        id: typeof adminPayload.id === "string" ? adminPayload.id : null,
+        chat_id: Number.isFinite(Number(adminPayload.chatId)) ? Number(adminPayload.chatId) : null,
+        status: typeof adminPayload.status === "string" ? adminPayload.status : null,
+        setting_key: typeof adminPayload.key === "string" ? adminPayload.key : null
+      };
+      const { error: activityError } = await adminClient().from("admin_activity_log").insert({
+        admin_chat_id: Number(result.user.id),
+        action: adminActionName,
+        entity_type: adminActionName.startsWith("update_") ? adminActionName.slice(7) : "admin",
+        entity_id: activityDetails.id || activityDetails.chat_id?.toString() || null,
+        details: activityDetails
+      });
+      if (activityError) console.error("Admin activity log failed:", activityError);
+
       return res.status(200).json({ ok: true, data });
     }
     if (req.body?.action === "chat") {
