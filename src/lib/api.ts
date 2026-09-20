@@ -37,6 +37,28 @@ export async function upsertProfile(profile: Partial<Profile> & { chat_id: numbe
 // ── Loan Application APIs ────────────────────────────────
 
 export async function submitLoanApplication(application: Omit<LoanApplication, 'id' | 'applied_at' | 'approved_at' | 'admin_feedback' | 'status'>): Promise<LoanApplication | null> {
+  // Ensure the Telegram profile exists before the FK-constrained loan insert.
+  // This is server-verified with Telegram initData and service role, so it does
+  // not weaken the customer RLS policies.
+  try {
+    // @ts-ignore
+    const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+    if (!initData) throw new Error('Telegram initData is missing');
+    const syncResponse = await fetch('/api/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, action: 'sync_profile' }),
+    });
+    const syncResult = await syncResponse.json().catch(() => null);
+    if (!syncResponse.ok || !syncResult?.ok) {
+      console.error('Profile sync before loan insert failed:', syncResult?.error || syncResponse.statusText);
+      return null;
+    }
+  } catch (error) {
+    console.error('Profile sync before loan insert error:', error);
+    return null;
+  }
+
   const { data, error } = await supabase
     .from('loan_applications')
     .insert({
