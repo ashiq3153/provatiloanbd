@@ -289,7 +289,15 @@ async function adminAction(action, payload) {
     case "delete_user":
       for (const table of ["transactions", "loan_applications", "support_messages"]) await db.from(table).delete().eq("chat_id", payload.chatId);
       return !(await db.from("profiles").delete().eq("chat_id", payload.chatId)).error;
-    case "update_transaction": return !(await db.from("transactions").update({ status: payload.status }).eq("id", payload.id)).error;
+    case "update_transaction": {
+      const patch = {
+        status: payload.status,
+        verified_by_chat_id: Number(payload.chatId || 0) || null,
+        verified_at: payload.status === "completed" || payload.status === "rejected" ? new Date().toISOString() : null,
+        verification_note: typeof payload.verificationNote === "string" ? payload.verificationNote.slice(0, 1000) : null
+      };
+      return !(await db.from("transactions").update(patch).eq("id", payload.id)).error;
+    }
     case "update_loan": {
       if (payload.status === "approved") {
         const { error } = await db.rpc("approve_loan_atomic", { p_loan_id: payload.id, p_feedback: payload.feedback || null });
