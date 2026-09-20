@@ -9,7 +9,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Skeleton } from '../components/Skeleton';
 import { toast } from 'sonner';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { getDashboardStats, getActiveLoans, getSuccessStories, getTransactions, getLoanApplications, reactToSuccessStory } from '../lib/api';
+import { getDashboardStats, getActiveLoans, getSuccessStories, getTransactions, getLoanApplications, reactToSuccessStory, getMyNotifications, markMyNotificationRead } from '../lib/api';
 import type { DashboardStats } from '../lib/api';
 import type { LoanApplication, SuccessStory, Transaction } from '../types/database';
 import personalImg from '../assets/categories/personal.png';
@@ -34,6 +34,7 @@ export default function Home() {
   const [userTransactions, setUserTransactions] = useState<Transaction[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [reactedStories, setReactedStories] = useState<Record<string, string[]>>({});
+  const [serverNotifications, setServerNotifications] = useState<any[]>([]);
 
   useEffect(() => {
     try {
@@ -109,6 +110,7 @@ export default function Home() {
           setCompletedEmisCount(completedCount);
         }
         setStories(successStoriesData.length > 0 ? successStoriesData : []);
+        try { setServerNotifications(await getMyNotifications()); } catch { setServerNotifications([]); }
       } catch (err) {
         console.error('Dashboard fetch error:', err);
       } finally {
@@ -177,6 +179,16 @@ export default function Home() {
   ];
 
   const getNotifications = () => {
+    const persisted = serverNotifications.map((n:any) => ({
+      id: n.id,
+      title: n.title,
+      time: n.created_at ? new Date(n.created_at).toLocaleString(isBn ? 'bn-BD' : 'en-US') : '',
+      type: n.type || 'system',
+      status: n.is_read ? 'read' : 'new',
+      link: n.entity_type === 'loan' && n.entity_id ? `/application/${n.entity_id}` : undefined,
+      unread: !n.is_read
+    }));
+    const legacy = (() => {
     const list: { id: string; title: string; time: string; type: string; status: string; link?: string }[] = [];
 
     userLoans.forEach(loan => {
@@ -311,7 +323,8 @@ export default function Home() {
       }
     });
 
-    return list;
+    return [...persisted, ...list];
+    })();
   };
 
   // Helper to compute the loan/savings status configuration
@@ -479,11 +492,12 @@ export default function Home() {
                       getNotifications().map((notif) => (
                         <div 
                           key={notif.id}
-                          onClick={() => {
-                            if (notif.link) {
-                              navigate(notif.link);
-                              setShowNotifications(false);
+                          onClick={async () => {
+                            if ((notif as any).unread) {
+                              await markMyNotificationRead(notif.id);
+                              setServerNotifications(prev => prev.map(n => n.id === notif.id ? {...n, is_read:true} : n));
                             }
+                            if (notif.link) { navigate(notif.link); setShowNotifications(false); }
                           }}
                           className={`p-3 rounded-xl border flex gap-3 transition-all ${
                             notif.link ? 'hover:bg-primary-50/20 dark:hover:bg-primary-900/10 cursor-pointer active:scale-98' : ''
