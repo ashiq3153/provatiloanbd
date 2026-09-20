@@ -139,7 +139,7 @@ export default function PayEMI() {
 
   if (!activeLoan) {
     return (
-      <div className="min-h-screen neu-bg pb-24 transition-colors">
+      <div className="min-h-[100dvh] w-full min-w-0 neu-bg pb-[calc(6rem+env(safe-area-inset-bottom))] transition-colors>
         {/* Header */}
         <div className="neu-bg px-5 py-4 flex items-center gap-4 sticky top-0 z-30 shadow-md border-b border-white/20 dark:border-white/5 transition-colors">
           <button 
