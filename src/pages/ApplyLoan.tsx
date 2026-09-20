@@ -35,6 +35,7 @@ import { AddressSelector, AddressValue, emptyAddress, serializeAddress } from ".
 
 import { getCategories, snapPoints, amountPackages, formatAmount, getAllowedTenure, getColorStyles, getIconColor } from "./apply-loan-utils";
 import { calculateLoan } from "../lib/finance";
+import { getLoanDocumentRequirements, getMissingRequiredDocuments } from "../lib/loan-document-requirements";
 
 const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
   const { formState: { errors } } = useFormContext<LoanFormData>();
@@ -667,8 +668,11 @@ export default function ApplyLoan() {
       }
 
       if (step === 4) {
-        if (!documents.nid_front || !documents.nid_back) {
-          toast.error(isBn ? 'অনুগ্রহ করে NID এর উভয় পিঠ আপলোড করুন' : 'Please upload both sides of NID');
+        const missingDocuments = getMissingRequiredDocuments(category?.id || 'personal', documents);
+        if (missingDocuments.length > 0) {
+          const preview = missingDocuments.slice(0, 3).map(d => isBn ? d.labelBn : d.labelEn).join(', ');
+          const extra = missingDocuments.length > 3 ? (isBn ? ` এবং আরও ${missingDocuments.length - 3}টি` : ` and ${missingDocuments.length - 3} more`) : '';
+          toast.error(isBn ? `প্রয়োজনীয় কাগজপত্র দিন: ${preview}${extra}` : `Required documents missing: ${preview}${extra}`);
           return;
         }
         if (!acceptedTerms) {
