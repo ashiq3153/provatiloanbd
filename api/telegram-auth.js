@@ -254,6 +254,7 @@ const ADMIN_ACTION_ROLES = {
   get_transactions: ["owner","admin","finance","viewer"],
   get_success_stories: ["owner","admin","support","viewer"],
   get_system_setting: ["owner","admin","finance","support","viewer"],
+  get_admin_role: ["owner","admin","finance","support","viewer"],
   ban_user: ["owner","admin","support"],
   lock_user: ["owner","admin","support"],
   delete_user: ["owner","admin"],
@@ -274,6 +275,10 @@ const ADMIN_ACTION_ROLES = {
 async function adminAction(action, payload) {
   const db = adminClient();
   switch (action) {
+    case "get_admin_role": {
+      const role = await getAdminRole(payload.chatId || 0);
+      return { role };
+    }
     case "get_profiles": return (await db.from("profiles").select("*").order("created_at", { ascending: false })).data || [];
     case "get_loans": return (await db.from("loan_applications").select("*").order("applied_at", { ascending: false })).data || [];
     case "get_transactions": return (await db.from("transactions").select("*").order("created_at", { ascending: false })).data || [];
