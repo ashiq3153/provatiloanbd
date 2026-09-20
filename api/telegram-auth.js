@@ -300,8 +300,38 @@ async function adminAction(action, payload) {
     }
     case "update_system_setting": {
       const existing = await db.from("system_settings").select("id").eq("key", payload.key).maybeSingle();
-      if (existing.data) return !(await db.from("system_settings").update({ value: payload.value }).eq("key", payload.key)).error;
-      return !(await db.from("system_settings").insert({ key: payload.key, value: payload.value })).error;
+      const saved = existing.data
+        ? !(await db.from("system_settings").update({ value: payload.value }).eq("key", payload.key)).error
+        : !(await db.from("system_settings").insert({ key: payload.key, value: payload.value })).error;
+      if (!saved) return false;
+
+      if (payload.key === "global_loan_config" && payload.value && typeof payload.value === "object") {
+        const rates = [
+          ["personal", payload.value.minRatePersonal],
+          ["business", payload.value.minRateBusiness],
+          ["expat", payload.value.minRateExpat],
+          ["student", payload.value.minRateStudent],
+          ["emergency", payload.value.minRateEmergency],
+          ["women", payload.value.minRateWomen]
+        ];
+        for (const [category, rate] of rates) {
+          if (!Number.isFinite(Number(rate))) continue;
+          await db.from("loan_rate_versions")
+            .update({ is_active: false, effective_to: new Date().toISOString() })
+            .eq("loan_category", category)
+            .eq("is_active", true);
+          const { error } = await db.from("loan_rate_versions").insert({
+            loan_category: category,
+            monthly_rate: Number(rate),
+            calculation_method: "flat",
+            effective_from: new Date().toISOString(),
+            is_active: true,
+            created_by_chat_id: Number(payload.chatId || 0) || null
+          });
+          if (error) throw error;
+        }
+      }
+      return true;
     }
     case "add_success_story": return !(await db.from("success_stories").insert(payload.story)).error;
     case "delete_success_story": return !(await db.from("success_stories").delete().eq("id", payload.id)).error;
