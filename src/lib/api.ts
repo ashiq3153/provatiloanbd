@@ -70,18 +70,27 @@ export async function submitLoanApplication(application: Omit<LoanApplication, '
 }
 
 export async function updateLoanApplication(id: string, application: Partial<LoanApplication>): Promise<LoanApplication | null> {
-  const { data, error } = await supabase
-    .from('loan_applications')
-    .update({ ...application, status: 'pending' }) // Reset to pending after update
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) {
+  try {
+    // Revision updates are also Telegram-verified and ownership-scoped on the
+    // server, avoiding browser RLS/session failures after action_required.
+    // @ts-ignore
+    const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+    if (!initData) throw new Error('Telegram initData is missing');
+    const response = await fetch('/api/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, action: 'loan', loanAction: 'update', loanId: id, payload: application }),
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result?.ok || !result?.data) {
+      console.error('updateLoanApplication gateway error:', result?.error || response.statusText);
+      return null;
+    }
+    return result.data as LoanApplication;
+  } catch (error) {
     console.error('updateLoanApplication error:', error);
     return null;
   }
-  return data;
 }
 
 export async function checkDuplicateApplication(
@@ -121,18 +130,28 @@ export async function checkDuplicateApplication(
   }
 }
 
-export async function getLoanApplications(chatId: number): Promise<LoanApplication[]> {
-  const { data, error } = await supabase
-    .from('loan_applications')
-    .select('*')
-    .eq('chat_id', chatId)
-    .order('applied_at', { ascending: false });
-
-  if (error) {
+export async function getLoanApplications(_chatId: number): Promise<LoanApplication[]> {
+  try {
+    // Read through the Telegram-verified server gateway so My Loans does not
+    // depend on a stale/mismatched browser Supabase anonymous session.
+    // @ts-ignore
+    const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+    if (!initData) return [];
+    const response = await fetch('/api/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, action: 'loan', loanAction: 'get_my_loans' }),
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result?.ok) {
+      console.error('getLoanApplications gateway error:', result?.error || response.statusText);
+      return [];
+    }
+    return (result.data || []) as LoanApplication[];
+  } catch (error) {
     console.error('getLoanApplications error:', error);
     return [];
   }
-  return data || [];
 }
 
 export async function getLoanApplicationById(applicationId: string): Promise<LoanApplication | null> {
