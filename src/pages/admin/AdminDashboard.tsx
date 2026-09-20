@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, MessageCircle, Copy, ArrowLeft, Edit2, Lock, Unlock, ThumbsUp, Heart } from 'lucide-react';
-import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, getAllChatMessages, sendAdminChatMessage, editChatMessage, markChatMessagesSeen, deleteChatMessage, sendAdminTelegramMessage, broadcastAdminTelegramMessage, getFinancialReconciliationReport } from '../../lib/adminApi';
+import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, getAllChatMessages, sendAdminChatMessage, editChatMessage, markChatMessagesSeen, deleteChatMessage, sendAdminTelegramMessage, broadcastAdminTelegramMessage, getFinancialReconciliationReport, getKycReviewQueue, updateKycReview } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
 import { useAppStore } from '../../lib/store';
@@ -11,7 +11,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { supabase } from '../../lib/supabase';
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings' | 'chat' | 'broadcast'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings' | 'chat' | 'broadcast' | 'kyc'>('overview');
   const [settingsSubTab, setSettingsSubTab] = useState<'general' | 'payments' | 'announcements' | 'categories'>('general');
 
   const [showLockModal, setShowLockModal] = useState<number | null>(null);
@@ -24,6 +24,9 @@ export default function AdminDashboard() {
   const [isBroadcasting, setIsBroadcasting] = useState(false);
   const [broadcastStats, setBroadcastStats] = useState({ total: 0, delivered: 0, failed: 0 });
   const [financialReport, setFinancialReport] = useState<any | null>(null);
+  const [kycReviews, setKycReviews] = useState<any[]>([]);
+  const [kycNote, setKycNote] = useState('');
+  const [kycLoading, setKycLoading] = useState(false);
   const [broadcastProgress, setBroadcastProgress] = useState(0);
 
   const [showDirectMessageModal, setShowDirectMessageModal] = useState(false);
@@ -378,6 +381,7 @@ export default function AdminDashboard() {
       setTransactions(t);
       setStories(s);
       try { setFinancialReport(await getFinancialReconciliationReport()); } catch { setFinancialReport(null); }
+      try { setKycReviews(await getKycReviewQueue()); } catch { setKycReviews([]); }
     } catch (err) {
       toast.error('Failed to load admin data');
     } finally {
@@ -864,6 +868,7 @@ export default function AdminDashboard() {
     { id: 'withdrawals', label: isBn ? 'উত্তোলন সমূহ' : 'Withdrawals', icon: Upload },
     { id: 'users', label: isBn ? 'ইউজার নিয়ন্ত্রণ' : 'Manage Users', icon: Users },
     { id: 'chat', label: isBn ? 'লাইভ চ্যাট' : 'Support Chat', icon: MessageCircle },
+    { id: 'kyc', label: isBn ? 'KYC রিভিউ' : 'KYC Review', icon: ClipboardCheck },
     { id: 'broadcast', label: isBn ? 'ব্রডকাস্ট' : 'Broadcast', icon: Megaphone },
     { id: 'stories', label: isBn ? 'সফলতার গল্প' : 'Success Stories', icon: Star },
     { id: 'settings', label: isBn ? 'সিস্টেম সেটিংস' : 'System Settings', icon: Settings },
@@ -981,6 +986,33 @@ export default function AdminDashboard() {
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="w-full max-w-7xl mx-auto min-w-0 space-y-4 sm:space-y-6"
             >
+              {activeTab === 'kyc' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div><h2 className="text-xl font-black">{isBn ? 'KYC রিভিউ কিউ' : 'KYC Review Queue'}</h2><p className="text-sm text-gray-500">{kycReviews.length} {isBn ? 'টি রিভিউ' : 'reviews'}</p></div>
+                    <button onClick={async()=>{setKycLoading(true); try{setKycReviews(await getKycReviewQueue());}finally{setKycLoading(false);}}} className="px-4 py-2 rounded-xl bg-primary-500 text-white font-bold">{kycLoading ? '...' : (isBn?'রিফ্রেশ':'Refresh')}</button>
+                  </div>
+                  <div className="grid gap-3">
+                    {kycReviews.map((r:any)=>(
+                      <div key={r.id} className="neu-raised rounded-2xl p-4 space-y-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div><p className="font-bold">Chat ID: {r.chat_id}</p><p className="text-xs text-gray-500">{r.loan_id || 'No loan linked'} · {r.submitted_at ? new Date(r.submitted_at).toLocaleString() : ''}</p></div>
+                          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 dark:bg-gray-700">{r.status}</span>
+                        </div>
+                        <pre className="text-xs whitespace-pre-wrap overflow-auto max-h-40 bg-gray-50 dark:bg-gray-900 rounded-xl p-3">{JSON.stringify(r.documents || {}, null, 2)}</pre>
+                        <textarea value={kycNote} onChange={e=>setKycNote(e.target.value)} placeholder={isBn?'রিভিউ নোট':'Reviewer note'} className="w-full rounded-xl border p-3 bg-transparent" />
+                        <div className="flex flex-wrap gap-2">
+                          {(['under_review','verified','needs_revision','rejected'] as const).map(status=>(
+                            <button key={status} disabled={kycLoading} onClick={async()=>{setKycLoading(true); try{await updateKycReview(r.id,status,kycNote); setKycReviews(await getKycReviewQueue()); setKycNote(''); toast.success(isBn?'KYC আপডেট হয়েছে':'KYC updated');}catch{toast.error(isBn?'আপডেট ব্যর্থ':'Update failed')}finally{setKycLoading(false);}}} className="px-3 py-2 rounded-xl border font-bold text-xs">{status}</button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    {!kycReviews.length && <div className="text-center py-12 text-gray-500">{isBn ? 'কোনো KYC রিভিউ নেই' : 'No KYC reviews found'}</div>}
+                  </div>
+                </div>
+              )}
+
               {activeTab === 'overview' && (
                 <div className="mb-6 grid grid-cols-2 lg:grid-cols-5 gap-3">
                   {[
