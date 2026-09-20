@@ -250,6 +250,7 @@ async function getAdminRole(chatId) {
 
 const ADMIN_ACTION_ROLES = {
   get_financial_report: ["owner","admin","finance","viewer"],
+  get_kyc_queue: ["owner","admin","support","viewer"],
   update_kyc_review: ["owner","admin","support"],
   get_notifications: ["owner","admin","support","viewer","finance"],
   mark_notification_read: ["owner","admin","support","viewer","finance"],
@@ -288,6 +289,11 @@ async function adminAction(action, payload) {
       const { data, error } = await db.from("financial_reconciliation_summary").select("*").single();
       if (error) throw error;
       return data;
+    }
+    case "get_kyc_queue": {
+      const { data, error } = await db.from("kyc_reviews").select("*").order("submitted_at", { ascending: false }).limit(200);
+      if (error) throw error;
+      return data || [];
     }
     case "update_kyc_review": {
       const reviewId = String(payload.reviewId || "");
