@@ -34,6 +34,7 @@ import { getLoanSchema, LoanFormData } from "./ApplyLoanSchema";
 import { AddressSelector, AddressValue, emptyAddress, serializeAddress } from "../components/AddressSelector";
 
 import { getCategories, snapPoints, amountPackages, formatAmount, getAllowedTenure, getColorStyles, getIconColor } from "./apply-loan-utils";
+import { calculateLoan } from "../lib/finance";
 
 const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
   const { formState: { errors } } = useFormContext<LoanFormData>();
@@ -556,15 +557,18 @@ export default function ApplyLoan() {
     if (tenure > maxAllowed) setTenure(maxAllowed);
   };
 
-  const calculateEMI = () => {
-    if (!category) return 0;
-    const r = category.minRate;
-    const n = tenure;
-    if (r === 0) return amount / n;
-    const totalInterest = amount * r * n;
-    const emi = (amount + totalInterest) / n;
-    return Math.round(emi);
-  };
+  const getLoanCalculation = () => calculateLoan({
+    principal: amount,
+    monthlyRate: category?.minRate || 0,
+    tenureMonths: tenure,
+    processingFeeRate: systemSettings?.procFee || 0.01,
+    securityDepositRate: systemSettings?.secDeposit || 0.1,
+    insuranceRate: systemSettings?.insuranceRate || 0,
+    insuranceEnabled: !!systemSettings?.insuranceEnabled,
+    method: "flat",
+  });
+
+  const calculateEMI = () => getLoanCalculation().emi;
 
 
 
@@ -925,9 +929,13 @@ export default function ApplyLoan() {
         amount,
         tenure_months: tenure,
         interest_rate: category?.minRate || 0,
-        emi_amount: calculateEMI(),
-        processing_fee: amount * (systemSettings?.procFee || 0.01),
-        security_deposit: amount * (systemSettings?.secDeposit || 0.1),
+        emi_amount: getLoanCalculation().emi,
+        processing_fee: getLoanCalculation().processingFee,
+        security_deposit: getLoanCalculation().securityDeposit,
+        calculation_method: "flat",
+        rate_version_id: null,
+        total_interest: getLoanCalculation().totalInterest,
+        total_payable: getLoanCalculation().totalPayable,
         full_name: formData.fullName,
         father_name: formData.fatherName,
         mother_name: formData.motherName,
