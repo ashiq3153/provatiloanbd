@@ -21,8 +21,8 @@ export default function Profile() {
   return (
     <div className="min-h-screen neu-bg pb-24 transition-colors">
       {/* Header Profile Section */}
-      <div className="px-5 pt-5 pb-2 bg-transparent shrink-0">
-        <div className="neu-raised p-6 rounded-[32px] relative overflow-hidden transition-colors border-0">
+      <div className="px-3 sm:px-5 pt-3 sm:pt-5 pb-2 bg-transparent shrink-0">
+        <div className="neu-raised p-4 sm:p-6 rounded-[24px] sm:rounded-[32px] relative overflow-hidden transition-colors border-0">
           <div className="absolute top-0 right-0 w-48 h-48 bg-primary-500/5 dark:bg-primary-500/10 blur-3xl rounded-full -mr-10 -mt-10 z-0 transition-colors pointer-events-none"></div>
           
           <div className="relative z-10 flex flex-col items-center">
