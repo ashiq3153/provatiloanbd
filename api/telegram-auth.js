@@ -329,7 +329,7 @@ async function adminAction(action, payload) {
     case "ban_user": return !(await db.from("profiles").update({ is_banned: !!payload.isBanned }).eq("chat_id", payload.chatId)).error;
     case "lock_user": return !(await db.from("profiles").update({ is_locked: !!payload.isLocked, lock_reason: payload.isLocked ? (payload.reason || null) : null }).eq("chat_id", payload.chatId)).error;
     case "delete_user":
-      for (const table of ["transactions", "loan_applications", "support_messages"]) await db.from(table).delete().eq("chat_id", payload.chatId);
+      for (const table of ["transactions", "loan_applications"]) await db.from(table).delete().eq("chat_id", payload.chatId);
       return !(await db.from("profiles").delete().eq("chat_id", payload.chatId)).error;
     case "update_transaction": {
       const patch = {
