@@ -37,42 +37,36 @@ export async function upsertProfile(profile: Partial<Profile> & { chat_id: numbe
 // ── Loan Application APIs ────────────────────────────────
 
 export async function submitLoanApplication(application: Omit<LoanApplication, 'id' | 'applied_at' | 'approved_at' | 'admin_feedback' | 'status'>): Promise<LoanApplication | null> {
-  // Ensure the Telegram profile exists before the FK-constrained loan insert.
-  // This is server-verified with Telegram initData and service role, so it does
-  // not weaken the customer RLS policies.
   try {
+    // New loan creation is server-verified with Telegram initData. The server
+    // derives chat_id from the verified Telegram user, syncs the profile, and
+    // inserts only an allowlisted set of loan fields with status=pending.
+    // This avoids a browser/RLS session race without weakening RLS policies.
     // @ts-ignore
     const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
     if (!initData) throw new Error('Telegram initData is missing');
-    const syncResponse = await fetch('/api/telegram-auth', {
+
+    const response = await fetch('/api/telegram-auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ initData, action: 'sync_profile' }),
+      body: JSON.stringify({
+        initData,
+        action: 'loan',
+        loanAction: 'submit',
+        payload: application,
+      }),
     });
-    const syncResult = await syncResponse.json().catch(() => null);
-    if (!syncResponse.ok || !syncResult?.ok) {
-      console.error('Profile sync before loan insert failed:', syncResult?.error || syncResponse.statusText);
+
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result?.ok || !result?.data) {
+      console.error('submitLoanApplication gateway error:', result?.error || response.statusText);
       return null;
     }
+    return result.data as LoanApplication;
   } catch (error) {
-    console.error('Profile sync before loan insert error:', error);
-    return null;
-  }
-
-  const { data, error } = await supabase
-    .from('loan_applications')
-    .insert({
-      ...application,
-      status: 'pending',
-    })
-    .select()
-    .single();
-
-  if (error) {
     console.error('submitLoanApplication error:', error);
     return null;
   }
-  return data;
 }
 
 export async function updateLoanApplication(id: string, application: Partial<LoanApplication>): Promise<LoanApplication | null> {
