@@ -421,9 +421,9 @@ export default function Support() {
       {/* Content Area */}
       <div className="flex-1 overflow-hidden relative flex flex-col bg-transparent">
         {activeTab === 'chat' ? (
-          <div className="flex-1 flex flex-col h-full overflow-hidden bg-transparent">
+          <div className="flex-1 min-w-0 min-h-0 flex flex-col h-full overflow-hidden bg-transparent">
             {/* Help Topics Row - Neumorphic visual badges */}
-            <div className="px-5 py-2 overflow-x-auto shrink-0 flex gap-3.5 hide-scrollbar">
+            <div className="px-3 sm:px-5 py-2 overflow-x-auto shrink-0 flex gap-3.5 hide-scrollbar">
               {[
                 { id: 1, type: 'orange', labelBn: 'ডিপোজিট সমস্যা', labelEn: 'Deposit Issue', text: 'আমি ডিপোজিট করতে চাই, পেমেন্ট নম্বর দিন।' },
                 { id: 2, type: 'purple', labelBn: 'ঋণ অনুমোদন', labelEn: 'Loan Approval', text: 'আমার লোন আবেদনটি কতক্ষণে অনুমোদিত হবে?' },
