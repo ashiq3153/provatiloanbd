@@ -2704,7 +2704,7 @@ export default function ApplyLoan() {
               setUploadingDoc(null);
               e.target.value = '';
             }
-          }}}}
+          }}
         />
         <label 
           htmlFor={isUploading ? undefined : `file-${id}`}
