@@ -174,6 +174,58 @@ async function submitLoanApplication(telegramUser, payload) {
   return data;
 }
 
+async function createMyTransaction(telegramUser, payload) {
+  const db = adminClient();
+  const chatId = Number(telegramUser?.id);
+  if (!chatId || !payload || typeof payload !== "object") throw new Error("Invalid transaction request");
+
+  const type = String(payload.type || "");
+  if (!["deposit", "withdraw", "emi"].includes(type)) throw new Error("Unsupported transaction type");
+
+  const amount = Number(payload.amount);
+  if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid transaction amount");
+
+  let loanId = payload.loan_id || null;
+  if (loanId) {
+    const { data: loan, error: loanError } = await db.from("loan_applications")
+      .select("id, chat_id")
+      .eq("id", loanId)
+      .eq("chat_id", chatId)
+      .maybeSingle();
+    if (loanError) throw loanError;
+    if (!loan) throw new Error("Loan does not belong to this Telegram user");
+  }
+
+  const record = {
+    chat_id: chatId,
+    loan_id: loanId,
+    type,
+    deposit_type: typeof payload.deposit_type === "string" ? payload.deposit_type : null,
+    amount,
+    payment_method: typeof payload.payment_method === "string" ? payload.payment_method : null,
+    sender_number: typeof payload.sender_number === "string" ? payload.sender_number : null,
+    trx_id: typeof payload.trx_id === "string" ? payload.trx_id : null,
+    screenshot_url: typeof payload.screenshot_url === "string" ? payload.screenshot_url : null,
+    status: "pending"
+  };
+
+  const { data, error } = await db.from("transactions").insert(record).select().single();
+  if (error) throw error;
+  return data;
+}
+
+async function getMyTransactions(telegramUser) {
+  const db = adminClient();
+  const chatId = Number(telegramUser?.id);
+  if (!chatId) throw new Error("Invalid Telegram user");
+  const { data, error } = await db.from("transactions")
+    .select("*")
+    .eq("chat_id", chatId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
 async function syncProfile(telegramUser) {
   const db = adminClient();
   const chatId = Number(telegramUser?.id);
@@ -270,6 +322,14 @@ export default async function handler(req, res) {
     if (req.body?.action === "loan" && req.body?.loanAction === "check_duplicate") {
       const duplicate = await checkDuplicateApplication(result.user, req.body.payload || {});
       return res.status(200).json({ ok: true, duplicate });
+    }
+    if (req.body?.action === "transaction" && req.body?.transactionAction === "create") {
+      const data = await createMyTransaction(result.user, req.body.payload || {});
+      return res.status(200).json({ ok: true, data });
+    }
+    if (req.body?.action === "transaction" && req.body?.transactionAction === "get_my_transactions") {
+      const data = await getMyTransactions(result.user);
+      return res.status(200).json({ ok: true, data });
     }
     if (req.body?.action === "loan" && req.body?.loanAction === "get_my_loans") {
       const data = await getMyLoanApplications(result.user);
