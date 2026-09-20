@@ -44,7 +44,7 @@ export default function Loans() {
   return (
     <div className="min-h-screen neu-bg flex flex-col relative transition-colors pb-24">
       {/* Premium Header */}
-      <div className="neu-bg px-5 py-4 sticky top-0 z-30 shadow-md border-b border-white/20 dark:border-white/5 transition-colors flex items-center justify-between">
+      <div className="neu-bg px-3 sm:px-5 py-3 sm:py-4 sticky top-0 z-30 shadow-md border-b border-white/20 dark:border-white/5 transition-colors flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full neu-sunken flex items-center justify-center text-primary-600 dark:text-primary-400">
             <Wallet size={20} />
