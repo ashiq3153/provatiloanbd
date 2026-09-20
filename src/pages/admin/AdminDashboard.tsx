@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, MessageCircle, Copy, ArrowLeft, Edit2, Lock, Unlock, ThumbsUp, Heart } from 'lucide-react';
-import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser } from '../../lib/adminApi';
+import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, getAllChatMessages, sendAdminChatMessage, editChatMessage, markChatMessagesSeen, deleteChatMessage, sendAdminTelegramMessage, broadcastAdminTelegramMessage } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
 import { useAppStore } from '../../lib/store';
@@ -362,12 +362,9 @@ export default function AdminDashboard() {
 
   const fetchAllChatData = async () => {
     try {
-      const { data: allMsgs, error } = await supabase
-        .from('support_messages')
-        .select('*')
-        .order('created_at', { ascending: true });
+      const allMsgs = await getAllChatMessages();
 
-      if (!error && allMsgs) {
+      if (allMsgs) {
         // Group messages by chat_id to get users list
         const userGroups: Record<number, any> = {};
         for (const msg of allMsgs) {
@@ -403,11 +400,7 @@ export default function AdminDashboard() {
             // Mark user messages as seen
             const unseenUserMsgs = selectedGroup.messages.filter((m: any) => m.sender === 'user' && !m.is_seen);
             if (unseenUserMsgs.length > 0) {
-              supabase
-                .from('support_messages')
-                .update({ is_seen: true })
-                .in('id', unseenUserMsgs.map((m: any) => m.id))
-                .then();
+              markChatMessagesSeen(unseenUserMsgs.map((m: any) => m.id));
             }
           }
         }
@@ -427,26 +420,16 @@ export default function AdminDashboard() {
     try {
       if (editingMsgId) {
         // Edit mode
-        const { error } = await supabase.from('support_messages').update({
-          message: replyMsg,
-          is_edited: true
-        }).eq('id', editingMsgId);
-
-        if (!error) {
+        const success = await editChatMessage(editingMsgId, replyMsg);
+        if (success) {
           setEditingMsgId(null);
         } else {
-          console.error('Error editing admin reply:', error);
+          console.error('Error editing admin reply');
         }
       } else {
         // Send new mode
-        const { error } = await supabase.from('support_messages').insert({
-          chat_id: selectedChatId,
-          sender: 'admin',
-          message: replyMsg,
-          reply_to: replyingToMsg?.id || null
-        });
-
-        if (!error) {
+        const success = await sendAdminChatMessage(selectedChatId, replyMsg, replyingToMsg?.id || null);
+        if (success) {
           setReplyingToMsg(null);
           
           // Send notification to user
@@ -483,12 +466,8 @@ export default function AdminDashboard() {
   const handleDeleteMessage = async (msgId: string) => {
     if (!window.confirm(isBn ? 'আপনি কি এই বার্তাটি মুছে ফেলতে চান?' : 'Are you sure you want to delete this message?')) return;
     try {
-      const { error } = await supabase
-        .from('support_messages')
-        .delete()
-        .eq('id', msgId);
-
-      if (!error) {
+      const success = await deleteChatMessage(msgId);
+      if (success) {
         setChatMessages(prev => prev.filter(m => m.id !== msgId));
         toast.success(isBn ? 'বার্তাটি মুছে ফেলা হয়েছে' : 'Message deleted successfully');
       } else {
@@ -557,32 +536,15 @@ export default function AdminDashboard() {
       inline_keyboard: [[{ text: "📝 Open App", web_app: { url: miniAppUrl } }]]
     } : undefined;
 
-    for (let i = 0; i < profiles.length; i++) {
-      const user = profiles[i];
-      try {
-        // We use fetch directly here to support inline keyboard
-        const response = await fetch(`https://api.telegram.org/bot${config.telegramBotToken}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: user.chat_id,
-            text: broadcastMessage,
-            parse_mode: "HTML",
-            reply_markup: replyMarkup
-          }),
-        });
-
-        if (response.ok) delivered++;
-        else failed++;
-      } catch (err) {
-        failed++;
-      }
-      setBroadcastStats({ total: profiles.length, delivered, failed });
-      setBroadcastProgress(Math.round(((i + 1) / profiles.length) * 100));
-      
-      // Delay to respect Telegram limits (30 msgs/sec)
-      await new Promise(resolve => setTimeout(resolve, 50));
-    }
+    const result = await broadcastAdminTelegramMessage(
+      profiles.map(user => user.chat_id),
+      broadcastMessage,
+      replyMarkup
+    );
+    delivered = result?.delivered || 0;
+    failed = result?.failed || 0;
+    setBroadcastStats({ total: profiles.length, delivered, failed });
+    setBroadcastProgress(100);
 
     setIsBroadcasting(false);
     toast.success(isBn ? 'ব্রডকাস্ট সম্পন্ন হয়েছে' : 'Broadcast completed!');
@@ -595,7 +557,7 @@ export default function AdminDashboard() {
     let delivered = 0;
     for (const user of directMessageUsers) {
       try {
-        const success = await sendTelegramNotification(user.chat_id, directMessageText, config.telegramBotToken);
+        const success = await sendAdminTelegramMessage(user.chat_id, directMessageText);
         if (success) delivered++;
       } catch (err) {}
       await new Promise(resolve => setTimeout(resolve, 50));
