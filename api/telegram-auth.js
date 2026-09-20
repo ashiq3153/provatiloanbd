@@ -404,7 +404,7 @@ export default async function handler(req, res) {
         return res.status(403).json({ ok: false, error: "Insufficient admin role permissions" });
       }
       const adminPayload = req.body.payload || {};
-      const data = await adminAction(adminActionName, adminPayload);
+      const data = await adminAction(adminActionName, { ...adminPayload, chatId: adminPayload.chatId ?? Number(result.user.id) });
 
       // Keep an immutable, server-side activity trail without storing secrets or message bodies.
       const activityDetails = {
