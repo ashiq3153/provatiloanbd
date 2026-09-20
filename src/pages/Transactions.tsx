@@ -241,10 +241,10 @@ export default function Transactions() {
         </div>
       </div>
 
-      <div className="flex-1 p-5 space-y-6">
+      <div className="flex-1 w-full min-w-0 px-3 sm:px-5 py-4 sm:py-5 space-y-4 sm:space-y-6">
 
         {/* Tabs */}
-        <div className="flex neu-sunken p-1.5 rounded-[16px] transition-colors">
+        <div className="flex neu-sunken p-1 rounded-[16px] transition-colors sticky top-2 z-20 backdrop-blur-xl">
            <button
               onClick={() => setView('transactions')}
               className={`flex-1 py-3 text-sm font-bold rounded-[12px] transition-all flex justify-center items-center gap-2 ${
@@ -279,14 +279,14 @@ export default function Transactions() {
               exit={{ opacity: 0, height: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="neu-raised p-5 rounded-[24px] relative overflow-hidden text-gray-900 dark:text-white">
+              <div className="neu-raised p-4 sm:p-5 rounded-[20px] sm:rounded-[24px] relative overflow-hidden text-gray-900 dark:text-white">
                 <div className="flex justify-between items-start mb-3">
                   <div className="w-10 h-10 neu-sunken rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                     <TrendingUp size={20} />
                   </div>
                 </div>
                 <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">{isBn ? "মোট জমা" : "Total Deposit"}</p>
-                <p className="text-2xl font-black mt-1">{formatCurrency(stats.totalDeposit, isBn)}</p>
+                <p className="text-xl sm:text-2xl font-black mt-1">{formatCurrency(stats.totalDeposit, isBn)}</p>
               </div>
 
               <div className="neu-raised p-5 rounded-[24px] relative overflow-hidden text-gray-900 dark:text-white">
@@ -321,7 +321,7 @@ export default function Transactions() {
             </div>
 
             {/* Sort and Export Options */}
-            <div className="flex gap-2 justify-between items-center neu-raised p-2 rounded-[16px]">
+            <div className="flex gap-2 justify-between items-center neu-raised p-1.5 sm:p-2 rounded-[16px] min-w-0">
               <div className="flex-1 px-2">
                 <select
                   value={sortBy}
