@@ -462,7 +462,7 @@ export async function getMyNotifications(): Promise<any[]> {
   const user = getTelegramUser();
   const response = await fetch('/api/telegram-auth', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ initData, action: 'user', adminAction: 'get_notifications', payload: { chatId: user.id } }),
+    body: JSON.stringify({ initData, action: 'user', userAction: 'get_notifications', payload: { chatId: user.id } }),
   });
   const result = await response.json().catch(() => null);
   return response.ok && result?.ok ? (result.data || []) : [];
@@ -473,7 +473,7 @@ export async function markMyNotificationRead(id: string): Promise<boolean> {
   const user = getTelegramUser();
   const response = await fetch('/api/telegram-auth', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ initData, action: 'user', adminAction: 'mark_notification_read', payload: { id, chatId: user.id } }),
+    body: JSON.stringify({ initData, action: 'user', userAction: 'mark_notification_read', payload: { id, chatId: user.id } }),
   });
   const result = await response.json().catch(() => null);
   return response.ok && result?.ok && result.data === true;
@@ -484,7 +484,7 @@ export async function getMyKycReviews(): Promise<any[]> {
   const user = getTelegramUser();
   const response = await fetch('/api/telegram-auth', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ initData, action: 'user', adminAction: 'get_kyc_reviews', payload: { chatId: user.id } }),
+    body: JSON.stringify({ initData, action: 'user', userAction: 'get_kyc_reviews', payload: { chatId: user.id } }),
   });
   const result = await response.json().catch(() => null);
   return response.ok && result?.ok ? (result.data || []) : [];
