@@ -249,6 +249,9 @@ async function getAdminRole(chatId) {
 }
 
 const ADMIN_ACTION_ROLES = {
+  get_notifications: ["owner","admin","support","viewer","finance"],
+  mark_notification_read: ["owner","admin","support","viewer","finance"],
+  get_kyc_reviews: ["owner","admin","support","viewer","finance"],
   get_profiles: ["owner","admin","support","viewer","finance"],
   get_loans: ["owner","admin","support","viewer","finance"],
   get_transactions: ["owner","admin","finance","viewer"],
@@ -278,6 +281,21 @@ async function adminAction(action, payload) {
     case "get_admin_role": {
       const role = await getAdminRole(payload.chatId || 0);
       return { role };
+    }
+    case "get_notifications": {
+      const { data, error } = await db.from("notifications").select("*").eq("chat_id", Number(payload.chatId)).order("created_at", { ascending: false }).limit(100);
+      if (error) throw error;
+      return data || [];
+    }
+    case "mark_notification_read": {
+      const { error } = await db.from("notifications").update({ is_read: true, read_at: new Date().toISOString() }).eq("id", payload.id).eq("chat_id", Number(payload.chatId));
+      if (error) throw error;
+      return true;
+    }
+    case "get_kyc_reviews": {
+      const { data, error } = await db.from("kyc_reviews").select("*").eq("chat_id", Number(payload.chatId)).order("submitted_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
     }
     case "get_profiles": return (await db.from("profiles").select("*").order("created_at", { ascending: false })).data || [];
     case "get_loans": return (await db.from("loan_applications").select("*").order("applied_at", { ascending: false })).data || [];
