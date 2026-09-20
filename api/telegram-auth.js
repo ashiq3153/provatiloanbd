@@ -281,6 +281,24 @@ async function adminAction(action, payload) {
     case "mark_chat_seen": return !(await db.from("support_messages").update({ is_seen: true }).in("id", Array.isArray(payload.ids) ? payload.ids : [])).error;
     case "delete_chat_message": return !(await db.from("support_messages").delete().eq("id", payload.id)).error;
     case "send_telegram_message": return await sendTelegramBotMessage(payload.chatId, payload.message, payload.replyMarkup);
+    case "broadcast_telegram_message": {
+      const chatIds = Array.isArray(payload.chatIds) ? payload.chatIds.map(Number).filter(Boolean) : [];
+      const message = typeof payload.message === "string" ? payload.message : "";
+      if (!chatIds.length || !message.trim()) throw new Error("Broadcast recipients and message are required");
+      let delivered = 0, failed = 0;
+      for (const chatId of chatIds) {
+        try {
+          await sendTelegramBotMessage(chatId, message, payload.replyMarkup);
+          delivered++;
+        } catch (error) {
+          failed++;
+          console.error("Telegram broadcast delivery failed:", chatId, error?.message || error);
+        }
+        // Stay comfortably below Telegram Bot API burst limits.
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      return { delivered, failed };
+    }
     default: throw new Error("Unsupported admin action");
   }
 }
