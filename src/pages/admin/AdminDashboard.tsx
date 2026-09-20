@@ -582,8 +582,6 @@ export default function AdminDashboard() {
       minRateWomen: config.minRateWomen / 100,
       telegramSupport: config.telegramSupport,
       whatsappSupport: config.whatsappSupport,
-      telegramBotToken: config.telegramBotToken,
-
       announcementActive: config.announcementActive,
       announcementBn: config.announcementBn,
       announcementEn: config.announcementEn,
@@ -1881,25 +1879,6 @@ export default function AdminDashboard() {
                               </div>
                             </div>
 
-                            {/* Telegram Bot Settings */}
-                            <div className="bg-gray-50 dark:bg-gray-900/40 p-6 rounded-[24px] border border-gray-100 dark:border-gray-700/60 shadow-sm">
-                              <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-primary-600 dark:text-primary-400">
-                                <ShieldAlert size={16} /> {isBn ? 'টেলিগ্রাম নোটিফিকেশন বট' : 'Telegram Notification Bot'}
-                              </h3>
-                              <div>
-                                <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Telegram Bot Token</label>
-                                <input 
-                                  type="password" 
-                                  placeholder="e.g. 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ" 
-                                  value={config.telegramBotToken || ''} 
-                                  onChange={e => setConfig({...config, telegramBotToken: e.target.value})} 
-                                  className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm font-mono text-sm" 
-                                />
-                                <p className="text-[11px] text-gray-500 mt-2">
-                                  {isBn ? 'টেলিগ্রাম বটের মাধ্যমে ইউজারদের লোনের আবেদন ও ট্রানজেকশন স্ট্যাটাস আপডেট নোটিফিকেশন পাঠাতে এটি ব্যবহার করা হয়।' : 'Used to send status updates and alerts directly to users via Telegram WebApp integration.'}
-                                </p>
-                              </div>
-                            </div>
 
                           </div>
                         )}
