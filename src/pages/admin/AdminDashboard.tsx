@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, MessageCircle, Copy, ArrowLeft, Edit2, Lock, Unlock, ThumbsUp, Heart } from 'lucide-react';
-import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, getAllChatMessages, sendAdminChatMessage, editChatMessage, markChatMessagesSeen, deleteChatMessage, sendAdminTelegramMessage, broadcastAdminTelegramMessage, getFinancialReconciliationReport, getKycReviewQueue, updateKycReview } from '../../lib/adminApi';
+import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, sendAdminTelegramMessage, broadcastAdminTelegramMessage, getFinancialReconciliationReport, getKycReviewQueue, updateKycReview } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
 import { useAppStore } from '../../lib/store';
@@ -11,7 +11,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { supabase } from '../../lib/supabase';
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings' | 'chat' | 'broadcast' | 'kyc'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings' | 'broadcast' | 'kyc'>('overview');
   const [settingsSubTab, setSettingsSubTab] = useState<'general' | 'payments' | 'announcements' | 'categories'>('general');
 
   const [showLockModal, setShowLockModal] = useState<number | null>(null);
@@ -113,16 +113,6 @@ export default function AdminDashboard() {
     }
   }, [selectedLoan]);
 
-  // Support Chat admin state
-  const [chatUsers, setChatUsers] = useState<any[]>([]);
-  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
-  const [adminReplyText, setAdminReplyText] = useState('');
-  const [replyingToMsg, setReplyingToMsg] = useState<any>(null);
-  const [editingMsgId, setEditingMsgId] = useState<string | null>(null);
-  const [userTyping, setUserTyping] = useState(false);
-  const adminTypingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  
   // New Story Form State
   const [newStory, setNewStory] = useState({
     name: '',
@@ -210,6 +200,9 @@ export default function AdminDashboard() {
     minRateWomen: 0.55,
     telegramSupport: 'https://t.me/Provati_Loan',
     whatsappSupport: 'https://wa.me/8801700000000',
+    imoSupport: '',
+    messengerSupport: '',
+    emailSupport: '',
 
     // Announcement settings
     announcementActive: false,
@@ -278,6 +271,9 @@ export default function AdminDashboard() {
         minRateWomen: systemSettings.minRateWomen ? systemSettings.minRateWomen * 100 : 0.55,
         telegramSupport: systemSettings.telegramSupport || 'https://t.me/Provati_Loan',
         whatsappSupport: systemSettings.whatsappSupport || 'https://wa.me/8801700000000',
+        imoSupport: systemSettings.imoSupport || '',
+        messengerSupport: systemSettings.messengerSupport || '',
+        emailSupport: systemSettings.emailSupport || '',
 
         announcementActive: !!systemSettings.announcementActive,
         announcementBn: systemSettings.announcementBn || '',
@@ -389,164 +385,6 @@ export default function AdminDashboard() {
     }
   };
 
-  const fetchAllChatData = async () => {
-    try {
-      const allMsgs = await getAllChatMessages();
-
-      if (allMsgs) {
-        // Group messages by chat_id to get users list
-        const userGroups: Record<number, any> = {};
-        for (const msg of allMsgs) {
-          if (!userGroups[msg.chat_id]) {
-            const prof = profiles.find(p => p.chat_id === msg.chat_id);
-            userGroups[msg.chat_id] = {
-              chat_id: msg.chat_id,
-              name: prof ? `${prof.first_name} ${prof.last_name || ''}` : `User #${msg.chat_id}`,
-              avatar: prof?.photo_url || '',
-              messages: [],
-              latestMessageTime: msg.created_at
-            };
-          }
-          userGroups[msg.chat_id].messages.push(msg);
-          if (new Date(msg.created_at) > new Date(userGroups[msg.chat_id].latestMessageTime)) {
-            userGroups[msg.chat_id].latestMessageTime = msg.created_at;
-          }
-        }
-
-        // Sort user list by latest message time descending
-        const sortedUsers = Object.values(userGroups).sort((a: any, b: any) => 
-          new Date(b.latestMessageTime).getTime() - new Date(a.latestMessageTime).getTime()
-        );
-
-        setChatUsers(sortedUsers);
-
-        // If there's a selected user, update their messages and mark unseen as seen
-        if (selectedChatId) {
-          const selectedGroup = userGroups[selectedChatId];
-          if (selectedGroup) {
-            setChatMessages(selectedGroup.messages);
-            
-            // Mark user messages as seen
-            const unseenUserMsgs = selectedGroup.messages.filter((m: any) => m.sender === 'user' && !m.is_seen);
-            if (unseenUserMsgs.length > 0) {
-              markChatMessagesSeen(unseenUserMsgs.map((m: any) => m.id));
-            }
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Error fetching admin support chat:', err);
-    }
-  };
-
-  const handleSendAdminReply = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedChatId || !adminReplyText.trim()) return;
-
-    const replyMsg = adminReplyText;
-    setAdminReplyText('');
-
-    try {
-      if (editingMsgId) {
-        // Edit mode
-        const success = await editChatMessage(editingMsgId, replyMsg);
-        if (success) {
-          setEditingMsgId(null);
-        } else {
-          console.error('Error editing admin reply');
-        }
-      } else {
-        // Send new mode
-        const success = await sendAdminChatMessage(selectedChatId, replyMsg, replyingToMsg?.id || null);
-        if (success) {
-          setReplyingToMsg(null);
-          
-          // Send notification to user
-          const miniAppUrl = import.meta.env.VITE_MINI_APP_URL || "https://provatiloanbd.vercel.app";
-          const notificationMsg = `📩 <b>নতুন বার্তা এসেছে</b>\n\nPROVATI LOAN Support থেকে একটি নতুন মেসেজ পেয়েছেন।\n\nবিস্তারিত দেখতে "Live Chat" খুলুন।`;
-          
-          await sendAdminTelegramMessage(
-            selectedChatId,
-            notificationMsg,
-            { inline_keyboard: [[{ text: "💬 Live Chat", web_app: { url: `${miniAppUrl}/support` } }]] }
-          );
-          
-        } else {
-          console.error('Error sending admin reply');
-        }
-      }
-    } catch (err) {
-      console.error('Error with admin reply:', err);
-    }
-  };
-
-  const handleAdminTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAdminReplyText(e.target.value);
-    if (selectedChatId) {
-      supabase.channel(`typing_chat_${selectedChatId}`).send({
-        type: 'broadcast',
-        event: 'typing',
-        payload: { sender: 'admin' }
-      });
-    }
-  };
-
-  const handleDeleteMessage = async (msgId: string) => {
-    if (!window.confirm(isBn ? 'আপনি কি এই বার্তাটি মুছে ফেলতে চান?' : 'Are you sure you want to delete this message?')) return;
-    try {
-      const success = await deleteChatMessage(msgId);
-      if (success) {
-        setChatMessages(prev => prev.filter(m => m.id !== msgId));
-        toast.success(isBn ? 'বার্তাটি মুছে ফেলা হয়েছে' : 'Message deleted successfully');
-      } else {
-        toast.error(isBn ? 'বার্তাটি মুছতে ব্যর্থ হয়েছে' : 'Failed to delete message');
-      }
-    } catch (e) {
-      console.error('Error deleting message:', e);
-    }
-  };
-
-  useEffect(() => {
-    let typingChannel: any;
-
-    if (activeTab === 'chat') {
-      fetchAllChatData();
-
-      const channel = supabase
-        .channel('admin_support_messages')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'support_messages' },
-          () => {
-            fetchAllChatData();
-          }
-        )
-        .subscribe();
-
-      // Listen for user typing
-      if (selectedChatId) {
-        typingChannel = supabase.channel(`typing_chat_${selectedChatId}`);
-        typingChannel
-          .on('broadcast', { event: 'typing' }, (payload: any) => {
-            if (payload.payload.sender === 'user') {
-              setUserTyping(true);
-              if (adminTypingTimeoutRef.current) clearTimeout(adminTypingTimeoutRef.current);
-              adminTypingTimeoutRef.current = setTimeout(() => {
-                setUserTyping(false);
-              }, 3000);
-            }
-          })
-          .subscribe();
-      }
-
-      return () => {
-        supabase.removeChannel(channel);
-        if (typingChannel) supabase.removeChannel(typingChannel);
-        if (adminTypingTimeoutRef.current) clearTimeout(adminTypingTimeoutRef.current);
-      };
-    }
-  }, [activeTab, selectedChatId, profiles]);
-
   const handleBulkBroadcast = async () => {
     if (!broadcastMessage.trim()) return toast.error(isBn ? 'মেসেজ লিখুন' : 'Please enter a message');
     if (profiles.length === 0) return toast.error('No users found');
@@ -614,6 +452,9 @@ export default function AdminDashboard() {
       minRateWomen: config.minRateWomen / 100,
       telegramSupport: config.telegramSupport,
       whatsappSupport: config.whatsappSupport,
+      imoSupport: config.imoSupport,
+      messengerSupport: config.messengerSupport,
+      emailSupport: config.emailSupport,
       announcementActive: config.announcementActive,
       announcementBn: config.announcementBn,
       announcementEn: config.announcementEn,
@@ -867,7 +708,6 @@ export default function AdminDashboard() {
     { id: 'deposits', label: isBn ? 'ডিপোজিট সমূহ' : 'Deposits', icon: Download },
     { id: 'withdrawals', label: isBn ? 'উত্তোলন সমূহ' : 'Withdrawals', icon: Upload },
     { id: 'users', label: isBn ? 'ইউজার নিয়ন্ত্রণ' : 'Manage Users', icon: Users },
-    { id: 'chat', label: isBn ? 'লাইভ চ্যাট' : 'Support Chat', icon: MessageCircle },
     { id: 'kyc', label: isBn ? 'KYC রিভিউ' : 'KYC Review', icon: ClipboardCheck },
     { id: 'broadcast', label: isBn ? 'ব্রডকাস্ট' : 'Broadcast', icon: Megaphone },
     { id: 'stories', label: isBn ? 'সফলতার গল্প' : 'Success Stories', icon: Star },
@@ -1508,18 +1348,6 @@ export default function AdminDashboard() {
                               </button>
                               <button 
                                 onClick={() => {
-                                  const cUser = chatUsers.find(u => u.chat_id === user.chat_id);
-                                  setSelectedChatId(user.chat_id);
-                                  setChatMessages(cUser ? cUser.messages : []);
-                                  setActiveTab('chat');
-                                }}
-                                className="p-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-xl transition-colors"
-                                title={isBn ? "লাইভ চ্যাট শুরু করুন" : "Start Live Chat"}
-                              >
-                                <MessageCircle size={16} />
-                              </button>
-                              <button 
-                                onClick={() => {
                                   setDirectMessageUsers([user]);
                                   setShowDirectMessageModal(true);
                                 }}
@@ -1944,14 +1772,18 @@ export default function AdminDashboard() {
                                 <Users size={16} /> {isBn ? 'কাস্টমার সাপোর্ট লিংক' : 'Customer Support Links'}
                               </h3>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                <div>
-                                  <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Telegram Link</label>
-                                  <input type="text" value={config.telegramSupport || ''} onChange={e => setConfig({...config, telegramSupport: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm font-mono text-sm" />
-                                </div>
-                                <div>
-                                  <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">WhatsApp Link</label>
-                                  <input type="text" value={config.whatsappSupport || ''} onChange={e => setConfig({...config, whatsappSupport: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm font-mono text-sm" />
-                                </div>
+                                {[
+                                  ['Telegram Link', 'telegramSupport', 'https://t.me/...'],
+                                  ['WhatsApp Link', 'whatsappSupport', 'https://wa.me/...'],
+                                  ['imo Link', 'imoSupport', 'https://...'],
+                                  ['Messenger Link', 'messengerSupport', 'https://m.me/...'],
+                                  ['Email Address / mailto Link', 'emailSupport', 'support@example.com or mailto:...']
+                                ].map(([label, key, placeholder]) => (
+                                  <div key={key}>
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{label}</label>
+                                    <input type="text" placeholder={placeholder} value={(config as any)[key] || ''} onChange={e => setConfig({...config, [key]: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm font-mono text-sm" />
+                                  </div>
+                                ))}
                               </div>
                             </div>
 
