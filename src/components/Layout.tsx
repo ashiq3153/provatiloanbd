@@ -134,7 +134,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Main Content Area */}
       <div className={cn(
         "flex-1 scroll-smooth overflow-x-hidden",
-        isSupportPage ? "overflow-hidden pb-0" : "overflow-y-auto pb-24"
+        isSupportPage ? "overflow-hidden pb-0" : "overflow-y-auto pb-[calc(6rem+env(safe-area-inset-bottom))"
       )}>
         <AnimatePresence mode="wait">
           <motion.div
