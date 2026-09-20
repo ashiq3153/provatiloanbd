@@ -69,6 +69,42 @@ async function sendTelegramBotMessage(chatId, text, replyMarkup) {
   return true;
 }
 
+async function checkDuplicateApplication(telegramUser, payload) {
+  const db = adminClient();
+  const chatId = Number(telegramUser?.id);
+  if (!chatId) throw new Error("Invalid Telegram user");
+  const fields = [
+    ["mobile", payload?.mobile],
+    ["email", payload?.email],
+    ["account_number", payload?.accountNumber || payload?.account_number],
+    ["nominee_nid", payload?.nomineeNid || payload?.nominee_nid],
+    ["nid_number", payload?.nidNumber || payload?.nid_number],
+  ].filter(([, value]) => typeof value === "string" && value.trim());
+
+  if (!fields.length) return null;
+
+  let query = db.from("loan_applications")
+    .select("id,mobile,email,account_number,nominee_nid,nid_number,professional_info,status")
+    .eq("chat_id", chatId)
+    .in("status", ["pending","under_review","approved","active","action_required"]);
+
+  const { data, error } = await query;
+  if (error) throw error;
+  if (!data?.length) return null;
+
+  const normalized = value => String(value || "").trim().toLowerCase().replace(/\s+/g, "");
+  for (const row of data) {
+    if (fields.some(([key, value]) => normalized(row[key]) === normalized(value))) {
+      if (fields.some(([key, value]) => key === "mobile" && normalized(row.mobile) === normalized(value))) return "Mobile Number";
+      if (fields.some(([key, value]) => key === "email" && normalized(row.email) === normalized(value))) return "Email Address";
+      if (fields.some(([key, value]) => key === "account_number" && normalized(row.account_number) === normalized(value))) return "Bank Account Number";
+      if (fields.some(([key, value]) => key === "nominee_nid" && normalized(row.nominee_nid) === normalized(value))) return "Nominee NID";
+      if (fields.some(([key, value]) => key === "nid_number" && normalized(row.nid_number) === normalized(value))) return "NID Number";
+    }
+  }
+  return null;
+}
+
 async function submitLoanApplication(telegramUser, payload) {
   const db = adminClient();
   const chatId = Number(telegramUser?.id);
@@ -187,6 +223,10 @@ export default async function handler(req, res) {
     if (req.body?.action === "sync_profile") {
       const data = await syncProfile(result.user);
       return res.status(200).json({ ok: true, data });
+    }
+    if (req.body?.action === "loan" && req.body?.loanAction === "check_duplicate") {
+      const duplicate = await checkDuplicateApplication(result.user, req.body.payload || {});
+      return res.status(200).json({ ok: true, duplicate });
     }
     if (req.body?.action === "loan" && req.body?.loanAction === "submit") {
       const data = await submitLoanApplication(result.user, req.body.payload || {});
