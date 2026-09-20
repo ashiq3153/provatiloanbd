@@ -478,6 +478,19 @@ export default async function handler(req, res) {
       if (error) throw error;
       return res.status(200).json({ success: true, data: true });
     }
+    if (userAction === "update_kyc_review") {
+      const reviewId = String(req.body?.reviewId || "");
+      const status = String(req.body?.status || "");
+      const note = typeof req.body?.reviewerNote === "string" ? req.body.reviewerNote.slice(0, 2000) : null;
+      if (!reviewId || !["under_review","verified","rejected","needs_revision"].includes(status)) throw new Error("Invalid KYC review update");
+      const { data: review, error: reviewError } = await db.from("kyc_reviews").select("id,chat_id").eq("id", reviewId).single();
+      if (reviewError || !review) throw new Error("KYC review not found");
+      const { error } = await db.from("kyc_reviews").update({
+        status, reviewer_chat_id: userChatId, reviewer_note: note, reviewed_at: new Date().toISOString()
+      }).eq("id", reviewId);
+      if (error) throw error;
+      return res.status(200).json({ success: true, data: true });
+    }
     if (userAction === "get_kyc_reviews") {
       const { data, error } = await db.from("kyc_reviews").select("*").eq("chat_id", userChatId).order("submitted_at", { ascending: false }).limit(50);
       if (error) throw error;
