@@ -74,6 +74,7 @@ async function submitLoanApplication(telegramUser, payload) {
   const chatId = Number(telegramUser?.id);
   if (!chatId) throw new Error("Invalid Telegram user");
   if (!payload || typeof payload !== "object") throw new Error("Invalid loan payload");
+  await syncProfile(telegramUser);
 
   const allowedFields = [
     "loan_category","amount","tenure_months","interest_rate","emi_amount",
