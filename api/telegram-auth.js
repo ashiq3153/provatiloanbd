@@ -296,7 +296,12 @@ async function adminAction(action, payload) {
         verified_at: payload.status === "completed" || payload.status === "rejected" ? new Date().toISOString() : null,
         verification_note: typeof payload.verificationNote === "string" ? payload.verificationNote.slice(0, 1000) : null
       };
-      return !(await db.from("transactions").update(patch).eq("id", payload.id)).error;
+      const { error } = await db.from("transactions").update(patch).eq("id", payload.id);
+      if (error) throw error;
+      if (payload.status === "completed") {
+        await db.rpc("finalize_completed_transaction", { p_transaction_id: payload.id });
+      }
+      return true;
     }
     case "update_loan": {
       if (payload.status === "approved") {
