@@ -481,6 +481,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, data });
     }
     if (req.body?.action === "user") {
+    const db = adminClient();
     const userAction = String(req.body?.userAction || "");
     const userChatId = Number(result.user.id);
     if (!Number.isSafeInteger(userChatId) || userChatId <= 0) throw new Error("Invalid Telegram identity");
