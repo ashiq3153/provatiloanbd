@@ -407,7 +407,7 @@ export default function Home() {
   const statusConfig = getStatusConfig();
 
   return (
-    <div className="w-full min-w-0 px-3 sm:px-5 pb-[calc(6rem+env(safe-area-inset-bottom))] space-y-4 sm:space-y-6 neu-bg transition-colors min-h-full">
+    <div className="home-modern w-full min-w-0 px-3 sm:px-5 pb-[calc(6rem+env(safe-area-inset-bottom))] space-y-4 sm:space-y-6 neu-bg transition-colors min-h-full">
       {/* Header */}
       <div className="flex items-center justify-between gap-2 sm:gap-3 neu-raised p-2.5 sm:p-4 rounded-[20px] sm:rounded-[28px] mb-1 transition-colors sticky top-2 z-30 backdrop-blur-xl">
         <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
@@ -541,7 +541,7 @@ export default function Home() {
       {/* Balance Section */}
       <div className="relative mb-12 w-full">
         {/* Main blue card */}
-        <div className="rounded-[24px] px-5 pt-5 pb-10 relative overflow-hidden flex flex-col justify-between transition-colors" style={{background:'linear-gradient(135deg,rgba(37,99,235,0.18) 0%,rgba(99,102,241,0.12) 100%)',backdropFilter:'blur(20px)',border:'1px solid rgba(99,102,241,0.25)',boxShadow:'0 8px 32px -8px rgba(37,99,235,0.18)'}}>
+        <div className="home-balance-card rounded-[24px] px-5 pt-5 pb-10 relative overflow-hidden flex flex-col justify-between transition-colors" style={{background:'linear-gradient(135deg,rgba(37,99,235,0.18) 0%,rgba(99,102,241,0.12) 100%)',backdropFilter:'blur(20px)',border:'1px solid rgba(99,102,241,0.25)',boxShadow:'0 8px 32px -8px rgba(37,99,235,0.18)'}}>
           <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-blue-400/20 blur-3xl pointer-events-none" />
           <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-indigo-500/15 blur-2xl pointer-events-none" />
           {/* Header row */}
