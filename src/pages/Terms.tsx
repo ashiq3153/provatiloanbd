@@ -169,14 +169,14 @@ export default function Terms() {
                 {isBn ? '৩. গুরুত্বপূর্ণ নোটিশ' : '3. Important Notices'}
               </h2>
               {isBn ? (
-                <div className="text-xs text-amber-800 dark:text-amber-300 bg-amber-500/10 p-4.5 rounded-2xl border border-amber-500/20 leading-relaxed space-y-2 font-bold">
+                <div className="text-xs text-amber-800 dark:text-amber-300 bg-amber-500/10 p-4 rounded-2xl border border-amber-500/20 leading-relaxed space-y-2 font-bold">
                   <p className="font-extrabold flex items-center gap-1.5"><AlertCircle size={14} /> প্রসেসিং ফি বাধ্যতামুলক:</p>
                   <p>ঋণ আবেদন প্রসেস করার জন্য নির্ধারিত "প্রসেসিং ফি" ডিপোজিট করা বাধ্যতামূলক। ফি প্রদান ছাড়া কোনো আবেদন রিভিউর আওতায় নেওয়া হবে না এবং এটি সম্পূর্ণ অফেরতযোগ্য।</p>
                   <p className="font-extrabold mt-3">অ্যাডমিন রিভিউ এবং চ্যাট:</p>
                   <p>যাচাইকরণের সময় কোনো তথ্যে ঘাটতি থাকলে অ্যাডমিন থেকে সংশোধন (Revision) নোট পাঠানো হতে পারে, যা আপনার টেলিগ্রামে নোটিফিকেশনের মাধ্যমে জানানো হবে।</p>
                 </div>
               ) : (
-                <div className="text-xs text-amber-800 dark:text-amber-300 bg-amber-500/10 p-4.5 rounded-2xl border border-amber-500/20 leading-relaxed space-y-2 font-bold">
+                <div className="text-xs text-amber-800 dark:text-amber-300 bg-amber-500/10 p-4 rounded-2xl border border-amber-500/20 leading-relaxed space-y-2 font-bold">
                   <p className="font-extrabold flex items-center gap-1.5"><AlertCircle size={14} /> Processing Fee is Mandatory:</p>
                   <p>To begin evaluating your loan profile, the processing fee must be deposited. Unpaid files will not be reviewed. Processing fees are non-refundable.</p>
                   <p className="font-extrabold mt-3">Admin Reviews & Revisions:</p>
@@ -228,7 +228,7 @@ export default function Terms() {
                     <p className="font-extrabold text-gray-900 dark:text-white">• সঞ্চয় আমানত (Savings Deposit / Security Deposit):</p>
                     <p className="pl-4">সমিতি সদস্যদের নিরাপত্তা ও আমানত সুরক্ষার্থে ৫০,০০০ থেকে ৫,০০,০০০ টাকা ঋণের জন্য <b>১০% সঞ্চয়</b> এবং ৫,০০,০০০ টাকার ওপরে হলে <b>৫% সঞ্চয়</b> ডিপোজিট করা বাধ্যতামূলক। এই সঞ্চয় ব্যালেন্স আপনার একাউন্টে জমা থাকবে এবং লোন বিতরণের পরেও এটি আপনার একাউন্টেই দৃশ্যমান থাকবে।</p>
                   </div>
-                  <p className="bg-rose-500/10 text-rose-700 dark:text-rose-400 p-3.5 rounded-xl border border-rose-500/20 text-[11px] font-extrabold">
+                  <p className="bg-rose-500/10 text-rose-700 dark:text-rose-400 p-3 rounded-xl border border-rose-500/20 text-[11px] font-extrabold">
                     *বিশেষ সতর্কবার্তা: যেকোনো ভুয়া ট্রানজেকশন আইডি (DEP-xxxxx) অথবা অন্যের স্ক্রিনশট পেমেন্ট প্রুফ হিসেবে সাবমিট করলে সম্পূর্ণ ঋণ বাতিলসহ সদস্যপদ স্থায়ীভাবে স্থগিত করা হবে।
                   </p>
                 </div>
@@ -242,7 +242,7 @@ export default function Terms() {
                     <p className="font-extrabold text-gray-900 dark:text-white">• Savings Deposit:</p>
                     <p className="pl-4">To support cooperative savings, BDT 50,000 to BDT 500,000 loans require a <b>10% savings deposit</b>. Loans above BDT 500,000 require a <b>5% savings deposit</b>. This deposit remains locked in your account and is fully visible even after loan disbursement.</p>
                   </div>
-                  <p className="bg-rose-500/10 text-rose-700 dark:text-rose-400 p-3.5 rounded-xl border border-rose-500/20 text-[11px] font-extrabold">
+                  <p className="bg-rose-500/10 text-rose-700 dark:text-rose-400 p-3 rounded-xl border border-rose-500/20 text-[11px] font-extrabold">
                     *Fraud Notice: Submitting fake screenshot proofs or forged Transaction IDs (DEP-xxxxx) will lead to immediate cancellation of the application and a permanent account ban.
                   </p>
                 </div>
@@ -356,13 +356,13 @@ export default function Terms() {
                 {isBn ? '১০. সতর্কবার্তা ও ঝুঁকি নোটিশ' : '10. Warnings & Risk Notices'}
               </h2>
               {isBn ? (
-                <div className="text-xs text-rose-800 dark:text-rose-350 bg-rose-500/10 p-4.5 rounded-2xl border border-rose-500/20 leading-relaxed space-y-2.5 font-bold">
+                <div className="text-xs text-rose-800 dark:text-rose-400 bg-rose-500/10 p-4 rounded-2xl border border-rose-500/20 leading-relaxed space-y-2.5 font-bold">
                   <p>• <b>ঋণ খেলাপি সতর্কতা (Default Warning):</b> সময়মতো মাসিক কিস্তি পরিশোধে ব্যর্থ হলে আপনার অ্যাকাউন্টটি লাল তালিকাভুক্ত (Overdue status) হবে, যা পরবর্তীতে নতুন কোনো লোন পাওয়ার যোগ্যতাকে চিরতরে বাতিল করতে পারে।</p>
                   <p>• <b>জালিয়াতি দমন (Anti-Fraud Policy):</b> যদি কোনো আবেদনকারীর মোবাইল নাম্বার, ব্যাংক একাউন্ট বা এনআইডি জালিয়াতি বা অন্যের তথ্য ব্যবহারের মাধ্যমে সনাক্ত হয়, তবে "Fake Apply Detected" অ্যালার্ম ট্রিগার হবে এবং অ্যাকাউন্ট সাথে সাথে সাসপেন্ড করা হবে।</p>
                   <p>• <b>সমবায় নীতিমালা:</b> প্রভাতি সমবায় সমিতির আইন অনুযায়ী সমিতির সিদ্ধান্তই ঋণের আবেদন নিষ্পত্তি করার জন্য চূড়ান্ত কর্তৃপক্ষ হিসেবে গণ্য হবে।</p>
                 </div>
               ) : (
-                <div className="text-xs text-rose-800 dark:text-rose-300 bg-rose-500/10 p-4.5 rounded-2xl border border-rose-500/20 leading-relaxed space-y-2.5 font-bold">
+                <div className="text-xs text-rose-800 dark:text-rose-300 bg-rose-500/10 p-4 rounded-2xl border border-rose-500/20 leading-relaxed space-y-2.5 font-bold">
                   <p>• <b>Payment Default:</b> Failure to repay monthly EMIs will lead to loan classification (Overdue) and may permanently affect credit eligibility for future cooperative loans.</p>
                   <p>• <b>Anti-Fraud Trigger:</b> Attempting to apply with duplicate phone numbers, nominee NIDs, bank routing credentials, or fake transaction numbers triggers a "Fake Apply Detected" flag and results in permanent suspension.</p>
                   <p>• <b>Cooperative Rules:</b> In accordance with the Provati Somobay Somiti bylaws, the administration's audits and files disposition are final.</p>
@@ -401,7 +401,7 @@ export default function Terms() {
                   </p>
                 </div>
 
-                <div className="border-t border-gray-150 dark:border-gray-855 pt-3">
+                <div className="border-t border-gray-150 dark:border-gray-800 pt-3">
                   <h4 className="font-extrabold text-gray-900 dark:text-white mb-1">
                     {isBn ? 'প্রশ্নঃ আমার আবেদন রিভিশন (Revision Required) চাওয়া হয়েছে কেন?' : 'Q: Why has my application been marked as Revision Required?'}
                   </h4>
