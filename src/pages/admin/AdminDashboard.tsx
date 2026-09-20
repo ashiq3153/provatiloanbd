@@ -683,6 +683,8 @@ export default function AdminDashboard() {
           msg = `❌ <b>দুঃখিত ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটি বাতিল করা হয়েছে।\n\n${feedback ? `📝 কারণ: <i>${feedback}</i>\n\n` : ''}ভবিষ্যতে পুনরায় আবেদন করার জন্য অনুরোধ করা হলো। ধন্যবাদ।`;
         } else if (status === 'action_required') {
           msg = `⚠️ <b>মনোযোগ দিন ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটিতে কিছু সংশোধনী প্রয়োজন।\n\n📝 মন্তব্য: <b>${feedback}</b>\n\nঅনুগ্রহ করে প্রোফাইল থেকে প্রয়োজনীয় তথ্য ও ডকুমেন্ট আপডেট করুন। ধন্যবাদ!`;
+        } else if (status === 'cancelled') {
+          msg = `⚠️ <b>প্রিয় ${loan.full_name},</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটি বাতিল করা হয়েছে।${feedback ? `\n\n📝 কারণ: <i>${feedback}</i>` : ''}`;
         } else if (status === 'completed') {
           msg = `✅ <b>অভিনন্দন ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোনটি</b> সফলভাবে সম্পূর্ণ বা পরিশোধ হয়েছে।\n\nআমাদের সাথে থাকার জন্য ধন্যবাদ!`;
         }
@@ -2512,7 +2514,7 @@ export default function AdminDashboard() {
                       {(selectedLoan.status === 'pending' || selectedLoan.status === 'under_review') && (
                         <>
                           <button onClick={() => { handleLoanStatus(selectedLoan.id, 'approved'); setSelectedLoan({...selectedLoan, status: 'approved'}); }} className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"><CheckCircle size={14} /> Approve Application</button>
-                          <button onClick={() => { handleLoanStatus(selectedLoan.id, 'rejected'); setSelectedLoan({...selectedLoan, status: 'rejected'}); }} className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"><XCircle size={14} /> Reject Application</button>
+                          <button onClick={() => { handleLoanStatus(selectedLoan.id, 'cancelled'); setSelectedLoan({...selectedLoan, status: 'rejected'}); }} className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"><XCircle size={14} /> Reject Application</button>
                         </>
                       )}
                       {(selectedLoan.status === 'approved' || selectedLoan.status === 'active') && (
