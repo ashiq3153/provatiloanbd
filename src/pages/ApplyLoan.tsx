@@ -2705,7 +2705,7 @@ export default function ApplyLoan() {
                   for (const [field, result] of Object.entries(extracted?.fields || {})) {
                     const current = String(getValues(field as keyof LoanFormData) ?? "").trim();
                     if (!current && result.value) {
-                      setValue(field as keyof LoanFormData, result.value as any, {
+                      setValue(field as any, result.value as any, {
                         shouldDirty: true,
                         shouldValidate: true
                       });
