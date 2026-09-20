@@ -7,7 +7,6 @@ import { useAppStore } from '../../lib/store';
 import { convertDigits, formatCurrency } from '../../lib/translation';
 import { reactToSuccessStory } from '../../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
-import { sendTelegramNotification } from '../../lib/telegram';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { supabase } from '../../lib/supabase';
 
@@ -436,15 +435,14 @@ export default function AdminDashboard() {
           const miniAppUrl = import.meta.env.VITE_MINI_APP_URL || "https://provatiloanbd.vercel.app";
           const notificationMsg = `📩 <b>নতুন বার্তা এসেছে</b>\n\nPROVATI LOAN Support থেকে একটি নতুন মেসেজ পেয়েছেন।\n\nবিস্তারিত দেখতে "Live Chat" খুলুন।`;
           
-          sendTelegramNotification(
-            selectedChatId, 
-            notificationMsg, 
-            config.telegramBotToken,
+          await sendAdminTelegramMessage(
+            selectedChatId,
+            notificationMsg,
             { inline_keyboard: [[{ text: "💬 Live Chat", web_app: { url: `${miniAppUrl}/support` } }]] }
           );
           
         } else {
-          console.error('Error sending admin reply:', error);
+          console.error('Error sending admin reply');
         }
       }
     } catch (err) {
@@ -652,7 +650,7 @@ export default function AdminDashboard() {
         }
 
         if (msg) {
-          sendTelegramNotification(loan.chat_id, msg, config.telegramBotToken);
+          await sendAdminTelegramMessage(loan.chat_id, msg);
         }
 
       }
@@ -723,7 +721,7 @@ export default function AdminDashboard() {
         }
 
         if (msg) {
-          sendTelegramNotification(txn.chat_id, msg, config.telegramBotToken);
+          await sendAdminTelegramMessage(txn.chat_id, msg);
         }
       }
     } else {
