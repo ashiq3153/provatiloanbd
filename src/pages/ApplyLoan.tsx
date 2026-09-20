@@ -270,7 +270,7 @@ export default function ApplyLoan() {
     resolver: zodResolver(getLoanSchema(isBn)),
     mode: "onChange",
   });
-  const { register, trigger, setValue, getValues, formState: { errors } } = methods;
+  const { register, trigger, formState: { errors } } = methods;
 
 
   const [step, setStep] = useState(1);
@@ -2703,9 +2703,9 @@ export default function ApplyLoan() {
                   const extracted = await extractDocumentFields(file, id);
                   let filled = 0;
                   for (const [field, result] of Object.entries(extracted?.fields || {})) {
-                    const current = String(getValues(field as any) ?? "").trim();
+                    const current = String(methods.getValues(field as any) ?? "").trim();
                     if (!current && result.value) {
-                      setValue(field as any, result.value as any, {
+                      methods.setValue(field as any, result.value as any, {
                         shouldDirty: true,
                         shouldValidate: true
                       });
