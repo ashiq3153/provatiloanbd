@@ -398,7 +398,7 @@ export default function Home() {
   return (
     <div className="p-5 pb-10 space-y-6 neu-bg transition-colors min-h-full">
       {/* Header */}
-      <div className="flex justify-between items-center neu-raised p-4.5 rounded-[28px] mb-2 transition-colors">
+      <div className="flex justify-between items-center gap-3 neu-raised p-3 sm:p-4.5 rounded-[22px] sm:rounded-[28px] mb-2 transition-colors">
         <div className="flex items-center gap-4">
           <div className="relative">
             <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden">
