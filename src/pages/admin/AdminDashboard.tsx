@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, MessageCircle, Copy, ArrowLeft, Edit2, Lock, Unlock, ThumbsUp, Heart } from 'lucide-react';
-import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, getAllChatMessages, sendAdminChatMessage, editChatMessage, markChatMessagesSeen, deleteChatMessage, sendAdminTelegramMessage, broadcastAdminTelegramMessage } from '../../lib/adminApi';
+import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, getAllChatMessages, sendAdminChatMessage, editChatMessage, markChatMessagesSeen, deleteChatMessage, sendAdminTelegramMessage, broadcastAdminTelegramMessage, getFinancialReconciliationReport } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
 import { useAppStore } from '../../lib/store';
@@ -23,6 +23,7 @@ export default function AdminDashboard() {
   const [broadcastIncludeButton, setBroadcastIncludeButton] = useState(true);
   const [isBroadcasting, setIsBroadcasting] = useState(false);
   const [broadcastStats, setBroadcastStats] = useState({ total: 0, delivered: 0, failed: 0 });
+  const [financialReport, setFinancialReport] = useState<any | null>(null);
   const [broadcastProgress, setBroadcastProgress] = useState(0);
 
   const [showDirectMessageModal, setShowDirectMessageModal] = useState(false);
@@ -376,6 +377,7 @@ export default function AdminDashboard() {
       setLoans(l);
       setTransactions(t);
       setStories(s);
+      try { setFinancialReport(await getFinancialReconciliationReport()); } catch { setFinancialReport(null); }
     } catch (err) {
       toast.error('Failed to load admin data');
     } finally {
@@ -980,6 +982,20 @@ export default function AdminDashboard() {
               className="w-full max-w-7xl mx-auto min-w-0 space-y-4 sm:space-y-6"
             >
               {activeTab === 'overview' && (
+                <div className="mb-6 grid grid-cols-2 lg:grid-cols-5 gap-3">
+                  {[
+                    ['Deposit', financialReport?.completed_deposits],
+                    ['EMI', financialReport?.completed_emi],
+                    ['Withdraw', financialReport?.completed_withdrawals],
+                    ['Disbursement', financialReport?.completed_disbursements],
+                    ['Pending', financialReport?.pending_amount],
+                  ].map(([label, value]) => (
+                    <div key={String(label)} className="neu-raised rounded-2xl p-4">
+                      <p className="text-xs text-gray-500">{label}</p>
+                      <p className="text-lg font-black mt-1">{formatCurrency(Number(value || 0))}</p>
+                    </div>
+                  ))}
+                </div>
                 <div className="space-y-8">
                   {/* Grid stats */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
