@@ -60,7 +60,7 @@ export default function Loans() {
         </div>
       </div>
 
-      <div className="flex-1 p-5 space-y-5">
+      <div className="flex-1 w-full min-w-0 px-3 sm:px-5 py-4 sm:py-5 space-y-4 sm:space-y-5">
         
         {/* Animated Active Loans summary (only show if there are active loans) */}
         {!loading && activeLoansCount > 0 && (
@@ -86,7 +86,7 @@ export default function Loans() {
             <div className="space-y-4">
               {[1, 2, 3].map(i => (
                 <div key={i} className="neu-raised rounded-[24px] p-6 relative overflow-hidden">
-                  <div className="flex justify-between items-start mb-5 relative z-10">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start mb-5 relative z-10">
                     <div className="space-y-2 flex-1 pr-6">
                       <Skeleton className="h-6 w-1/2" />
                       <Skeleton className="h-4 w-1/3" />
@@ -133,7 +133,7 @@ export default function Loans() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     key={loan.id} 
-                    className="neu-raised rounded-[24px] p-6 transition-all group relative overflow-hidden cursor-pointer hover:scale-[1.005]"
+                    className="neu-raised rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 transition-all group relative overflow-hidden cursor-pointer hover:scale-[1.005]"
                   >
                     <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/5 dark:bg-primary-900/5 rounded-bl-full -mr-10 -mt-10 z-0 group-hover:scale-110 transition-transform"></div>
 
@@ -142,16 +142,16 @@ export default function Loans() {
                         <h3 className="font-bold text-lg text-gray-900 dark:text-white capitalize group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{loan.loan_category} Loan</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400 font-mono mt-1">ID: #{loan.id.split('-')[0].toUpperCase()}</p>
                       </div>
-                      <div className={`px-3 py-1.5 rounded-full border flex items-center gap-1.5 text-xs font-bold capitalize ${status.color}`}>
+                      <div className={`self-start px-3 py-1.5 rounded-full border flex items-center gap-1.5 text-xs font-bold capitalize whitespace-nowrap ${status.color}`}>
                         <StatusIcon size={14} />
                         {status.text}
                       </div>
                     </div>
                     
-                    <div className="flex justify-between items-end pt-4 border-t border-white/20 dark:border-white/5 relative z-10">
+                    <div className="flex flex-col gap-3 xs:flex-row xs:justify-between xs:items-end pt-4 border-t border-white/20 dark:border-white/5 relative z-10">
                       <div>
                         <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider mb-0.5">{isBn ? 'পরিমাণ' : 'Amount'}</p>
-                        <p className="text-2xl font-black text-gray-900 dark:text-white">{formatCurrency(loan.amount || 0, isBn)}</p>
+                        <p className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{formatCurrency(loan.amount || 0, isBn)}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider mb-0.5">{isBn ? 'তারিখ' : 'Date'}</p>
