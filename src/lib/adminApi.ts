@@ -69,14 +69,6 @@ export async function getAllAdminSuccessStories(): Promise<SuccessStory[]> { ret
 export async function addSuccessStory(story: Omit<SuccessStory, 'id'>): Promise<boolean> { return (await callAdmin<boolean>('add_success_story', { story })) === true; }
 export async function deleteSuccessStory(id: string): Promise<boolean> { return (await callAdmin<boolean>('delete_success_story', { id })) === true; }
 
-export async function getAllChatMessages(): Promise<any[]> { return (await callAdmin<any[]>('get_chat_messages')) || []; }
-export async function sendAdminChatMessage(chatId: number, message: string, replyTo?: string | null, attachmentUrl?: string | null): Promise<boolean> {
-  return (await callAdmin<boolean>('send_chat_message', { chatId, message, replyTo: replyTo || null, attachmentUrl: attachmentUrl || null })) === true;
-}
-export async function editChatMessage(id: string, message: string): Promise<boolean> { return (await callAdmin<boolean>('edit_chat_message', { id, message })) === true; }
-export async function markChatMessagesSeen(ids: string[]): Promise<boolean> { if (!ids.length) return true; return (await callAdmin<boolean>('mark_chat_seen', { ids })) === true; }
-export async function deleteChatMessage(id: string): Promise<boolean> { return (await callAdmin<boolean>('delete_chat_message', { id })) === true; }
-
 /**
  * Sends a Telegram Bot API message to any chat_id on the admin's behalf.
  * The bot token stays server-only (TELEGRAM_BOT_TOKEN env var) and is never
