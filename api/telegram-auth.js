@@ -242,6 +242,35 @@ async function syncProfile(telegramUser) {
   return data;
 }
 
+async function getAdminRole(chatId) {
+  const { data, error } = await adminClient().rpc("get_admin_role", { p_chat_id: Number(chatId) });
+  if (error) throw error;
+  return data || null;
+}
+
+const ADMIN_ACTION_ROLES = {
+  get_profiles: ["owner","admin","support","viewer","finance"],
+  get_loans: ["owner","admin","support","viewer","finance"],
+  get_transactions: ["owner","admin","finance","viewer"],
+  get_success_stories: ["owner","admin","support","viewer"],
+  get_system_setting: ["owner","admin","finance","support","viewer"],
+  ban_user: ["owner","admin","support"],
+  lock_user: ["owner","admin","support"],
+  delete_user: ["owner","admin"],
+  update_transaction: ["owner","admin","finance"],
+  update_loan: ["owner","admin","finance"],
+  update_system_setting: ["owner","admin"],
+  add_success_story: ["owner","admin","support"],
+  delete_success_story: ["owner","admin"],
+  get_chat_messages: ["owner","admin","support","viewer"],
+  send_chat_message: ["owner","admin","support"],
+  edit_chat_message: ["owner","admin","support"],
+  mark_chat_seen: ["owner","admin","support","viewer"],
+  delete_chat_message: ["owner","admin"],
+  send_telegram_message: ["owner","admin","support"],
+  broadcast_telegram_message: ["owner","admin","support"]
+};
+
 async function adminAction(action, payload) {
   const db = adminClient();
   switch (action) {
@@ -364,6 +393,11 @@ export default async function handler(req, res) {
     if (req.body?.action === "admin") {
       if (!ADMIN_CHAT_IDS.has(String(result.user.id))) return res.status(403).json({ ok: false, error: "Admin access denied" });
       const adminActionName = String(req.body.adminAction || "unknown");
+      const adminRole = await getAdminRole(Number(result.user.id));
+      const allowedRoles = ADMIN_ACTION_ROLES[adminActionName] || [];
+      if (!adminRole || !allowedRoles.includes(adminRole)) {
+        return res.status(403).json({ ok: false, error: "Insufficient admin role permissions" });
+      }
       const adminPayload = req.body.payload || {};
       const data = await adminAction(adminActionName, adminPayload);
 
