@@ -93,36 +93,32 @@ export async function checkDuplicateApplication(
   passportNumber: string | null,
   excludeId?: string | null
 ): Promise<string | null> {
-  let query = supabase.from('loan_applications').select('id, mobile, email, account_number, nominee_nid, nid_number, professional_info');
-  if (excludeId) {
-    query = query.neq('id', excludeId);
+  try {
+    // Duplicate validation is server-side and Telegram-verified so it cannot
+    // be affected by the browser's Supabase identity/session race.
+    // @ts-ignore
+    const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+    if (!initData) return null;
+    const response = await fetch('/api/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        initData,
+        action: 'loan',
+        loanAction: 'check_duplicate',
+        payload: { mobile, email, accountNumber, nomineeNid, nidNumber, passportNumber, excludeId },
+      }),
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result?.ok) {
+      console.error('Duplicate check gateway error:', result?.error || response.statusText);
+      return null;
+    }
+    return result.duplicate || null;
+  } catch (error) {
+    console.error('Duplicate check error:', error);
+    return null;
   }
-  
-  query = query.neq('status', 'rejected').neq('status', 'cancelled').neq('status', 'completed');
-  
-  const orConditions = [
-    `mobile.eq.${mobile}`,
-    `account_number.eq.${accountNumber}`,
-    `nominee_nid.eq.${nomineeNid}`,
-    `nid_number.eq.${nidNumber}`
-  ];
-  if (email) orConditions.push(`email.eq.${email}`);
-  if (passportNumber) orConditions.push(`professional_info->>passportNumber.eq.${passportNumber}`);
-  
-  query = query.or(orConditions.join(','));
-  
-  const { data, error } = await query;
-  if (error || !data || data.length === 0) return null;
-
-  const duplicate = data[0];
-  if (duplicate.mobile === mobile) return 'Mobile Number';
-  if (email && duplicate.email === email) return 'Email Address';
-  if (duplicate.account_number === accountNumber) return 'Bank Account Number';
-  if (duplicate.nid_number === nidNumber) return 'NID Number';
-  if (duplicate.nominee_nid === nomineeNid) return 'Nominee NID';
-  if (passportNumber && duplicate.professional_info && (duplicate.professional_info as any).passportNumber === passportNumber) return 'Passport Number';
-  
-  return 'Information';
 }
 
 export async function getLoanApplications(chatId: number): Promise<LoanApplication[]> {
