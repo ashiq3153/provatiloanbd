@@ -203,7 +203,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
           <button 
             type="button"
             onClick={() => navigate('/')}
-            className="w-full neu-btn-primary py-3.5 rounded-[20px] font-black active:scale-95 transition-all text-sm relative z-10 border-0"
+            className="w-full neu-btn-primary py-3 rounded-[20px] font-black active:scale-95 transition-all text-sm relative z-10 border-0"
           >
             {isBn ? 'হোম পেজে ফিরে যান' : 'Back to Home'}
           </button>
@@ -252,7 +252,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 key={amt}
                 type="button"
                 onClick={() => setLoanAmount(amt.toString())}
-                className={`px-3.5 py-2 rounded-full text-xs font-black transition-all border-0 cursor-pointer ${
+                className={`px-3 py-2 rounded-full text-xs font-black transition-all border-0 cursor-pointer ${
                   loanAmtNum === amt
                     ? 'neu-btn-primary shadow-sm'
                     : 'neu-btn'
@@ -389,7 +389,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               )}
 
               {/* Total Row */}
-              <div className="p-3.5 px-5 neu-sunken rounded-full flex items-center justify-between border-0 text-gray-900 dark:text-white">
+              <div className="p-3 px-5 neu-sunken rounded-full flex items-center justify-between border-0 text-gray-900 dark:text-white">
                 <span className="text-xs font-black text-gray-500 dark:text-gray-400">{isBn ? 'মোট সম্ভাব্য জমা' : 'Total Charges'}</span>
                 <span className="text-base font-black">৳{selectedPaymentAmount.toLocaleString('en-IN')}</span>
               </div>
@@ -403,7 +403,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
           animate={{ opacity: 1, y: 0 }}
           className="neu-raised rounded-[24px] p-5 border-0"
         >
-          <label className="block text-xs font-black text-gray-700 dark:text-gray-300 mb-3.5 transition-colors">
+          <label className="block text-xs font-black text-gray-700 dark:text-gray-300 mb-3 transition-colors">
             {isBn ? 'পেমেন্ট গেটওয়ে' : 'Payment Method'}
           </label>
           
@@ -542,7 +542,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
             <button
               type="submit"
               disabled={selectedPaymentAmount <= 0 || !senderNo || submitted}
-              className="w-full neu-btn-primary disabled:opacity-50 text-white py-3.5 rounded-full font-black text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 border-0"
+              className="w-full neu-btn-primary disabled:opacity-50 text-white py-3 rounded-full font-black text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 border-0"
             >
               {submitted ? (
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
