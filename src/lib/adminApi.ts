@@ -92,3 +92,11 @@ export async function broadcastAdminTelegramMessage(chatIds: number[], message: 
 export async function getFinancialReconciliationReport(): Promise<any | null> {
   return await callAdmin<any>('get_financial_report', {});
 }
+
+export async function getKycReviewQueue(): Promise<any[]> {
+  return await callAdmin<any[]>('get_kyc_queue', {}) || [];
+}
+
+export async function updateKycReview(id: string, status: 'under_review' | 'verified' | 'rejected' | 'needs_revision', reviewerNote?: string): Promise<boolean> {
+  return (await callAdmin<boolean>('update_kyc_review', { reviewId: id, status, reviewerNote })) === true;
+}
