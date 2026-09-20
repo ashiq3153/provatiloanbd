@@ -1025,7 +1025,7 @@ export default function AdminDashboard() {
                   ].map(([label, value]) => (
                     <div key={String(label)} className="neu-raised rounded-2xl p-4">
                       <p className="text-xs text-gray-500">{label}</p>
-                      <p className="text-lg font-black mt-1">{formatCurrency(Number(value || 0))}</p>
+                      <p className="text-lg font-black mt-1">{formatCurrency(Number(value || 0), isBn)}</p>
                     </div>
                   ))}
                 </div>
