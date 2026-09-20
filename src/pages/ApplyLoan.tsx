@@ -2693,8 +2693,7 @@ export default function ApplyLoan() {
             const url = await uploadDocument(file, user.id, id);
             if (url) {
               setDocuments(prev => ({ ...prev, [id]: url }));
-
-             } else {
+            } else {
                     toast.info(isBn ? "ডকুমেন্ট পাওয়া গেছে, কিন্তু নির্ভরযোগ্য ফর্ম তথ্য শনাক্ত হয়নি।" : "Document uploaded, but no reliable form fields were detected.");
                   }
                 } catch (ocrError) {
