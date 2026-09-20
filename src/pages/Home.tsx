@@ -396,12 +396,12 @@ export default function Home() {
   const statusConfig = getStatusConfig();
 
   return (
-    <div className="p-5 pb-10 space-y-6 neu-bg transition-colors min-h-full">
+    <div className="w-full min-w-0 px-3 sm:px-5 pb-[calc(6rem+env(safe-area-inset-bottom))] space-y-4 sm:space-y-6 neu-bg transition-colors min-h-full">
       {/* Header */}
-      <div className="flex justify-between items-center gap-3 neu-raised p-3 sm:p-4 rounded-[22px] sm:rounded-[28px] mb-2 transition-colors">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between gap-2 sm:gap-3 neu-raised p-2.5 sm:p-4 rounded-[20px] sm:rounded-[28px] mb-1 transition-colors sticky top-2 z-30 backdrop-blur-xl">
+        <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
           <div className="relative">
-            <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden">
+            <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center overflow-hidden shrink-0">
               <img
                 src={user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name}`}
                 alt="Profile"
@@ -419,16 +419,16 @@ export default function Home() {
             <p className="text-[10px] text-gray-500 dark:text-gray-400 font-extrabold uppercase tracking-wider mb-0.5 transition-colors">
               {isBn ? 'স্বাগতম' : 'Welcome back'}
             </p>
-            <h1 className="text-lg font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-1.5 transition-colors">
+            <h1 className="text-base sm:text-lg font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-1.5 transition-colors truncate max-w-[42vw] sm:max-w-none">
               {user.first_name} {user.last_name}
             </h1>
           </div>
         </div>
-        <div className="flex items-center gap-3 relative">
+        <div className="flex items-center gap-1.5 sm:gap-3 relative shrink-0">
           <button
             type="button"
             onClick={() => setShowNotifications(!showNotifications)}
-            className="w-11 h-11 rounded-2xl neu-btn flex items-center justify-center relative border-0 cursor-pointer"
+            className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl neu-btn flex items-center justify-center relative border-0 cursor-pointer active:scale-95 transition-transform"
           >
             <Bell className="w-5 h-5 text-gray-700 dark:text-gray-300 transition-colors" />
             {getNotifications().length > 0 && (
@@ -458,7 +458,7 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 15, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute right-0 mt-3 w-80 sm:w-96 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-gray-100 dark:border-gray-700 rounded-[24px] shadow-2xl p-5 z-50 overflow-hidden"
+                  className="absolute right-0 mt-3 w-[calc(100vw-1.5rem)] max-w-96 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-gray-100 dark:border-gray-700 rounded-[24px] shadow-2xl p-5 z-50 overflow-hidden"
                 >
                   <div className="flex justify-between items-center pb-3 border-b border-gray-100 dark:border-gray-700 mb-3">
                     <h4 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
