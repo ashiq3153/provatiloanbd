@@ -423,7 +423,7 @@ export default function Support() {
         {activeTab === 'chat' ? (
           <div className="flex-1 min-w-0 min-h-0 flex flex-col h-full overflow-hidden bg-transparent">
             {/* Help Topics Row - Neumorphic visual badges */}
-            <div className="px-3 sm:px-5 py-2 overflow-x-auto shrink-0 flex gap-3.5 hide-scrollbar">
+            <div className="px-3 sm:px-5 py-2 overflow-x-auto shrink-0 flex gap-3 hide-scrollbar">
               {[
                 { id: 1, type: 'orange', labelBn: 'ডিপোজিট সমস্যা', labelEn: 'Deposit Issue', text: 'আমি ডিপোজিট করতে চাই, পেমেন্ট নম্বর দিন।' },
                 { id: 2, type: 'purple', labelBn: 'ঋণ অনুমোদন', labelEn: 'Loan Approval', text: 'আমার লোন আবেদনটি কতক্ষণে অনুমোদিত হবে?' },
@@ -584,7 +584,7 @@ export default function Support() {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-gray-750 dark:text-gray-200 truncate max-w-[150px]">{selectedFile.name}</p>
+                    <p className="text-xs font-bold text-gray-700 dark:text-gray-200 truncate max-w-[150px]">{selectedFile.name}</p>
                     <p className="text-[10px] text-gray-400 font-medium">
                       {uploadingAttachment ? (isBn ? 'আপলোড হচ্ছে...' : 'Uploading...') : `${(selectedFile.size / 1024).toFixed(1)} KB`}
                     </p>
@@ -636,7 +636,7 @@ export default function Support() {
             </div>
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto p-5 space-y-4.5 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
             {/* FAQ List */}
             {faqs.map((faq, index) => (
               <div 
@@ -645,7 +645,7 @@ export default function Support() {
               >
                 <button 
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full flex items-center justify-between p-4.5 text-left focus:outline-none bg-transparent border-0 cursor-pointer"
+                  className="w-full flex items-center justify-between p-4 text-left focus:outline-none bg-transparent border-0 cursor-pointer"
                 >
                   <span className={`font-black text-xs pr-4 transition-colors ${openFaq === index ? 'text-primary-600 dark:text-primary-400' : 'text-gray-800 dark:text-gray-200'}`}>
                     {faq.q}
@@ -666,7 +666,7 @@ export default function Support() {
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="p-4.5 pt-0 text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-bold">
+                      <div className="p-4 pt-0 text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-bold">
                         {faq.a}
                       </div>
                     </motion.div>
