@@ -3,6 +3,7 @@
 // ══════════════════════════════════════════════════════════
 
 import { supabase, ensureSupabaseAuthSession } from './supabase';
+import { getTelegramUser } from './telegram';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../types/database';
 
 // ── Profile APIs ─────────────────────────────────────────
