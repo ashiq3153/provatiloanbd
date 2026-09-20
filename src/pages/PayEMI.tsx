@@ -199,7 +199,7 @@ export default function PayEMI() {
           </p>
           
           <div className="neu-sunken p-4 rounded-2xl border border-orange-500/20 mb-6 transition-colors relative z-10">
-            <p className="text-xs uppercase tracking-wider font-bold text-orange-850 dark:text-orange-300 mb-1 transition-colors">
+            <p className="text-xs uppercase tracking-wider font-bold text-orange-800 dark:text-orange-300 mb-1 transition-colors">
               {isBn ? 'আপডেট সময়' : 'Estimated Time'}
             </p>
             <p className="font-bold text-orange-600 dark:text-orange-400 transition-colors flex items-center justify-center gap-2">
@@ -297,7 +297,7 @@ export default function PayEMI() {
                 className={`py-4 px-3 rounded-[20px] text-sm font-bold transition-all flex flex-col items-center justify-center gap-3 relative overflow-hidden ${
                   selectedMethod === m.id 
                     ? `neu-sunken text-primary-600 dark:text-primary-400` 
-                    : 'neu-raised-sm hover:scale-[1.02] text-gray-650 dark:text-gray-300'
+                    : 'neu-raised-sm hover:scale-[1.02] text-gray-600 dark:text-gray-300'
                 }`}
               >
                 {selectedMethod === m.id && (
@@ -340,10 +340,10 @@ export default function PayEMI() {
           </div>
           
           <div className="flex gap-3 relative z-10">
-            <button onClick={openWhatsApp} type="button" className="flex-1 neu-btn py-3.5 rounded-full flex items-center justify-center gap-2 font-bold text-sm active:scale-95 transition-all text-gray-750 dark:text-gray-200">
+            <button onClick={openWhatsApp} type="button" className="flex-1 neu-btn py-3 rounded-full flex items-center justify-center gap-2 font-bold text-sm active:scale-95 transition-all text-gray-700 dark:text-gray-200">
               <MessageCircle size={18} className="text-green-500" /> WhatsApp
             </button>
-            <button onClick={openTelegram} type="button" className="flex-1 neu-btn py-3.5 rounded-full flex items-center justify-center gap-2 font-bold text-sm active:scale-95 transition-all text-gray-755 dark:text-gray-200">
+            <button onClick={openTelegram} type="button" className="flex-1 neu-btn py-3 rounded-full flex items-center justify-center gap-2 font-bold text-sm active:scale-95 transition-all text-gray-755 dark:text-gray-200">
               <Send size={18} className="text-sky-500" /> Telegram
             </button>
           </div>
@@ -506,7 +506,7 @@ export default function PayEMI() {
             <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">
               {isBn ? 'আপনি কি নিশ্চিত?' : 'Are you sure?'}
             </h3>
-            <p className="text-sm text-center text-gray-650 dark:text-gray-400 mb-6">
+            <p className="text-sm text-center text-gray-600 dark:text-gray-400 mb-6">
               {isBn 
                 ? 'ইএমআই পেমেন্ট সাবমিট করার আগে নিশ্চিত করুন আপনি সঠিক ট্রানজেকশন আইডি এবং সেন্ডার নাম্বার দিয়েছেন। ভুল তথ্য দিলে রিকুয়েস্ট বাতিল হবে।' 
                 : 'Please ensure TrxID and Sender Number are correct before submitting. Incorrect details will lead to rejection.'}
