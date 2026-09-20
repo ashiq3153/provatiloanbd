@@ -462,7 +462,31 @@ export default async function handler(req, res) {
       const data = await submitLoanApplication(result.user, req.body.payload || {});
       return res.status(200).json({ ok: true, data });
     }
-    if (req.body?.action === "admin") {
+    if (req.body?.action === "user") {
+    const userAction = String(req.body?.userAction || "");
+    const userChatId = Number(result.user.id);
+    if (!Number.isSafeInteger(userChatId) || userChatId <= 0) throw new Error("Invalid Telegram identity");
+    if (userAction === "get_notifications") {
+      const { data, error } = await db.from("notifications").select("*").eq("chat_id", userChatId).order("created_at", { ascending: false }).limit(100);
+      if (error) throw error;
+      return res.status(200).json({ success: true, data: data || [] });
+    }
+    if (userAction === "mark_notification_read") {
+      const id = String(req.body?.id || "");
+      if (!id) throw new Error("Notification id required");
+      const { error } = await db.from("notifications").update({ is_read: true, read_at: new Date().toISOString() }).eq("id", id).eq("chat_id", userChatId);
+      if (error) throw error;
+      return res.status(200).json({ success: true, data: true });
+    }
+    if (userAction === "get_kyc_reviews") {
+      const { data, error } = await db.from("kyc_reviews").select("*").eq("chat_id", userChatId).order("submitted_at", { ascending: false }).limit(50);
+      if (error) throw error;
+      return res.status(200).json({ success: true, data: data || [] });
+    }
+    throw new Error("Unsupported user action");
+  }
+
+  if (req.body?.action === "admin") {
       if (!ADMIN_CHAT_IDS.has(String(result.user.id))) return res.status(403).json({ ok: false, error: "Admin access denied" });
       const adminActionName = String(req.body.adminAction || "unknown");
       const adminRole = await getAdminRole(Number(result.user.id));
