@@ -2690,22 +2690,21 @@ export default function ApplyLoan() {
             const file = e.target.files?.[0];
             if (!file) return;
             setUploadingDoc(id);
-            const url = await uploadDocument(file, user.id, id);
-            if (url) {
-              setDocuments(prev => ({ ...prev, [id]: url }));
-            } else {
-                    toast.info(isBn ? "ডকুমেন্ট পাওয়া গেছে, কিন্তু নির্ভরযোগ্য ফর্ম তথ্য শনাক্ত হয়নি।" : "Document uploaded, but no reliable form fields were detected.");
-                  }
-                } catch (ocrError) {
-                  console.warn("Document OCR failed:", ocrError);
-                  toast.info(isBn ? "ডকুমেন্ট আপলোড হয়েছে। স্বয়ংক্রিয় পড়া সম্ভব হয়নি—তথ্য হাতে যাচাই করুন।" : "Document uploaded. Automatic reading was unavailable—please verify manually.");
-                }
+            try {
+              const url = await uploadDocument(file, user.id, id);
+              if (url) {
+                setDocuments(prev => ({ ...prev, [id]: url }));
+              } else {
+                toast.error(isBn ? 'ফাইল আপলোড ব্যর্থ হয়েছে' : 'File upload failed');
               }
-            } else {
+            } catch (error) {
+              console.error('Document upload failed:', error);
               toast.error(isBn ? 'ফাইল আপলোড ব্যর্থ হয়েছে' : 'File upload failed');
+            } finally {
+              setUploadingDoc(null);
+              e.target.value = '';
             }
-            setUploadingDoc(null);
-          }}
+          }}}}
         />
         <label 
           htmlFor={isUploading ? undefined : `file-${id}`}
