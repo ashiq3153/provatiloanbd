@@ -297,7 +297,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               type="number" 
               value={loanAmount}
               onChange={(e) => setLoanAmount(e.target.value)}
-              className={`w-full neu-input rounded-full py-3 pl-8 pr-4 text-base font-black outline-none border-2 transition-all text-gray-900 dark:text-white ${presetAmounts.includes(loanAmtNum) ? "border-primary-500/60 ring-2 ring-primary-500/10" : "border-transparent focus:border-primary-500/40"}`} 
+              className={`w-full neu-input rounded-full py-3 pl-8 pr-4 text-base font-black outline-none border-2 transition-all text-gray-900 dark:text-white ${presetAmounts.includes(loanAmtNum) ? "border-primary-500/70 ring-2 ring-primary-500/10" : "border-transparent focus:border-primary-500/40"}`} 
               placeholder={isBn ? "অন্যান্য পরিমাণ লিখুন (উদাঃ ১০০০০০)" : "Enter custom amount (e.g. 100000)"} 
             />
           </div>
@@ -570,13 +570,18 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                   {uploading ? (
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
                   ) : screenshotUrl ? (
-                    <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 text-xs font-black">
-                      <CheckCircle2 size={16} />
-                      {isBn ? 'স্ক্রিনশট সংযুক্ত হয়েছে' : 'Screenshot Attached'}
-                    </div>
-                    {screenshotPreview && (
-                      <img src={screenshotPreview} alt="Payment screenshot preview" className="mt-2 h-20 w-28 object-cover rounded-xl border border-green-500/30 shadow-sm" />
-                    )}
+                    <>
+                      <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 text-xs font-black">
+                        <CheckCircle2 size={16} />
+                        {isBn ? 'স্ক্রিনশট সংযুক্ত হয়েছে' : 'Screenshot Attached'}
+                      </div>
+                      {screenshotPreview && (
+                        <img src={screenshotPreview} alt="Payment screenshot preview" className="mt-2 h-20 w-28 object-cover rounded-xl border border-green-500/30 shadow-sm" />
+                      )}
+                      <span className="text-[9px] font-medium text-gray-400 dark:text-gray-500">
+                        JPG/PNG, সর্বোচ্চ 5MB
+                      </span>
+                    </>
                   ) : (
                     <>
                       <UploadCloud size={20} className="text-gray-400" />
