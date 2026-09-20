@@ -20,7 +20,8 @@ type AdminAction =
   | 'edit_chat_message'
   | 'mark_chat_seen'
   | 'delete_chat_message'
-  | 'send_telegram_message';
+  | 'send_telegram_message'
+  | 'broadcast_telegram_message';
 
 async function callAdmin<T>(adminAction: AdminAction, payload: Record<string, unknown> = {}): Promise<T | null> {
   const telegramWebApp = (window as Window & { Telegram?: { WebApp?: { initData?: string } } }).Telegram?.WebApp;
@@ -81,3 +82,7 @@ export async function sendAdminTelegramMessage(chatId: number, message: string, 
   return (await callAdmin<boolean>('send_telegram_message', { chatId, message, replyMarkup })) === true;
 }
 
+
+export async function broadcastAdminTelegramMessage(chatIds: number[], message: string, replyMarkup?: any): Promise<{ delivered: number; failed: number } | null> {
+  return await callAdmin<{ delivered: number; failed: number }>('broadcast_telegram_message', { chatIds, message, replyMarkup });
+}
