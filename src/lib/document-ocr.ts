@@ -9,19 +9,21 @@ export type DocumentOcrResult = {
   confidence: number;
 };
 
+type TesseractModule = any;
+
 declare global {
   interface Window {
-    Tesseract?: any;
+    Tesseract?: TesseractModule;
   }
 }
 
-let tesseractLoader: Promise<any> | null = null;
+let tesseractLoader: Promise<TesseractModule> | null = null;
 
 async function loadTesseract() {
   if (typeof window === "undefined") throw new Error("OCR is browser-only");
   if (window.Tesseract) return window.Tesseract;
   if (!tesseractLoader) {
-    tesseractLoader = new Promise((resolve, reject) => {
+    tesseractLoader = new Promise<TesseractModule>((resolve, reject) => {
       const existing = document.querySelector('script[data-provati-ocr="tesseract"]') as HTMLScriptElement | null;
       if (existing) {
         existing.addEventListener("load", () => resolve(window.Tesseract));
@@ -173,7 +175,7 @@ export async function extractDocumentFields(file: File, docKey: string, onProgre
   const Tesseract = await loadTesseract();
   const worker = await Tesseract.createWorker("eng+ben");
   try {
-    const result = await worker.recognize(file, {}, { progress: (p: any) => onProgress?.(Math.round((p?.progress || 0) * 100)) });
+    const result = await worker.recognize(file);
     const confidence = Math.max(0, Math.min(100, Number(result?.data?.confidence || 0)));
     const fields = parseFields(String(result?.data?.text || ""), docKey, confidence);
     return { fields, confidence };
