@@ -122,7 +122,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             )}
             <Link 
               to="/support"
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-red-500/30"
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-red-500/30"
             >
               <MessageCircle size={20} />
               {isBn ? 'সাপোর্টে যোগাযোগ করুন' : 'Contact Support'}
@@ -134,7 +134,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Main Content Area */}
       <div className={cn(
         "flex-1 scroll-smooth overflow-x-hidden",
-        isSupportPage ? "overflow-hidden pb-0" : "overflow-y-auto pb-[calc(6rem+env(safe-area-inset-bottom))"
+        isSupportPage ? "overflow-hidden pb-0" : "overflow-y-auto pb-[calc(6rem+env(safe-area-inset-bottom))]"
       )}>
         <AnimatePresence mode="wait">
           <motion.div
@@ -259,7 +259,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       to={item.path}
                       className="relative -top-5 flex flex-col items-center justify-center pointer-events-auto shrink-0"
                     >
-                      <div className="bg-gradient-to-tr from-blue-600 to-indigo-700 text-white rounded-full p-3.5 shadow-md active:scale-95 transition-transform flex items-center justify-center">
+                      <div className="bg-gradient-to-tr from-blue-600 to-indigo-700 text-white rounded-full p-3 shadow-md active:scale-95 transition-transform flex items-center justify-center">
                         <item.icon size={22} strokeWidth={2.5} />
                       </div>
                       <span className="text-[9px] font-black text-gray-700 dark:text-gray-300 mt-1 transition-colors">
