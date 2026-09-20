@@ -180,7 +180,6 @@ export default function AdminDashboard() {
     minRateWomen: 0.55,
     telegramSupport: 'https://t.me/Provati_Loan',
     whatsappSupport: 'https://wa.me/8801700000000',
-    telegramBotToken: '',
 
     // Announcement settings
     announcementActive: false,
@@ -249,7 +248,6 @@ export default function AdminDashboard() {
         minRateWomen: systemSettings.minRateWomen ? systemSettings.minRateWomen * 100 : 0.55,
         telegramSupport: systemSettings.telegramSupport || 'https://t.me/Provati_Loan',
         whatsappSupport: systemSettings.whatsappSupport || 'https://wa.me/8801700000000',
-        telegramBotToken: systemSettings.telegramBotToken || '',
 
         announcementActive: !!systemSettings.announcementActive,
         announcementBn: systemSettings.announcementBn || '',
