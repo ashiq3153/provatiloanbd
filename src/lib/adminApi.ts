@@ -88,3 +88,7 @@ export async function sendAdminTelegramMessage(chatId: number, message: string, 
 export async function broadcastAdminTelegramMessage(chatIds: number[], message: string, replyMarkup?: any): Promise<{ delivered: number; failed: number } | null> {
   return await callAdmin<{ delivered: number; failed: number }>('broadcast_telegram_message', { chatIds, message, replyMarkup });
 }
+
+export async function getFinancialReconciliationReport(): Promise<any | null> {
+  return await callAdmin<any>('get_financial_report', {});
+}
