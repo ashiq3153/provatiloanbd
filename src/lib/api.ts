@@ -185,32 +185,53 @@ export async function getActiveLoans(chatId: number): Promise<LoanApplication[]>
 
 // ── Transaction APIs ─────────────────────────────────────
 
-export async function getTransactions(chatId: number): Promise<Transaction[]> {
-  const { data, error } = await supabase
-    .from('transactions')
-    .select('*')
-    .eq('chat_id', chatId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
+export async function getTransactions(_chatId: number): Promise<Transaction[]> {
+  try {
+    // Use the same Telegram-verified gateway for transaction history.
+    // @ts-ignore
+    const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+    if (!initData) return [];
+    const response = await fetch('/api/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, action: 'transaction', transactionAction: 'get_my_transactions' }),
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result?.ok) {
+      console.error('getTransactions gateway error:', result?.error || response.statusText);
+      return [];
+    }
+    return (result.data || []) as Transaction[];
+  } catch (error) {
     console.error('getTransactions error:', error);
     return [];
   }
-  return data || [];
 }
 
 export async function createTransaction(txn: Omit<Transaction, 'id' | 'created_at'>): Promise<Transaction | null> {
-  const { data, error } = await supabase
-    .from('transactions')
-    .insert(txn)
-    .select()
-    .single();
-
-  if (error) {
+  try {
+    // Financial transaction creation is Telegram-verified server-side. The
+    // server derives chat_id from initData and always forces status=pending.
+    // This avoids browser RLS/session mismatches and prevents client-side
+    // spoofing of another user's chat_id or completed transaction status.
+    // @ts-ignore
+    const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+    if (!initData) throw new Error('Telegram initData is missing');
+    const response = await fetch('/api/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, action: 'transaction', transactionAction: 'create', payload: txn }),
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result?.ok || !result?.data) {
+      console.error('createTransaction gateway error:', result?.error || response.statusText);
+      return null;
+    }
+    return result.data as Transaction;
+  } catch (error) {
     console.error('createTransaction error:', error);
     return null;
   }
-  return data;
 }
 
 // ── Success Stories API ──────────────────────────────────
