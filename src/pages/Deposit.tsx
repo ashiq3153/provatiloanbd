@@ -30,15 +30,17 @@ export default function Deposit() {
   const user = getTelegramUser();
   
   const [method, setMethod] = useState(paymentMethods[0].id);
-  const [selectProcessing, setSelectProcessing] = useState(true);
+  const [selectProcessing, setSelectProcessing] = useState(false);
   const [selectSecurity, setSelectSecurity] = useState(false);
   const [selectInsurance, setSelectInsurance] = useState(false);
   const [loanAmount, setLoanAmount] = useState('');
   const [senderNo, setSenderNo] = useState('');
+  const [transactionId, setTransactionId] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [screenshotUrl, setScreenshotUrl] = useState<string>('');
+  const [screenshotPreview, setScreenshotPreview] = useState<string>('');
   const [uploading, setUploading] = useState(false);
   const [associatedLoanId, setAssociatedLoanId] = useState<string | null>(null);
 
@@ -125,8 +127,8 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedPaymentAmount <= 0 || !senderNo) {
-      toast.error(isBn ? 'অনুগ্রহ করে প্রথমে লোনের পরিমাণ ও ডিপোজিট টাইপ নির্বাচন করুন' : 'Please select a valid loan amount and deposit options first');
+    if (selectedPaymentAmount <= 0 || !senderNo || !transactionId) {
+      toast.error(isBn ? 'অনুগ্রহ করে লোনের পরিমাণ, ডিপোজিট টাইপ, সেন্ডার নম্বর ও TrxID দিন' : 'Please select a valid loan amount and deposit options first');
       return;
     }
     setShowConfirmModal(true);
@@ -137,9 +139,6 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
     setSubmitted(true);
     const loadingId = toast.loading(isBn ? 'রিকুয়েস্ট জমা দেওয়া হচ্ছে...' : 'Submitting request...');
     
-    // Auto-generate transaction code for the trx_id field
-    const generatedTrxId = `DEP-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
-
     try {
       const result = await createTransaction({
         chat_id: user.id,
@@ -149,7 +148,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
         amount: selectedPaymentAmount,
         payment_method: method,
         sender_number: senderNo,
-        trx_id: generatedTrxId,
+        trx_id: transactionId.trim(),
         screenshot_url: screenshotUrl || null,
         status: 'pending',
       });
@@ -200,6 +199,34 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
             </p>
           </div>
 
+          <div className="mb-6 rounded-2xl bg-gray-50/80 dark:bg-gray-900/40 p-4 text-left">
+            <p className="text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">
+              {isBn ? 'রিকোয়েস্ট স্ট্যাটাস' : 'Request Status'}
+            </p>
+            <div className="flex items-start">
+              {[
+                { label: 'Pending', active: true },
+                { label: 'Processing', active: false },
+                { label: 'Approved', active: false },
+              ].map((step, index) => (
+                <React.Fragment key={step.label}>
+                  <div className="flex flex-col items-center min-w-0">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black ${step.active ? 'bg-green-500 text-white shadow-sm' : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}`}>
+                      {index + 1}
+                    </div>
+                    <span className={`mt-1.5 text-[9px] font-black text-center ${step.active ? 'text-green-600 dark:text-green-400' : 'text-gray-400'}`}>
+                      {step.label}
+                    </span>
+                  </div>
+                  {index < 2 && <div className="h-px flex-1 mt-3.5 mx-1.5 bg-gray-200 dark:bg-gray-700" />}
+                </React.Fragment>
+              ))}
+            </div>
+            <p className="mt-3 text-[9px] font-bold text-gray-400 dark:text-gray-500">
+              {isBn ? 'ভেরিফিকেশনের পর পরবর্তী ধাপ আপডেট হবে।' : 'The next step will update after verification.'}
+            </p>
+          </div>
+
           <button 
             type="button"
             onClick={() => navigate('/')}
@@ -224,10 +251,10 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
           <ArrowLeft size={18} />
         </button>
         <div>
-          <h1 className="text-lg font-black text-gray-900 dark:text-white leading-tight transition-colors">
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white leading-tight transition-colors">
             {isBn ? 'ডিপোজিট করুন' : 'Deposit Funds'}
           </h1>
-          <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 transition-colors mt-0.5">
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 transition-colors mt-1">
             {isBn ? 'লোন প্রসেসিং ও সঞ্চয় জমা' : 'Pay processing fee or savings deposit'}
           </p>
         </div>
@@ -270,7 +297,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               type="number" 
               value={loanAmount}
               onChange={(e) => setLoanAmount(e.target.value)}
-              className="w-full neu-input rounded-full py-3 pl-8 pr-4 text-base font-black outline-none border-0 transition-all text-gray-900 dark:text-white" 
+              className={`w-full neu-input rounded-full py-3 pl-8 pr-4 text-base font-black outline-none border-2 transition-all text-gray-900 dark:text-white ${presetAmounts.includes(loanAmtNum) ? "border-primary-500/60 ring-2 ring-primary-500/10" : "border-transparent focus:border-primary-500/40"}`} 
               placeholder={isBn ? "অন্যান্য পরিমাণ লিখুন (উদাঃ ১০০০০০)" : "Enter custom amount (e.g. 100000)"} 
             />
           </div>
@@ -322,7 +349,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 onClick={() => setSelectProcessing(!selectProcessing)}
                 className={`p-3 px-4 rounded-full border-2 transition-all flex items-center justify-between cursor-pointer ${
                   selectProcessing
-                    ? 'border-primary-500/40 bg-primary-600/10 text-primary-600 dark:text-indigo-400 neu-raised shadow-inner'
+                    ? 'border-amber-400/60 bg-amber-500/10 text-amber-700 dark:text-amber-300 neu-raised shadow-inner'
                     : 'neu-btn text-gray-800 dark:text-gray-250 border-0'
                 }`}
               >
@@ -347,7 +374,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 onClick={() => setSelectSecurity(!selectSecurity)}
                 className={`p-3 px-4 rounded-full border-2 transition-all flex items-center justify-between cursor-pointer ${
                   selectSecurity
-                    ? 'border-primary-500/40 bg-primary-600/10 text-primary-600 dark:text-indigo-400 neu-raised shadow-inner'
+                    ? 'border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-300 neu-raised shadow-inner'
                     : 'neu-btn text-gray-800 dark:text-gray-250 border-0'
                 }`}
               >
@@ -391,7 +418,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               {/* Total Row */}
               <div className="p-3 px-5 neu-sunken rounded-full flex items-center justify-between border-0 text-gray-900 dark:text-white">
                 <span className="text-xs font-black text-gray-500 dark:text-gray-400">{isBn ? 'মোট সম্ভাব্য জমা' : 'Total Charges'}</span>
-                <span className="text-base font-black">৳{selectedPaymentAmount.toLocaleString('en-IN')}</span>
+                <span className="text-base font-black">{selectedPaymentAmount > 0 ? `৳${selectedPaymentAmount.toLocaleString('en-IN')}` : (isBn ? 'উপরে থেকে নির্বাচন করুন' : 'Select an option above')}</span>
               </div>
             </div>
           </motion.section>
@@ -415,7 +442,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 onClick={() => setMethod(m.id)}
                 className={`py-2 px-1.5 rounded-[20px] text-xs font-bold border-2 transition-all flex flex-col items-center justify-center gap-1.5 relative overflow-hidden cursor-pointer ${
                   method === m.id 
-                    ? `border-primary-500/40 bg-primary-600/10 shadow-inner` 
+                    ? `${m.border} ${m.bgLight} shadow-inner ring-1 ring-black/5 dark:ring-white/5` 
                     : 'neu-btn border-0'
                 }`}
               >
@@ -460,8 +487,8 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               onClick={handleLiveSupportChat}
               className="neu-btn-primary font-black text-xs py-2.5 px-4 rounded-full active:scale-95 transition-all border-0 flex items-center gap-1.5 shrink-0"
             >
-              <MessageCircle size={14} />
-              {isBn ? 'পেমেন্ট নির্দেশনা নিন' : '💬 Live Chat'}
+              <ShieldCheck size={14} />
+              {isBn ? 'পেমেন্ট নির্দেশনা নিন' : 'Live Chat'}
             </button>
           </div>
         </motion.div>
@@ -479,7 +506,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase mb-1.5 transition-colors">
-                {isBn ? 'যে নাম্বার থেকে টাকা পাঠিয়েছেন' : 'Sender Number'}
+                {isBn ? 'পেমেন্ট পাঠানো মোবাইল নম্বর' : 'Sender Mobile Number'}
               </label>
               <input 
                 type="text" 
@@ -487,7 +514,21 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 value={senderNo}
                 onChange={(e) => setSenderNo(e.target.value)}
                 className="w-full neu-input rounded-full px-5 py-3 text-sm font-bold text-gray-900 dark:text-white outline-none border-0 transition-all" 
-                placeholder="01XXXXXXXXX" 
+                placeholder="01XXXXXXXXXX" 
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase mb-1.5 transition-colors">
+                {isBn ? 'ট্রানজেকশন আইডি (TrxID)' : 'Transaction ID (TrxID)'}
+              </label>
+              <input
+                type="text"
+                required
+                value={transactionId}
+                onChange={(e) => setTransactionId(e.target.value)}
+                className="w-full neu-input rounded-full px-5 py-3 text-sm font-bold text-gray-900 dark:text-white outline-none border-0 transition-all"
+                placeholder={isBn ? 'bKash/Nagad TrxID লিখুন' : 'Enter bKash/Nagad TrxID'}
               />
             </div>
 
@@ -505,6 +546,12 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
+                    if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+                      toast.error(isBn ? 'শুধু JPG/PNG এবং সর্বোচ্চ 5MB ফাইল দিন' : 'Please upload JPG/PNG up to 5MB');
+                      e.target.value = '';
+                      return;
+                    }
+                    setScreenshotPreview(URL.createObjectURL(file));
                     setUploading(true);
                     const url = await uploadDocument(file, user.id, 'deposit_screenshot');
                     if (url) {
@@ -527,11 +574,17 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                       <CheckCircle2 size={16} />
                       {isBn ? 'স্ক্রিনশট সংযুক্ত হয়েছে' : 'Screenshot Attached'}
                     </div>
+                    {screenshotPreview && (
+                      <img src={screenshotPreview} alt="Payment screenshot preview" className="mt-2 h-20 w-28 object-cover rounded-xl border border-green-500/30 shadow-sm" />
+                    )}
                   ) : (
                     <>
                       <UploadCloud size={20} className="text-gray-400" />
                       <span className="text-xs font-black text-gray-500 dark:text-gray-400">
                         {isBn ? 'ক্লিক করে স্ক্রিনশট দিন' : 'Click to upload screenshot'}
+                      </span>
+                      <span className="text-[9px] font-medium text-gray-400 dark:text-gray-500">
+                        JPG/PNG, সর্বোচ্চ 5MB
                       </span>
                     </>
                   )}
@@ -542,7 +595,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
             <button
               type="submit"
               disabled={selectedPaymentAmount <= 0 || !senderNo || submitted}
-              className="w-full neu-btn-primary disabled:opacity-50 text-white py-3 rounded-full font-black text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 border-0"
+              className="w-full bg-gradient-to-r from-primary-600 via-primary-500 to-indigo-500 hover:from-primary-700 hover:to-indigo-600 disabled:opacity-50 text-white py-3.5 rounded-full font-black text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 border-0 shadow-[0_8px_24px_rgba(79,70,229,0.22)]"
             >
               {submitted ? (
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
