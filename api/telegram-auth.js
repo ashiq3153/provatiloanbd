@@ -390,15 +390,6 @@ async function adminAction(action, payload) {
     }
     case "add_success_story": return !(await db.from("success_stories").insert(payload.story)).error;
     case "delete_success_story": return !(await db.from("success_stories").delete().eq("id", payload.id)).error;
-    case "get_chat_messages": return (await db.from("support_messages").select("*").order("created_at", { ascending: true })).data || [];
-    case "send_chat_message": {
-      const { error } = await db.from("support_messages").insert({ chat_id: payload.chatId, sender: "admin", message: payload.message, reply_to: payload.replyTo || null, attachment_url: payload.attachmentUrl || null });
-      if (error) throw error;
-      return true;
-    }
-    case "edit_chat_message": return !(await db.from("support_messages").update({ message: payload.message, is_edited: true }).eq("id", payload.id)).error;
-    case "mark_chat_seen": return !(await db.from("support_messages").update({ is_seen: true }).in("id", Array.isArray(payload.ids) ? payload.ids : [])).error;
-    case "delete_chat_message": return !(await db.from("support_messages").delete().eq("id", payload.id)).error;
     case "send_telegram_message": return await sendTelegramBotMessage(payload.chatId, payload.message, payload.replyMarkup);
     case "broadcast_telegram_message": {
       const chatIds = Array.isArray(payload.chatIds) ? payload.chatIds.map(Number).filter(Boolean) : [];
@@ -422,26 +413,6 @@ async function adminAction(action, payload) {
   }
 }
 
-async function chatAction(telegramChatId, action, payload) {
-  const db = adminClient();
-  switch (action) {
-    case "get_messages": return (await db.from("support_messages").select("*").eq("chat_id", telegramChatId).order("created_at", { ascending: true })).data || [];
-    case "send_message": {
-      const message = typeof payload.message === "string" ? payload.message.trim() : "";
-      const attachmentUrl = typeof payload.attachmentUrl === "string" ? payload.attachmentUrl : null;
-      if (!message && !attachmentUrl) throw new Error("Message or attachment is required");
-      const { error } = await db.from("support_messages").insert({ chat_id: telegramChatId, sender: "user", message, reply_to: payload.replyTo || null, attachment_url: attachmentUrl });
-      if (error) throw error;
-      return true;
-    }
-    case "mark_seen": {
-      const ids = Array.isArray(payload.ids) ? payload.ids.filter(id => typeof id === "string") : [];
-      if (!ids.length) return true;
-      return !(await db.from("support_messages").update({ is_seen: true }).eq("chat_id", telegramChatId).eq("sender", "admin").in("id", ids)).error;
-    }
-    default: throw new Error("Unsupported chat action");
-  }
-}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ ok: false, error: "Method Not Allowed" });
@@ -533,10 +504,6 @@ export default async function handler(req, res) {
       });
       if (activityError) console.error("Admin activity log failed:", activityError);
 
-      return res.status(200).json({ ok: true, data });
-    }
-    if (req.body?.action === "chat") {
-      const data = await chatAction(Number(result.user.id), req.body.chatAction, req.body.payload || {});
       return res.status(200).json({ ok: true, data });
     }
     return res.status(200).json({ ok: true, user: result.user, identityBound: Boolean(req.body?.accessToken) });
