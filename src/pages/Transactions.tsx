@@ -250,7 +250,7 @@ export default function Transactions() {
               className={`flex-1 py-3 text-sm font-bold rounded-[12px] transition-all flex justify-center items-center gap-2 ${
                 view === 'transactions' 
                   ? 'neu-raised-sm text-gray-900 dark:text-white' 
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-750'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'
               }`}
             >
               <LayoutList size={16} />
@@ -261,7 +261,7 @@ export default function Transactions() {
               className={`flex-1 py-3 text-sm font-bold rounded-[12px] transition-all flex justify-center items-center gap-2 ${
                 view === 'applications' 
                   ? 'neu-raised-sm text-gray-900 dark:text-white' 
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-750'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'
               }`}
             >
               <FileText size={16} />
@@ -374,7 +374,7 @@ export default function Transactions() {
               <div className="space-y-3">
                 {loading ? (
                   [1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="neu-raised p-3.5 sm:p-5 rounded-[18px] sm:rounded-[20px] flex items-center gap-4">
+                    <div key={i} className="neu-raised p-3 sm:p-5 rounded-[18px] sm:rounded-[20px] flex items-center gap-4">
                       <Skeleton className="w-12 h-12 rounded-full shrink-0" />
                       <div className="flex-1 space-y-2">
                         <Skeleton className="h-4 w-3/4" />
@@ -403,7 +403,7 @@ export default function Transactions() {
                        animate={{ opacity: 1, y: 0 }}
                        transition={{ delay: index * 0.05 }}
                        key={tx.id}
-                       className="neu-raised p-3.5 sm:p-5 rounded-[18px] sm:rounded-[20px] transition-all cursor-pointer flex items-center gap-4 group hover:scale-[1.005]"
+                       className="neu-raised p-3 sm:p-5 rounded-[18px] sm:rounded-[20px] transition-all cursor-pointer flex items-center gap-4 group hover:scale-[1.005]"
                     >
                       <div className={`w-12 h-12 rounded-full flex items-center justify-center border group-hover:scale-110 transition-transform ${getIconStyles(tx.type)}`}>
                         {getIcon(tx.type)}
@@ -485,7 +485,7 @@ export default function Transactions() {
                       <FileText size={40} />
                     </div>
                     <p className="text-gray-500 dark:text-gray-400 font-bold">{isBn ? "এখনো কোনো আবেদন নেই" : "No loan applications yet"}</p>
-                    <Link to="/apply" className="mt-5 inline-block px-8 py-3.5 neu-btn-primary text-white rounded-full text-base font-bold active:scale-95 transition-all">
+                    <Link to="/apply" className="mt-5 inline-block px-8 py-3 neu-btn-primary text-white rounded-full text-base font-bold active:scale-95 transition-all">
                       {isBn ? "এখনই আবেদন করুন" : "Apply Now"}
                     </Link>
                 </div>
