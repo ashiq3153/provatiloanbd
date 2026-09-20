@@ -21,7 +21,10 @@ type AdminAction =
   | 'mark_chat_seen'
   | 'delete_chat_message'
   | 'send_telegram_message'
-  | 'broadcast_telegram_message';
+  | 'broadcast_telegram_message'
+  | 'get_financial_report'
+  | 'get_kyc_queue'
+  | 'update_kyc_review';
 
 async function callAdmin<T>(adminAction: AdminAction, payload: Record<string, unknown> = {}): Promise<T | null> {
   const telegramWebApp = (window as Window & { Telegram?: { WebApp?: { initData?: string } } }).Telegram?.WebApp;
