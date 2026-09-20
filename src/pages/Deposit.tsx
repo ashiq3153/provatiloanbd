@@ -548,7 +548,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                     if (!file) return;
                     if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > 5 * 1024 * 1024) {
                       toast.error(isBn ? 'শুধু JPG/PNG এবং সর্বোচ্চ 5MB ফাইল দিন' : 'Please upload JPG/PNG up to 5MB');
-                      e.target.value = '';
+                      e.currentTarget.value = '';
                       return;
                     }
                     setScreenshotPreview(URL.createObjectURL(file));
@@ -594,7 +594,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
             
             <button
               type="submit"
-              disabled={selectedPaymentAmount <= 0 || !senderNo || submitted}
+              disabled={selectedPaymentAmount <= 0 || !senderNo || !transactionId.trim() || submitted}
               className="w-full bg-gradient-to-r from-primary-600 via-primary-500 to-indigo-500 hover:from-primary-700 hover:to-indigo-600 disabled:opacity-50 text-white py-3.5 rounded-full font-black text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 border-0 shadow-[0_8px_24px_rgba(79,70,229,0.22)]"
             >
               {submitted ? (
