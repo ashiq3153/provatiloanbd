@@ -36,6 +36,7 @@ import { AddressSelector, AddressValue, emptyAddress, serializeAddress } from ".
 import { getCategories, snapPoints, amountPackages, formatAmount, getAllowedTenure, getColorStyles, getIconColor } from "./apply-loan-utils";
 import { calculateLoan } from "../lib/finance";
 import { getLoanDocumentRequirements, getMissingRequiredDocuments } from "../lib/loan-document-requirements";
+import { extractDocumentFields } from "../lib/document-ocr";
 
 const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
   const { formState: { errors } } = useFormContext<LoanFormData>();
@@ -269,7 +270,7 @@ export default function ApplyLoan() {
     resolver: zodResolver(getLoanSchema(isBn)),
     mode: "onChange",
   });
-  const { register, trigger, formState: { errors } } = methods;
+  const { register, trigger, setValue, getValues, formState: { errors } } = methods;
 
 
   const [step, setStep] = useState(1);
@@ -2693,6 +2694,38 @@ export default function ApplyLoan() {
             const url = await uploadDocument(file, user.id, id);
             if (url) {
               setDocuments(prev => ({ ...prev, [id]: url }));
+
+              // OCR runs locally in the browser for image documents.
+              // Never overwrite a value the applicant already entered.
+              if (file.type.startsWith("image/")) {
+                try {
+                  toast.info(isBn ? "ডকুমেন্ট পড়া হচ্ছে—অনুগ্রহ করে অপেক্ষা করুন..." : "Reading document—please wait...");
+                  const extracted = await extractDocumentFields(file, id);
+                  let filled = 0;
+                  for (const [field, result] of Object.entries(extracted?.fields || {})) {
+                    const current = String(getValues(field as keyof LoanFormData) ?? "").trim();
+                    if (!current && result.value) {
+                      setValue(field as keyof LoanFormData, result.value as any, {
+                        shouldDirty: true,
+                        shouldValidate: true
+                      });
+                      filled++;
+                    }
+                  }
+                  if (filled > 0) {
+                    toast.success(
+                      isBn
+                        ? `${filled}টি তথ্য ডকুমেন্ট থেকে নেওয়া হয়েছে। অনুগ্রহ করে ফর্মটি যাচাই করুন।`
+                        : `${filled} fields detected from the document. Please verify the form.`
+                    );
+                  } else {
+                    toast.info(isBn ? "ডকুমেন্ট পাওয়া গেছে, কিন্তু নির্ভরযোগ্য ফর্ম তথ্য শনাক্ত হয়নি।" : "Document uploaded, but no reliable form fields were detected.");
+                  }
+                } catch (ocrError) {
+                  console.warn("Document OCR failed:", ocrError);
+                  toast.info(isBn ? "ডকুমেন্ট আপলোড হয়েছে। স্বয়ংক্রিয় পড়া সম্ভব হয়নি—তথ্য হাতে যাচাই করুন।" : "Document uploaded. Automatic reading was unavailable—please verify manually.");
+                }
+              }
             } else {
               toast.error(isBn ? 'ফাইল আপলোড ব্যর্থ হয়েছে' : 'File upload failed');
             }
