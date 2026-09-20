@@ -1014,7 +1014,7 @@ export default function AdminDashboard() {
               )}
 
               {activeTab === 'overview' && (
-                 <>
+                <><div className="mb-6 grid grid-cols-2 lg:grid-cols-5 gap-3">
                   {[
                     ['Deposit', financialReport?.completed_deposits],
                     ['EMI', financialReport?.completed_emi],
@@ -1150,8 +1150,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
-                 </>
-              )}
+                 </>              )}
 
               {activeTab === 'loans' && (
                 <div className="bg-white dark:bg-gray-800 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
