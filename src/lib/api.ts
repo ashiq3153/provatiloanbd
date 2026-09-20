@@ -427,36 +427,6 @@ export async function getPublicSettings(key: string): Promise<any> {
   return data?.value || null;
 }
 
-// ── Support Chat (user-side) ─────────────────────────────
-// Reading/sending your own messages already works under RLS (chat_id must equal
-// the caller's own bridged Telegram chat_id). There is no UPDATE policy on
-// support_messages though, so marking admin messages as "seen" must go through
-// the server-side chat gateway, which uses the service role.
-async function callChatGateway<T>(chatAction: string, payload: Record<string, unknown> = {}): Promise<T | null> {
-  // @ts-ignore
-  const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
-  if (!initData) {
-    console.error('Chat gateway: Telegram initData is missing');
-    return null;
-  }
-  const response = await fetch('/api/telegram-auth', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ initData, action: 'chat', chatAction, payload }),
-  });
-  const result = await response.json().catch(() => null);
-  if (!response.ok || !result?.ok) {
-    console.error('Chat gateway request failed:', result?.error || response.statusText);
-    return null;
-  }
-  return result.data as T;
-}
-
-export async function markMyChatMessagesSeen(ids: string[]): Promise<boolean> {
-  if (!ids.length) return true;
-  return (await callChatGateway<boolean>('mark_seen', { ids })) === true;
-}
-
 export async function getMyNotifications(): Promise<any[]> {
   const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
   const user = getTelegramUser();
