@@ -69,6 +69,22 @@ async function sendTelegramBotMessage(chatId, text, replyMarkup) {
   return true;
 }
 
+async function syncProfile(telegramUser) {
+  const db = adminClient();
+  const chatId = Number(telegramUser?.id);
+  if (!chatId) throw new Error("Invalid Telegram user");
+  const profile = {
+    chat_id: chatId,
+    first_name: String(telegramUser.first_name || "Telegram User"),
+    last_name: telegramUser.last_name || null,
+    username: telegramUser.username || null,
+    photo_url: telegramUser.photo_url || null,
+  };
+  const { data, error } = await db.from("profiles").upsert(profile, { onConflict: "chat_id" }).select().single();
+  if (error) throw error;
+  return data;
+}
+
 async function adminAction(action, payload) {
   const db = adminClient();
   switch (action) {
@@ -141,6 +157,10 @@ export default async function handler(req, res) {
     if (req.body?.accessToken) {
       const bridged = await bridgeIdentity(Number(result.user.id), req.body.accessToken);
       if (!bridged) return res.status(401).json({ ok: false, error: "Supabase identity binding failed" });
+    }
+    if (req.body?.action === "sync_profile") {
+      const data = await syncProfile(result.user);
+      return res.status(200).json({ ok: true, data });
     }
     if (req.body?.action === "admin") {
       if (!ADMIN_CHAT_IDS.has(String(result.user.id))) return res.status(403).json({ ok: false, error: "Admin access denied" });
