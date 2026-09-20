@@ -88,15 +88,24 @@ export default function App() {
 
       const user = authResult.user;
 
-      upsertProfile({
-        chat_id: user.id,
-        first_name: user.first_name,
-        last_name: user.last_name || null,
-        username: user.username || null,
-        photo_url: user.photo_url || null,
-      }).then(profile => {
-        if (profile) useAppStore.getState().setUserProfile(profile);
-      }).catch(err => console.error('Global profile sync error:', err));
+      // Profile creation is server-verified so the loan_applications FK is
+      // satisfied even if the browser-side RLS upsert races with app startup.
+      try {
+        const profileResponse = await fetch('/api/telegram-auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initData, action: 'sync_profile' }),
+        });
+        const profileResult = await profileResponse.json().catch(() => null);
+        if (!profileResponse.ok || !profileResult?.ok) {
+          throw new Error(profileResult?.error || 'Profile synchronization failed');
+        }
+        if (profileResult.data) {
+          useAppStore.getState().setUserProfile(profileResult.data);
+        }
+      } catch (err) {
+        console.error('Global profile sync error:', err);
+      }
 
       const welcomeKey = `provati_welcome_sent_${user.id}`;
       if (!localStorage.getItem(welcomeKey)) {
