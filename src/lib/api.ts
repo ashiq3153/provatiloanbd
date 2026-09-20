@@ -455,3 +455,36 @@ export async function markMyChatMessagesSeen(ids: string[]): Promise<boolean> {
   if (!ids.length) return true;
   return (await callChatGateway<boolean>('mark_seen', { ids })) === true;
 }
+
+export async function getMyNotifications(): Promise<any[]> {
+  const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+  const user = getTelegramUser();
+  const response = await fetch('/api/telegram-auth', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ initData, action: 'admin', adminAction: 'get_notifications', payload: { chatId: user.id } }),
+  });
+  const result = await response.json().catch(() => null);
+  return response.ok && result?.ok ? (result.data || []) : [];
+}
+
+export async function markMyNotificationRead(id: string): Promise<boolean> {
+  const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+  const user = getTelegramUser();
+  const response = await fetch('/api/telegram-auth', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ initData, action: 'admin', adminAction: 'mark_notification_read', payload: { id, chatId: user.id } }),
+  });
+  const result = await response.json().catch(() => null);
+  return response.ok && result?.ok && result.data === true;
+}
+
+export async function getMyKycReviews(): Promise<any[]> {
+  const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+  const user = getTelegramUser();
+  const response = await fetch('/api/telegram-auth', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ initData, action: 'admin', adminAction: 'get_kyc_reviews', payload: { chatId: user.id } }),
+  });
+  const result = await response.json().catch(() => null);
+  return response.ok && result?.ok ? (result.data || []) : [];
+}
