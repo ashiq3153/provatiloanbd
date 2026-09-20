@@ -40,6 +40,11 @@ export default function AdminDashboard() {
   const [selectedLoan, setSelectedLoan] = useState<LoanApplication | null>(null);
 
   const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
+  const [adminRole, setAdminRole] = useState<'owner' | 'admin' | 'finance' | 'support' | 'viewer' | null>(null);
+  const canManageUsers = adminRole === 'owner' || adminRole === 'admin' || adminRole === 'support';
+  const canManageFinance = adminRole === 'owner' || adminRole === 'admin' || adminRole === 'finance';
+  const canManageSettings = adminRole === 'owner' || adminRole === 'admin';
+  const canManageBroadcast = adminRole === 'owner' || adminRole === 'admin' || adminRole === 'support';
 
   useEffect(() => {
     const channel = supabase.channel('online_users');
@@ -136,6 +141,27 @@ export default function AdminDashboard() {
     hundred_count: 0
   });
   
+  useEffect(() => {
+    const loadAdminRole = async () => {
+      const telegramWebApp = (window as Window & { Telegram?: { WebApp?: { initData?: string } } }).Telegram?.WebApp;
+      const initData = telegramWebApp?.initData;
+      if (!initData) return;
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const response = await fetch('/api/telegram-auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initData, accessToken: sessionData.session?.access_token, action: 'admin', adminAction: 'get_admin_role', payload: {} })
+        });
+        const result = await response.json().catch(() => null);
+        if (response.ok && result?.ok && result.data?.role) setAdminRole(result.data.role);
+      } catch (error) {
+        console.error('Unable to load admin role:', error);
+      }
+    };
+    loadAdminRole();
+  }, []);
+
   const { systemSettings, setSystemSettings, language, setLanguage } = useAppStore();
   const isBn = language === 'bn';
   
