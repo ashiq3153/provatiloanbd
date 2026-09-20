@@ -2043,7 +2043,7 @@ export default function AdminDashboard() {
                 </div>
               )}
 
-              
+            </motion.div>
           </AnimatePresence>
       {/* Stunning Loan Details Modal */}
       <AnimatePresence>
