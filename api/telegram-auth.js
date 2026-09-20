@@ -249,6 +249,7 @@ async function getAdminRole(chatId) {
 }
 
 const ADMIN_ACTION_ROLES = {
+  get_financial_report: ["owner","admin","finance","viewer"],
   get_notifications: ["owner","admin","support","viewer","finance"],
   mark_notification_read: ["owner","admin","support","viewer","finance"],
   get_kyc_reviews: ["owner","admin","support","viewer","finance"],
@@ -281,6 +282,11 @@ async function adminAction(action, payload) {
     case "get_admin_role": {
       const role = await getAdminRole(payload.chatId || 0);
       return { role };
+    }
+    case "get_financial_report": {
+      const { data, error } = await db.from("financial_reconciliation_summary").select("*").single();
+      if (error) throw error;
+      return data;
     }
     case "get_notifications": {
       const { data, error } = await db.from("notifications").select("*").eq("chat_id", Number(payload.chatId)).order("created_at", { ascending: false }).limit(100);
