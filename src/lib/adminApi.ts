@@ -57,7 +57,9 @@ export async function deleteUser(chatId: number): Promise<boolean> { return (awa
 export async function getAllLoanApplications(): Promise<LoanApplication[]> { return (await callAdmin<LoanApplication[]>('get_loans')) || []; }
 export async function updateLoanApplicationStatus(id: string, status: LoanApplication['status'], feedback?: string): Promise<boolean> { return (await callAdmin<boolean>('update_loan', { id, status, feedback: feedback || null })) === true; }
 export async function getAllTransactions(): Promise<Transaction[]> { return (await callAdmin<Transaction[]>('get_transactions')) || []; }
-export async function updateTransactionStatus(id: string, status: Transaction['status']): Promise<boolean> { return (await callAdmin<boolean>('update_transaction', { id, status })) === true; }
+export async function updateTransactionStatus(id: string, status: Transaction['status'], verificationNote?: string): Promise<boolean> {
+  return (await callAdmin<boolean>('update_transaction', { id, status, verificationNote })) === true;
+}
 export async function getSystemSettings(key: string): Promise<any> { return await callAdmin<any>('get_system_setting', { key }); }
 export async function updateSystemSettings(key: string, value: any): Promise<boolean> { return (await callAdmin<boolean>('update_system_setting', { key, value })) === true; }
 export async function getAllAdminSuccessStories(): Promise<SuccessStory[]> { return (await callAdmin<SuccessStory[]>('get_success_stories')) || []; }
