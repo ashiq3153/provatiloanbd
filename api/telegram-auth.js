@@ -69,6 +69,31 @@ async function sendTelegramBotMessage(chatId, text, replyMarkup) {
   return true;
 }
 
+async function submitLoanApplication(telegramUser, payload) {
+  const db = adminClient();
+  const chatId = Number(telegramUser?.id);
+  if (!chatId) throw new Error("Invalid Telegram user");
+  if (!payload || typeof payload !== "object") throw new Error("Invalid loan payload");
+
+  const allowedFields = [
+    "loan_category","amount","tenure_months","interest_rate","emi_amount",
+    "processing_fee","security_deposit","full_name","father_name","mother_name",
+    "dob","gender","mobile","whatsapp","email","current_address",
+    "permanent_address","nid_number","professional_info","bank_name",
+    "account_name","account_number","routing_number","mobile_banking",
+    "nominee_name","nominee_relation","nominee_mobile","nominee_nid",
+    "documents","admin_feedback"
+  ];
+  const record = { chat_id: chatId, status: "pending" };
+  for (const key of allowedFields) {
+    if (Object.prototype.hasOwnProperty.call(payload, key)) record[key] = payload[key];
+  }
+
+  const { data, error } = await db.from("loan_applications").insert(record).select().single();
+  if (error) throw error;
+  return data;
+}
+
 async function syncProfile(telegramUser) {
   const db = adminClient();
   const chatId = Number(telegramUser?.id);
@@ -160,6 +185,10 @@ export default async function handler(req, res) {
     }
     if (req.body?.action === "sync_profile") {
       const data = await syncProfile(result.user);
+      return res.status(200).json({ ok: true, data });
+    }
+    if (req.body?.action === "loan" && req.body?.loanAction === "submit") {
+      const data = await submitLoanApplication(result.user, req.body.payload || {});
       return res.status(200).json({ ok: true, data });
     }
     if (req.body?.action === "admin") {
