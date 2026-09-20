@@ -148,7 +148,7 @@ export default function Loans() {
                       </div>
                     </div>
                     
-                    <div className="flex flex-col gap-3 xs:flex-row xs:justify-between xs:items-end pt-4 border-t border-white/20 dark:border-white/5 relative z-10">
+                    <div className="flex flex-row justify-between items-end gap-3 pt-4 border-t border-white/20 dark:border-white/5 relative z-10">
                       <div>
                         <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider mb-0.5">{isBn ? 'পরিমাণ' : 'Amount'}</p>
                         <p className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{formatCurrency(loan.amount || 0, isBn)}</p>
