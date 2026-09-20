@@ -848,12 +848,12 @@ export default function AdminDashboard() {
   ] as const;
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 transition-colors overflow-hidden font-sans">
+    <div className="flex h-[100dvh] min-h-0 w-full min-w-0 bg-gray-50 dark:bg-gray-900 transition-colors overflow-hidden font-sans">
       
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -868,7 +868,7 @@ export default function AdminDashboard() {
             <h1 className="font-black text-gray-900 dark:text-white text-xl leading-tight">Provati</h1>
             <p className="text-xs text-primary-600 dark:text-primary-400 font-bold tracking-widest uppercase">Admin Panel</p>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="md:hidden ml-auto text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden ml-auto text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -911,12 +911,12 @@ export default function AdminDashboard() {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-500/5 dark:bg-primary-500/10 blur-[120px] rounded-full pointer-events-none -mr-48 -mt-48 z-0"></div>
 
         {/* Top Header */}
-        <header className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border-b border-gray-100 dark:border-gray-700 h-20 flex items-center justify-between px-6 sm:px-8 shrink-0 relative z-10">
-          <div className="flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(true)} className="md:hidden text-gray-600 dark:text-gray-300 p-2.5 -ml-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+        <header className="bg-white/75 dark:bg-gray-800/75 backdrop-blur-xl border-b border-gray-100 dark:border-gray-700 min-h-16 sm:min-h-20 py-2 sm:py-0 flex items-center justify-between gap-2 px-3 sm:px-6 lg:px-8 shrink-0 relative z-10">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-gray-600 dark:text-gray-300 p-2.5 -ml-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shrink-0">
               <Menu size={24} />
             </button>
-            <h2 className="text-xl font-black text-gray-900 dark:text-white capitalize tracking-tight hidden sm:block">
+            <h2 className="text-base sm:text-xl font-black text-gray-900 dark:text-white capitalize tracking-tight truncate max-w-[42vw] sm:max-w-none">
               {(() => {
                 if (!isBn) return activeTab.replace('_', ' ');
                 const titles: Record<string, string> = {
@@ -934,14 +934,14 @@ export default function AdminDashboard() {
             </h2>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
              <button 
                onClick={() => setLanguage(language === 'bn' ? 'en' : 'bn')}
-               className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 rounded-full px-4.5 py-2 text-sm font-bold text-gray-700 dark:text-gray-300 shadow-sm flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all cursor-pointer"
+               className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 shadow-sm flex items-center gap-1.5 sm:gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all cursor-pointer shrink-0"
              >
                🌐 {isBn ? 'English' : 'বাংলা'}
              </button>
-             <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 text-sm font-bold text-gray-700 dark:text-gray-300 shadow-sm flex items-center gap-2">
+             <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-full px-2.5 sm:px-4 py-2 text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 shadow-sm flex items-center gap-1.5 sm:gap-2 shrink-0">
                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                {isBn ? 'সিস্টেম চালু' : 'System Live'}
              </div>
@@ -949,7 +949,7 @@ export default function AdminDashboard() {
         </header>
 
         {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto p-6 sm:p-8 relative z-10 custom-scrollbar">
+        <main className="flex-1 min-w-0 min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain p-3 sm:p-5 lg:p-8 pb-[max(1rem,env(safe-area-inset-bottom))] relative z-10 custom-scrollbar">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -957,7 +957,7 @@ export default function AdminDashboard() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="max-w-7xl mx-auto space-y-6"
+              className="w-full max-w-7xl mx-auto min-w-0 space-y-4 sm:space-y-6"
             >
               {activeTab === 'overview' && (
                 <div className="space-y-8">
@@ -2951,7 +2951,7 @@ export default function AdminDashboard() {
         {showDirectMessageModal && directMessageUsers.length > 0 && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setShowDirectMessageModal(false)}></div>
-            <div className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-md p-6 relative z-10 shadow-2xl border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto p-4 sm:p-6 relative z-10 shadow-2xl border border-gray-200 dark:border-gray-700">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <MessageCircle className="text-blue-500" /> {directMessageUsers.length > 1 ? 'Bulk Message' : 'Message User'}
@@ -2996,7 +2996,7 @@ export default function AdminDashboard() {
 
         {showLockModal && (
           <div className="fixed inset-0 z-[100] bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 w-full max-w-md shadow-2xl border border-gray-100 dark:border-gray-700 relative">
+            <div className="bg-white dark:bg-gray-800 rounded-3xl p-4 sm:p-6 w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto shadow-2xl border border-gray-100 dark:border-gray-700 relative">
               <button onClick={() => setShowLockModal(null)} className="absolute top-4 right-4 p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
                 <X size={20} />
               </button>
