@@ -188,8 +188,7 @@ export default function Home() {
       link: n.entity_type === 'loan' && n.entity_id ? `/application/${n.entity_id}` : undefined,
       unread: !n.is_read
     }));
-    const legacy = (() => {
-    const list: { id: string; title: string; time: string; type: string; status: string; link?: string }[] = [];
+        const list: { id: string; title: string; time: string; type: string; status: string; link?: string }[] = [];
 
     userLoans.forEach(loan => {
       const cat = loan.loan_category === 'personal' ? (isBn ? 'ব্যক্তিগত' : 'Personal') :
@@ -324,7 +323,6 @@ export default function Home() {
     });
 
     return [...persisted, ...list];
-    })();
   };
 
   // Helper to compute the loan/savings status configuration
