@@ -36,7 +36,6 @@ import { AddressSelector, AddressValue, emptyAddress, serializeAddress } from ".
 import { getCategories, snapPoints, amountPackages, formatAmount, getAllowedTenure, getColorStyles, getIconColor } from "./apply-loan-utils";
 import { calculateLoan } from "../lib/finance";
 import { getLoanDocumentRequirements, getMissingRequiredDocuments } from "../lib/loan-document-requirements";
-import { extractDocumentFields } from "../lib/document-ocr";
 
 const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
   const { formState: { errors } } = useFormContext<LoanFormData>();
@@ -2695,30 +2694,7 @@ export default function ApplyLoan() {
             if (url) {
               setDocuments(prev => ({ ...prev, [id]: url }));
 
-              // OCR runs locally in the browser for image documents.
-              // Never overwrite a value the applicant already entered.
-              if (file.type.startsWith("image/")) {
-                try {
-                  toast.info(isBn ? "ডকুমেন্ট পড়া হচ্ছে—অনুগ্রহ করে অপেক্ষা করুন..." : "Reading document—please wait...");
-                  const extracted = await extractDocumentFields(file, id);
-                  let filled = 0;
-                  for (const [field, result] of Object.entries(extracted?.fields || {})) {
-                    const current = String(methods.getValues(field as any) ?? "").trim();
-                    if (!current && result.value) {
-                      methods.setValue(field as any, result.value as any, {
-                        shouldDirty: true,
-                        shouldValidate: true
-                      });
-                      filled++;
-                    }
-                  }
-                  if (filled > 0) {
-                    toast.success(
-                      isBn
-                        ? `${filled}টি তথ্য ডকুমেন্ট থেকে নেওয়া হয়েছে। অনুগ্রহ করে ফর্মটি যাচাই করুন।`
-                        : `${filled} fields detected from the document. Please verify the form.`
-                    );
-                  } else {
+             } else {
                     toast.info(isBn ? "ডকুমেন্ট পাওয়া গেছে, কিন্তু নির্ভরযোগ্য ফর্ম তথ্য শনাক্ত হয়নি।" : "Document uploaded, but no reliable form fields were detected.");
                   }
                 } catch (ocrError) {
