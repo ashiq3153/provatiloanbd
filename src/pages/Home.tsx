@@ -398,7 +398,7 @@ export default function Home() {
   return (
     <div className="p-5 pb-10 space-y-6 neu-bg transition-colors min-h-full">
       {/* Header */}
-      <div className="flex justify-between items-center gap-3 neu-raised p-3 sm:p-4.5 rounded-[22px] sm:rounded-[28px] mb-2 transition-colors">
+      <div className="flex justify-between items-center gap-3 neu-raised p-3 sm:p-4 rounded-[22px] sm:rounded-[28px] mb-2 transition-colors">
         <div className="flex items-center gap-4">
           <div className="relative">
             <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden">
@@ -485,7 +485,7 @@ export default function Home() {
                               setShowNotifications(false);
                             }
                           }}
-                          className={`p-3.5 rounded-xl border flex gap-3 transition-all ${
+                          className={`p-3 rounded-xl border flex gap-3 transition-all ${
                             notif.link ? 'hover:bg-primary-50/20 dark:hover:bg-primary-900/10 cursor-pointer active:scale-98' : ''
                           } ${
                             notif.status === 'under_review' ? 'bg-purple-50/50 dark:bg-purple-950/10 border-purple-100 dark:border-purple-900/30 text-purple-950 dark:text-purple-300' :
@@ -547,15 +547,15 @@ export default function Home() {
           </div>
  
           {/* Grid of Balances */}
-          <div className="grid grid-cols-2 gap-3.5 relative z-10 my-4 pb-2">
-            <div className="rounded-2xl p-3.5 relative overflow-hidden" style={{background:'linear-gradient(135deg,rgba(16,185,129,0.18) 0%,rgba(5,150,105,0.10) 100%)',border:'1px solid rgba(16,185,129,0.32)'}}>
+          <div className="grid grid-cols-2 gap-3 relative z-10 my-4 pb-2">
+            <div className="rounded-2xl p-3 relative overflow-hidden" style={{background:'linear-gradient(135deg,rgba(16,185,129,0.18) 0%,rgba(5,150,105,0.10) 100%)',border:'1px solid rgba(16,185,129,0.32)'}}>
               <div className="absolute top-0 left-0 w-1 h-full rounded-l-2xl bg-gradient-to-b from-emerald-400 to-green-600" />
               <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold mb-1.5 uppercase tracking-wider pl-2">{isBn ? 'মোট ব্যালেন্স' : 'Total Balance'}</p>
               <h2 className="text-xl font-black tracking-tight text-gray-900 dark:text-white leading-none pl-2">
                 {balanceVisible ? formatCurrency(stats?.totalBalance || 0, isBn) : '৳•••••'}
               </h2>
             </div>
-            <div className="rounded-2xl p-3.5 relative overflow-hidden" style={{background:'linear-gradient(135deg,rgba(139,92,246,0.18) 0%,rgba(109,40,217,0.10) 100%)',border:'1px solid rgba(139,92,246,0.32)'}}>
+            <div className="rounded-2xl p-3 relative overflow-hidden" style={{background:'linear-gradient(135deg,rgba(139,92,246,0.18) 0%,rgba(109,40,217,0.10) 100%)',border:'1px solid rgba(139,92,246,0.32)'}}>
               <div className="absolute top-0 left-0 w-1 h-full rounded-l-2xl bg-gradient-to-b from-violet-400 to-purple-600" />
               <p className="text-[10px] text-violet-600 dark:text-violet-400 font-extrabold mb-1.5 uppercase tracking-wider pl-2">{isBn ? 'সঞ্চয় ব্যালেন্স' : 'Savings Balance'}</p>
               <h2 className="text-xl font-black tracking-tight text-gray-900 dark:text-white leading-none pl-2">
@@ -735,7 +735,7 @@ export default function Home() {
                 </p>
  
                 {/* Chart Section within Active Loan */}
-                <div className="mt-3.5 h-[120px] w-full relative z-10 neu-sunken p-2.5 rounded-2xl border-0">
+                <div className="mt-3 h-[120px] w-full relative z-10 neu-sunken p-2.5 rounded-2xl border-0">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                       <defs>
@@ -984,7 +984,7 @@ export default function Home() {
               onClick={() => navigate(`/apply?category=${cat.id}`)}
               className="group w-full text-left neu-raised rounded-[20px] flex overflow-hidden border-0 transition-all hover:scale-[1.02] active:scale-98 cursor-pointer p-0"
             >
-              <div className="flex-1 p-3.5 flex items-center gap-2.5 relative z-10 min-w-0">
+              <div className="flex-1 p-3 flex items-center gap-2.5 relative z-10 min-w-0">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-colors shrink-0 neu-sunken ${cat.color}`}>
                   {cat.icon}
                 </div>
