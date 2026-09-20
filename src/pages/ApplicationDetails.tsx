@@ -44,7 +44,7 @@ export default function ApplicationDetails() {
         </div>
         <p className="text-gray-900 dark:text-white font-bold text-lg mb-2">{isBn ? 'আবেদন পাওয়া যায়নি' : 'Application not found'}</p>
         <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-6">{isBn ? 'দুঃখিত, এই আইডি দিয়ে কোনো আবেদন খুঁজে পাওয়া যায়নি।' : 'Sorry, no application could be found with this ID.'}</p>
-        <button onClick={() => navigate(-1)} className="px-8 py-3.5 neu-btn-primary text-white rounded-full font-bold active:scale-95 transition-all">
+        <button onClick={() => navigate(-1)} className="px-8 py-3 neu-btn-primary text-white rounded-full font-bold active:scale-95 transition-all">
           {isBn ? 'ফিরে যান' : 'Go Back'}
         </button>
       </div>
@@ -187,7 +187,7 @@ export default function ApplicationDetails() {
               <span className="text-sm font-bold text-gray-900 dark:text-white">{convertDigits(appDetails.tenure_months, isBn)} {isBn ? 'মাস' : 'months'}</span>
             </div>
             <div className="p-5 flex justify-between items-center neu-sunken border-t border-white/20 dark:border-white/5">
-              <span className="text-sm font-bold flex items-center gap-2 text-primary-750 dark:text-primary-400">
+              <span className="text-sm font-bold flex items-center gap-2 text-primary-700 dark:text-primary-400">
                  <Wallet size={18} /> {isBn ? 'সম্ভাব্য মাসিক কিস্তি (EMI)' : 'Estimated EMI'}
               </span>
               <span className="text-base font-black text-primary-700 dark:text-primary-300">{formatCurrency(appDetails.emi_amount || 0, isBn)}</span>
@@ -211,7 +211,7 @@ export default function ApplicationDetails() {
                  {isBn ? 'এডমিন নোটস' : 'Admin Notes'}
                </h3>
              </div>
-             <p className="text-sm text-orange-850 dark:text-orange-200 leading-relaxed neu-raised-sm p-4 rounded-xl relative z-10 font-medium">
+             <p className="text-sm text-orange-800 dark:text-orange-200 leading-relaxed neu-raised-sm p-4 rounded-xl relative z-10 font-medium">
                {(() => {
                  const feedbackStr = appDetails.admin_feedback;
                  if (!feedbackStr) return '';
