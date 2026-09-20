@@ -2675,6 +2675,10 @@ export default function ApplyLoan() {
 
   const renderFileUploader = (id: string, title: string) => {
     const isUploading = uploadingDoc === id;
+    const requirement = getLoanDocumentRequirements(category?.id || 'personal').find(d => d.key === id);
+    const displayTitle = requirement?.required
+      ? `${title} ${isBn ? '• আবশ্যক' : '• Required'}`
+      : title;
     return (
       <div className="relative">
         <input 
@@ -2712,7 +2716,7 @@ export default function ApplyLoan() {
                <UploadCloud size={18} className="text-gray-500 dark:text-gray-400" />
              )}
            </div>
-           <span className="text-xs font-bold text-gray-600 dark:text-gray-300 text-center leading-tight block">{title}</span>
+           <span className="text-xs font-bold text-gray-600 dark:text-gray-300 text-center leading-tight block">{displayTitle}</span>
            {documents[id] && (
              <span className="text-[10px] text-green-600 font-bold block">
                {isBn ? 'আপলোড হয়েছে' : 'Uploaded'}
