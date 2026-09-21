@@ -127,7 +127,7 @@ export default function Loans() {
                 </div>
               ))}
             </div>
-          ) : error ? null : loans.length === 0 ?
+          ) : error ? null : loans.length === 0 ? (
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
