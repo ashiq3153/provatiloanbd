@@ -715,7 +715,7 @@ export default function AdminDashboard() {
   ] as const;
 
   return (
-    <div className="flex h-[100dvh] min-h-0 w-full min-w-0 bg-gray-50 dark:bg-gray-900 transition-colors overflow-hidden font-sans">
+    <div className="admin-panel-shell flex h-[100dvh] min-h-0 w-full min-w-0 bg-gray-50 dark:bg-[#0b1220] transition-colors overflow-hidden font-sans">
       
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
@@ -825,7 +825,7 @@ export default function AdminDashboard() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="w-full max-w-7xl mx-auto min-w-0 space-y-4 sm:space-y-6"
+              className="w-full max-w-7xl mx-auto min-w-0 space-y-4 sm:space-y-6 admin-surface-scope"
             >
               {activeTab === 'kyc' && (
                 <div className="space-y-5">
