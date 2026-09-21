@@ -26,6 +26,7 @@ export default function Home() {
   const isBn = language === 'bn';
 
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [balanceVisible, setBalanceVisible] = useState(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activeLoan, setActiveLoan] = useState<LoanApplication | null>(null);
@@ -41,6 +42,7 @@ export default function Home() {
     let mounted = true;
     (async () => {
       setLoading(true);
+      setError(null);
       try {
         const [s, active, tx, allLoans, notices] = await Promise.all([
           getDashboardStats(user.id),
@@ -59,12 +61,15 @@ export default function Home() {
         if (active[0]?.id) setEmiSchedule(await getLoanEmiSchedule(active[0].id));
       } catch (e) {
         console.error('Home dashboard error:', e);
+        if (mounted) setError(isBn ? 'ড্যাশবোর্ডের তথ্য লোড করা যায়নি।' : 'Could not load dashboard data.');
       } finally {
         if (mounted) setLoading(false);
       }
     })();
     return () => { mounted = false; };
   }, [user.id]);
+
+  const retryDashboard = () => { window.location.reload(); };
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
   const completedEmis = emiSchedule.filter(e => e.status === 'paid').length;
@@ -224,6 +229,15 @@ export default function Home() {
   return (
     <main className="w-full min-w-0 bg-[#f6f8fc] dark:bg-[#0b1220] text-slate-900 dark:text-slate-100 pb-[calc(6rem+env(safe-area-inset-bottom))] transition-colors">
       <div className="px-4 sm:px-5 pt-3 space-y-5">
+
+        {error && !loading && (
+          <section className="bg-white dark:bg-[#111827] border border-rose-200 dark:border-rose-900 rounded-2xl p-5 shadow-sm">
+            <div className="w-11 h-11 rounded-xl bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center"><AlertCircle size={19} className="text-rose-600"/></div>
+            <h2 className="text-sm font-black mt-3">{isBn ? 'তথ্য লোড হয়নি' : 'Data could not be loaded'}</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{error}</p>
+            <button onClick={retryDashboard} className="mt-4 px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black">{isBn ? 'আবার চেষ্টা করুন' : 'Try again'}</button>
+          </section>
+        )}
 
         {/* Header */}
         <header className="flex items-center justify-between gap-3">
