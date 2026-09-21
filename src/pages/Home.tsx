@@ -307,7 +307,7 @@ export default function Home() {
         )}
 
         {/* Financial overview */}
-        <section className="bg-[#101827] dark:bg-[#111827] rounded-[28px] p-5 text-white shadow-xl overflow-hidden relative">
+        <section className="home-financial-card rounded-[28px] p-5 text-white shadow-xl overflow-hidden relative">
           <div className="absolute -right-16 -top-16 w-40 h-40 rounded-full border border-sky-400/10" />
           <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full border border-sky-400/10" />
           <div className="flex items-center justify-between relative">
