@@ -911,3 +911,108 @@ html, body, #root {
   width: 100% !important;
   max-width: none !important;
 }
+
+
+/* ================================================================
+   FINAL MINI-APP EDGE + COLOR CONSISTENCY PASS
+   Force the application viewport to occupy the complete Telegram
+   WebView. Keep page content gutters controlled by each screen.
+   ================================================================ */
+html,
+body {
+  width: 100% !important;
+  min-width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+#root {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  overflow: hidden !important;
+}
+
+.user-app-shell,
+.admin-panel-shell {
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  transform: none !important;
+}
+
+/* One stable application palette across all user screens. */
+.user-app-shell {
+  background: #f5f7fb !important;
+  color: #0f172a !important;
+}
+
+.dark .user-app-shell {
+  background: #0b1220 !important;
+  color: #f8fafc !important;
+}
+
+/* Prevent old translucent/gradient surfaces from leaking through on
+   screens that have not yet been individually redesigned. */
+.user-app-shell [class*="bg-white/"] {
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+
+.dark .user-app-shell [class*="dark:bg-gray-800/"],
+.dark .user-app-shell [class*="dark:bg-gray-900/"],
+.dark .user-app-shell [class*="dark:bg-gray-950/"],
+.dark .user-app-shell [class*="dark:bg-slate-900/"] {
+  background-color: #111c2e !important;
+  background-image: none !important;
+}
+
+/* Consistent dark form controls across Apply/Deposit/Withdraw/EMI. */
+.dark .user-app-shell input,
+.dark .user-app-shell textarea,
+.dark .user-app-shell select {
+  background-color: #0f1724 !important;
+  color: #f8fafc !important;
+  border-color: #2a374b !important;
+}
+
+.dark .user-app-shell input::placeholder,
+.dark .user-app-shell textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Remove legacy decorative dark gradients that made screens visually
+   inconsistent with the new solid fintech surface system. */
+.dark .user-app-shell [class*="from-[#1b2330]"],
+.dark .user-app-shell [class*="from-[#0f131a]"],
+.dark .user-app-shell [class*="to-[#0b0c10]"] {
+  background-image: none !important;
+  background: #111827 !important;
+}
+
+/* Keep the primary action language consistent. */
+.user-app-shell .bg-primary-600 {
+  background-color: #0284c7 !important;
+}
+.user-app-shell .hover\:bg-primary-700:hover {
+  background-color: #0369a1 !important;
+}
