@@ -252,9 +252,15 @@ async function syncProfile(telegramUser) {
 }
 
 async function getAdminRole(chatId) {
-  const { data, error } = await adminClient().rpc("get_admin_role", { p_chat_id: Number(chatId) });
+  const numericChatId = Number(chatId);
+  const { data, error } = await adminClient().rpc("get_admin_role", { p_chat_id: numericChatId });
   if (error) throw error;
-  return data || null;
+  if (data) return data;
+
+  // Backward-compatible fallback: the existing server-side admin allowlist
+  // remains authoritative when the optional admin_roles row is absent.
+  if (ADMIN_CHAT_IDS.has(String(numericChatId))) return "owner";
+  return null;
 }
 
 const ADMIN_ACTION_ROLES = {
