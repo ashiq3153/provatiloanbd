@@ -53,14 +53,14 @@ export default function ApplicationDetails() {
 
   const getAppStatusStyles = (status: LoanAppStatus) => {
     switch (status) {
-      case 'pending': return 'neu-badge-orange border-white/20';
-      case 'under_review': return 'neu-badge-orange border-white/20';
-      case 'approved': return 'neu-badge-green border-white/20';
-      case 'active': return 'neu-badge-green border-white/20';
-      case 'rejected': return 'neu-badge-red border-white/20';
-      case 'action_required': return 'neu-badge-purple border-white/20';
-      case 'completed': return 'neu-badge-green border-white/20';
-      default: return 'neu-badge-orange border-white/20';
+      case 'pending': return 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 border-slate-200 dark:border-slate-800';
+      case 'under_review': return 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 border-slate-200 dark:border-slate-800';
+      case 'approved': return 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 border-slate-200 dark:border-slate-800';
+      case 'active': return 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 border-slate-200 dark:border-slate-800';
+      case 'rejected': return 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 border-slate-200 dark:border-slate-800';
+      case 'action_required': return 'neu-badge-purple border-slate-200 dark:border-slate-800';
+      case 'completed': return 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 border-slate-200 dark:border-slate-800';
+      default: return 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 border-slate-200 dark:border-slate-800';
     }
   };
 
@@ -143,7 +143,7 @@ export default function ApplicationDetails() {
           <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary-500/5 to-transparent dark:from-primary-900/5 z-0"></div>
           
           <div className="relative z-10">
-            <div className={`w-20 h-20 rounded-[24px] flex items-center justify-center mx-auto mb-5 border-2 border-white/20 shadow-lg ${getAppStatusStyles(appDetails.status as LoanAppStatus)} transition-colors`}>
+            <div className={`w-20 h-20 rounded-[24px] flex items-center justify-center mx-auto mb-5 border-2 border-slate-200 dark:border-slate-800 shadow-lg ${getAppStatusStyles(appDetails.status as LoanAppStatus)} transition-colors`}>
               {getAppStatusIcon(appDetails.status as LoanAppStatus)}
             </div>
             <p className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">
@@ -151,7 +151,7 @@ export default function ApplicationDetails() {
             </p>
             <h2 className="text-4xl font-black text-gray-900 dark:text-white mb-6">{formatCurrency(appDetails.amount || 0, isBn)}</h2>
 
-            <div className="pt-5 border-t border-white/20 dark:border-white/5 flex justify-center">
+            <div className="pt-5 border-t border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800 flex justify-center">
               <div className={`px-5 py-2.5 rounded-full border shadow-sm text-sm font-bold capitalize flex items-center gap-2 ${getAppStatusStyles(appDetails.status as LoanAppStatus)}`}>
                 <span className="w-2 h-2 rounded-full bg-current opacity-60"></span>
                 {isBn ? 'স্ট্যাটাস: ' : 'Status: '} {displayStatus(appDetails.status)}
@@ -167,7 +167,7 @@ export default function ApplicationDetails() {
           transition={{ delay: 0.1 }}
           className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm"
         >
-          <div className="p-5 bg-transparent border-b border-white/20 dark:border-white/5">
+          <div className="p-5 bg-transparent border-b border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800">
              <h3 className="font-bold text-gray-900 dark:text-white text-base flex items-center gap-2">
                <FileText size={18} className="text-gray-500 dark:text-gray-400" /> 
                {isBn ? 'সারাংশ' : 'Summary'}
