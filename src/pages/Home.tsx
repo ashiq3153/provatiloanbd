@@ -227,7 +227,7 @@ export default function Home() {
   };
 
   return (
-    <main className="home-modern w-full min-w-0 bg-[#f6f8fc] dark:bg-[#0b1220] text-slate-900 dark:text-slate-100 pb-[calc(6rem+env(safe-area-inset-bottom))] transition-colors">
+    <main className="home-modern app-home-theme w-full min-w-0 bg-[#f6f8fc] dark:bg-[#0b1220] text-slate-900 dark:text-slate-100 pb-[calc(6rem+env(safe-area-inset-bottom))] transition-colors">
       <div className="px-4 sm:px-5 pt-3 space-y-5">
 
         {error && !loading && (
