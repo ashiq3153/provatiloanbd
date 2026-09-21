@@ -432,6 +432,17 @@ export default function Home() {
           </section>
         )}
 
+        {/* Savings summary */}
+        {!loading && stats && (
+          <section className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+            <div className="flex items-center justify-between gap-3">
+              <div><p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{isBn ? 'সঞ্চয় হিসাব' : 'Savings account'}</p><p className="text-xl font-black mt-1">{balanceVisible ? formatCurrency(stats.savingsBalance || 0, isBn) : '••••••'}</p></div>
+              <Link to="/deposit" className="px-3 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[11px] font-black">{isBn ? 'জমা দিন' : 'Deposit'}</Link>
+            </div>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-2">{isBn ? 'বর্তমান সঞ্চয় ব্যালেন্স' : 'Current savings balance'}</p>
+          </section>
+        )}
+
         {/* Member services */}
         <section>
           <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'সদস্য সেবা':'Member services'}</p><h2 className="text-lg font-black mt-1">{isBn?'দ্রুত সেবা':'Quick services'}</h2></div></div>
