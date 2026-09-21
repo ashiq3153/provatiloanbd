@@ -2287,3 +2287,112 @@ html.dark .user-app-shell section:nth-of-type(3n+1),
 html.dark .user-app-shell section:nth-of-type(4n) {
   background: inherit !important;
 }
+
+/* ================================================================
+   PROFILE MODERN SURFACES
+   White/black canvas; sections and widgets carry the color.
+   ================================================================ */
+.profile-theme .profile-section {
+  position: relative;
+  padding: 14px 10px 10px;
+  border-radius: 24px;
+}
+.profile-theme .profile-section > .profile-section-title {
+  color: #475569;
+}
+.profile-theme .profile-section-member {
+  background: linear-gradient(180deg,#F0FDFA 0%,#F8FAFC 100%) !important;
+  border: 1px solid #CCFBF1 !important;
+}
+.profile-theme .profile-section-security {
+  background: linear-gradient(180deg,#EFF6FF 0%,#F8FAFC 100%) !important;
+  border: 1px solid #DBEAFE !important;
+}
+.profile-theme .profile-section-preferences {
+  background: linear-gradient(180deg,#FFF7ED 0%,#FFFBEB 100%) !important;
+  border: 1px solid #FED7AA !important;
+}
+.profile-theme .profile-section-support {
+  background: linear-gradient(180deg,#F5F3FF 0%,#FAF7FF 100%) !important;
+  border: 1px solid #E9D5FF !important;
+}
+.profile-theme .profile-section-telegram {
+  background: transparent !important;
+  padding-inline: 10px;
+}
+.profile-theme .profile-section > div.overflow-hidden {
+  background: rgba(255,255,255,.92) !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 10px 26px rgba(15,23,42,.06) !important;
+}
+.profile-theme .profile-section-member .profile-row-icon {
+  background: #E0F2FE !important;
+  color: #0369A1 !important;
+}
+.profile-theme .profile-section-security .profile-row-icon {
+  background: #EDE9FE !important;
+  color: #6D28D9 !important;
+}
+.profile-theme .profile-section-preferences .profile-row-icon {
+  background: #FEF3C7 !important;
+  color: #B45309 !important;
+}
+.profile-theme .profile-section-support .profile-row-icon {
+  background: #DCFCE7 !important;
+  color: #15803D !important;
+}
+.profile-theme .profile-section .border-slate-100 {
+  border-color: #E2E8F0 !important;
+}
+.profile-theme .profile-section .text-slate-900 { color:#0F172A !important; }
+.profile-theme .profile-section .text-slate-500 { color:#64748B !important; }
+.profile-theme .profile-section .text-slate-400 { color:#94A3B8 !important; }
+
+/* Dark profile: black canvas with colored elevated section shells. */
+html.dark .profile-theme .profile-section-member {
+  background: linear-gradient(180deg,#062E2B 0%,#081B1A 100%) !important;
+  border-color:#115E59 !important;
+}
+html.dark .profile-theme .profile-section-security {
+  background: linear-gradient(180deg,#0B2340 0%,#091522 100%) !important;
+  border-color:#1E40AF !important;
+}
+html.dark .profile-theme .profile-section-preferences {
+  background: linear-gradient(180deg,#2A1D08 0%,#171006 100%) !important;
+  border-color:#92400E !important;
+}
+html.dark .profile-theme .profile-section-support {
+  background: linear-gradient(180deg,#21163A 0%,#120C20 100%) !important;
+  border-color:#6D28D9 !important;
+}
+html.dark .profile-theme .profile-section > div.overflow-hidden {
+  background:#111827 !important;
+  border-color:#334155 !important;
+  box-shadow:0 12px 28px rgba(0,0,0,.25) !important;
+}
+html.dark .profile-theme .profile-section-member .profile-row-icon {
+  background:#083B45 !important; color:#38BDF8 !important;
+}
+html.dark .profile-theme .profile-section-security .profile-row-icon {
+  background:#24154A !important; color:#A78BFA !important;
+}
+html.dark .profile-theme .profile-section-preferences .profile-row-icon {
+  background:#3A2508 !important; color:#FBBF24 !important;
+}
+html.dark .profile-theme .profile-section-support .profile-row-icon {
+  background:#103B2A !important; color:#4ADE80 !important;
+}
+html.dark .profile-theme .profile-section .border-slate-100 {
+  border-color:#263449 !important;
+}
+html.dark .profile-theme .profile-section .text-slate-900 { color:#F8FAFC !important; }
+html.dark .profile-theme .profile-section .text-slate-500 { color:#CBD5E1 !important; }
+html.dark .profile-theme .profile-section .text-slate-400 { color:#94A3B8 !important; }
+
+/* Identity card: stronger fintech hierarchy. */
+.profile-theme > section:first-child > div {
+  box-shadow:0 16px 34px rgba(15,23,42,.10) !important;
+}
+html.dark .profile-theme > section:first-child > div {
+  box-shadow:0 18px 38px rgba(0,0,0,.35) !important;
+}
