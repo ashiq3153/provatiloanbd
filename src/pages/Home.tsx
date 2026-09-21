@@ -449,9 +449,19 @@ export default function Home() {
 
           <Link
             to="/profile"
-            className="w-11 h-11 rounded-2xl neu-btn flex items-center justify-center relative border-0 cursor-pointer"
+            aria-label={isBn ? 'প্রোফাইল খুলুন' : 'Open profile'}
+            className="w-11 h-11 rounded-full overflow-hidden relative border-2 border-white dark:border-slate-700 shadow-sm cursor-pointer active:scale-95 transition-transform bg-gray-100 dark:bg-slate-800"
           >
-            <User className="w-5 h-5 text-gray-700 dark:text-gray-300 transition-colors" />
+            <img
+              src={user.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(`${user.first_name} ${user.last_name || ''}`)}&background=0ea5e9&color=fff&bold=true`}
+              alt={isBn ? 'প্রোফাইল ছবি' : 'Profile photo'}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(`${user.first_name} ${user.last_name || ''}`)}&background=0ea5e9&color=fff&bold=true`;
+                if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
+              }}
+            />
+            <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-800" />
           </Link>
 
           {/* Premium Glassmorphic Notifications Panel */}
