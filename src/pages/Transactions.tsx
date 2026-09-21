@@ -11,7 +11,7 @@ import type { Transaction as DBTransaction, LoanApplication } from '../types/dat
 
 type TransactionType = 'deposit' | 'withdraw' | 'emi' | 'loan';
 type TransactionStatus = 'completed' | 'pending' | 'failed';
-type LoanAppStatus = 'pending' | 'approved' | 'rejected';
+type LoanAppStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'action_required' | 'cancelled';
 
 interface Transaction {
   id: string;
@@ -38,7 +38,7 @@ export default function Transactions() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'transactions' | 'applications'>('transactions');
   const [filter, setFilter] = useState<'all' | 'deposit' | 'withdraw'>('all');
-  const [appFilter, setAppFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [appFilter, setAppFilter] = useState<'all' | 'pending' | 'under_review' | 'approved' | 'rejected' | 'action_required' | 'cancelled'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'amount-high' | 'amount-low'>('newest');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -84,7 +84,7 @@ export default function Transactions() {
 
         // Map DB applications to display format
         const mappedApps: LoanApp[] = appData
-          .filter((a: LoanApplication) => ['pending', 'approved', 'rejected'].includes(a.status))
+          .filter((a: LoanApplication) => ['pending', 'under_review', 'approved', 'rejected', 'action_required', 'cancelled'].includes(a.status))
           .map((a: LoanApplication) => ({
             id: a.id,
             amount: a.amount,
@@ -158,19 +158,27 @@ export default function Transactions() {
     }
   };
 
+  const getAppStatusLabel = (status: LoanAppStatus) => ({ pending: isBn ? 'জমা হয়েছে' : 'Submitted', under_review: isBn ? 'যাচাই চলছে' : 'Under review', approved: isBn ? 'অনুমোদিত' : 'Approved', rejected: isBn ? 'প্রত্যাখ্যাত' : 'Rejected', action_required: isBn ? 'পদক্ষেপ প্রয়োজন' : 'Action required', cancelled: isBn ? 'বাতিল' : 'Cancelled' }[status]);
+
   const getAppStatusStyles = (status: LoanAppStatus) => {
     switch (status) {
       case 'pending': return 'neu-badge-orange border-white/20';
+      case 'under_review': return 'neu-badge-orange border-white/20';
       case 'approved': return 'neu-badge-green border-white/20';
       case 'rejected': return 'neu-badge-red border-white/20';
+      case 'action_required': return 'neu-badge-orange border-white/20';
+      case 'cancelled': return 'neu-badge-red border-white/20';
     }
   };
 
   const getAppStatusIcon = (status: LoanAppStatus) => {
     switch (status) {
       case 'pending': return <Clock size={16} />;
+      case 'under_review': return <Clock size={16} />;
       case 'approved': return <CheckCircle2 size={16} />;
       case 'rejected': return <XCircle size={16} />;
+      case 'action_required': return <AlertCircle size={16} />;
+      case 'cancelled': return <XCircle size={16} />;
     }
   };
 
