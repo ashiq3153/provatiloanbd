@@ -138,6 +138,8 @@ export default function Transactions() {
     return app.status === appFilter;
   });
 
+  const formatStatusLabel = (status: TransactionStatus) => status === 'completed' ? (isBn ? 'সম্পন্ন' : 'Completed') : status === 'pending' ? (isBn ? 'অপেক্ষমাণ' : 'Pending') : (isBn ? 'ব্যর্থ' : 'Failed');
+
   const getIcon = (type: TransactionType) => {
     switch (type) {
       case 'deposit': return <ArrowDownToLine size={20} />;
@@ -228,6 +230,14 @@ export default function Transactions() {
   return (
     <div className="min-h-screen neu-bg flex flex-col relative transition-colors pb-24">
       {/* Premium Header */}
+      {!loading && !error && view === 'transactions' && filteredTransactions.length === 0 && (
+        <div className="mx-4 mt-4 p-6 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 text-center">
+          <div className="mx-auto w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center"><LayoutList size={19} className="text-slate-500"/></div>
+          <p className="text-sm font-black mt-3">{isBn ? 'কোনো লেনদেন পাওয়া যায়নি' : 'No transactions found'}</p>
+          <p className="text-xs text-slate-500 mt-1">{searchQuery ? (isBn ? 'সার্চ বা ফিল্টার পরিবর্তন করে দেখুন।' : 'Try changing your search or filter.') : (isBn ? 'আপনার লেনদেন এখানে দেখা যাবে।' : 'Your transactions will appear here.')}</p>
+        </div>
+      )}
+
       {error && !loading && (
         <div className="mx-4 mt-4 p-4 rounded-2xl bg-white dark:bg-[#111827] border border-rose-200 dark:border-rose-900">
           <div className="flex items-start gap-3"><AlertCircle size={18} className="text-rose-600 mt-0.5"/><div className="min-w-0"><p className="text-sm font-black">{isBn ? 'রেকর্ড লোড হয়নি' : 'Records could not be loaded'}</p><p className="text-xs text-slate-500 mt-1">{error}</p><button onClick={() => window.location.reload()} className="mt-3 px-3 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black">{isBn ? 'আবার চেষ্টা করুন' : 'Try again'}</button></div></div>
