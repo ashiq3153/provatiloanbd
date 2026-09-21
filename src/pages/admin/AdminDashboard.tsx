@@ -720,13 +720,13 @@ export default function AdminDashboard() {
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-gray-900/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border-r border-gray-100 dark:border-gray-700 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 flex flex-col shadow-2xl md:shadow-none`}>
+      <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-[#111c2e] border-r border-gray-100 dark:border-gray-700 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 flex flex-col shadow-2xl md:shadow-none`}>
         <div className="p-6 flex items-center gap-4 border-b border-gray-100/50 dark:border-gray-700/50">
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-indigo-600 text-white rounded-[16px] flex items-center justify-center shrink-0 shadow-lg shadow-primary-500/30">
             <ShieldAlert size={24} />
@@ -778,7 +778,7 @@ export default function AdminDashboard() {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-500/5 dark:bg-primary-500/10 blur-[120px] rounded-full pointer-events-none -mr-48 -mt-48 z-0"></div>
 
         {/* Top Header */}
-        <header className="bg-white/75 dark:bg-gray-800/75 backdrop-blur-xl border-b border-gray-100 dark:border-gray-700 min-h-16 sm:min-h-20 py-2 sm:py-0 flex items-center justify-between gap-2 px-3 sm:px-6 lg:px-8 shrink-0 relative z-10">
+        <header className="bg-white dark:bg-[#111c2e] border-b border-gray-100 dark:border-gray-700 min-h-16 sm:min-h-20 py-2 sm:py-0 flex items-center justify-between gap-2 px-3 sm:px-6 lg:px-8 shrink-0 relative z-10">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-gray-600 dark:text-gray-300 p-2.5 -ml-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shrink-0">
               <Menu size={24} />
@@ -874,7 +874,7 @@ export default function AdminDashboard() {
                   {/* Grid stats */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {/* Card 1 */}
-                    <div className="relative group overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.15)] hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(59,130,246,0.1)] transition-all duration-300">
+                    <div className="relative group overflow-hidden bg-white dark:bg-[#111c2e] border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.15)] hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(59,130,246,0.1)] transition-all duration-300">
                       <div className="absolute -right-6 -top-6 w-28 h-28 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all duration-500"></div>
                       <div className="flex justify-between items-start relative z-10">
                         <div className="w-14 h-14 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center border border-blue-100/50 dark:border-blue-500/20 shadow-inner"><Users size={28} /></div>
@@ -893,7 +893,7 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Card 2 */}
-                    <div className="relative group overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.15)] hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(16,185,129,0.1)] transition-all duration-300">
+                    <div className="relative group overflow-hidden bg-white dark:bg-[#111c2e] border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.15)] hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(16,185,129,0.1)] transition-all duration-300">
                       <div className="absolute -right-6 -top-6 w-28 h-28 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500"></div>
                       <div className="flex justify-between items-start relative z-10">
                         <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center border border-emerald-100/50 dark:border-emerald-500/20 shadow-inner"><FileText size={28} /></div>
@@ -904,7 +904,7 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Card 3 */}
-                    <div className="relative group overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.15)] hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] transition-all duration-300">
+                    <div className="relative group overflow-hidden bg-white dark:bg-[#111c2e] border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.15)] hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] transition-all duration-300">
                       <div className="absolute -right-6 -top-6 w-28 h-28 bg-amber-500/5 dark:bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all duration-500"></div>
                       <div className="flex justify-between items-start relative z-10">
                         <div className="w-14 h-14 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center border border-amber-100/50 dark:border-amber-500/20 shadow-inner"><Activity size={28} /></div>
@@ -915,7 +915,7 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Card 4 */}
-                    <div className="relative group overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.15)] hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(168,85,247,0.1)] transition-all duration-300">
+                    <div className="relative group overflow-hidden bg-white dark:bg-[#111c2e] border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.15)] hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(168,85,247,0.1)] transition-all duration-300">
                       <div className="absolute -right-6 -top-6 w-28 h-28 bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-all duration-500"></div>
                       <div className="flex justify-between items-start relative z-10">
                         <div className="w-14 h-14 bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-2xl flex items-center justify-center border border-purple-100/50 dark:border-purple-500/20 shadow-inner"><DollarSign size={28} /></div>
@@ -929,7 +929,7 @@ export default function AdminDashboard() {
                   {/* Visual charts */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Transaction Trends chart */}
-                    <div className="lg:col-span-2 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[32px] shadow-sm flex flex-col justify-between">
+                    <div className="lg:col-span-2 bg-white dark:bg-[#111c2e] border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[32px] shadow-sm flex flex-col justify-between">
                       <div className="mb-4">
                         <h4 className="font-bold text-slate-800 dark:text-white text-lg tracking-tight">{isBn ? 'লেনদেন ভলিউম ট্রেন্ড (বিগত ৭ দিন)' : 'Transaction Volume Trends (Last 7 Days)'}</h4>
                         <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{isBn ? 'সম্পন্নকৃত ডিপোজিট ও উত্তোলনের দৈনিক অনুপাত।' : 'Daily ratio of completed deposits vs withdrawals.'}</p>
@@ -964,7 +964,7 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Payment gateway volume chart */}
-                    <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[32px] shadow-sm flex flex-col justify-between">
+                    <div className="bg-white dark:bg-[#111c2e] border border-slate-200/50 dark:border-slate-800/40 p-6 rounded-[32px] shadow-sm flex flex-col justify-between">
                       <div className="mb-4">
                         <h4 className="font-bold text-slate-800 dark:text-white text-lg tracking-tight">{isBn ? 'গেটওয়ে ভিত্তিক লেনদেন ভলিউম' : 'Gateway Transaction Volume'}</h4>
                         <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{isBn ? 'পেমেন্ট মেথড সমূহের মোট লেনদেনের হিসেব।' : 'Cumulative volumes processed per payment channel.'}</p>
@@ -2055,7 +2055,7 @@ export default function AdminDashboard() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 overflow-y-auto p-4 sm:p-6 md:p-10 flex items-center justify-center animate-fade-in"
+              className="fixed inset-0 bg-slate-900/70 z-50 overflow-y-auto p-4 sm:p-6 md:p-10 flex items-center justify-center animate-fade-in"
               onClick={() => setSelectedLoan(null)}
             >
               {/* Modal Container */}
@@ -2604,7 +2604,7 @@ export default function AdminDashboard() {
 
         {showDirectMessageModal && directMessageUsers.length > 0 && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setShowDirectMessageModal(false)}></div>
+            <div className="absolute inset-0 bg-gray-900/70" onClick={() => setShowDirectMessageModal(false)}></div>
             <div className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto p-4 sm:p-6 relative z-10 shadow-2xl border border-gray-200 dark:border-gray-700">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -2649,7 +2649,7 @@ export default function AdminDashboard() {
         )}
 
         {showLockModal && (
-          <div className="fixed inset-0 z-[100] bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[100] bg-gray-900/70 flex items-center justify-center p-4">
             <div className="bg-white dark:bg-gray-800 rounded-3xl p-4 sm:p-6 w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto shadow-2xl border border-gray-100 dark:border-gray-700 relative">
               <button onClick={() => setShowLockModal(null)} className="absolute top-4 right-4 p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
                 <X size={20} />
