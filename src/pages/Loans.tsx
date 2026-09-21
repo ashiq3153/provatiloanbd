@@ -39,22 +39,22 @@ export default function Loans() {
       case 'pending': return { text: isBn ? 'অপেক্ষমান' : 'Pending', color: 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900', icon: Clock };
       case 'under_review': return { text: isBn ? 'রিভিউ চলছে' : 'Under Review', color: 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900', icon: Clock };
       case 'approved': return { text: isBn ? 'অনুমোদিত' : 'Approved', color: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900', icon: CheckCircle2 };
-      case 'active': return { text: isBn ? 'সক্রিয়' : 'Active', color: 'neu-badge-green border-white/20', icon: CheckCircle2 };
+      case 'active': return { text: isBn ? 'সক্রিয়' : 'Active', color: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 border-slate-200 dark:border-slate-800', icon: CheckCircle2 };
       case 'rejected': return { text: isBn ? 'বাতিল' : 'Rejected', color: 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-900', icon: XCircle };
       case 'action_required': return { text: isBn ? 'আপডেট প্রয়োজন' : 'Action Required', color: 'bg-violet-50 dark:bg-violet-950/40 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-900', icon: AlertCircle };
-      case 'completed': return { text: isBn ? 'সম্পন্ন' : 'Completed', color: 'neu-badge-green border-white/20', icon: CheckCircle2 };
-      default: return { text: status, color: 'neu-badge-orange border-white/20', icon: FileText };
+      case 'completed': return { text: isBn ? 'সম্পন্ন' : 'Completed', color: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 border-slate-200 dark:border-slate-800', icon: CheckCircle2 };
+      default: return { text: status, color: 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 border-slate-200 dark:border-slate-800', icon: FileText };
     }
   };
 
   const activeLoansCount = loans.filter(l => l.status === 'active' || l.status === 'approved').length;
 
   return (
-    <div className="min-h-screen neu-bg flex flex-col relative transition-colors pb-24">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b1220] flex flex-col relative transition-colors pb-24">
       {/* Premium Header */}
       <div className="bg-white dark:bg-[#0f172a] px-4 sm:px-5 py-4 sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 transition-colors flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full neu-sunken flex items-center justify-center text-primary-600 dark:text-primary-400">
+          <div className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-primary-600 dark:text-primary-400">
             <Wallet size={20} />
           </div>
           <div>
@@ -95,7 +95,7 @@ export default function Loans() {
                 <p className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-1">{isBn ? 'সক্রিয় লোন সংখ্যা' : 'Active Loans Count'}</p>
                 <p className="text-3xl font-black text-gray-900 dark:text-white">{activeLoansCount}</p>
               </div>
-              <div className="w-14 h-14 neu-sunken rounded-full flex items-center justify-center text-primary-600 dark:text-primary-400">
+              <div className="w-14 h-14 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full flex items-center justify-center text-primary-600 dark:text-primary-400">
                 <FileText size={28} />
               </div>
             </div>
@@ -106,7 +106,7 @@ export default function Loans() {
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3].map(i => (
-                <div key={i} className="neu-raised rounded-[24px] p-6 relative overflow-hidden">
+                <div key={i} className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-6 relative overflow-hidden">
                   <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start mb-5 relative z-10">
                     <div className="space-y-2 flex-1 pr-6">
                       <Skeleton className="h-6 w-1/2" />
@@ -131,14 +131,14 @@ export default function Loans() {
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-16 neu-raised rounded-[32px] mt-4"
+              className="text-center py-16 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[32px] mt-4"
             >
-              <div className="w-24 h-24 neu-sunken rounded-full flex items-center justify-center mx-auto mb-5 text-primary-500">
+              <div className="w-24 h-24 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full flex items-center justify-center mx-auto mb-5 text-primary-500">
                 <FileText size={48} strokeWidth={1.5} />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{isBn ? 'কোনো লোন নেই' : 'No Loans Found'}</h2>
               <p className="text-gray-500 dark:text-gray-400 mb-8 text-sm font-medium">{isBn ? 'আপনি এখনও কোনো লোনের আবেদন করেননি।' : 'You have not applied for any loans yet.'}</p>
-              <Link to="/apply" className="inline-flex items-center gap-2 neu-btn-primary text-white px-8 py-4 rounded-full font-bold active:scale-95 transition-all text-base">
+              <Link to="/apply" className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white shadow-sm text-white px-8 py-4 rounded-full font-bold active:scale-95 transition-all text-base">
                 {isBn ? 'নতুন আবেদন করুন' : 'Apply Now'} <ArrowRight size={18} />
               </Link>
             </motion.div>
@@ -183,7 +183,7 @@ export default function Loans() {
                     </div>
 
                     {loan.status === 'action_required' && loan.admin_feedback && (
-                      <div className="mt-5 p-4 neu-sunken border border-orange-500/20 rounded-[16px] relative z-10">
+                      <div className="mt-5 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border border-orange-500/20 rounded-[16px] relative z-10">
                         <div className="flex items-start gap-3">
                           <AlertCircle size={20} className="text-orange-500 shrink-0 mt-0.5" />
                           <div>
@@ -207,7 +207,7 @@ export default function Loans() {
                         </div>
                         <button 
                           onClick={() => navigate(`/apply?edit=${loan.id}`)}
-                          className="mt-4 w-full neu-btn-primary text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 active:scale-95"
+                          className="mt-4 w-full bg-primary-600 hover:bg-primary-700 text-white shadow-sm text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 active:scale-95"
                         >
                           <Pencil size={16} />
                           {isBn ? 'আবেদন আপডেট করুন' : 'Update Application'}
@@ -218,7 +218,7 @@ export default function Loans() {
                     {loan.status !== 'action_required' && (
                       <button 
                         onClick={() => navigate(`/application/${loan.id}`)}
-                        className="mt-5 w-full neu-btn text-gray-700 dark:text-gray-250 py-3 rounded-[16px] text-sm font-bold active:scale-95 transition-all relative z-10"
+                        className="mt-5 w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-700 dark:text-gray-250 py-3 rounded-[16px] text-sm font-bold active:scale-95 transition-all relative z-10"
                       >
                         {isBn ? 'বিস্তারিত দেখুন' : 'View Details'}
                       </button>
