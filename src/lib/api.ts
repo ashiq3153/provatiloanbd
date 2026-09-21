@@ -169,6 +169,20 @@ export async function getLoanApplicationById(applicationId: string): Promise<Loa
   return data;
 }
 
+export async function getLoanEmiSchedule(loanId: string): Promise<import('../types/database').LoanEmiSchedule[]> {
+  const { data, error } = await supabase
+    .from('loan_emi_schedule')
+    .select('*')
+    .eq('loan_id', loanId)
+    .order('installment_no', { ascending: true });
+
+  if (error) {
+    console.error('getLoanEmiSchedule error:', error);
+    return [];
+  }
+  return (data || []) as import('../types/database').LoanEmiSchedule[];
+}
+
 export async function getActiveLoans(chatId: number): Promise<LoanApplication[]> {
   const { data, error } = await supabase
     .from('loan_applications')
