@@ -84,13 +84,13 @@ const AccordionSection = ({
         className={`w-full flex items-center justify-between p-4 transition-all text-left font-bold text-sm select-none cursor-pointer border ${
           isExpanded
             ? flagged
-              ? "neu-raised border-amber-500 text-amber-900 dark:text-amber-100 rounded-t-2xl rounded-b-none ring-2 ring-amber-500/20"
-              : "neu-raised border-primary-500/50 dark:border-primary-500/30 text-primary-900 dark:text-primary-100 rounded-t-2xl rounded-b-none"
+              ? "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-amber-500 text-amber-900 dark:text-amber-100 rounded-t-2xl rounded-b-none ring-2 ring-amber-500/20"
+              : "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-primary-500/50 dark:border-primary-500/30 text-primary-900 dark:text-primary-100 rounded-t-2xl rounded-b-none"
             : flagged
-            ? "neu-raised border-amber-400 dark:border-amber-900/60 text-amber-800 dark:text-amber-400 rounded-2xl ring-2 ring-amber-500/10 animate-pulse"
+            ? "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-amber-400 dark:border-amber-900/60 text-amber-800 dark:text-amber-400 rounded-2xl ring-2 ring-amber-500/10 animate-pulse"
             : hasError
-            ? "neu-raised border-rose-450/60 dark:border-rose-900 text-rose-700 dark:text-rose-455 rounded-2xl"
-            : "neu-raised border-white/60 dark:border-white/5 text-gray-805 dark:text-gray-200 hover:border-primary-500/30 rounded-2xl"
+            ? "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-rose-450/60 dark:border-rose-900 text-rose-700 dark:text-rose-455 rounded-2xl"
+            : "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-white/60 dark:border-white/5 text-gray-805 dark:text-gray-200 hover:border-primary-500/30 rounded-2xl"
         }`}
       >
         <div className="flex items-center gap-3">
@@ -101,7 +101,7 @@ const AccordionSection = ({
               ? "bg-amber-500 text-white animate-bounce"
               : hasError
               ? "bg-rose-500 text-white"
-              : "neu-sunken text-gray-500 dark:text-gray-400"
+              : "bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-gray-500 dark:text-gray-400"
           }`}>
             {icon}
           </div>
@@ -1260,8 +1260,8 @@ export default function ApplyLoan() {
               }}
               className={`group w-full rounded-[24px] text-left relative overflow-hidden transition-all duration-300 border cursor-pointer ${
                 isActive 
-                  ? "neu-raised border-primary-500 dark:border-primary-500/80 ring-2 ring-primary-500/20 shadow-[inset_0_0_8px_rgba(59,130,246,0.1)] text-primary-905 dark:text-primary-100"
-                  : "neu-raised border-white/60 dark:border-white/5 hover:border-gray-200 dark:hover:border-gray-700 hover:scale-[1.01]"
+                  ? "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-primary-500 dark:border-primary-500/80 ring-2 ring-primary-500/20 shadow-[inset_0_0_8px_rgba(59,130,246,0.1)] text-primary-905 dark:text-primary-100"
+                  : "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-white/60 dark:border-white/5 hover:border-gray-200 dark:hover:border-gray-700 hover:scale-[1.01]"
               }`}
             >
               <div className="flex flex-col sm:flex-row min-h-[160px]">
@@ -1270,7 +1270,7 @@ export default function ApplyLoan() {
                   <div>
                     <div className="flex items-start justify-between mb-2 gap-2">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 neu-sunken ${getIconColor(cat.color)}`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 ${getIconColor(cat.color)}`}>
                           <cat.icon size={20} />
                         </div>
                         <div>
@@ -1282,7 +1282,7 @@ export default function ApplyLoan() {
                           </p>
                         </div>
                       </div>
-                      <div className="shrink-0 px-3 py-1.5 rounded-full neu-btn-primary text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-md hover:scale-105 active:scale-95 transition-all">
+                      <div className="shrink-0 px-3 py-1.5 rounded-full bg-primary-600 hover:bg-primary-700 text-white shadow-sm text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-md hover:scale-105 active:scale-95 transition-all">
                         {isBn ? "নির্বাচন করুন" : "Select"}
                         <ChevronRight size={12} />
                       </div>
@@ -1311,7 +1311,7 @@ export default function ApplyLoan() {
                       <span key={i} className={`px-2 py-0.5 text-[10px] rounded-[6px] border font-bold ${
                         isActive 
                           ? 'bg-primary-500/10 border-primary-500/20 text-primary-600 dark:text-primary-400 font-bold shadow-sm' 
-                          : 'neu-sunken border-white/50 dark:border-white/5 text-gray-500 dark:text-gray-400 shadow-sm'
+                          : 'bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-white/50 dark:border-white/5 text-gray-500 dark:text-gray-400 shadow-sm'
                       }`}>
                         {feature}
                       </span>
@@ -1366,7 +1366,7 @@ export default function ApplyLoan() {
         </div>
 
         {/* Amount Chips */}
-        <div className="neu-raised p-5 rounded-3xl">
+        <div className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm p-5 rounded-3xl">
           <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-4 transition-colors">{isBn ? "লোনের পরিমাণ" : "Loan Amount"}</label>
           <div className="flex flex-wrap gap-2">
              {amountPackages.filter(amt => amt <= (category?.maxAmount || 5000000)).map(pkg => (
@@ -1375,8 +1375,8 @@ export default function ApplyLoan() {
                 onClick={() => handleAmountChange(pkg)}
                 className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all border flex-grow text-center ${
                   amount === pkg 
-                    ? "neu-btn-primary" 
-                    : "neu-btn text-gray-605 dark:text-gray-300"
+                    ? "bg-primary-600 hover:bg-primary-700 text-white shadow-sm" 
+                    : "bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-605 dark:text-gray-300"
                 }`}
               >
                 {formatAmount(pkg, isBn)}
@@ -1386,7 +1386,7 @@ export default function ApplyLoan() {
         </div>
 
         {/* Tenure Snap Slider */}
-        <div className="neu-raised p-5 rounded-3xl">
+        <div className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm p-5 rounded-3xl">
           <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-4 transition-colors">{isBn ? "সময়কাল (মাস)" : "Tenure (Months)"}</label>
           
           <div className="flex flex-wrap gap-2">
@@ -1399,11 +1399,11 @@ export default function ApplyLoan() {
               
               let btnClass = "py-3 px-4 rounded-xl font-bold text-sm transition-all flex-grow text-center ";
               if (isSelected) {
-                btnClass += "neu-btn-primary";
+                btnClass += "bg-primary-600 hover:bg-primary-700 text-white shadow-sm";
               } else if (isAllowed) {
-                btnClass += "neu-btn text-gray-700 dark:text-gray-400";
+                btnClass += "bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-700 dark:text-gray-400";
               } else {
-                btnClass += "neu-sunken opacity-40 cursor-not-allowed shadow-none text-gray-400 dark:text-gray-600";
+                btnClass += "bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 opacity-40 cursor-not-allowed shadow-none text-gray-400 dark:text-gray-600";
               }
 
               return (
@@ -2712,9 +2712,9 @@ export default function ApplyLoan() {
             documents[id] 
               ? 'border-solid border-green-500 bg-green-50/10 dark:bg-green-950/5' 
               : 'border-dashed border-white/60 dark:border-white/5 bg-gray-100/10 dark:bg-gray-950/10'
-          } rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:scale-[1.01] transition-all cursor-pointer text-center block neu-sunken ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+          } rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:scale-[1.01] transition-all cursor-pointer text-center block bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
         >
-           <div className={`w-10 h-10 ${documents[id] ? 'neu-badge-green border-white/20' : 'neu-btn'} transition-colors rounded-full flex items-center justify-center shadow-sm mx-auto`}>
+           <div className={`w-10 h-10 ${documents[id] ? 'neu-badge-green border-white/20' : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700'} transition-colors rounded-full flex items-center justify-center shadow-sm mx-auto`}>
              {isUploading ? (
                <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
              ) : documents[id] ? (
@@ -2752,7 +2752,7 @@ export default function ApplyLoan() {
       </div>
 
       {/* Uploads Block */}
-      <div className={`transition-all rounded-2xl border ${flaggedSections.documents ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-white/60 dark:border-white/5'} p-4 space-y-4 neu-raised`}>
+      <div className={`transition-all rounded-2xl border ${flaggedSections.documents ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-white/60 dark:border-white/5'} p-4 space-y-4 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm`}>
         <h3 className="font-bold text-gray-805 dark:text-gray-200 text-sm border-b border-gray-200/50 dark:border-gray-800 transition-colors pb-2">{isBn ? "পরিচয়পত্র ও ছবি" : "Identity Documents & Photos"}</h3>
         
         {/* Upload Slot Grid */}
@@ -2769,7 +2769,7 @@ export default function ApplyLoan() {
       </div>
 
       {/* Income Proofs Block */}
-      <div className="rounded-2xl border border-white/60 dark:border-white/5 p-4 space-y-4 neu-raised">
+      <div className="rounded-2xl border border-white/60 dark:border-white/5 p-4 space-y-4 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm">
         <h3 className="font-bold text-gray-805 dark:text-gray-200 text-sm border-b border-gray-200/50 dark:border-gray-800 transition-colors pb-2">
           {isBn ? "আয়ের প্রমাণপত্র" : "Income Proof"} ({category?.title})
         </h3>
@@ -2884,7 +2884,7 @@ export default function ApplyLoan() {
       </div>
 
       {/* Review Details Summary Card */}
-      <div className="rounded-2xl border border-white/60 dark:border-white/5 overflow-hidden mt-4 neu-raised">
+      <div className="rounded-2xl border border-white/60 dark:border-white/5 overflow-hidden mt-4 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="bg-gray-100/40 dark:bg-gray-900/20 p-4 border-b border-gray-200/50 dark:border-gray-800 flex justify-between items-center">
           <div className="flex items-center gap-2">
             {category?.icon && <category.icon size={18} className="text-gray-500" />}
@@ -2910,7 +2910,7 @@ export default function ApplyLoan() {
       </div>
 
       {/* Terms and Declaration Checkbox */}
-      <label htmlFor="acceptedTerms" className="flex items-start gap-3 p-4 rounded-2xl cursor-pointer group mt-4 neu-sunken border-white/30 dark:border-white/5">
+      <label htmlFor="acceptedTerms" className="flex items-start gap-3 p-4 rounded-2xl cursor-pointer group mt-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-white/30 dark:border-white/5">
         <div className="pt-0.5">
           <input 
             id="acceptedTerms"
@@ -2952,7 +2952,7 @@ export default function ApplyLoan() {
         <p className="text-gray-600 dark:text-gray-400 text-sm">{isBn ? "আপনার আবেদনটি পর্যালোচনার জন্য পাঠানো হয়েছে।" : "Your application has been submitted for review."}</p>
       </div>
 
-      <div className="rounded-2xl border border-white/30 dark:border-white/5 p-5 text-left max-w-xs mx-auto neu-sunken">
+      <div className="rounded-2xl border border-white/30 dark:border-white/5 p-5 text-left max-w-xs mx-auto bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
         <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">{isBn ? "ট্র্যাকিং আইডি" : "Tracking ID"}</p>
         <p className="text-lg font-mono font-black text-gray-900 dark:text-white transition-colors mb-4">#LN-{(Math.random()*100000).toFixed(0).padStart(6,'0')}</p>
         
@@ -2979,13 +2979,13 @@ export default function ApplyLoan() {
       <div className="pt-6 space-y-3">
         <Link 
           to="/deposit" 
-          className="w-full block text-center neu-btn-primary font-bold py-4 rounded-xl text-sm"
+          className="w-full block text-center bg-primary-600 hover:bg-primary-700 text-white shadow-sm font-bold py-4 rounded-xl text-sm"
         >
           {isBn ? "প্রসেসিং ফি জমা দিন" : "Deposit Processing Fee"}
         </Link>
         <Link 
           to={`/support?prefill=loan_apply&cat=${category?.id}&amount=${amount}`}
-          className="w-full block text-center neu-btn font-bold py-4 rounded-xl text-sm"
+          className="w-full block text-center bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold py-4 rounded-xl text-sm"
         >
           {isBn ? "লাইভ সাপোর্ট চ্যাট" : "Contact Live Support"}
         </Link>
@@ -3001,12 +3001,12 @@ export default function ApplyLoan() {
 
   return (
     <FormProvider {...methods}>
-    <div className="min-h-full neu-bg transition-colors flex flex-col relative">
+    <div className="min-h-full bg-slate-50 dark:bg-[#0b1220] transition-colors flex flex-col relative">
       {/* Dynamic Header */}
       {step < 5 && (
         <div className="px-5 pt-6 pb-4 sticky top-0 z-30 flex items-center justify-between border-b border-gray-200/30 dark:border-gray-850/50">
            {step > 1 ? (
-             <button onClick={prevStep} className="p-2 -ml-2 rounded-full neu-btn flex items-center justify-center">
+             <button onClick={prevStep} className="p-2 -ml-2 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
                <ChevronLeft size={20} />
              </button>
            ) : (
@@ -3015,7 +3015,7 @@ export default function ApplyLoan() {
            
            <div className="flex flex-col items-center">
              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Step {step} of 4</p>
-             <div className="flex gap-1 h-2 w-32 neu-sunken rounded-full overflow-hidden border-none">
+             <div className="flex gap-1 h-2 w-32 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full overflow-hidden border-none">
                <motion.div 
                  className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full"
                  initial={{ width: 0 }}
@@ -3055,7 +3055,7 @@ export default function ApplyLoan() {
             <button
               type="button"
               onClick={prevStep}
-              className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm neu-btn shrink-0 text-gray-700 dark:text-gray-300"
+              className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 text-gray-700 dark:text-gray-300"
             >
               <ChevronLeft size={16} /> {isBn ? 'পিছনে' : 'Back'}
             </button>
@@ -3064,7 +3064,7 @@ export default function ApplyLoan() {
             type="button"
             onClick={nextStep}
             disabled={(step === 1 && !category) || (step === 4 && !acceptedTerms) || isSubmitting}
-            className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm neu-btn-primary shrink-0 disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:shadow-none ml-auto"
+            className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm bg-primary-600 hover:bg-primary-700 text-white shadow-sm shrink-0 disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:shadow-none ml-auto"
           >
             {isSubmitting
               ? (isBn ? 'অপেক্ষা করুন...' : 'Please wait...')
@@ -3083,7 +3083,7 @@ export default function ApplyLoan() {
           <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="rounded-3xl max-w-md w-full shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden my-8 neu-raised"
+            className="rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-8 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm"
           >
             {/* Header */}
             <div className="bg-gray-100/40 dark:bg-gray-900/20 px-6 py-4 border-b border-gray-200/50 dark:border-gray-800 flex justify-between items-center">
@@ -3107,7 +3107,7 @@ export default function ApplyLoan() {
               {/* STAGE 1: Confirmation & Warnings checklist */}
               {verificationStage === 'confirm' && (
                 <>
-                  <div className="p-4 rounded-2xl border border-white/20 dark:border-white/5 space-y-2.5 neu-sunken">
+                  <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     <h4 className="font-bold text-gray-905 dark:text-white text-xs">
                       {isBn ? 'লোন ও আবেদনকারী সারসংক্ষেপ' : 'Loan & Applicant Summary'}
                     </h4>
@@ -3144,7 +3144,7 @@ export default function ApplyLoan() {
 
                     <div className="space-y-2.5">
                       {/* Check 1 */}
-                      <label htmlFor="checkAntiFraud" className="flex items-start gap-2.5 p-3 rounded-xl cursor-pointer group neu-sunken border-white/20 dark:border-white/5">
+                      <label htmlFor="checkAntiFraud" className="flex items-start gap-2.5 p-3 rounded-xl cursor-pointer group bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-slate-200 dark:border-slate-800">
                         <input 
                           id="checkAntiFraud"
                           type="checkbox" 
@@ -3160,7 +3160,7 @@ export default function ApplyLoan() {
                       </label>
 
                       {/* Check 2 */}
-                      <label htmlFor="checkNoRefund" className="flex items-start gap-2.5 p-3 rounded-xl cursor-pointer group neu-sunken border-white/20 dark:border-white/5">
+                      <label htmlFor="checkNoRefund" className="flex items-start gap-2.5 p-3 rounded-xl cursor-pointer group bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-slate-200 dark:border-slate-800">
                         <input 
                           id="checkNoRefund"
                           type="checkbox" 
@@ -3176,7 +3176,7 @@ export default function ApplyLoan() {
                       </label>
 
                       {/* Check 3 */}
-                      <label htmlFor="checkSavingsRule" className="flex items-start gap-2.5 p-3 rounded-xl cursor-pointer group neu-sunken border-white/20 dark:border-white/5">
+                      <label htmlFor="checkSavingsRule" className="flex items-start gap-2.5 p-3 rounded-xl cursor-pointer group bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-slate-200 dark:border-slate-800">
                         <input 
                           id="checkSavingsRule"
                           type="checkbox" 
@@ -3192,7 +3192,7 @@ export default function ApplyLoan() {
                       </label>
 
                       {/* Check 4 */}
-                      <label htmlFor="checkEmiObligation" className="flex items-start gap-2.5 p-3 rounded-xl cursor-pointer group neu-sunken border-white/20 dark:border-white/5">
+                      <label htmlFor="checkEmiObligation" className="flex items-start gap-2.5 p-3 rounded-xl cursor-pointer group bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-slate-200 dark:border-slate-800">
                         <input 
                           id="checkEmiObligation"
                           type="checkbox" 
@@ -3213,14 +3213,14 @@ export default function ApplyLoan() {
                   <div className="flex gap-3 pt-3">
                     <button 
                       onClick={handleCloseVerification}
-                      className="flex-1 py-3 rounded-xl font-bold neu-btn text-gray-700 dark:text-gray-300"
+                      className="flex-1 py-3 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-700 dark:text-gray-300"
                     >
                       {isBn ? 'বাতিল' : 'Cancel'}
                     </button>
                     <button 
                       disabled={!checkAntiFraud || !checkNoRefund || !checkSavingsRule || !checkEmiObligation}
                       onClick={processSmartVerification}
-                      className="flex-1 py-3 rounded-xl font-bold neu-btn-primary disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:shadow-none"
+                      className="flex-1 py-3 rounded-xl font-bold bg-primary-600 hover:bg-primary-700 text-white shadow-sm disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:shadow-none"
                     >
                       {isBn ? 'যাচাইকরণ শুরু করুন' : 'Start Verification'}
                     </button>
@@ -3264,7 +3264,7 @@ export default function ApplyLoan() {
                   </div>
 
                   {/* Checklist of steps */}
-                  <div className="text-left space-y-3 p-4 rounded-2xl border border-white/20 dark:border-white/5 neu-sunken">
+                  <div className="text-left space-y-3 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     {/* Check 1 */}
                     <div className="flex items-center justify-between text-[11px] font-bold">
                       <span className={activeCheck >= 1 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500'}>
@@ -3378,7 +3378,7 @@ export default function ApplyLoan() {
           <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="rounded-3xl max-w-lg w-full max-h-[85vh] shadow-2xl border border-white/20 dark:border-white/5 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 neu-raised"
+            className="rounded-3xl max-w-lg w-full max-h-[85vh] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm"
           >
             <div className="bg-gray-100/40 dark:bg-gray-950/20 px-6 py-4 border-b border-gray-200/50 dark:border-gray-800 flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
@@ -3490,7 +3490,7 @@ export default function ApplyLoan() {
             <div className="bg-gray-100/40 dark:bg-gray-950/20 px-6 py-4 border-t border-gray-200/50 dark:border-gray-800 flex justify-end shrink-0">
               <button 
                 onClick={() => setShowTermsModal(false)}
-                className="px-5 py-2.5 neu-btn text-gray-850 dark:text-white rounded-xl font-bold text-xs"
+                className="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-850 dark:text-white rounded-xl font-bold text-xs"
               >
                 {isBn ? 'বন্ধ করুন' : 'Close'}
               </button>
