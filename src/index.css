@@ -675,3 +675,50 @@ a.dark\:bg-gray-800:active,
   background-color: #111827 !important;
   background-image: none !important;
 }
+
+
+/* Final solid-surface cleanup for remaining page-level glass classes. */
+[class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+[class*="bg-white/"] {
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+.dark [class*="dark:bg-gray-800/"],
+.dark [class*="dark:bg-gray-900/"],
+.dark [class*="dark:bg-slate-900/"] {
+  background-color: #111827 !important;
+  background-image: none !important;
+}
+
+[class*="bg-gray-50/"] {
+  background-color: #f8fafc !important;
+}
+.dark [class*="dark:bg-gray-800/"] {
+  background-color: #151e2d !important;
+}
+.dark [class*="dark:bg-gray-900/"] {
+  background-color: #0f1724 !important;
+}
+
+[class*="border-white/"] {
+  border-color: #e2e8f0 !important;
+}
+.dark [class*="dark:border-white/"] {
+  border-color: #2a374b !important;
+}
+
+/* Keep modal overlays opaque enough for readable dialogs, without blur. */
+[class*="bg-black/"][class*="fixed"][class*="inset-0"],
+[class*="bg-gray-900/"][class*="fixed"][class*="inset-0"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.dark [class*="bg-white/"][class*="dark:bg-slate-900/"],
+.dark [class*="bg-white/"][class*="dark:bg-gray-800/"] {
+  background-color: #111827 !important;
+}
