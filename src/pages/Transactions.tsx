@@ -333,7 +333,7 @@ export default function Transactions() {
                 placeholder={isBn ? "লেনদেন খুঁজুন..." : "Search transactions..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 neu-input rounded-[20px] text-base font-medium outline-none focus:outline-none transition-all"
+                className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-[20px] text-base font-medium outline-none focus:outline-none transition-all"
               />
             </div>
 
