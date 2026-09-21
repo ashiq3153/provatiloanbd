@@ -32,7 +32,8 @@ export default function Home() {
   const [loans, setLoans] = useState<LoanApplication[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
-  const [showNotifications, setShowNotifications] = useState(false);\n  const [stories, setStories] = useState<SuccessStory[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [stories, setStories] = useState<SuccessStory[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -51,7 +52,8 @@ export default function Home() {
         setActiveLoan(active[0] || null);
         setTransactions(tx || []);
         setLoans(allLoans || []);
-        setNotifications(notices || []);\n        setStories(await getSuccessStories());
+        setNotifications(notices || []);
+        setStories(await getSuccessStories());
       } catch (e) {
         console.error('Home dashboard error:', e);
       } finally {
