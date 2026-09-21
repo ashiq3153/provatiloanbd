@@ -145,7 +145,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
   return (
     <div className="rounded-2xl border border-white/20 dark:border-white/5 bg-gray-50/50 dark:bg-gray-900/20 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.03)] dark:shadow-[inset_1px_1px_3px_rgba(0,0,0,0.2)] overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 bg-white/40 dark:bg-gray-800/30 border-b border-gray-200/50 dark:border-gray-850/50">
+      <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 dark:bg-[#0f1724] border-b border-slate-200 dark:border-slate-700">
         <div className="w-7 h-7 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
           <MapPin size={14} className="text-primary-600 dark:text-primary-400" />
         </div>
