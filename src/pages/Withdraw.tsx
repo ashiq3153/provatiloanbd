@@ -154,12 +154,12 @@ export default function Withdraw() {
   };
 
   return (
-    <div className="min-h-screen neu-bg flex flex-col relative transition-colors pb-10">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b1220] flex flex-col relative transition-colors pb-10">
       {/* Premium Header */}
-      <div className="neu-bg px-5 py-4 sticky top-0 z-30 shadow-md border-b border-white/20 dark:border-white/5 transition-colors flex items-center gap-4">
+      <div className="bg-slate-50 dark:bg-[#0b1220] px-5 py-4 sticky top-0 z-30 shadow-md border-b border-slate-200 dark:border-slate-800 transition-colors flex items-center gap-4">
         <button 
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full neu-btn flex items-center justify-center text-gray-700 dark:text-gray-300 active:scale-95 transition-all"
+          className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-gray-700 dark:text-gray-300 active:scale-95 transition-all"
         >
           <ArrowUpFromLine size={20} className="-rotate-90" />
         </button>
@@ -179,9 +179,9 @@ export default function Withdraw() {
         <motion.div 
           initial={{ y: 20, opacity: 0 }} 
           animate={{ y: 0, opacity: 1 }} 
-          className="neu-raised rounded-[24px] p-6 relative overflow-hidden transition-colors text-center"
+          className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-6 relative overflow-hidden transition-colors text-center"
         >
-          <div className="w-16 h-16 neu-sunken rounded-full flex items-center justify-center mx-auto mb-4 relative z-10 transition-colors shadow-inner text-primary-600 dark:text-primary-400">
+          <div className="w-16 h-16 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 relative z-10 transition-colors shadow-inner text-primary-600 dark:text-primary-400">
             <ArrowUpFromLine size={28} />
           </div>
           <h2 className="text-gray-500 dark:text-gray-400 font-semibold text-sm relative z-10 transition-colors uppercase tracking-wider mb-1">
@@ -197,7 +197,7 @@ export default function Withdraw() {
           initial={{ y: 20, opacity: 0 }} 
           animate={{ y: 0, opacity: 1 }} 
           transition={{ delay: 0.1 }}
-          className="neu-raised rounded-[24px] p-6 transition-colors"
+          className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-6 transition-colors"
         >
           <div className="mb-4 flex items-center justify-between">
             <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 transition-colors">
@@ -205,7 +205,7 @@ export default function Withdraw() {
             </label>
             <button 
               onClick={() => setAmount(availableBalance.toString())}
-              className="text-xs font-bold text-primary-600 dark:text-primary-400 neu-btn px-3 py-1.5 rounded-full active:scale-95 transition-all"
+              className="text-xs font-bold text-primary-600 dark:text-primary-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-full active:scale-95 transition-all"
             >
               {isBn ? 'সম্পূর্ণ' : 'MAX'}
             </button>
@@ -227,24 +227,24 @@ export default function Withdraw() {
           initial={{ y: 20, opacity: 0 }} 
           animate={{ y: 0, opacity: 1 }} 
           transition={{ delay: 0.2 }}
-          className="neu-raised rounded-[24px] p-6 transition-colors"
+          className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-6 transition-colors"
         >
           <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-4 transition-colors">
             {isBn ? 'মাধ্যম নির্বাচন করুন' : 'Select Destination'}
           </label>
           <div className="grid grid-cols-2 gap-3 mb-5">
-            <button className="neu-sunken text-primary-600 dark:text-primary-400 p-4 rounded-[20px] font-bold text-sm transition-colors flex flex-col items-center justify-center gap-2 shadow-inner relative overflow-hidden">
+            <button className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-primary-600 dark:text-primary-400 p-4 rounded-[20px] font-bold text-sm transition-colors flex flex-col items-center justify-center gap-2 shadow-inner relative overflow-hidden">
               <div className="absolute inset-0 bg-primary-500/5 dark:bg-primary-500/10 pointer-events-none"></div>
               <Landmark size={24} />
               <span>{isBn ? 'ব্যাংক একাউন্ট' : 'Bank Account'}</span>
             </button>
-            <button className="neu-raised-sm text-gray-400 dark:text-gray-600 p-4 rounded-[20px] font-bold text-sm transition-colors flex flex-col items-center justify-center gap-2 opacity-55 cursor-not-allowed">
+            <button className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-gray-400 dark:text-gray-600 p-4 rounded-[20px] font-bold text-sm transition-colors flex flex-col items-center justify-center gap-2 opacity-55 cursor-not-allowed">
               <Smartphone size={24} />
               <span>{isBn ? 'মোবাইল অ্যাপ' : 'Mobile App'}</span>
             </button>
           </div>
           
-          <div className="pt-4 border-t border-white/20 dark:border-white/5 transition-colors">
+          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 transition-colors">
             <div className="flex justify-between items-center mb-3">
               <p className="text-xs uppercase tracking-wider font-bold text-gray-500 dark:text-gray-400 transition-colors">
                 {isBn ? 'সেভ করা একাউন্ট' : 'Saved Account'}
@@ -252,7 +252,7 @@ export default function Withdraw() {
               {bankAccount && (
                 <button 
                   onClick={deleteBankAccount}
-                  className="text-xs font-bold text-red-500 hover:text-red-600 dark:text-red-400/80 dark:hover:text-red-400 flex items-center gap-1 neu-btn px-3 py-1 rounded-full active:scale-95 transition-all"
+                  className="text-xs font-bold text-red-500 hover:text-red-600 dark:text-red-400/80 dark:hover:text-red-400 flex items-center gap-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1 rounded-full active:scale-95 transition-all"
                 >
                   <Trash2 size={13} /> {isBn ? 'মুছে ফেলুন' : 'Delete'}
                 </button>
@@ -260,9 +260,9 @@ export default function Withdraw() {
             </div>
 
             {bankAccount ? (
-              <div className="flex items-center justify-between neu-sunken p-4 px-6 rounded-full transition-colors">
+              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 px-6 rounded-full transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 neu-raised-sm rounded-full flex items-center justify-center transition-colors">
+                  <div className="w-12 h-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center transition-colors">
                     <Landmark className="text-blue-600 dark:text-blue-400" size={24} />
                   </div>
                   <div>
@@ -278,7 +278,7 @@ export default function Withdraw() {
                 </div>
               </div>
             ) : showAddForm ? (
-              <form onSubmit={saveBankAccount} className="space-y-3 neu-sunken p-4 rounded-2xl transition-all">
+              <form onSubmit={saveBankAccount} className="space-y-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl transition-all">
                 <div>
                   <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">{isBn ? 'ব্যাংকের নাম *' : 'Bank Name *'}</label>
                   <input 
@@ -326,13 +326,13 @@ export default function Withdraw() {
                   <button 
                     type="button" 
                     onClick={() => setShowAddForm(false)} 
-                    className="flex-1 py-2 rounded-full text-xs font-bold neu-btn text-gray-700 dark:text-gray-300 transition-colors"
+                    className="flex-1 py-2 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 transition-colors"
                   >
                     {isBn ? 'বাতিল' : 'Cancel'}
                   </button>
                   <button 
                     type="submit" 
-                    className="flex-1 py-2 rounded-full text-xs font-bold neu-btn-primary text-white transition-colors"
+                    className="flex-1 py-2 rounded-full text-xs font-bold bg-primary-600 hover:bg-primary-700 text-white shadow-sm text-white transition-colors"
                   >
                     {isBn ? 'সেভ করুন' : 'Save Account'}
                   </button>
@@ -342,7 +342,7 @@ export default function Withdraw() {
               <button 
                 type="button"
                 onClick={() => setShowAddForm(true)}
-                className="w-full py-4 border-2 border-dashed border-gray-300 dark:border-gray-700 bg-transparent rounded-full flex items-center justify-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-500/50 dark:hover:border-primary-500/50 active:scale-[0.98] transition-all neu-raised-sm"
+                className="w-full py-4 border-2 border-dashed border-gray-300 dark:border-gray-700 bg-transparent rounded-full flex items-center justify-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-500/50 dark:hover:border-primary-500/50 active:scale-[0.98] transition-all bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm"
               >
                 <Plus size={16} />
                 {isBn ? 'ব্যাংক একাউন্ট যুক্ত করুন' : 'Add Bank Account'}
@@ -356,7 +356,7 @@ export default function Withdraw() {
           initial={{ y: 20, opacity: 0 }} 
           animate={{ y: 0, opacity: 1 }} 
           transition={{ delay: 0.3 }}
-          className="neu-sunken p-4 rounded-2xl text-sm text-orange-800 dark:text-orange-300 flex gap-3 border border-orange-500/20 transition-colors"
+          className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl text-sm text-orange-800 dark:text-orange-300 flex gap-3 border border-orange-500/20 transition-colors"
         >
           <AlertCircle className="shrink-0 text-orange-500 dark:text-orange-400 mt-0.5" size={20} />
           <p className="font-medium leading-relaxed text-xs">
@@ -369,7 +369,7 @@ export default function Withdraw() {
         <button 
           onClick={handleWithdraw} 
           disabled={isSubmitting || !amount || Number(amount) <= 0 || Number(amount) > availableBalance} 
-          className="w-full mt-2 neu-btn-primary disabled:opacity-50 disabled:active:scale-100 text-white py-4 rounded-full font-bold text-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          className="w-full mt-2 bg-primary-600 hover:bg-primary-700 text-white shadow-sm disabled:opacity-50 disabled:active:scale-100 text-white py-4 rounded-full font-bold text-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
             <span className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -397,7 +397,7 @@ export default function Withdraw() {
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="neu-raised rounded-[32px] p-6 max-w-sm w-full mx-4 border-0 overflow-hidden relative"
+              className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[32px] p-6 max-w-sm w-full mx-4 border-0 overflow-hidden relative"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
@@ -413,7 +413,7 @@ export default function Withdraw() {
                 </div>
                 <button
                   onClick={() => setShowDepositModal(false)}
-                  className="w-8 h-8 flex items-center justify-center neu-btn text-gray-500 rounded-full active:scale-95 transition-all"
+                  className="w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-500 rounded-full active:scale-95 transition-all"
                 >
                   <X size={18} />
                 </button>
@@ -427,7 +427,7 @@ export default function Withdraw() {
                 </p>
 
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-4 neu-sunken rounded-[16px]">
+                  <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[16px]">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${depositStatus.processingFee ? 'bg-green-100 dark:bg-green-900/30 text-green-600' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-600'}`}>
                         {depositStatus.processingFee ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
@@ -446,7 +446,7 @@ export default function Withdraw() {
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 neu-sunken rounded-[16px]">
+                  <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[16px]">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${depositStatus.securityDeposit ? 'bg-green-100 dark:bg-green-900/30 text-green-600' : 'bg-red-100 dark:bg-red-900/30 text-red-600'}`}>
                         {depositStatus.securityDeposit ? <CheckCircle size={20} /> : <X size={20} />}
@@ -470,7 +470,7 @@ export default function Withdraw() {
               <div className="flex gap-3 relative z-10">
                 <button
                   onClick={() => setShowDepositModal(false)}
-                  className="flex-1 py-4 neu-btn text-gray-700 dark:text-gray-300 rounded-full font-bold active:scale-95 transition-all"
+                  className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 rounded-full font-bold active:scale-95 transition-all"
                 >
                   {isBn ? 'পরে করব' : 'Later'}
                 </button>
@@ -479,7 +479,7 @@ export default function Withdraw() {
                     setShowDepositModal(false);
                     navigate('/deposit');
                   }}
-                  className="flex-1 py-4 neu-btn-primary text-white rounded-full font-bold active:scale-95 transition-all"
+                  className="flex-1 py-4 bg-primary-600 hover:bg-primary-700 text-white shadow-sm text-white rounded-full font-bold active:scale-95 transition-all"
                 >
                   {isBn ? 'ডিপোজিট করুন' : 'Deposit Now'}
                 </button>
