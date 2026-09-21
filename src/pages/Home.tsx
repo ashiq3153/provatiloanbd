@@ -165,6 +165,21 @@ export default function Home() {
   ];
 
   const recentTransactions = transactions.slice(0, 4);
+  const latestApplication = [...loans].sort((a, b) => new Date(b.applied_at).getTime() - new Date(a.applied_at).getTime())[0] || null;
+
+  const applicationStatus = (status?: string) => {
+    const map: Record<string, { bn: string; en: string; tone: string }> = {
+      pending: { bn: 'আবেদন জমা হয়েছে', en: 'Application submitted', tone: 'sky' },
+      under_review: { bn: 'যাচাই চলছে', en: 'Under review', tone: 'amber' },
+      approved: { bn: 'অনুমোদিত', en: 'Approved', tone: 'green' },
+      active: { bn: 'ঋণ চলমান', en: 'Loan active', tone: 'green' },
+      completed: { bn: 'ঋণ সম্পন্ন', en: 'Loan completed', tone: 'green' },
+      rejected: { bn: 'আবেদন প্রত্যাখ্যাত', en: 'Application rejected', tone: 'red' },
+      cancelled: { bn: 'আবেদন বাতিল', en: 'Application cancelled', tone: 'slate' },
+      action_required: { bn: 'আপনার পদক্ষেপ প্রয়োজন', en: 'Action required', tone: 'amber' },
+    };
+    return map[status || ''] || { bn: 'স্ট্যাটাস আপডেট', en: 'Status update', tone: 'slate' };
+  };
 
   const loanCategoryIcon = (category: string) => {
     const icons: Record<string, any> = {
@@ -306,6 +321,33 @@ export default function Home() {
             <ChevronRight size={18} className="text-slate-400 shrink-0"/>
           </div>
         </Link>
+
+        {/* Latest application status */}
+        {!activeLoan && latestApplication && (
+          <section className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn ? 'লোন আবেদন' : 'Loan application'}</p>
+                <h2 className="text-base font-black mt-1">{categoryName(latestApplication.loan_category)}</h2>
+                <p className="text-[10px] text-slate-400 mt-1 font-bold">APP-{latestApplication.id.slice(0,8).toUpperCase()}</p>
+              </div>
+              {(() => { const s = applicationStatus(latestApplication.status); return <span className={`px-2.5 py-1 rounded-full text-[9px] font-black ${s.tone === 'green' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : s.tone === 'amber' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300' : s.tone === 'red' ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300' : s.tone === 'sky' ? 'bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>{isBn ? s.bn : s.en}</span>; })()}
+            </div>
+            <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <div><p className="text-[10px] text-slate-400">{isBn ? 'আবেদনের পরিমাণ' : 'Requested amount'}</p><p className="text-sm font-black mt-1">{formatCurrency(latestApplication.amount, isBn)}</p></div>
+              <div className="text-right"><p className="text-[10px] text-slate-400">{isBn ? 'আবেদনের তারিখ' : 'Applied on'}</p><p className="text-xs font-bold mt-1">{new Date(latestApplication.applied_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-GB')}</p></div>
+            </div>
+            {latestApplication.admin_feedback && (
+              <div className="mt-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40 p-3">
+                <p className="text-[9px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-wider">{isBn ? 'অ্যাডমিন বার্তা' : 'Admin message'}</p>
+                <p className="text-xs font-semibold text-amber-900 dark:text-amber-100 mt-1 leading-5">{latestApplication.admin_feedback}</p>
+              </div>
+            )}
+            <Link to={latestApplication.status === 'action_required' ? `/apply?edit=${latestApplication.id}` : `/application/${latestApplication.id}`} className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-sky-500 text-white py-2.5 text-xs font-black">
+              {latestApplication.status === 'action_required' ? (isBn ? 'আবেদন আপডেট করুন' : 'Update application') : (isBn ? 'আবেদনের বিস্তারিত' : 'View application')} <ChevronRight size={14}/>
+            </Link>
+          </section>
+        )}
 
         {/* Active loan portfolio */}
         <section>
