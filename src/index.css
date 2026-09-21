@@ -575,3 +575,103 @@ a.dark\:bg-gray-800:active,
 .dark .home-modern .shadow-2xl {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28) !important;
 }
+
+
+/* ================================================================
+   Global Solid Surface System — remove glass/transparency app-wide
+   ================================================================ */
+/* The app should use solid fintech surfaces instead of glassmorphism. */
+.neu-raised,
+.neu-raised-sm,
+.neu-sunken,
+.neu-input,
+.neu-btn {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background-image: none !important;
+}
+
+.neu-raised {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.07) !important;
+}
+
+.neu-raised-sm,
+.neu-btn {
+  background-color: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.06) !important;
+}
+
+.neu-sunken,
+.neu-input {
+  background-color: #f1f5f9 !important;
+  border: 1px solid #dbe3ec !important;
+  box-shadow: none !important;
+}
+
+.dark .neu-raised {
+  background-color: #111827 !important;
+  border: 1px solid #273449 !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28) !important;
+}
+
+.dark .neu-raised-sm,
+.dark .neu-btn {
+  background-color: #151e2d !important;
+  border: 1px solid #2a374b !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24) !important;
+}
+
+.dark .neu-sunken,
+.dark .neu-input {
+  background-color: #0f1724 !important;
+  border: 1px solid #263449 !important;
+  box-shadow: none !important;
+}
+
+/* Neutralize Tailwind backdrop-blur utilities anywhere in the app. */
+[class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Replace the global white glass-card treatment with solid surfaces. */
+.bg-white.rounded-2xl,
+.bg-white.rounded-3xl,
+.bg-white.rounded-\\[20px\\],
+.bg-white.rounded-\\[23px\\],
+.bg-white.rounded-\\[24px\\],
+.bg-white.rounded-\\[28px\\],
+.bg-white.rounded-\\[32px\\] {
+  background-color: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.07) !important;
+}
+
+.dark .bg-white.rounded-2xl,
+.dark .bg-white.rounded-3xl,
+.dark .bg-white.rounded-\\[20px\\],
+.dark .bg-white.rounded-\\[23px\\],
+.dark .bg-white.rounded-\\[24px\\],
+.dark .bg-white.rounded-\\[28px\\],
+.dark .bg-white.rounded-\\[32px\\] {
+  background-color: #111827 !important;
+  border: 1px solid #273449 !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28) !important;
+}
+
+/* Remove translucent glass from common white/dark rounded surfaces. */
+[class*="bg-white/"] {
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+
+.dark [class*="dark:bg-gray-800/"],
+.dark [class*="dark:bg-gray-900/"] {
+  background-color: #111827 !important;
+  background-image: none !important;
+}
