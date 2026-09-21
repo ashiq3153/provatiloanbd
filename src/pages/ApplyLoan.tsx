@@ -3001,7 +3001,7 @@ export default function ApplyLoan() {
 
   return (
     <FormProvider {...methods}>
-    <div className="apply-loan-screen min-h-full bg-slate-50 dark:bg-[#0b1220] transition-colors flex flex-col relative">
+    <div className="apply-loan-screen app-apply-theme min-h-full bg-slate-50 dark:bg-[#0b1220] transition-colors flex flex-col relative">
       {/* Dynamic Header */}
       {step < 5 && (
         <div className="px-5 pt-6 pb-4 sticky top-0 z-30 flex items-center justify-between border-b border-gray-200/30 dark:border-gray-800/50">
