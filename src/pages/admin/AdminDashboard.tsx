@@ -794,7 +794,8 @@ export default function AdminDashboard() {
                   users: 'ইউজার নিয়ন্ত্রণ',
                   broadcast: 'টেলিগ্রাম ব্রডকাস্ট',
                   stories: 'সফলতার গল্প',
-                  settings: 'সিস্টেম সেটিংস'
+                  settings: 'সিস্টেম সেটিংস',
+                  kyc: 'KYC রিভিউ'
                 };
                 return titles[activeTab] || activeTab;
               })()}
@@ -827,17 +828,17 @@ export default function AdminDashboard() {
               className="w-full max-w-7xl mx-auto min-w-0 space-y-4 sm:space-y-6"
             >
               {activeTab === 'kyc' && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between gap-3">
+                <div className="space-y-5">
+                  <div className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl p-4 flex items-center justify-between gap-3">
                     <div><h2 className="text-xl font-black">{isBn ? 'KYC রিভিউ কিউ' : 'KYC Review Queue'}</h2><p className="text-sm text-gray-500">{kycReviews.length} {isBn ? 'টি রিভিউ' : 'reviews'}</p></div>
                     <button onClick={async()=>{setKycLoading(true); try{setKycReviews(await getKycReviewQueue());}finally{setKycLoading(false);}}} className="px-4 py-2 rounded-xl bg-primary-500 text-white font-bold">{kycLoading ? '...' : (isBn?'রিফ্রেশ':'Refresh')}</button>
                   </div>
-                  <div className="grid gap-3">
+                  <div className="grid gap-4">
                     {kycReviews.map((r:any)=>(
-                      <div key={r.id} className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl p-4 space-y-3">
+                      <div key={r.id} className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl p-4 sm:p-5 space-y-4">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div><p className="font-bold">Chat ID: {r.chat_id}</p><p className="text-xs text-gray-500">{r.loan_id || 'No loan linked'} · {r.submitted_at ? new Date(r.submitted_at).toLocaleString() : ''}</p></div>
-                          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 dark:bg-gray-700">{r.status}</span>
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${r.status === 'verified' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900' : r.status === 'rejected' ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900' : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900'}`}>{r.status}</span>
                         </div>
                         <pre className="text-xs whitespace-pre-wrap overflow-auto max-h-40 bg-gray-50 dark:bg-gray-900 rounded-xl p-3">{JSON.stringify(r.documents || {}, null, 2)}</pre>
                         <textarea value={kycNote} onChange={e=>setKycNote(e.target.value)} placeholder={isBn?'রিভিউ নোট':'Reviewer note'} className="w-full rounded-xl border p-3 bg-transparent" />
