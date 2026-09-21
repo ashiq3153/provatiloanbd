@@ -63,6 +63,20 @@ export interface LoanApplication {
   approved_at: string | null;
 }
 
+export interface LoanEmiSchedule {
+  id: string;
+  loan_id: string;
+  installment_no: number;
+  due_date: string;
+  principal_due: number;
+  interest_due: number;
+  total_due: number;
+  paid_amount: number;
+  status: 'pending' | 'partial' | 'paid' | 'overdue' | 'waived';
+  paid_at: string | null;
+  created_at: string;
+}
+
 export interface Transaction {
   id: string;
   chat_id: number;
@@ -115,6 +129,11 @@ export interface Database {
         Row: LoanApplication;
         Insert: Omit<LoanApplication, 'id' | 'applied_at' | 'approved_at' | 'admin_feedback' | 'status'> & { status?: string };
         Update: Partial<LoanApplication>;
+      };
+      loan_emi_schedule: {
+        Row: LoanEmiSchedule;
+        Insert: Omit<LoanEmiSchedule, 'id' | 'created_at'>;
+        Update: Partial<LoanEmiSchedule>;
       };
       transactions: {
         Row: Transaction;
