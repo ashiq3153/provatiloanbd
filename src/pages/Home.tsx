@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
 import { formatCurrency, convertDigits } from '../lib/translation';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Skeleton } from '../components/Skeleton';
 import { toast } from 'sonner';
 import {
@@ -165,6 +165,8 @@ export default function Home() {
   ];
 
   const recentTransactions = transactions.slice(0, 4);
+  const formatActivityStatus = (status: string) => status === 'completed' ? (isBn ? 'সম্পন্ন' : 'Completed') : status === 'pending' ? (isBn ? 'অপেক্ষমাণ' : 'Pending') : status === 'failed' ? (isBn ? 'ব্যর্থ' : 'Failed') : status;
+  const activityLabel = (type: string) => type === 'deposit' ? (isBn ? 'সঞ্চয়/ডিপোজিট' : 'Deposit') : type === 'emi_payment' ? (isBn ? 'কিস্তি পরিশোধ' : 'EMI payment') : type === 'disbursement' ? (isBn ? 'ঋণ বিতরণ' : 'Loan disbursement') : (isBn ? 'উত্তোলন' : 'Withdrawal');
   const latestApplication = [...loans].sort((a, b) => new Date(b.applied_at).getTime() - new Date(a.applied_at).getTime())[0] || null;
 
   const applicationStatus = (status?: string) => {
@@ -407,6 +409,15 @@ export default function Home() {
           </section>
         )}
 
+        {/* Empty account state */}
+        {!loading && !activeLoan && !latestApplication && transactions.length === 0 && (
+          <section className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+            <div className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center"><Wallet size={19} className="text-slate-500"/></div>
+            <h2 className="text-sm font-black mt-3">{isBn ? 'আপনার সদস্য হিসাব প্রস্তুত' : 'Your member account is ready'}</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-5">{isBn ? 'ঋণ আবেদন, সঞ্চয় বা লেনদেন শুরু করলে আপনার তথ্য এখানে দেখা যাবে।' : 'Your loan, savings and transaction information will appear here as you use the services.'}</p>
+          </section>
+        )}
+
         {/* Member services */}
         <section>
           <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'সদস্য সেবা':'Member services'}</p><h2 className="text-lg font-black mt-1">{isBn?'দ্রুত সেবা':'Quick services'}</h2></div></div>
@@ -431,8 +442,8 @@ export default function Home() {
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tx.type==='deposit'?'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400':tx.type==='emi_payment'?'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400':'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
                   {tx.type==='deposit'?<ArrowDownToLine size={17}/>:tx.type==='emi_payment'?<CreditCard size={17}/>:<Wallet size={17}/>}
                 </div>
-                <div className="flex-1 min-w-0"><p className="text-xs font-black">{tx.type==='deposit'?(isBn?'সঞ্চয়/ডিপোজিট':'Deposit'):tx.type==='emi_payment'?(isBn?'কিস্তি পরিশোধ':'EMI payment'):(isBn?'লেনদেন':'Transaction')}</p><p className="text-[10px] text-slate-400 mt-1">{new Date(tx.created_at).toLocaleDateString(isBn?'bn-BD':'en-GB')}</p></div>
-                <p className="text-xs font-black">{formatCurrency(tx.amount,isBn)}</p>
+                <div className="flex-1 min-w-0"><p className="text-xs font-black">{activityLabel(tx.type)}</p><p className="text-[10px] text-slate-400 mt-1">{new Date(tx.created_at).toLocaleDateString(isBn?'bn-BD':'en-GB')} • {formatActivityStatus(tx.status)}</p></div>
+                <div className="text-right"><p className="text-xs font-black">{formatCurrency(tx.amount,isBn)}</p><p className={`text-[9px] font-bold mt-1 ${tx.status==='completed'?'text-emerald-600 dark:text-emerald-400':tx.status==='failed'?'text-rose-600 dark:text-rose-400':'text-amber-600 dark:text-amber-400'}`}>{formatActivityStatus(tx.status)}</p></div>
               </div>
             )) : <div className="p-8 text-center text-xs font-bold text-slate-400">{isBn?'সাম্প্রতিক কোনো কার্যক্রম নেই':'No recent activity'}</div>}
           </div>
