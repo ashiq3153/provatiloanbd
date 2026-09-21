@@ -834,7 +834,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="grid gap-3">
                     {kycReviews.map((r:any)=>(
-                      <div key={r.id} className="neu-raised rounded-2xl p-4 space-y-3">
+                      <div key={r.id} className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl p-4 space-y-3">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div><p className="font-bold">Chat ID: {r.chat_id}</p><p className="text-xs text-gray-500">{r.loan_id || 'No loan linked'} · {r.submitted_at ? new Date(r.submitted_at).toLocaleString() : ''}</p></div>
                           <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 dark:bg-gray-700">{r.status}</span>
@@ -863,7 +863,7 @@ export default function AdminDashboard() {
                     ['Disbursement', financialReport?.completed_disbursements],
                     ['Pending', financialReport?.pending_amount],
                   ].map(([label, value]) => (
-                    <div key={String(label)} className="neu-raised rounded-2xl p-4">
+                    <div key={String(label)} className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl p-4">
                       <p className="text-xs text-gray-500">{label}</p>
                       <p className="text-lg font-black mt-1">{formatCurrency(Number(value || 0), isBn)}</p>
                     </div>
