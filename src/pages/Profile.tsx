@@ -1,219 +1,283 @@
 import { getTelegramUser } from '../lib/telegram';
-import { ShieldCheck, Settings, HelpCircle, LogOut, ChevronRight, Moon, Sun, Languages, Volume2, VolumeX } from 'lucide-react';
+import {
+  ShieldCheck,
+  HelpCircle,
+  ChevronRight,
+  Moon,
+  Sun,
+  Languages,
+  Volume2,
+  VolumeX,
+  UserRound,
+  IdCard,
+  MapPin,
+  Phone,
+  MessageCircle,
+  LockKeyhole,
+  Bell,
+  FileText,
+  Copy,
+  Check,
+  LogOut,
+} from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAppStore } from '../lib/store';
-import { useState, useEffect } from 'react';
-import { Skeleton } from '../components/Skeleton';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function Profile() {
   const user = getTelegramUser();
-  const { theme, toggleTheme, language, setLanguage, soundEnabled, setSoundEnabled } = useAppStore();
-  const [loading, setLoading] = useState(true);
+  const {
+    theme,
+    toggleTheme,
+    language,
+    setLanguage,
+    soundEnabled,
+    setSoundEnabled,
+    userProfile,
+  } = useAppStore();
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
-
+  const [copied, setCopied] = useState(false);
   const isBn = language === 'bn';
 
+  const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
+  const memberName = [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(' ') || fullName;
+  const memberId = userProfile?.chat_id ? `PSS-${String(userProfile.chat_id).slice(-6)}` : 'PSS-MEMBER';
+  const accountState = userProfile?.is_locked
+    ? (isBn ? 'অ্যাকাউন্ট লকড' : 'Account locked')
+    : userProfile?.is_banned
+      ? (isBn ? 'অ্যাকাউন্ট সীমাবদ্ধ' : 'Account restricted')
+      : (isBn ? 'সক্রিয় সদস্য' : 'Active member');
+
+  const copyTelegramId = async () => {
+    try {
+      await navigator.clipboard.writeText(String(user.id));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // Clipboard may be unavailable inside some Telegram WebViews.
+    }
+  };
+
+  const Row = ({
+    icon: Icon,
+    title,
+    description,
+    onClick,
+    right,
+    tone = 'default',
+  }: {
+    icon: typeof UserRound;
+    title: string;
+    description?: string;
+    onClick?: () => void;
+    right?: React.ReactNode;
+    tone?: 'default' | 'danger';
+  }) => {
+    const content = (
+      <>
+        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+          tone === 'danger'
+            ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+            : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
+        }`}>
+          <Icon size={19} strokeWidth={2} />
+        </div>
+        <div className="min-w-0 flex-1 text-left">
+          <div className={`font-bold text-sm ${
+            tone === 'danger' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'
+          }`}>{title}</div>
+          {description && <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-4">{description}</div>}
+        </div>
+        {right ?? <ChevronRight size={17} className="text-slate-400 shrink-0" />}
+      </>
+    );
+
+    if (onClick) {
+      return (
+        <button type="button" onClick={onClick} className="w-full flex items-center gap-3.5 px-3 py-3 text-left active:scale-[0.99] transition-transform">
+          {content}
+        </button>
+      );
+    }
+
+    return <div className="w-full flex items-center gap-3.5 px-3 py-3">{content}</div>;
+  };
+
   return (
-    <div className="min-h-screen neu-bg pb-24 transition-colors">
-      {/* Header Profile Section */}
-      <div className="px-3 sm:px-5 pt-3 sm:pt-5 pb-2 bg-transparent shrink-0">
-        <div className="neu-raised p-4 sm:p-6 rounded-[24px] sm:rounded-[32px] relative overflow-hidden transition-colors border-0">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-primary-500/5 dark:bg-primary-500/10 blur-3xl rounded-full -mr-10 -mt-10 z-0 transition-colors pointer-events-none"></div>
-          
-          <div className="relative z-10 flex flex-col items-center">
-            {loading ? (
-              <div className="flex flex-col items-center w-full">
-                <Skeleton className="w-28 h-28 rounded-full mb-5" />
-                <Skeleton className="h-8 w-48 mb-2" />
-                <Skeleton className="h-4 w-32 mb-5" />
-                <Skeleton className="h-8 w-40 rounded-full" />
+    <div className="min-h-full bg-[#f6f8fc] dark:bg-[#0b1220] text-slate-900 dark:text-slate-100 pb-[calc(6rem+env(safe-area-inset-bottom))] transition-colors">
+      {/* Profile identity */}
+      <section className="px-4 pt-4">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden rounded-[28px] bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm"
+        >
+          <div className="h-20 bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 dark:from-sky-900 dark:via-blue-950 dark:to-cyan-950" />
+          <div className="px-5 pb-5">
+            <div className="-mt-11 flex items-end justify-between">
+              <div className="relative w-24 h-24 rounded-full p-1 bg-white dark:bg-[#111827] shadow-lg">
+                <img
+                  src={user.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=0ea5e9&color=fff&bold=true`}
+                  alt={isBn ? 'প্রোফাইল ছবি' : 'Profile photo'}
+                  className="w-full h-full rounded-full object-cover"
+                  onError={(e) => {
+                    const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=0ea5e9&color=fff&bold=true`;
+                    if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
+                  }}
+                />
+                <span className="absolute right-1 bottom-1 w-5 h-5 rounded-full bg-emerald-500 border-[3px] border-white dark:border-[#111827]" />
               </div>
-            ) : (
-              <motion.div 
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="flex flex-col items-center w-full"
+              <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 px-3 py-1.5 text-[10px] font-black text-emerald-700 dark:text-emerald-400">
+                <ShieldCheck size={13} />
+                {accountState}
+              </span>
+            </div>
+
+            <div className="mt-4">
+              <h1 className="text-2xl font-black tracking-tight">{memberName}</h1>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                @{user.username || 'telegram-user'}
+              </p>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <div className="rounded-2xl bg-slate-50 dark:bg-[#0f1724] border border-slate-200 dark:border-slate-800 p-3">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{isBn ? 'সদস্য আইডি' : 'Member ID'}</div>
+                <div className="mt-1 text-sm font-black">{memberId}</div>
+              </div>
+              <button
+                type="button"
+                onClick={copyTelegramId}
+                className="rounded-2xl bg-slate-50 dark:bg-[#0f1724] border border-slate-200 dark:border-slate-800 p-3 text-left active:scale-[0.98] transition-transform"
               >
-                <div className="relative mb-5">
-                  <div className="w-28 h-28 rounded-full p-[4px] bg-white dark:bg-gray-800 border border-white/50 shadow-inner flex items-center justify-center overflow-hidden">
-                    <img 
-                      src={user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name}`}
-                      alt="Profile"
-                      className="w-full h-full rounded-full object-cover transition-colors"
-                    />
-                  </div>
-                  <div className="absolute bottom-0 right-0 neu-badge-orange rounded-full border-[3px] border-white dark:border-gray-800 p-1.5 transition-colors shadow-sm">
-                    <ShieldCheck size={16} className="text-white" />
-                  </div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Telegram ID</div>
+                  {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} className="text-slate-400" />}
                 </div>
-                
-                <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight text-center transition-colors">
-                  {user.first_name} {user.last_name}
-                </h1>
-                <p className="text-xs font-black text-gray-500 dark:text-gray-400 mt-1.5 mb-4 transition-colors neu-sunken px-4 py-1.5 rounded-full border-0 select-text">
-                  @{user.username || 'user'}
-                </p>
-                
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-500/10 text-green-700 dark:text-green-400 rounded-full text-xs font-black border border-green-500/25 transition-colors shadow-none">
-                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                  {isBn ? 'টেলিগ্রাম ভেরিফাইড' : 'Verified via Telegram'}
-                </div>
-              </motion.div>
-            )}
+                <div className="mt-1 text-sm font-black truncate">{user.id}</div>
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Member information */}
+      <section className="px-4 mt-5">
+        <SectionTitle title={isBn ? 'সদস্য তথ্য' : 'Member information'} />
+        <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
+          <Row icon={UserRound} title={isBn ? 'ব্যক্তিগত তথ্য' : 'Personal information'} description={isBn ? 'নাম ও প্রাথমিক সদস্য তথ্য' : 'Name and basic member details'} />
+          <Divider />
+          <Row
+            icon={Phone}
+            title={isBn ? 'মোবাইল নম্বর' : 'Mobile number'}
+            description={userProfile?.phone || (isBn ? 'প্রোফাইলে এখনো যোগ করা হয়নি' : 'Not added to profile')}
+          />
+          <Divider />
+          <Row
+            icon={MapPin}
+            title={isBn ? 'ঠিকানা' : 'Address'}
+            description={userProfile?.address || (isBn ? 'প্রোফাইলে এখনো যোগ করা হয়নি' : 'Not added to profile')}
+          />
+          <Divider />
+          <Row icon={IdCard} title={isBn ? 'পরিচয় ও ডকুমেন্ট' : 'Identity & documents'} description={isBn ? 'আপনার জমা দেওয়া তথ্য ও নথি' : 'Submitted identity information and documents'} />
+        </div>
+      </section>
+
+      {/* Account & security */}
+      <section className="px-4 mt-5">
+        <SectionTitle title={isBn ? 'অ্যাকাউন্ট ও নিরাপত্তা' : 'Account & security'} />
+        <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
+          <Row icon={LockKeyhole} title={isBn ? 'নিরাপত্তা' : 'Security'} description={isBn ? 'Telegram ভিত্তিক অ্যাকাউন্ট পরিচয়' : 'Telegram-based account identity'} />
+          <Divider />
+          <Row icon={Bell} title={isBn ? 'নোটিফিকেশন' : 'Notifications'} description={isBn ? 'লোন ও লেনদেনের আপডেট' : 'Loan and transaction updates'} />
+          <Divider />
+          <Row icon={FileText} title={isBn ? 'আমার ডকুমেন্ট' : 'My documents'} description={isBn ? 'আবেদনের সঙ্গে জমা দেওয়া নথি' : 'Documents submitted with applications'} />
+        </div>
+      </section>
+
+      {/* Preferences */}
+      <section className="px-4 mt-5">
+        <SectionTitle title={isBn ? 'পছন্দ ও অ্যাপ সেটিংস' : 'Preferences & app settings'} />
+        <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
+          <Row
+            icon={theme === 'dark' ? Moon : Sun}
+            title={isBn ? 'ডার্ক মোড' : 'Dark mode'}
+            description={theme === 'dark' ? (isBn ? 'চালু আছে' : 'Enabled') : (isBn ? 'বন্ধ আছে' : 'Disabled')}
+            onClick={toggleTheme}
+            right={
+              <span className={`w-11 h-6 rounded-full p-0.5 transition-colors ${
+                theme === 'dark' ? 'bg-sky-500' : 'bg-slate-300 dark:bg-slate-700'
+              }`}>
+                <span className={`block w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+                  theme === 'dark' ? 'translate-x-5' : ''
+                }`} />
+              </span>
+            }
+          />
+          <Divider />
+          <Row
+            icon={Languages}
+            title={isBn ? 'ভাষা' : 'Language'}
+            description={isBn ? 'বাংলা' : 'English'}
+            onClick={() => setLanguage(isBn ? 'en' : 'bn')}
+            right={<span className="text-xs font-black text-sky-600 dark:text-sky-400">{isBn ? 'বাংলা' : 'EN'}</span>}
+          />
+          <Divider />
+          <Row
+            icon={soundEnabled ? Volume2 : VolumeX}
+            title={isBn ? 'ক্লিক সাউন্ড' : 'Click sounds'}
+            description={soundEnabled ? (isBn ? 'চালু আছে' : 'Enabled') : (isBn ? 'বন্ধ আছে' : 'Disabled')}
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            right={
+              <span className={`w-11 h-6 rounded-full p-0.5 transition-colors ${
+                soundEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'
+              }`}>
+                <span className={`block w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+                  soundEnabled ? 'translate-x-5' : ''
+                }`} />
+              </span>
+            }
+          />
+        </div>
+      </section>
+
+      {/* Support */}
+      <section className="px-4 mt-5">
+        <SectionTitle title={isBn ? 'সহায়তা' : 'Support'} />
+        <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
+          <Link to="/support" className="block">
+            <Row icon={HelpCircle} title={isBn ? 'সাপোর্ট ও সাহায্য' : 'Support & help'} description={isBn ? 'FAQ ও লাইভ সাপোর্ট' : 'FAQ and live support'} />
+          </Link>
+        </div>
+      </section>
+
+      {/* Telegram account note */}
+      <section className="px-4 mt-5">
+        <div className="rounded-2xl bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900/50 p-4 flex gap-3">
+          <MessageCircle className="text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" size={19} />
+          <div>
+            <p className="text-sm font-black text-sky-900 dark:text-sky-200">{isBn ? 'Telegram অ্যাকাউন্ট' : 'Telegram account'}</p>
+            <p className="text-[11px] leading-5 text-sky-700 dark:text-sky-300 mt-1">
+              {isBn
+                ? 'এই Mini App আপনার Telegram পরিচয়ের সঙ্গে সংযুক্ত। আলাদা username/password তৈরি করার প্রয়োজন নেই।'
+                : 'This Mini App is linked to your Telegram identity. No separate username or password is required.'}
+            </p>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Settings & Preferences */}
-      <div className="px-5 mt-6 space-y-4 relative z-20">
-        <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider pl-1 mb-2">
-          {isBn ? 'সেটিংস ও প্রেফারেন্স' : 'Settings & Preferences'}
-        </h3>
-
-        {/* Theme Toggle */}
-        <motion.div
-           initial={{ opacity: 0, y: 10 }}
-           animate={{ opacity: 1, y: 0 }}
-        >
-          <div className="w-full neu-raised p-4 rounded-[24px] border-0 flex items-center justify-between transition-colors">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full neu-sunken flex items-center justify-center text-gray-700 dark:text-gray-300 transition-colors border-0">
-                {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
-              </div>
-              <div>
-                <span className="font-extrabold text-gray-900 dark:text-white text-base block transition-colors">
-                  {isBn ? 'ডার্ক মোড' : 'Dark Mode'}
-                </span>
-                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 transition-colors mt-0.5 block">
-                  {isBn ? 'থিম পরিবর্তন করুন' : 'Toggle application theme'}
-                </span>
-              </div>
-            </div>
-            
-            {/* Toggle Switch */}
-            <button 
-              type="button"
-              onClick={toggleTheme}
-              className={`w-14 h-8 rounded-full relative transition-colors duration-300 ease-in-out neu-sunken border-0 cursor-pointer ${theme === 'dark' ? 'bg-indigo-500/20' : 'bg-gray-300/40'}`}
-            >
-              <div className={`absolute top-1 left-1 w-6 h-6 rounded-full transition-transform duration-300 ease-in-out shadow-md ${theme === 'dark' ? 'translate-x-6 bg-gradient-to-r from-blue-500 to-indigo-600' : 'translate-x-0 bg-white'}`}></div>
-            </button>
-          </div>
-        </motion.div>
-
-        {/* Language Toggle */}
-        <motion.div
-           initial={{ opacity: 0, y: 10 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.1 }}
-        >
-          <div className="w-full neu-raised p-4 rounded-[24px] border-0 flex items-center justify-between transition-colors">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full neu-sunken flex items-center justify-center text-blue-600 dark:text-blue-400 transition-colors border-0">
-                <Languages size={20} />
-              </div>
-              <div>
-                <span className="font-extrabold text-gray-900 dark:text-white text-base block transition-colors">
-                  {isBn ? 'বাংলা' : 'English'}
-                </span>
-                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 transition-colors mt-0.5 block">
-                  {isBn ? 'অ্যাপের ভাষা পরিবর্তন করুন' : 'Change application language'}
-                </span>
-              </div>
-            </div>
-            
-            {/* Toggle Switch */}
-            <button 
-              type="button"
-              onClick={() => setLanguage(isBn ? 'en' : 'bn')}
-              className={`w-14 h-8 rounded-full relative transition-colors duration-300 ease-in-out neu-sunken border-0 cursor-pointer ${isBn ? 'bg-emerald-500/20' : 'bg-blue-500/20'}`}
-            >
-              <div className={`absolute top-1 left-1 w-6 h-6 rounded-full transition-transform duration-300 ease-in-out shadow-md ${isBn ? 'translate-x-6 bg-gradient-to-r from-emerald-500 to-green-600' : 'translate-x-0 bg-gradient-to-r from-blue-500 to-indigo-500'}`}></div>
-            </button>
-          </div>
-        </motion.div>
-
-        {/* Sound Toggle */}
-        <motion.div
-           initial={{ opacity: 0, y: 10 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.15 }}
-        >
-          <div className="w-full neu-raised p-4 rounded-[24px] border-0 flex items-center justify-between transition-colors">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full neu-sunken flex items-center justify-center text-amber-500 dark:text-amber-400 transition-colors border-0">
-                {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
-              </div>
-              <div>
-                <span className="font-extrabold text-gray-900 dark:text-white text-base block transition-colors">
-                  {isBn ? 'ক্লিক সাউন্ড' : 'Click Sounds'}
-                </span>
-                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 transition-colors mt-0.5 block">
-                  {isBn ? 'ইনপুট ও বাটনে শব্দ সক্রিয় রাখুন' : 'Enable click sounds on buttons and inputs'}
-                </span>
-              </div>
-            </div>
-            
-            {/* Toggle Switch */}
-            <button 
-              type="button"
-              onClick={() => setSoundEnabled(!soundEnabled)}
-              className={`w-14 h-8 rounded-full relative transition-colors duration-300 ease-in-out neu-sunken border-0 cursor-pointer ${soundEnabled ? 'bg-amber-500/20' : 'bg-gray-300/40'}`}
-            >
-              <div className={`absolute top-1 left-1 w-6 h-6 rounded-full transition-transform duration-300 ease-in-out shadow-md ${soundEnabled ? 'translate-x-6 bg-gradient-to-r from-amber-500 to-orange-500' : 'translate-x-0 bg-white'}`}></div>
-            </button>
-          </div>
-        </motion.div>
-
-        {/* Support Link */}
-        <motion.div
-           initial={{ opacity: 0, y: 10 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.2 }}
-        >
-          <Link 
-            to="/support"
-            className="w-full neu-raised p-4 rounded-[24px] border-0 flex items-center justify-between active:scale-[0.98] transition-all block cursor-pointer"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full neu-sunken flex items-center justify-center text-amber-600 dark:text-amber-400 transition-colors border-0">
-                <HelpCircle size={20} />
-              </div>
-              <div className="text-left">
-                <span className="font-extrabold text-gray-900 dark:text-white text-base block transition-colors">
-                  {isBn ? 'সাপোর্ট ও সাহায্য' : 'Support & Help'}
-                </span>
-                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 transition-colors mt-0.5 block">
-                  {isBn ? 'FAQ ও লাইভ সাপোর্ট' : 'FAQ & Live Support'}
-                </span>
-              </div>
-            </div>
-            <div className="w-8 h-8 rounded-full neu-btn flex items-center justify-center border-0">
-              <ChevronRight size={16} className="text-gray-500 dark:text-gray-400" />
-            </div>
-          </Link>
-        </motion.div>
-
-        {/* Disconnect Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="pt-6"
-        >
-           <button className="w-full bg-rose-500/10 p-5 rounded-[24px] border border-rose-500/25 flex items-center justify-center gap-3 active:scale-[0.98] hover:bg-rose-500/15 transition-all shadow-none cursor-pointer">
-              <LogOut size={20} className="text-rose-600 dark:text-rose-400" />
-              <span className="font-black text-rose-600 dark:text-rose-400 text-base transition-colors">
-                {isBn ? 'অ্যাপ থেকে ডিসকানেক্ট করুন' : 'Disconnect from App'}
-              </span>
-            </button>
-        </motion.div>
-      </div>
+      <p className="px-5 pt-6 pb-4 text-center text-[10px] font-bold text-slate-400">
+        PROVATI LOAN • PROVATI SOMOBAY SOMITI
+      </p>
     </div>
   );
+}
+
+function SectionTitle({ title }: { title: string }) {
+  return <h2 className="mb-2 px-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-400">{title}</h2>;
+}
+
+function Divider() {
+  return <div className="ml-[72px] border-t border-slate-100 dark:border-slate-800" />;
 }
