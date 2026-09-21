@@ -143,7 +143,7 @@ const AccordionSection = ({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="p-5 pt-3 bg-gray-50/40 dark:bg-gray-950/20 border border-t-0 border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800 rounded-b-2xl space-y-4 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.02)]">
+            <div className="apply-accordion-body p-3 pt-3 bg-gray-50/40 dark:bg-gray-950/20 border border-t-0 border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800 rounded-b-2xl space-y-4 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.02)]">
               {children}
             </div>
           </motion.div>
@@ -3001,7 +3001,7 @@ export default function ApplyLoan() {
 
   return (
     <FormProvider {...methods}>
-    <div className="min-h-full bg-slate-50 dark:bg-[#0b1220] transition-colors flex flex-col relative">
+    <div className="apply-loan-screen min-h-full bg-slate-50 dark:bg-[#0b1220] transition-colors flex flex-col relative">
       {/* Dynamic Header */}
       {step < 5 && (
         <div className="px-5 pt-6 pb-4 sticky top-0 z-30 flex items-center justify-between border-b border-gray-200/30 dark:border-gray-800/50">
@@ -3030,7 +3030,7 @@ export default function ApplyLoan() {
       )}
 
       {/* Main Content Area */}
-      <div className="px-5 pt-6">
+      <div className="apply-loan-content pt-6">
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
