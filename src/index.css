@@ -812,3 +812,50 @@ body {
     box-shadow: none !important;
   }
 }
+
+
+/* ================================================================
+   Final dark-surface correction
+   Prevent translucent utility selectors from turning dark widgets
+   into light/washed-out surfaces.
+   ================================================================ */
+.dark .user-app-shell [class*="bg-gray-50/"],
+.dark .user-app-shell [class*="bg-gray-100/"] {
+  background-color: #111c2e !important;
+  background-image: none !important;
+}
+
+.dark .user-app-shell [class*="dark:bg-gray-950/"],
+.dark .user-app-shell [class*="dark:bg-gray-900/"],
+.dark .user-app-shell [class*="dark:bg-gray-800/"] {
+  background-color: #111c2e !important;
+  background-image: none !important;
+}
+
+.dark .home-modern [class*="bg-white/"] {
+  background-color: rgba(255,255,255,0.08) !important;
+}
+
+.dark .home-modern .bg-white,
+.dark .home-modern [class*="bg-white.rounded"] {
+  background-color: #111827 !important;
+}
+
+.dark .home-modern .bg-gray-50,
+.dark .home-modern [class*="bg-gray-50/"] {
+  background-color: #151e2d !important;
+}
+
+.dark .admin-panel-shell [class*="bg-gray-50/"],
+.dark .admin-panel-shell [class*="bg-gray-100/"],
+.dark .admin-panel-shell [class*="dark:bg-gray-950/"],
+.dark .admin-panel-shell [class*="dark:bg-gray-900/"],
+.dark .admin-panel-shell [class*="dark:bg-gray-800/"] {
+  background-color: #111c2e !important;
+  background-image: none !important;
+}
+
+.user-app-shell .address-widget {
+  width: 100% !important;
+  max-width: none !important;
+}
