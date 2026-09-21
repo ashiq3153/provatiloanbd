@@ -2890,7 +2890,7 @@ export default function ApplyLoan() {
             {category?.icon && <category.icon size={18} className="text-gray-500" />}
             <span className="font-bold text-sm text-gray-800 dark:text-gray-200">{category?.title} লোন</span>
           </div>
-          <span className="text-xs font-bold neu-badge-purple border-slate-200 dark:border-slate-800 px-2.5 py-1 rounded-full">New</span>
+          <span className="text-xs font-bold bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 border-slate-200 dark:border-slate-800 px-2.5 py-1 rounded-full">New</span>
         </div>
         
         <div className="p-4 divide-y divide-gray-200/40 dark:divide-gray-700/50">
@@ -3050,7 +3050,7 @@ export default function ApplyLoan() {
 
       {/* Bottom Action Bar - Compact */}
       {step > 1 && step < 5 && (
-        <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-none-none-md transition-colors border-t border-gray-200/50 dark:border-gray-800/50 z-40 flex justify-between gap-2">
+        <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-white/80 dark:bg-gray-800/80  transition-colors border-t border-gray-200/50 dark:border-gray-800/50 z-40 flex justify-between gap-2">
           {step > 1 && (
             <button
               type="button"
@@ -3079,7 +3079,7 @@ export default function ApplyLoan() {
 
       {/* Smart Review System Modal Overlay */}
       {verificationStage !== 'idle' && (
-        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-none-none-none overflow-y-auto overscroll-contain">
+        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 sm:p-4 bg-black/60  overflow-y-auto overscroll-contain">
           <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -3238,7 +3238,7 @@ export default function ApplyLoan() {
                     {/* Glowing inner spin reverse */}
                     <div className="absolute inset-2 rounded-full border-4 border-t-transparent border-r-transparent border-b-blue-500 border-l-blue-400 animate-spin duration-1500" style={{ animationDirection: 'reverse' }}></div>
                     {/* Glass Circle + Gradient SVG "P" Logo */}
-                    <div className="w-20 h-20 bg-white/10 dark:bg-gray-900/40 backdrop-blur-none-none-md rounded-full flex items-center justify-center shadow-lg border border-slate-200 dark:border-slate-800">
+                    <div className="w-20 h-20 bg-white/10 dark:bg-gray-900/40  rounded-full flex items-center justify-center shadow-lg border border-slate-200 dark:border-slate-800">
                       <svg className="w-9 h-9 text-emerald-500 filter drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                         <path d="M8 20V4h6a4 4 0 0 1 0 8H8" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
@@ -3374,7 +3374,7 @@ export default function ApplyLoan() {
         )}
       {/* Local Terms Modal */}
       {showTermsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-none-none-none overflow-hidden text-gray-800 dark:text-gray-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60  overflow-hidden text-gray-800 dark:text-gray-200">
           <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
