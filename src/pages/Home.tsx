@@ -1,1032 +1,385 @@
-import { Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight, Star, FileText, Eye, EyeOff, Loader2, Clock, CheckCircle2, XCircle, AlertCircle, User } from 'lucide-react';
+import {
+  Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight,
+  FileText, CreditCard, PiggyBank, ReceiptText, FolderOpen,
+  ChevronRight, CalendarDays, CheckCircle2, Clock3, AlertCircle,
+  ShieldCheck, Eye, EyeOff, UserRound
+} from 'lucide-react';
 import { getTelegramUser } from '../lib/telegram';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
-import { supabase } from '../lib/supabase';
-import { convertDigits, formatCurrency, formatNumber } from '../lib/translation';
-import { useState, useEffect, useRef } from 'react';
+import { formatCurrency, convertDigits } from '../lib/translation';
+import { useState, useEffect, useMemo } from 'react';
 import { Skeleton } from '../components/Skeleton';
 import { toast } from 'sonner';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { getDashboardStats, getActiveLoans, getSuccessStories, getTransactions, getLoanApplications, reactToSuccessStory, getMyNotifications, markMyNotificationRead } from '../lib/api';
+import {
+  getDashboardStats, getActiveLoans, getTransactions,
+  getLoanApplications, getMyNotifications, markMyNotificationRead
+} from '../lib/api';
 import type { DashboardStats } from '../lib/api';
-import type { LoanApplication, SuccessStory, Transaction } from '../types/database';
-import personalImg from '../assets/categories/personal.png';
-import businessImg from '../assets/categories/business.png';
-import expatImg from '../assets/categories/expat.png';
-import studentImg from '../assets/categories/student.png';
-import emergencyImg from '../assets/categories/emergency.png';
-import womenImg from '../assets/categories/women.png';
+import type { LoanApplication, Transaction } from '../types/database';
 
 export default function Home() {
-  const [loading, setLoading] = useState(true);
-  const storyScrollRef = useRef<HTMLDivElement>(null);
-  const storyScrollPaused = useRef(false);
-  const [balanceVisible, setBalanceVisible] = useState(true);
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [activeLoan, setActiveLoan] = useState<LoanApplication | null>(null);
-  const [completedEmisCount, setCompletedEmisCount] = useState(0);
-  const [stories, setStories] = useState<SuccessStory[]>([]);
-  
-  // Dynamic Notifications State
-  const [userLoans, setUserLoans] = useState<LoanApplication[]>([]);
-  const [userTransactions, setUserTransactions] = useState<Transaction[]>([]);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [reactedStories, setReactedStories] = useState<Record<string, string[]>>({});
-  const [serverNotifications, setServerNotifications] = useState<any[]>([]);
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('provati_story_reactions');
-      if (saved) setReactedStories(JSON.parse(saved));
-    } catch (e) {
-      console.error("Failed to load story reactions:", e);
-    }
-  }, []);
-
-  const handleReact = async (storyId: string, reactionType: string) => {
-    const list = reactedStories[storyId] || [];
-    if (list.includes(reactionType)) {
-      toast.error(isBn ? 'আপনি ইতিমধ্যে এই রিঅ্যাকশনটি দিয়েছেন!' : 'You already reacted with this!');
-      return;
-    }
-
-    const success = await reactToSuccessStory(storyId, reactionType);
-    if (success) {
-      const newReacted = {
-        ...reactedStories,
-        [storyId]: [...list, reactionType]
-      };
-      setReactedStories(newReacted);
-      localStorage.setItem('provati_story_reactions', JSON.stringify(newReacted));
-      
-      // Update stories local state
-      setStories((prev) => 
-        prev.map((s) => {
-          if (s.id === storyId) {
-            const countKey = `${reactionType}_count`;
-            return {
-              ...s,
-              [countKey]: ((s as any)[countKey] || 0) + 1
-            };
-          }
-          return s;
-        })
-      );
-      toast.success(isBn ? 'রিঅ্যাকশন সফল হয়েছে!' : 'Reaction submitted!');
-    } else {
-      toast.error(isBn ? 'রিঅ্যাকশন সাবমিট করা যায়নি।' : 'Failed to react.');
-    }
-  };
-
   const user = getTelegramUser();
   const navigate = useNavigate();
   const { language, systemSettings } = useAppStore();
   const isBn = language === 'bn';
 
-  // Fetch real data from Supabase
+  const [loading, setLoading] = useState(true);
+  const [balanceVisible, setBalanceVisible] = useState(true);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [activeLoan, setActiveLoan] = useState<LoanApplication | null>(null);
+  const [loans, setLoans] = useState<LoanApplication[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
   useEffect(() => {
-    const fetchData = async () => {
+    let mounted = true;
+    (async () => {
       setLoading(true);
       try {
-        const [dashStats, activeLoans, successStoriesData, allTransactions, allLoans] = await Promise.all([
+        const [s, active, tx, allLoans, notices] = await Promise.all([
           getDashboardStats(user.id),
           getActiveLoans(user.id),
-          getSuccessStories(),
           getTransactions(user.id),
           getLoanApplications(user.id),
+          getMyNotifications().catch(() => [])
         ]);
-
-        setStats(dashStats);
-        setUserLoans(allLoans);
-        setUserTransactions(allTransactions);
-        const loan = activeLoans.length > 0 ? activeLoans[0] : null;
-        setActiveLoan(loan);
-        if (loan) {
-          const completedCount = allTransactions.filter(
-            t => t.type === 'emi_payment' && t.loan_id === loan.id && t.status === 'completed'
-          ).length;
-          setCompletedEmisCount(completedCount);
-        }
-        setStories(successStoriesData.length > 0 ? successStoriesData : []);
-        try { setServerNotifications(await getMyNotifications()); } catch { setServerNotifications([]); }
-      } catch (err) {
-        console.error('Dashboard fetch error:', err);
+        if (!mounted) return;
+        setStats(s);
+        setActiveLoan(active[0] || null);
+        setTransactions(tx || []);
+        setLoans(allLoans || []);
+        setNotifications(notices || []);
+      } catch (e) {
+        console.error('Home dashboard error:', e);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
-    };
-    fetchData();
+    })();
+    return () => { mounted = false; };
   }, [user.id]);
 
-  // Auto-scroll Success Stories — seamless infinite loop
-  useEffect(() => {
-    if (stories.length < 2) return;
-    const CARD_WIDTH = 332; // card width (320) + gap (12)
-    const SCROLL_INTERVAL = 2500;
-    const el = storyScrollRef.current;
-    if (!el) return;
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+  const completedEmis = activeLoan
+    ? transactions.filter(t => t.type === 'emi_payment' && t.loan_id === activeLoan.id && t.status === 'completed').length
+    : 0;
 
-    // Start from the middle set (index = stories.length)
-    const initialOffset = CARD_WIDTH * stories.length;
-    el.scrollLeft = initialOffset;
+  const loanProgress = activeLoan
+    ? Math.min(100, Math.round((completedEmis / Math.max(activeLoan.tenure_months, 1)) * 100))
+    : 0;
 
-    const timer = setInterval(() => {
-      if (!el || storyScrollPaused.current) return;
-      el.scrollBy({ left: CARD_WIDTH, behavior: 'smooth' });
+  const outstanding = activeLoan
+    ? Math.max(0, activeLoan.amount - completedEmis * activeLoan.emi_amount)
+    : 0;
 
-      // After scroll animation (~400ms), check if we need to silently jump back to middle
-      setTimeout(() => {
-        if (!el) return;
-        const singleSetWidth = CARD_WIDTH * stories.length;
-        // If we've gone past the 2nd set, jump silently to middle
-        if (el.scrollLeft >= singleSetWidth * 2) {
-          el.style.scrollBehavior = 'auto';
-          el.scrollLeft = el.scrollLeft - singleSetWidth;
-          el.style.scrollBehavior = '';
-        }
-        // If somehow before first set, jump to middle
-        if (el.scrollLeft < singleSetWidth * 0.5) {
-          el.style.scrollBehavior = 'auto';
-          el.scrollLeft = el.scrollLeft + singleSetWidth;
-          el.style.scrollBehavior = '';
-        }
-      }, 420);
-    }, SCROLL_INTERVAL);
-
-    return () => clearInterval(timer);
-  }, [stories.length]);
-
-
-  const allLoanCategories = [
-    { id: 'business', name: isBn ? 'ব্যবসায়ী ঋণ' : 'Business', icon: '🏢', image: businessImg, color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-    { id: 'personal', name: isBn ? 'ব্যক্তিগত লোন' : 'Personal', icon: '👤', image: personalImg, color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-    { id: 'expat', name: isBn ? 'প্রবাসী ঋণ' : 'Probashi', icon: '✈️', image: expatImg, color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-    { id: 'student', name: isBn ? 'শিক্ষার্থী ঋণ' : 'Student', icon: '🎓', image: studentImg, color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-    { id: 'emergency', name: isBn ? 'জরুরি ঋণ' : 'Emergency', icon: '🚨', image: emergencyImg, color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-    { id: 'women', name: isBn ? 'নারী উদ্যোক্তা' : 'Women Entrepreneur', icon: '🏆', image: womenImg, color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-  ];
-
-  const displayCategories = allLoanCategories.filter(cat => systemSettings?.categories?.[cat.id]?.enabled !== false);
-
-  const chartData = [
-    { name: isBn ? 'জানু' : 'Jan', amount: 45000 },
-    { name: isBn ? 'ফেব' : 'Feb', amount: 52000 },
-    { name: isBn ? 'মার্চ' : 'Mar', amount: 48000 },
-    { name: isBn ? 'এপ্রিল' : 'Apr', amount: 61000 },
-    { name: isBn ? 'মে' : 'May', amount: stats?.totalBalance || 0 },
-  ];
-
-  const getNotifications = () => {
-    const persisted = serverNotifications.map((n:any) => ({
-      id: n.id,
-      title: n.title,
-      time: n.created_at ? new Date(n.created_at).toLocaleString(isBn ? 'bn-BD' : 'en-US') : '',
-      type: n.type || 'system',
-      status: n.is_read ? 'read' : 'new',
-      link: n.entity_type === 'loan' && n.entity_id ? `/application/${n.entity_id}` : undefined,
-      unread: !n.is_read
-    }));
-        const list: { id: string; title: string; time: string; type: string; status: string; link?: string }[] = [];
-
-    userLoans.forEach(loan => {
-      const cat = loan.loan_category === 'personal' ? (isBn ? 'ব্যক্তিগত' : 'Personal') :
-                  loan.loan_category === 'business' ? (isBn ? 'ব্যবসায়িক' : 'Business') :
-                  loan.loan_category === 'expat' ? (isBn ? 'প্রবাসী' : 'Probashi') :
-                  loan.loan_category === 'student' ? (isBn ? 'শিক্ষা' : 'Student') :
-                  loan.loan_category === 'emergency' ? (isBn ? 'জরুরি' : 'Emergency') : (isBn ? 'নারী উদ্যোক্তা' : 'Women Entrepreneur');
-
-      const amountText = formatCurrency(loan.amount, isBn);
-      const appliedDate = new Date(loan.applied_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-US');
-
-      if (loan.status === 'under_review') {
-        list.push({
-          id: `loan-review-${loan.id}`,
-          title: isBn 
-            ? `আপনার ${amountText} (${cat}) লোন আবেদনটির রিভিউ চলছে।` 
-            : `Your ${amountText} (${cat}) loan application is under review.`,
-          time: appliedDate,
-          type: 'loan',
-          status: 'under_review',
-          link: `/application/${loan.id}`
-        });
-      } else if (loan.status === 'approved') {
-        list.push({
-          id: `loan-approved-${loan.id}`,
-          title: isBn 
-            ? `🎉 অভিনন্দন! আপনার ${amountText} (${cat}) লোন আবেদনটি অনুমোদিত হয়েছে।` 
-            : `🎉 Congratulations! Your ${amountText} (${cat}) loan application has been approved.`,
-          time: appliedDate,
-          type: 'loan',
-          status: 'approved',
-          link: `/application/${loan.id}`
-        });
-      } else if (loan.status === 'rejected') {
-        list.push({
-          id: `loan-rejected-${loan.id}`,
-          title: isBn 
-            ? `দুঃখিত, আপনার ${amountText} (${cat}) লোন আবেদনটি বাতিল করা হয়েছে।` 
-            : `Sorry, your ${amountText} (${cat}) loan application has been rejected.`,
-          time: appliedDate,
-          type: 'loan',
-          status: 'rejected',
-          link: `/application/${loan.id}`
-        });
-      } else if (loan.status === 'action_required') {
-        const feedbackText = (() => {
-          const fb = loan.admin_feedback;
-          if (!fb) return '';
-          if (fb.trim().startsWith('{')) {
-            try {
-              const parsed = JSON.parse(fb);
-              return parsed.note || '';
-            } catch (e) {
-              console.error("Error parsing admin_feedback JSON in Home.tsx", e);
-            }
-          }
-          return fb;
-        })();
-        list.push({
-          id: `loan-action-${loan.id}`,
-          title: isBn 
-            ? `⚠️ আপনার ${amountText} (${cat}) লোন আবেদনে সংশোধন প্রয়োজন: ${feedbackText}` 
-            : `⚠️ Your ${amountText} (${cat}) loan requires updates: ${feedbackText}`,
-          time: appliedDate,
-          type: 'loan',
-          status: 'action_required',
-          link: `/apply?edit=${loan.id}`
-        });
-      }
+  const nextEmiDate = useMemo(() => {
+    const d = new Date();
+    if (d.getDate() > 25) d.setMonth(d.getMonth() + 1);
+    d.setDate(25);
+    return d.toLocaleDateString(isBn ? 'bn-BD' : 'en-GB', {
+      day: '2-digit', month: 'long', year: 'numeric'
     });
+  }, [isBn]);
 
-    userTransactions.slice(0, 5).forEach(txn => {
-      const amountText = formatCurrency(txn.amount, isBn);
-      const date = new Date(txn.created_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-US');
-      const method = txn.payment_method?.toUpperCase() || '';
-      
-      if (txn.type === 'deposit') {
-        const getDepTypeLabel = (type: string | null) => {
-          if (!type) return '';
-          return type.split(',').map(p => {
-            if (p === 'processing_fee') return isBn ? 'প্রসেসিং ফি' : 'Processing Fee';
-            if (p === 'security_deposit') return isBn ? 'সিকিউরিটি ডিপোজিট' : 'Security Deposit';
-            if (p === 'insurance') return isBn ? 'বীমা (ইন্সুরেন্স)' : 'Insurance';
-            return p;
-          }).join(' + ');
-        };
-        const depType = getDepTypeLabel(txn.deposit_type);
-        if (txn.status === 'completed') {
-          list.push({
-            id: `txn-${txn.id}`,
-            title: isBn 
-              ? `✅ ${amountText} (${depType}) ডিপোজিট সফলভাবে জমা হয়েছে।` 
-              : `✅ ${amountText} (${depType}) deposit completed successfully.`,
-            time: date,
-            type: 'txn',
-            status: 'completed'
-          });
-        } else if (txn.status === 'failed') {
-          list.push({
-            id: `txn-${txn.id}`,
-            title: isBn 
-              ? `❌ ${amountText} (${depType}) ডিপোজিট অনুরোধটি বাতিল বা ব্যর্থ হয়েছে।` 
-              : `❌ ${amountText} (${depType}) deposit failed or was rejected.`,
-            time: date,
-            type: 'txn',
-            status: 'failed'
-          });
-        }
-      } else if (txn.type === 'withdraw') {
-        if (txn.status === 'completed') {
-          list.push({
-            id: `txn-${txn.id}`,
-            title: isBn 
-              ? `✅ ${amountText} অর্থ উত্তোলন সফল হয়েছে।` 
-              : `✅ ${amountText} withdrawal completed successfully.`,
-            time: date,
-            type: 'txn',
-            status: 'completed'
-          });
-        } else if (txn.status === 'failed') {
-          list.push({
-            id: `txn-${txn.id}`,
-            title: isBn 
-              ? `❌ ${amountText} অর্থ উত্তোলন ব্যর্থ হয়েছে।` 
-              : `❌ ${amountText} withdrawal failed.`,
-            time: date,
-            type: 'txn',
-            status: 'failed'
-          });
-        }
-      }
-    });
-
-    return [...persisted, ...list];
-  };
-
-  // Helper to compute the loan/savings status configuration
-  const getStatusConfig = () => {
-    if (!activeLoan) {
-      return {
-        title: isBn ? 'সক্রিয় কোনো লোন নেই' : 'No Active Loan',
-        description: isBn 
-          ? 'নতুন লোনের জন্য এখনই আবেদন করুন এবং সহজ কিস্তিতে ঋণ সুবিধা উপভোগ করুন।'
-          : 'Apply now for a loan and enjoy low-interest, easy installment plans.',
-        icon: FileText,
-        iconBg: 'bg-gray-100 dark:bg-gray-700',
-        iconColor: 'text-gray-500 dark:text-gray-400',
-        iconClass: '',
-        textColor: 'text-gray-800 dark:text-gray-200',
-        badgeBg: 'bg-gray-100 dark:bg-gray-700',
-        badgeColor: 'text-gray-500 dark:text-gray-400',
-        badgeText: isBn ? 'উপলব্ধ নেই' : 'N/A'
-      };
-    }
-
-    // Check if security deposit has been made (completed transaction of deposit_type === 'security_deposit')
-    const hasSecurityDeposit = userTransactions.some(
-      t => t.type === 'deposit' && t.deposit_type === 'security_deposit' && t.status === 'completed'
-    );
-
-    // Check if loan has already been withdrawn (completed transaction of type === 'withdraw')
-    const hasWithdrawn = userTransactions.some(
-      t => t.type === 'withdraw' && t.status === 'completed'
-    );
-
-    if (!hasSecurityDeposit) {
-      return {
-        title: isBn ? 'লোন উত্তোলনের জন্য সঞ্চয় জমা প্রয়োজন' : 'Savings Deposit Required',
-        description: isBn 
-          ? 'আপনার লোনটি অনুমোদিত হয়েছে। অর্থ উত্তোলনের জন্য প্রসেসিং ফি এবং সঞ্চয় ডিপোজিট সম্পূর্ণ করুন।'
-          : 'Your loan is approved. Please deposit the processing fee and required savings to withdraw.',
-        icon: AlertCircle,
-        iconBg: 'bg-amber-100 dark:bg-amber-900/30',
-        iconColor: 'text-amber-600 dark:text-amber-400',
-        iconClass: 'animate-pulse',
-        textColor: 'text-amber-800 dark:text-amber-300',
-        badgeBg: 'bg-amber-100 dark:bg-amber-900/30',
-        badgeColor: 'text-amber-700 dark:text-amber-400',
-        badgeText: isBn ? 'সঞ্চয় জমা প্রয়োজন' : 'Deposit Required'
-      };
-    }
-
-    if (!hasWithdrawn) {
-      return {
-        title: isBn ? 'সঞ্চয় যাচাই সম্পন্ন — উত্তোলন উপলব্ধ' : 'Savings Verified — Withdrawal Available',
-        description: isBn 
-          ? 'আপনার সঞ্চয় ডিপোজিট সফলভাবে যাচাই করা হয়েছে। আপনি এখন সম্পূর্ণ অর্থ উত্তোলন করতে পারেন।'
-          : 'Your savings deposit has been successfully verified. You can now withdraw the full amount.',
-        icon: CheckCircle2,
-        iconBg: 'bg-emerald-100 dark:bg-emerald-900/30',
-        iconColor: 'text-emerald-600 dark:text-emerald-400',
-        iconClass: '',
-        textColor: 'text-emerald-800 dark:text-emerald-300',
-        badgeBg: 'bg-emerald-100 dark:bg-emerald-900/30',
-        badgeColor: 'text-emerald-700 dark:text-emerald-400',
-        badgeText: isBn ? 'উত্তোলন উপলব্ধ' : 'Available'
-      };
-    }
-
-    return {
-      title: isBn ? 'লোন বিতরণ সম্পন্ন' : 'Loan Disbursement Completed',
-      description: isBn 
-        ? 'আপনার লোনের অর্থ সফলভাবে বিতরণ করা হয়েছে। নির্ধারিত সময়ে ইএমআই পরিশোধ করুন।'
-        : 'Your loan has been successfully disbursed. Please pay your EMIs on time.',
-      icon: CheckCircle2,
-      iconBg: 'bg-blue-100 dark:bg-blue-900/30',
-      iconColor: 'text-blue-600 dark:text-blue-400',
-      iconClass: '',
-      textColor: 'text-blue-800 dark:text-blue-300',
-      badgeBg: 'bg-blue-100 dark:bg-blue-900/30',
-      badgeColor: 'text-blue-700 dark:text-blue-400',
-      badgeText: isBn ? 'বিতরণ সম্পন্ন' : 'Disbursed'
+  const categoryName = (category?: string) => {
+    const names: Record<string, string> = {
+      personal: isBn ? 'ব্যক্তিগত ঋণ' : 'Personal Loan',
+      business: isBn ? 'ব্যবসায়িক ঋণ' : 'Business Loan',
+      home: isBn ? 'বাড়ি ঋণ' : 'Home Loan',
+      car: isBn ? 'গাড়ি ঋণ' : 'Car Loan',
+      medical: isBn ? 'চিকিৎসা ঋণ' : 'Medical Loan',
+      probashi: isBn ? 'প্রবাসী ঋণ' : 'Probashi Loan',
+      education: isBn ? 'শিক্ষা ঋণ' : 'Education Loan',
+      student: isBn ? 'শিক্ষার্থী ঋণ' : 'Student Loan',
+      women: isBn ? 'নারী উদ্যোক্তা ঋণ' : 'Women Entrepreneur Loan',
+      agriculture: isBn ? 'কৃষি ঋণ' : 'Agriculture Loan',
+      emergency: isBn ? 'জরুরি ঋণ' : 'Emergency Loan',
     };
+    return names[category || ''] || (isBn ? 'ঋণ' : 'Loan');
   };
 
-  const statusConfig = getStatusConfig();
+  const nextAction = (() => {
+    if (!activeLoan) {
+      const actionRequired = loans.find(l => l.status === 'action_required');
+      if (actionRequired) return {
+        title: isBn ? 'লোন আবেদনে সংশোধন প্রয়োজন' : 'Loan application needs action',
+        description: isBn ? 'আপনার আবেদনের কিছু তথ্য আপডেট করতে হবে।' : 'Some information needs to be updated.',
+        link: `/apply?edit=${actionRequired.id}`,
+        icon: AlertCircle,
+        tone: 'amber'
+      };
+      const pending = loans.find(l => ['pending', 'under_review'].includes(l.status));
+      if (pending) return {
+        title: isBn ? 'আপনার লোন আবেদন পর্যালোচনায় আছে' : 'Your loan application is under review',
+        description: categoryName(pending.loan_category),
+        link: `/application/${pending.id}`,
+        icon: Clock3,
+        tone: 'blue'
+      };
+      return {
+        title: isBn ? 'আপনার প্রথম লোন আবেদন শুরু করুন' : 'Start your first loan application',
+        description: isBn ? 'আপনার প্রয়োজন অনুযায়ী ঋণ সেবা নির্বাচন করুন।' : 'Choose a loan service that matches your need.',
+        link: '/apply',
+        icon: FileText,
+        tone: 'blue'
+      };
+    }
+    if (completedEmis < activeLoan.tenure_months) return {
+      title: isBn ? 'পরবর্তী কিস্তি প্রস্তুত' : 'Next installment',
+      description: `${formatCurrency(activeLoan.emi_amount, isBn)} • ${nextEmiDate}`,
+      link: '/pay',
+      icon: CalendarDays,
+      tone: 'blue'
+    };
+    return {
+      title: isBn ? 'ঋণ পরিশোধ সম্পন্ন' : 'Loan repayment completed',
+      description: isBn ? 'আপনার ঋণ হিসাব দেখুন।' : 'Review your completed loan account.',
+      link: `/application/${activeLoan.id}`,
+      icon: CheckCircle2,
+      tone: 'green'
+    };
+  })();
+
+  const quickActions = [
+    { label: isBn ? 'ঋণ আবেদন' : 'Apply Loan', sub: isBn ? 'নতুন আবেদন' : 'New application', icon: FileText, link: '/apply' },
+    { label: isBn ? 'কিস্তি' : 'EMI', sub: isBn ? 'পরিশোধ করুন' : 'Make payment', icon: CreditCard, link: '/pay' },
+    { label: isBn ? 'সঞ্চয়' : 'Savings', sub: isBn ? 'জমা দিন' : 'Deposit', icon: PiggyBank, link: '/deposit' },
+    { label: isBn ? 'লেনদেন' : 'Activity', sub: isBn ? 'হিসাব দেখুন' : 'View history', icon: ReceiptText, link: '/transactions' },
+    { label: isBn ? 'ডকুমেন্ট' : 'Documents', sub: isBn ? 'নথি দেখুন' : 'View files', icon: FolderOpen, link: '/profile' },
+    { label: isBn ? 'আমার ঋণ' : 'My Loans', sub: isBn ? 'স্ট্যাটাস' : 'Status', icon: Wallet, link: '/loans' },
+  ];
+
+  const categories = [
+    ['personal', isBn ? 'ব্যক্তিগত' : 'Personal'],
+    ['business', isBn ? 'ব্যবসায়িক' : 'Business'],
+    ['home', isBn ? 'বাড়ি' : 'Home'],
+    ['medical', isBn ? 'চিকিৎসা' : 'Medical'],
+    ['probashi', isBn ? 'প্রবাসী' : 'Probashi'],
+    ['women', isBn ? 'নারী উদ্যোক্তা' : 'Women'],
+  ];
+
+  const recentTransactions = transactions.slice(0, 4);
+
+  const markReadAndOpen = async (n: any) => {
+    if (!n.is_read) {
+      await markMyNotificationRead(n.id);
+      setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, is_read: true } : x));
+    }
+    setShowNotifications(false);
+    if (n.entity_type === 'loan' && n.entity_id) navigate(`/application/${n.entity_id}`);
+  };
 
   return (
-    <div className="home-modern w-full min-w-0 px-3 sm:px-5 pb-[calc(6rem+env(safe-area-inset-bottom))] space-y-4 sm:space-y-6 neu-bg transition-colors min-h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-2 sm:gap-3 neu-raised p-2.5 sm:p-4 rounded-[20px] sm:rounded-[28px] mb-1 transition-colors sticky top-2 z-30 backdrop-blur-xl">
-        <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
-          <div className="relative">
-            <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center overflow-hidden shrink-0">
+    <main className="w-full min-w-0 bg-[#f6f8fc] dark:bg-[#0b1220] text-slate-900 dark:text-slate-100 pb-[calc(6rem+env(safe-area-inset-bottom))] transition-colors">
+      <div className="px-4 sm:px-5 pt-3 space-y-5">
+
+        {/* Header */}
+        <header className="flex items-center justify-between gap-3">
+          <Link to="/profile" className="flex items-center gap-3 min-w-0">
+            <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white dark:border-slate-700 bg-slate-200 dark:bg-slate-800 shadow-sm shrink-0">
               <img
-                src={user.photo_url || `https://ui-avatars.com/api/?name=${user.first_name}`}
+                src={user.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.first_name)}&background=0ea5e9&color=fff&bold=true`}
                 alt="Profile"
-                className="w-full h-full rounded-full object-cover transition-colors"
+                className="w-full h-full object-cover"
               />
+              <span className="absolute right-0 bottom-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#0b1220]" />
             </div>
-            {/* Verified Badge */}
-            <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full border-2 border-white dark:border-gray-800 p-0.5 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-            </div>
-          </div>
-          <div>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 font-extrabold uppercase tracking-wider mb-0.5 transition-colors">
-              {isBn ? 'স্বাগতম' : 'Welcome back'}
-            </p>
-            <h1 className="text-base sm:text-lg font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-1.5 transition-colors truncate max-w-[42vw] sm:max-w-none">
-              {user.first_name} {user.last_name}
-            </h1>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5 sm:gap-3 relative shrink-0">
-          <button
-            type="button"
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl neu-btn flex items-center justify-center relative border-0 cursor-pointer active:scale-95 transition-transform"
-          >
-            <Bell className="w-5 h-5 text-gray-700 dark:text-gray-300 transition-colors" />
-            {getNotifications().length > 0 && (
-              <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border border-white dark:border-gray-700 shadow-sm shadow-red-500/50 transition-colors animate-pulse"></span>
-            )}
-          </button>
-
-          <Link
-            to="/profile"
-            aria-label={isBn ? 'প্রোফাইল খুলুন' : 'Open profile'}
-            className="w-11 h-11 rounded-full overflow-hidden relative border-2 border-white dark:border-slate-700 shadow-sm cursor-pointer active:scale-95 transition-transform bg-gray-100 dark:bg-slate-800"
-          >
-            <img
-              src={user.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(`${user.first_name} ${user.last_name || ''}`)}&background=0ea5e9&color=fff&bold=true`}
-              alt={isBn ? 'প্রোফাইল ছবি' : 'Profile photo'}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(`${user.first_name} ${user.last_name || ''}`)}&background=0ea5e9&color=fff&bold=true`;
-                if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
-              }}
-            />
-            <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-800" />
-          </Link>
-
-          {/* Premium Glassmorphic Notifications Panel */}
-          <AnimatePresence>
-            {showNotifications && (
-              <>
-                {/* Backdrop overlay to close when clicked outside */}
-                <div 
-                  className="fixed inset-0 z-45" 
-                  onClick={() => setShowNotifications(false)}
-                />
-                
-                <motion.div
-                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 15, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute right-0 mt-3 w-[calc(100vw-1.5rem)] max-w-96 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-gray-100 dark:border-gray-700 rounded-[24px] shadow-2xl p-5 z-50 overflow-hidden"
-                >
-                  <div className="flex justify-between items-center pb-3 border-b border-gray-100 dark:border-gray-700 mb-3">
-                    <h4 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
-                      <Bell size={18} className="text-primary-500" />
-                      {isBn ? 'নোটিফিকেশন সমূহ' : 'Notifications'}
-                    </h4>
-                    <span className="text-[10px] font-bold bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-2.5 py-1 rounded-full uppercase tracking-wider">
-                      {convertDigits(getNotifications().length, isBn)} {isBn ? 'টি' : 'Items'}
-                    </span>
-                  </div>
-
-                  <div className="space-y-3 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
-                    {getNotifications().length === 0 ? (
-                      <div className="py-10 text-center">
-                        <p className="text-gray-400 dark:text-gray-500 text-sm font-bold">{isBn ? 'নতুন কোনো নোটিফিকেশন নেই' : 'No new notifications'}</p>
-                      </div>
-                    ) : (
-                      getNotifications().map((notif) => (
-                        <div 
-                          key={notif.id}
-                          onClick={async () => {
-                            if ((notif as any).unread) {
-                              await markMyNotificationRead(notif.id);
-                              setServerNotifications(prev => prev.map(n => n.id === notif.id ? {...n, is_read:true} : n));
-                            }
-                            if (notif.link) { navigate(notif.link); setShowNotifications(false); }
-                          }}
-                          className={`p-3 rounded-xl border flex gap-3 transition-all ${
-                            notif.link ? 'hover:bg-primary-50/20 dark:hover:bg-primary-900/10 cursor-pointer active:scale-98' : ''
-                          } ${
-                            notif.status === 'under_review' ? 'bg-purple-50/50 dark:bg-purple-950/10 border-purple-100 dark:border-purple-900/30 text-purple-950 dark:text-purple-300' :
-                            notif.status === 'approved' || notif.status === 'completed' ? 'bg-emerald-50/50 dark:bg-emerald-950/10 border-emerald-100 dark:border-emerald-900/30 text-emerald-950 dark:text-emerald-300' :
-                            notif.status === 'rejected' || notif.status === 'failed' ? 'bg-rose-50/50 dark:bg-rose-950/10 border-rose-100 dark:border-rose-900/30 text-rose-950 dark:text-rose-300' :
-                            notif.status === 'action_required' ? 'bg-orange-50/50 dark:bg-orange-950/10 border-orange-100 dark:border-orange-900/30 text-orange-950 dark:text-orange-300' :
-                            'bg-gray-50/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 text-gray-900 dark:text-gray-100'
-                          }`}
-                        >
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold leading-normal mb-1.5 break-words text-gray-900 dark:text-white">{notif.title}</p>
-                            <span className="text-[10px] opacity-60 font-medium text-gray-500 dark:text-gray-400">{notif.time}</span>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
- 
-      {/* Notice Board Marquee */}
-      {systemSettings?.announcementActive && (
-        <div className="neu-sunken rounded-2xl py-3 px-4 overflow-hidden relative flex items-center gap-3 transition-all border-0">
-          <span className="bg-[#dc2626] text-white text-[10px] uppercase font-black py-1 px-2.5 rounded shrink-0 relative z-10 shadow-sm flex items-center gap-1 animate-blink-bounce">
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-            {isBn ? 'বিজ্ঞপ্তি' : 'Notice'}
-          </span>
-          <div className="overflow-hidden flex-1 relative w-full h-5 flex items-center">
-            <div className="flex whitespace-nowrap absolute animate-marquee-seamless font-extrabold text-[14px] text-primary-700 dark:text-primary-400 leading-none hover:[animation-play-state:paused] cursor-pointer">
-              <span className="pr-16">{isBn ? systemSettings.announcementBn : systemSettings.announcementEn}</span>
-              <span className="pr-16">{isBn ? systemSettings.announcementBn : systemSettings.announcementEn}</span>
-            </div>
-          </div>
-        </div>
-      )}
- 
-      {/* Balance Section */}
-      <div className="relative mb-12 w-full">
-        {/* Main blue card */}
-        <div className="home-balance-card rounded-[24px] px-5 pt-5 pb-10 relative overflow-hidden flex flex-col justify-between transition-colors" style={{background:'linear-gradient(135deg,rgba(37,99,235,0.18) 0%,rgba(99,102,241,0.12) 100%)',backdropFilter:'blur(20px)',border:'1px solid rgba(99,102,241,0.25)',boxShadow:'0 8px 32px -8px rgba(37,99,235,0.18)'}}>
-          <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-blue-400/20 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-indigo-500/15 blur-2xl pointer-events-none" />
-          {/* Header row */}
-          <div className="flex justify-between items-start mb-2 relative z-10">
-            <div className="flex items-center gap-2 bg-white/20 dark:bg-white/10 px-3 py-1 rounded-full border border-white/25 self-start backdrop-blur-sm">
-              <span className="text-[10px] font-black text-blue-700 dark:text-blue-200 leading-none">{isBn ? 'পোর্টফোলিও ব্যালেন্স' : 'Portfolio Balances'}</span>
-              <button 
-                type="button" 
-                onClick={() => setBalanceVisible(!balanceVisible)} 
-                className="text-blue-500 dark:text-blue-300 hover:text-blue-700 dark:hover:text-white transition-colors bg-transparent border-0 cursor-pointer p-0 flex items-center"
-              >
-                {balanceVisible ? <Eye size={12} /> : <EyeOff size={12} />}
-              </button>
-            </div>
-          </div>
- 
-          {/* Grid of Balances */}
-          <div className="grid grid-cols-2 gap-3 relative z-10 my-4 pb-2">
-            <div className="rounded-2xl p-3 relative overflow-hidden" style={{background:'linear-gradient(135deg,rgba(16,185,129,0.18) 0%,rgba(5,150,105,0.10) 100%)',border:'1px solid rgba(16,185,129,0.32)'}}>
-              <div className="absolute top-0 left-0 w-1 h-full rounded-l-2xl bg-gradient-to-b from-emerald-400 to-green-600" />
-              <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold mb-1.5 uppercase tracking-wider pl-2">{isBn ? 'মোট ব্যালেন্স' : 'Total Balance'}</p>
-              <h2 className="text-xl font-black tracking-tight text-gray-900 dark:text-white leading-none pl-2">
-                {balanceVisible ? formatCurrency(stats?.totalBalance || 0, isBn) : '৳•••••'}
-              </h2>
-            </div>
-            <div className="rounded-2xl p-3 relative overflow-hidden" style={{background:'linear-gradient(135deg,rgba(139,92,246,0.18) 0%,rgba(109,40,217,0.10) 100%)',border:'1px solid rgba(139,92,246,0.32)'}}>
-              <div className="absolute top-0 left-0 w-1 h-full rounded-l-2xl bg-gradient-to-b from-violet-400 to-purple-600" />
-              <p className="text-[10px] text-violet-600 dark:text-violet-400 font-extrabold mb-1.5 uppercase tracking-wider pl-2">{isBn ? 'সঞ্চয় ব্যালেন্স' : 'Savings Balance'}</p>
-              <h2 className="text-xl font-black tracking-tight text-gray-900 dark:text-white leading-none pl-2">
-                {balanceVisible ? formatCurrency(stats?.savingsBalance || 0, isBn) : '৳•••••'}
-              </h2>
-            </div>
-          </div>
- 
-          {/* Decorative building */}
-          <div className="absolute top-4 right-4 opacity-5 pointer-events-none">
-            <svg width="80" height="80" viewBox="0 0 80 80" fill="currentColor" className="text-gray-400">
-              <rect x="10" y="20" width="20" height="60" />
-              <rect x="35" y="5" width="20" height="75" />
-              <rect x="60" y="30" width="15" height="50" />
-            </svg>
-          </div>
-        </div>
- 
-        {/* Floating Deposit & Withdraw cards */}
-        <div className="absolute -bottom-8 left-4 right-4 flex gap-4">
-          <Link
-            to="/deposit"
-            className="flex-1 rounded-full p-3 pl-4 pr-5 flex items-center gap-3 active:scale-95 hover:scale-[1.02] transition-all duration-300"
-            style={{background:'linear-gradient(135deg,#10b981,#059669)',boxShadow:'0 6px 20px -4px rgba(16,185,129,0.45)',border:'1px solid rgba(16,185,129,0.5)'}}
-          >
-            <div className="w-9 h-9 rounded-full bg-white/25 flex items-center justify-center shrink-0">
-              <ArrowDownToLine size={16} className="text-white" />
-            </div>
-            <div>
-              <p className="text-[9px] text-white/75 uppercase tracking-widest font-black leading-none mb-0.5">{isBn ? 'ডিপোজিট' : 'DEPOSIT'}</p>
-              <p className="text-sm font-black leading-none text-white">{balanceVisible ? formatCurrency(stats?.depositBalance || 0, isBn) : '৳•••'}</p>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                {isBn ? 'স্বাগতম' : 'Welcome back'}
+              </p>
+              <h1 className="font-black text-base truncate">{user.first_name} {user.last_name || ''}</h1>
+              <p className="text-[10px] font-bold text-slate-400">{isBn ? 'PROVATI সদস্য' : 'PROVATI Member'}</p>
             </div>
           </Link>
-          <Link
-            to="/withdraw"
-            className="flex-1 rounded-full p-3 pl-4 pr-5 flex items-center gap-3 active:scale-95 hover:scale-[1.02] transition-all duration-300"
-            style={{background:'linear-gradient(135deg,#f43f5e,#e11d48)',boxShadow:'0 6px 20px -4px rgba(244,63,94,0.45)',border:'1px solid rgba(244,63,94,0.5)'}}
-          >
-            <div className="w-9 h-9 rounded-full bg-white/25 flex items-center justify-center shrink-0">
-              <ArrowUpFromLine size={16} className="text-white" />
-            </div>
-            <div>
-              <p className="text-[9px] text-white/75 uppercase tracking-widest font-black leading-none mb-0.5">{isBn ? 'উত্তোলন' : 'WITHDRAW'}</p>
-              <p className="text-sm font-black leading-none text-white">{balanceVisible ? formatCurrency(stats?.withdrawBalance || 0, isBn) : '৳•••'}</p>
-            </div>
-          </Link>
-        </div>
-      </div>
- 
-      {/* Quick Actions */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-extrabold text-gray-900 dark:text-white text-base">
-            {isBn ? 'কুইক অ্যাকশন' : 'Quick Actions'}
-          </h3>
-          <span className="text-xs font-black text-blue-600 dark:text-blue-400 cursor-pointer">
-            {isBn ? 'সব দেখুন' : 'See All'}
-          </span>
-        </div>
-        <div className="grid grid-cols-4 gap-3">
-          {[
-            { name: isBn ? 'ডিপোজিট' : 'Deposit', icon: ArrowDownToLine, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-500/10', link: '/deposit' },
-            { name: isBn ? 'উত্তোলন' : 'Withdraw', icon: ArrowUpFromLine, color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-500/10', link: '/withdraw' },
-            { name: isBn ? 'আবেদন' : 'Apply', icon: FileText, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-500/10', link: '/apply' },
-            { name: isBn ? 'ইএমআই' : 'EMI Pay', icon: Wallet, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-500/10', link: '/pay' },
-          ].map((action, i) => (
-            <Link key={i} to={action.link} className="flex flex-col items-center gap-2">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center neu-btn border-0 ${action.color}`}>
-                <action.icon size={22} />
-              </div>
-              <span className="text-[10px] font-black text-gray-600 dark:text-gray-400 tracking-tight">{action.name}</span>
-            </Link>
-          ))}
-        </div>
-      </div>
- 
-      {/* Active Loan */}
-      <div>
-        <h3 className="font-extrabold text-gray-900 dark:text-white text-base mb-4 transition-colors">
-          {isBn ? 'সক্রিয় লোন' : 'Active Loan'}
-        </h3>
-        {loading ? (
-          <div className="neu-raised rounded-[24px] p-5 flex items-center gap-4 border-0">
-            <Skeleton className="w-14 h-14 rounded-[18px] shrink-0" />
-            <div className="flex-1 space-y-3">
-              <div className="flex justify-between">
-                <div className="space-y-1 w-1/2">
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-3 w-1/2" />
-                </div>
-                <div className="space-y-1 w-1/4 text-right">
-                  <Skeleton className="h-3 w-full" />
-                  <Skeleton className="h-4 w-3/4 ml-auto" />
-                </div>
-              </div>
-              <Skeleton className="h-2 w-full rounded-full" />
-            </div>
-          </div>
-        ) : activeLoan ? (
-          (() => {
-            const progressPercent = Math.min(Math.round((completedEmisCount / activeLoan.tenure_months) * 100), 100);
-            const outstanding = Math.max(activeLoan.amount - (completedEmisCount * activeLoan.emi_amount), 0);
-            
-            const getCategoryName = (category: string) => {
-              switch (category) {
-                case 'business': return isBn ? 'ব্যবসায়িক লোন' : 'Business Loan';
-                case 'personal': return isBn ? 'ব্যক্তিগত লোন' : 'Personal Loan';
-                case 'home': return isBn ? 'বাড়ি লোন' : 'Home Loan';
-                case 'car': return isBn ? 'গাড়ি লোন' : 'Car Loan';
-                case 'medical': return isBn ? 'চিকিৎসা লোন' : 'Medical Loan';
-                case 'freelancer': return isBn ? 'ফ্রিল্যান্সার লোন' : 'Freelancer Loan';
-                case 'probashi': return isBn ? 'প্রবাসী লোন' : 'Probashi Loan';
-                case 'education': return isBn ? 'শিক্ষা লোন' : 'Education Loan';
-                case 'women': return isBn ? 'নারী উদ্যোক্তা লোন' : 'Women Entrepreneur Loan';
-                case 'student': return isBn ? 'স্টুডেন্ট লোন' : 'Student Loan';
-                case 'emergency': return isBn ? 'জরুরি লোন' : 'Emergency Loan';
-                default: return isBn ? 'লোন' : 'Loan';
-              }
-            };
- 
-            const getCategoryIcon = (category: string) => {
-              const cat = allLoanCategories.find(c => c.id === category);
-              return cat ? cat.icon : '🏢';
-            };
- 
-            const getNextEmiDate = () => {
-              const today = new Date();
-              let dueMonth = today.getMonth();
-              let dueYear = today.getFullYear();
-              if (today.getDate() > 25) {
-                dueMonth += 1;
-                if (dueMonth > 11) {
-                  dueMonth = 0;
-                  dueYear += 1;
-                }
-              }
-              const dueDate = new Date(dueYear, dueMonth, 25);
-              return dueDate.toLocaleDateString(isBn ? 'bn-BD' : 'en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
-            };
- 
-            return (
-              <div className="neu-raised rounded-[24px] p-5 flex flex-col gap-4 relative overflow-hidden transition-colors border-0">
-                <div className="flex gap-4 items-center relative z-10">
-                  <div className="w-14 h-14 neu-sunken rounded-[18px] flex items-center justify-center text-2xl shrink-0 border-0">
-                    {getCategoryIcon(activeLoan.loan_category)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-1">
-                      <div>
-                        <h4 className="font-black text-sm text-gray-900 dark:text-white transition-colors flex items-center gap-1.5 flex-wrap">
-                          {getCategoryName(activeLoan.loan_category)}
-                          <span className="inline-block px-2.5 py-0.5 neu-badge-green text-[9px] rounded-full uppercase tracking-wide transition-colors font-black border-0 shadow-none">
-                            {isBn ? 'সক্রিয়' : 'Active'}
-                          </span>
-                        </h4>
-                        <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold transition-colors">
-                          {isBn ? 'লোন আইডি' : 'Loan ID'}: {convertDigits(`LN-${activeLoan.id.slice(0, 8).toUpperCase()}`, isBn)}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold mb-0.5 transition-colors">
-                          {isBn ? 'বকেয়া' : 'Outstanding'}
-                        </p>
-                        <p className="text-sm font-black text-gray-900 dark:text-white transition-colors">{formatCurrency(outstanding, isBn)}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 mt-1 relative z-10">
-                  <div className="h-2.5 neu-sunken rounded-full flex-1 overflow-hidden transition-colors border-0">
-                    <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }}></div>
-                  </div>
-                  <span className="text-[10px] font-black text-primary-600 dark:text-primary-400 transition-colors">{convertDigits(`${progressPercent}%`, isBn)}</span>
-                </div>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold transition-colors relative z-10">
-                  {isBn ? 'পরবর্তী ইএমআই' : 'Next EMI'}: <span className="text-gray-700 dark:text-gray-300 font-extrabold transition-colors">{getNextEmiDate()}</span>
-                </p>
- 
-                {/* Chart Section within Active Loan */}
-                <div className="mt-3 h-[120px] w-full relative z-10 neu-sunken p-2.5 rounded-2xl border-0">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                      <defs>
-                        <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25} />
-                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <Tooltip
-                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}
-                        labelStyle={{ fontWeight: 'bold', color: '#6b7280', marginBottom: '4px' }}
-                        itemStyle={{ fontWeight: '900', color: '#111827' }}
-                        formatter={(value) => [formatCurrency(value as number, isBn), isBn ? 'ব্যালেন্স' : 'Balance']}
-                      />
-                      <Area type="monotone" dataKey="amount" stroke="#3b82f6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorAmount)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            );
-          })()
-        ) : (
-          <div className="neu-raised rounded-[24px] p-6 text-center relative overflow-hidden transition-colors flex flex-col items-center border-0">
-            <div className="w-16 h-16 neu-sunken rounded-2xl flex items-center justify-center text-primary-600 dark:text-primary-400 mb-4 shrink-0 border-0">
-              <FileText size={28} />
-            </div>
-            <h4 className="font-black text-gray-900 dark:text-white text-base mb-1 relative z-10">
-              {isBn ? 'কোনো সক্রিয় লোন নেই' : 'No Active Loan'}
-            </h4>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-5 max-w-[280px] relative z-10 leading-relaxed font-semibold">
-              {isBn 
-                ? 'সহজ শর্তে লোন পেতে এবং আপনার স্বপ্নের প্রজেক্ট শুরু করতে এখনই আবেদন করুন!' 
-                : 'Apply now to get low-interest loans easily and start your dream project!'}
-            </p>
-            <Link 
-              to="/apply" 
-              className="w-full neu-btn-primary py-3 rounded-xl font-black text-xs active:scale-95 transition-all flex items-center justify-center gap-2 relative z-10 border-0"
-            >
-              {isBn ? 'লোনের জন্য আবেদন করুন' : 'Apply for a Loan'}
-              <ArrowRight size={14} />
-            </Link>
-          </div>
-        )}
-      </div>
- 
-      {/* Success Stories */}
-      {stories.length > 0 && (
-        <div className="w-full overflow-hidden">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-extrabold text-gray-900 dark:text-white text-base transition-colors">
-              {isBn ? 'সাফল্যের গল্প' : 'Success Stories'}
-            </h3>
-            <span className="text-[10px] font-black text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 px-2.5 py-1 rounded-full">
-              {convertDigits(stories.length, isBn)} {isBn ? 'জন' : 'Members'}
-            </span>
-          </div>
-          {/* Horizontal scrollable card list */}
-          <div
-            ref={storyScrollRef}
-            className="flex gap-3 overflow-x-auto pb-3 hide-scrollbar -mx-5 px-5 snap-x snap-mandatory"
-            onMouseEnter={() => { storyScrollPaused.current = true; }}
-            onMouseLeave={() => { storyScrollPaused.current = false; }}
-            onTouchStart={() => { storyScrollPaused.current = true; }}
-            onTouchEnd={() => { setTimeout(() => { storyScrollPaused.current = false; }, 1500); }}
-          >
-            {(() => {
-              // 10 deep colors — harmonious with app's primary #13bcff cyan-blue palette
-              const storyColors = [
-                { bg: 'linear-gradient(145deg, #003d66, #001f33)', border: 'rgba(19, 188, 255, 0.45)', accent: 'rgba(19, 188, 255, 0.25)', textMuted: 'text-cyan-200' },
-                { bg: 'linear-gradient(145deg, #005c99, #002b47)', border: 'rgba(0, 153, 230, 0.45)', accent: 'rgba(0, 153, 230, 0.25)', textMuted: 'text-blue-200' },
-                { bg: 'linear-gradient(145deg, #064e3b, #022c22)', border: 'rgba(16, 185, 129, 0.45)', accent: 'rgba(16, 185, 129, 0.25)', textMuted: 'text-emerald-200' },
-                { bg: 'linear-gradient(145deg, #312e81, #1e1b4b)', border: 'rgba(99, 102, 241, 0.45)', accent: 'rgba(99, 102, 241, 0.25)', textMuted: 'text-indigo-200' },
-                { bg: 'linear-gradient(145deg, #115e59, #042f2e)', border: 'rgba(20, 184, 166, 0.45)', accent: 'rgba(20, 184, 166, 0.25)', textMuted: 'text-teal-200' },
-                { bg: 'linear-gradient(145deg, #164e63, #083344)', border: 'rgba(6, 182, 212, 0.45)', accent: 'rgba(6, 182, 212, 0.25)', textMuted: 'text-cyan-200' },
-                { bg: 'linear-gradient(145deg, #1e3a8a, #172554)', border: 'rgba(59, 130, 246, 0.45)', accent: 'rgba(59, 130, 246, 0.25)', textMuted: 'text-blue-200' },
-                { bg: 'linear-gradient(145deg, #4c1d95, #2e1065)', border: 'rgba(139, 92, 246, 0.45)', accent: 'rgba(139, 92, 246, 0.25)', textMuted: 'text-purple-200' },
-                { bg: 'linear-gradient(145deg, #78350f, #451a03)', border: 'rgba(245, 158, 11, 0.45)', accent: 'rgba(245, 158, 11, 0.25)', textMuted: 'text-amber-200' },
-                { bg: 'linear-gradient(145deg, #881337, #4c0519)', border: 'rgba(244, 63, 94, 0.45)', accent: 'rgba(244, 63, 94, 0.25)', textMuted: 'text-rose-200' },
-              ];
 
-              // Triplicate for seamless infinite scroll
-              const loopedStories = [...stories.slice(0, 10), ...stories.slice(0, 10), ...stories.slice(0, 10)];
-
-              return loopedStories.map((story, i) => {
-                const realIndex = i % storyColors.length;
-                const theme = storyColors[realIndex];
-                const serialNum = (i % stories.slice(0, 10).length) + 1;
-                return (
-                  <div
-                    key={`${story.id || i}-${i}`}
-                    className="shrink-0 w-[320px] rounded-[22px] p-4 flex flex-col relative overflow-hidden shadow-lg snap-center min-h-[220px]"
-                    style={{
-                      background: theme.bg
-                    }}
-                  >
-                    {/* Dot grid watermark */}
-                    <div className="absolute inset-0 z-0 opacity-[0.07]" style={{
-                      backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,1) 1px, transparent 0)`,
-                      backgroundSize: '16px 16px'
-                    }} />
-
-                    {/* Glow orb */}
-                    <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full pointer-events-none z-0"
-                      style={{ background: theme.accent, filter: 'blur(20px)' }} />
-
-                    {/* Avatar + Name row — full width, no badge overlap */}
-                    <div className="flex items-center gap-2.5 relative z-10 mb-3 pr-0">
-                      <div className="w-11 h-11 rounded-full p-[2px] bg-white/20 flex items-center justify-center shrink-0 border border-white/25">
-                        <img
-                          src={story.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(story.name)}&background=random`}
-                          alt={story.name}
-                          onError={(e) => {
-                            const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(story.name)}&background=random`;
-                            if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
-                          }}
-                          className="w-full h-full rounded-full object-cover"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1 overflow-hidden">
-                        <p className="text-[11px] font-black text-white flex items-center gap-1 whitespace-nowrap overflow-hidden" style={{textOverflow:'ellipsis'}}>
-                          <span className="truncate">{story.name}</span>
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="shrink-0 text-white/70"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
-                        </p>
-                        <p className={`text-[9px] font-bold truncate mt-0.5 ${theme.textMuted}`}>{story.loan_type}</p>
-                      </div>
-                    </div>
-
-                    {/* Amount */}
-                    <div className="relative z-10 mb-3 flex-1">
-                      <p className="text-[10px] text-white/50 font-bold uppercase tracking-wider mb-0.5">
-                        {isBn ? 'লোন পরিমাণ' : 'Loan Amount'}
-                      </p>
-                      <p className="text-xl font-black text-white leading-none">
-                        {formatCurrency(story.amount || 0, isBn)}
-                      </p>
-                      <p className={`text-[9px] font-bold mt-0.5 ${theme.textMuted}`}>
-                        {convertDigits(story.approval_time, isBn)}
-                      </p>
-                    </div>
-
-                    {/* Additional Details */}
-                    {(story.profession || story.location || story.loan_tenure || story.deposit_payment) && (
-                      <div className="relative z-10 mb-3 grid grid-cols-2 gap-1.5">
-                        {story.profession && (
-                          <div className="bg-white/10 border border-white/10 rounded-md px-2 py-1 text-[9px] text-white flex flex-col">
-                            <span className="opacity-50 uppercase tracking-wider text-[7px] mb-0.5">{isBn ? 'পেশা' : 'Profession'}</span>
-                            <span className="font-bold truncate">{story.profession}</span>
-                          </div>
-                        )}
-                        {story.location && (
-                          <div className="bg-white/10 border border-white/10 rounded-md px-2 py-1 text-[9px] text-white flex flex-col">
-                            <span className="opacity-50 uppercase tracking-wider text-[7px] mb-0.5">{isBn ? 'লোকেশন' : 'Location'}</span>
-                            <span className="font-bold truncate">{story.location}</span>
-                          </div>
-                        )}
-                        {story.loan_tenure && (
-                          <div className="bg-white/10 border border-white/10 rounded-md px-2 py-1 text-[9px] text-white flex flex-col">
-                            <span className="opacity-50 uppercase tracking-wider text-[7px] mb-0.5">{isBn ? 'মেয়াদ' : 'Tenure'}</span>
-                            <span className="font-bold truncate">{story.loan_tenure}</span>
-                          </div>
-                        )}
-                        {story.deposit_payment && (
-                          <div className="bg-white/10 border border-white/10 rounded-md px-2 py-1 text-[9px] text-white flex flex-col">
-                            <span className="opacity-50 uppercase tracking-wider text-[7px] mb-0.5">{isBn ? 'ডিপোজিট' : 'Deposit'}</span>
-                            <span className="font-bold text-green-300 truncate">{story.deposit_payment}</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Bottom row: Reactions + Stars + Serial */}
-                    <div className="relative z-10 mt-auto pt-3 border-t border-white/10 flex flex-col gap-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5">
-                          {[
-                            { type: 'like', emoji: '👍' },
-                            { type: 'love', emoji: '❤️' },
-                            { type: 'wow', emoji: '😮' },
-                            { type: 'congratulation', emoji: '🎉' }
-                          ].map((rx) => {
-                            const countKey = `${rx.type}_count`;
-                            const count = (story as any)[countKey] || 0;
-                            const hasReacted = reactedStories[story.id]?.includes(rx.type);
-
-                            return (
-                              <button
-                                key={rx.type}
-                                type="button"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  handleReact(story.id, rx.type);
-                                }}
-                                className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] transition-all border cursor-pointer select-none ${
-                                  hasReacted 
-                                    ? 'bg-white/25 border-white/40 font-black scale-105 shadow-sm' 
-                                    : 'bg-white/5 border-transparent hover:bg-white/10 active:scale-95'
-                                } text-white`}
-                              >
-                                <span>{rx.emoji}</span>
-                                {count > 0 && <span className="font-extrabold">{convertDigits(count, isBn)}</span>}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        
-                        <div className="w-5 h-5 rounded-full bg-white/15 flex items-center justify-center border border-white/25 shrink-0">
-                          <span className="text-[8px] font-black text-white leading-none">{convertDigits(serialNum, isBn)}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-between items-center">
-                        <div className="flex gap-0.5 text-yellow-400">
-                          {[...Array(Math.min(story.rating || 5, 5))].map((_, si) => (
-                            <Star key={si} size={9} fill="currentColor" />
-                          ))}
-                        </div>
-                        <span className="text-[7px] font-bold text-white/40 uppercase tracking-widest">
-                          {isBn ? 'ভেরিফাইড' : 'Verified'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              });
-            })()}
-          </div>
-        </div>
-      )}
- 
-      {/* Loan Categories */}
-      <div className="pb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-extrabold text-gray-900 dark:text-white text-base transition-colors">
-            {isBn ? 'লোন ক্যাটাগরি' : 'Loan Categories'}
-          </h3>
-          <Link to="/apply" className="text-primary-600 dark:text-primary-400 text-xs font-black transition-colors hover:text-primary-500 dark:hover:text-primary-300">
-            {isBn ? 'সব দেখুন' : 'View All'}
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          {displayCategories.map((cat, i) => (
+          <div className="relative">
             <button
-              key={i}
               type="button"
-              onClick={() => navigate(`/apply?category=${cat.id}`)}
-              className="group w-full text-left neu-raised rounded-[20px] flex overflow-hidden border-0 transition-all hover:scale-[1.02] active:scale-98 cursor-pointer p-0"
+              onClick={() => setShowNotifications(v => !v)}
+              className="w-11 h-11 rounded-full bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-sm active:scale-95 transition"
+              aria-label="Notifications"
             >
-              <div className="flex-1 p-3 flex items-center gap-2.5 relative z-10 min-w-0">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-colors shrink-0 neu-sunken ${cat.color}`}>
-                  {cat.icon}
-                </div>
-                <span className="font-black text-xs text-gray-800 dark:text-gray-100 transition-colors group-hover:text-primary-600 dark:group-hover:text-primary-400 truncate">{cat.name}</span>
-              </div>
-              
-              {/* Subtle background card preview */}
-              <div className="relative w-12 h-full overflow-hidden shrink-0 self-stretch hidden xs:block">
-                <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-gray-800 via-white/40 dark:via-gray-800/40 to-transparent z-10 pointer-events-none" />
-                <img 
-                  src={cat.image} 
-                  alt="" 
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-55"
-                />
-              </div>
+              <Bell size={19} />
+              {unreadCount > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-white dark:border-[#111827]" />}
             </button>
-          ))}
-        </div>
+            <AnimatePresence>
+              {showNotifications && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
+                  <motion.div
+                    initial={{opacity:0,y:8,scale:.98}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:8,scale:.98}}
+                    className="absolute right-0 top-14 z-50 w-[calc(100vw-2rem)] max-w-sm bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden"
+                  >
+                    <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                      <strong>{isBn ? 'নোটিফিকেশন' : 'Notifications'}</strong>
+                      {unreadCount > 0 && <span className="text-[10px] font-black text-sky-600">{convertDigits(unreadCount,isBn)} {isBn?'নতুন':'new'}</span>}
+                    </div>
+                    <div className="max-h-72 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-8 text-center text-sm text-slate-400">{isBn ? 'নতুন কোনো নোটিফিকেশন নেই' : 'No notifications'}</div>
+                      ) : notifications.slice(0,6).map((n:any) => (
+                        <button key={n.id} onClick={() => markReadAndOpen(n)} className="w-full text-left p-4 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60">
+                          <div className="flex gap-3"><span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${n.is_read?'bg-slate-300':'bg-sky-500'}`} /><div className="min-w-0"><p className="text-xs font-bold leading-5">{n.title}</p><p className="text-[10px] text-slate-400 mt-1">{n.created_at ? new Date(n.created_at).toLocaleString(isBn?'bn-BD':'en-US') : ''}</p></div></div>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+        </header>
+
+        {/* Notice */}
+        {systemSettings?.announcementActive && (
+          <Link to="/support" className="flex items-center gap-3 bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-sm">
+            <span className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0"><Bell size={15}/></span>
+            <div className="min-w-0 flex-1"><p className="text-[10px] font-black text-sky-600 uppercase">{isBn?'গুরুত্বপূর্ণ বিজ্ঞপ্তি':'Important notice'}</p><p className="text-xs font-bold truncate">{isBn?systemSettings.announcementBn:systemSettings.announcementEn}</p></div>
+            <ChevronRight size={16} className="text-slate-400"/>
+          </Link>
+        )}
+
+        {/* Financial overview */}
+        <section className="bg-[#101827] dark:bg-[#111827] rounded-[28px] p-5 text-white shadow-xl overflow-hidden relative">
+          <div className="absolute -right-16 -top-16 w-40 h-40 rounded-full border border-sky-400/10" />
+          <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full border border-sky-400/10" />
+          <div className="flex items-center justify-between relative">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[.14em] text-slate-400">{isBn?'আমার আর্থিক অবস্থা':'Financial position'}</p>
+              <p className="text-sm font-bold text-slate-200 mt-1">{isBn?'সঞ্চয়':'Savings balance'}</p>
+            </div>
+            <button onClick={()=>setBalanceVisible(v=>!v)} className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center">
+              {balanceVisible?<Eye size={16}/>:<EyeOff size={16}/>}
+            </button>
+          </div>
+          {loading ? <Skeleton className="h-9 w-40 mt-4 bg-slate-700" /> :
+            <p className="text-3xl font-black tracking-tight mt-3">{balanceVisible?formatCurrency(stats?.savingsBalance||0,isBn):'৳••••••'}</p>}
+          <div className="grid grid-cols-2 gap-3 mt-5 pt-4 border-t border-white/10">
+            <div><p className="text-[10px] text-slate-400 font-bold">{isBn?'মোট ব্যালেন্স':'Total balance'}</p><p className="font-black mt-1">{balanceVisible?formatCurrency(stats?.totalBalance||0,isBn):'৳••••'}</p></div>
+            <div><p className="text-[10px] text-slate-400 font-bold">{isBn?'মোট বকেয়া ঋণ':'Outstanding loan'}</p><p className="font-black mt-1">{balanceVisible?formatCurrency(stats?.totalOutstanding||0,isBn):'৳••••'}</p></div>
+          </div>
+        </section>
+
+        {/* Next important action */}
+        <Link to={nextAction.link} className="block bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm active:scale-[.99] transition">
+          <div className="flex items-center gap-3">
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${nextAction.tone==='amber'?'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400':'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400'}`}>
+              <nextAction.icon size={20}/>
+            </div>
+            <div className="flex-1 min-w-0"><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'পরবর্তী গুরুত্বপূর্ণ কাজ':'Next important action'}</p><p className="font-black text-sm mt-1 truncate">{nextAction.title}</p><p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate">{nextAction.description}</p></div>
+            <ChevronRight size={18} className="text-slate-400 shrink-0"/>
+          </div>
+        </Link>
+
+        {/* Active loan portfolio */}
+        <section>
+          <div className="flex items-end justify-between mb-3">
+            <div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'ঋণ পোর্টফোলিও':'Loan portfolio'}</p><h2 className="text-lg font-black mt-1">{isBn?'চলমান ঋণ':'Active loan'}</h2></div>
+            <Link to="/loans" className="text-xs font-black text-sky-600 dark:text-sky-400"> {isBn?'সব দেখুন':'View all'} </Link>
+          </div>
+          {loading ? <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-5"><Skeleton className="h-5 w-40"/><Skeleton className="h-3 w-full mt-5"/></div> :
+          activeLoan ? (
+            <Link to={`/application/${activeLoan.id}`} className="block bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+              <div className="flex justify-between gap-3">
+                <div><h3 className="font-black">{categoryName(activeLoan.loan_category)}</h3><p className="text-[10px] text-slate-400 mt-1 font-bold">LN-{activeLoan.id.slice(0,8).toUpperCase()}</p></div>
+                <span className="h-fit px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-[9px] font-black">{isBn?'সক্রিয়':'ACTIVE'}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-5">
+                <div><p className="text-[10px] text-slate-400">{isBn?'মূল ঋণ':'Loan amount'}</p><p className="font-black mt-1">{formatCurrency(activeLoan.amount,isBn)}</p></div>
+                <div><p className="text-[10px] text-slate-400">{isBn?'বকেয়া':'Outstanding'}</p><p className="font-black mt-1">{formatCurrency(outstanding,isBn)}</p></div>
+              </div>
+              <div className="mt-5">
+                <div className="flex justify-between text-[10px] font-black mb-2"><span>{isBn?'পরিশোধ অগ্রগতি':'Repayment progress'}</span><span className="text-sky-600">{convertDigits(loanProgress,isBn)}%</span></div>
+                <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="h-full bg-sky-500 rounded-full" style={{width:`${loanProgress}%`}}/></div>
+              </div>
+              <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                <div><p className="text-[10px] text-slate-400">{isBn?'পরবর্তী কিস্তি':'Next installment'}</p><p className="text-sm font-black mt-1">{formatCurrency(activeLoan.emi_amount,isBn)}</p></div>
+                <div className="text-right"><p className="text-[10px] text-slate-400">{isBn?'তারিখ':'Due date'}</p><p className="text-xs font-bold mt-1">{nextEmiDate}</p></div>
+              </div>
+            </Link>
+          ) : (
+            <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-6 text-center">
+              <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 mx-auto flex items-center justify-center"><FileText size={20} className="text-slate-500"/></div>
+              <h3 className="font-black mt-3">{isBn?'কোনো সক্রিয় ঋণ নেই':'No active loan'}</h3>
+              <p className="text-xs text-slate-500 mt-1">{isBn?'আপনার প্রয়োজন অনুযায়ী ঋণ সেবা দেখুন।':'Explore loan services for your needs.'}</p>
+              <Link to="/apply" className="inline-flex mt-4 px-4 py-2.5 rounded-xl bg-sky-500 text-white text-xs font-black"> {isBn?'ঋণ আবেদন':'Apply for loan'} <ArrowRight size={14} className="ml-2"/></Link>
+            </div>
+          )}
+        </section>
+
+        {/* Loan journey */}
+        {activeLoan && (
+          <section className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
+            <p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'ঋণের যাত্রা':'Loan journey'}</p>
+            <div className="flex items-start mt-5">
+              {[
+                [true,isBn?'আবেদন':'Applied'],
+                [true,isBn?'যাচাই':'Review'],
+                [activeLoan.status==='approved'||activeLoan.status==='active'||activeLoan.status==='completed',isBn?'অনুমোদন':'Approved'],
+                [activeLoan.status==='active'||activeLoan.status==='completed',isBn?'বিতরণ':'Disbursed'],
+                [activeLoan.status==='completed',isBn?'সম্পন্ন':'Completed']
+              ].map(([done,label],i,arr)=>(
+                <div key={String(label)} className="flex-1 relative text-center">
+                  {i<arr.length-1 && <div className={`absolute top-3 left-1/2 w-full h-px ${done&&arr[i+1][0]?'bg-sky-500':'bg-slate-200 dark:bg-slate-700'}`}/>}
+                  <div className={`relative mx-auto w-7 h-7 rounded-full flex items-center justify-center border-2 ${done?'bg-sky-500 border-sky-500 text-white':'bg-white dark:bg-[#111827] border-slate-300 dark:border-slate-600 text-slate-400'}`}>{done?<CheckCircle2 size={14}/>:<span className="w-1.5 h-1.5 rounded-full bg-current"/>}</div>
+                  <p className="text-[8px] font-bold mt-2 text-slate-500 dark:text-slate-400">{label}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Member services */}
+        <section>
+          <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'সদস্য সেবা':'Member services'}</p><h2 className="text-lg font-black mt-1">{isBn?'দ্রুত সেবা':'Quick services'}</h2></div></div>
+          <div className="grid grid-cols-2 gap-3">
+            {quickActions.map(({label,sub,icon:Icon,link})=>(
+              <Link key={link} to={link} className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3 shadow-sm active:scale-[.98] transition">
+                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0"><Icon size={18}/></div>
+                <div className="min-w-0"><p className="text-xs font-black truncate">{label}</p><p className="text-[10px] text-slate-400 mt-1 truncate">{sub}</p></div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* Recent activity */}
+        <section>
+          <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'লেনদেন':'Activity'}</p><h2 className="text-lg font-black mt-1">{isBn?'সাম্প্রতিক কার্যক্রম':'Recent activity'}</h2></div><Link to="/transactions" className="text-xs font-black text-sky-600 dark:text-sky-400">{isBn?'সব দেখুন':'View all'}</Link></div>
+          <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
+            {recentTransactions.length ? recentTransactions.map((tx,i)=>(
+              <div key={tx.id} className={`p-4 flex items-center gap-3 ${i<recentTransactions.length-1?'border-b border-slate-100 dark:border-slate-800':''}`}>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tx.type==='deposit'?'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400':tx.type==='emi_payment'?'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400':'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+                  {tx.type==='deposit'?<ArrowDownToLine size={17}/>:tx.type==='emi_payment'?<CreditCard size={17}/>:<Wallet size={17}/>}
+                </div>
+                <div className="flex-1 min-w-0"><p className="text-xs font-black">{tx.type==='deposit'?(isBn?'সঞ্চয়/ডিপোজিট':'Deposit'):tx.type==='emi_payment'?(isBn?'কিস্তি পরিশোধ':'EMI payment'):(isBn?'লেনদেন':'Transaction')}</p><p className="text-[10px] text-slate-400 mt-1">{new Date(tx.created_at).toLocaleDateString(isBn?'bn-BD':'en-GB')}</p></div>
+                <p className="text-xs font-black">{formatCurrency(tx.amount,isBn)}</p>
+              </div>
+            )) : <div className="p-8 text-center text-xs font-bold text-slate-400">{isBn?'সাম্প্রতিক কোনো কার্যক্রম নেই':'No recent activity'}</div>}
+          </div>
+        </section>
+
+        {/* Loan services */}
+        <section>
+          <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'ঋণ সেবা':'Loan services'}</p><h2 className="text-lg font-black mt-1">{isBn?'আপনার প্রয়োজন অনুযায়ী':'Choose a service'}</h2></div><Link to="/apply" className="text-xs font-black text-sky-600 dark:text-sky-400">{isBn?'সব দেখুন':'View all'}</Link></div>
+          <div className="grid grid-cols-2 gap-3">
+            {categories.map(([id,label])=>(
+              <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className="text-left bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3 shadow-sm active:scale-[.98] transition">
+                <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center"><ShieldCheck size={18}/></div>
+                <div className="min-w-0 flex-1"><p className="text-xs font-black truncate">{label}</p><p className="text-[9px] text-slate-400 mt-1">{isBn?'আবেদন দেখুন':'View option'}</p></div>
+                <ChevronRight size={15} className="text-slate-400"/>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Trust / member note */}
+        <section className="bg-slate-900 dark:bg-[#111827] text-white rounded-2xl p-5">
+          <div className="flex gap-3"><ShieldCheck className="text-sky-400 shrink-0" size={21}/><div><p className="font-black text-sm">{isBn?'সদস্য তথ্য ও হিসাব':'Member account & records'}</p><p className="text-[11px] text-slate-400 leading-5 mt-1">{isBn?'আপনার সঞ্চয়, ঋণ, কিস্তি, লেনদেন ও নথির তথ্য এক জায়গা থেকে দেখুন।':'View your savings, loans, installments, transactions and documents in one place.'}</p></div></div>
+        </section>
       </div>
- 
-    </div>
+    </main>
   );
 }
