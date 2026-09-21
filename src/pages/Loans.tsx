@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'motion/react';
 export default function Loans() {
   const [loans, setLoans] = useState<LoanApplication[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const user = getTelegramUser();
   const { language } = useAppStore();
   const isBn = language === 'bn';
@@ -19,21 +20,28 @@ export default function Loans() {
 
   useEffect(() => {
     const fetchLoans = async () => {
-      const data = await getLoanApplications(user.id);
-      setLoans(data);
-      setLoading(false);
+      try {
+        setError(null);
+        const data = await getLoanApplications(user.id);
+        setLoans(data);
+      } catch (err) {
+        console.error('Loans fetch error:', err);
+        setError(isBn ? 'লোন রেকর্ড লোড করা যায়নি।' : 'Could not load loan records.');
+      } finally {
+        setLoading(false);
+      }
     };
     fetchLoans();
   }, [user.id]);
 
   const getStatusDisplay = (status: string) => {
     switch (status) {
-      case 'pending': return { text: isBn ? 'অপেক্ষমান' : 'Pending', color: 'neu-badge-orange border-white/20', icon: Clock };
-      case 'under_review': return { text: isBn ? 'রিভিউ চলছে' : 'Under Review', color: 'neu-badge-orange border-white/20', icon: Clock };
-      case 'approved': return { text: isBn ? 'অনুমোদিত' : 'Approved', color: 'neu-badge-green border-white/20', icon: CheckCircle2 };
+      case 'pending': return { text: isBn ? 'অপেক্ষমান' : 'Pending', color: 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900', icon: Clock };
+      case 'under_review': return { text: isBn ? 'রিভিউ চলছে' : 'Under Review', color: 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900', icon: Clock };
+      case 'approved': return { text: isBn ? 'অনুমোদিত' : 'Approved', color: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900', icon: CheckCircle2 };
       case 'active': return { text: isBn ? 'সক্রিয়' : 'Active', color: 'neu-badge-green border-white/20', icon: CheckCircle2 };
-      case 'rejected': return { text: isBn ? 'বাতিল' : 'Rejected', color: 'neu-badge-red border-white/20', icon: XCircle };
-      case 'action_required': return { text: isBn ? 'আপডেট প্রয়োজন' : 'Action Required', color: 'neu-badge-purple border-white/20', icon: AlertCircle };
+      case 'rejected': return { text: isBn ? 'বাতিল' : 'Rejected', color: 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-900', icon: XCircle };
+      case 'action_required': return { text: isBn ? 'আপডেট প্রয়োজন' : 'Action Required', color: 'bg-violet-50 dark:bg-violet-950/40 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-900', icon: AlertCircle };
       case 'completed': return { text: isBn ? 'সম্পন্ন' : 'Completed', color: 'neu-badge-green border-white/20', icon: CheckCircle2 };
       default: return { text: status, color: 'neu-badge-orange border-white/20', icon: FileText };
     }
@@ -44,7 +52,7 @@ export default function Loans() {
   return (
     <div className="min-h-screen neu-bg flex flex-col relative transition-colors pb-24">
       {/* Premium Header */}
-      <div className="neu-bg px-3 sm:px-5 py-3 sm:py-4 sticky top-0 z-30 shadow-md border-b border-white/20 dark:border-white/5 transition-colors flex items-center justify-between">
+      <div className="bg-white dark:bg-[#0f172a] px-4 sm:px-5 py-4 sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 transition-colors flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full neu-sunken flex items-center justify-center text-primary-600 dark:text-primary-400">
             <Wallet size={20} />
@@ -60,14 +68,27 @@ export default function Loans() {
         </div>
       </div>
 
-      <div className="flex-1 w-full min-w-0 px-3 sm:px-5 py-4 sm:py-5 space-y-4 sm:space-y-5">
+      <div className="flex-1 w-full min-w-0 px-4 sm:px-5 py-4 sm:py-5 space-y-4 sm:space-y-5">
+        {error && !loading && (
+          <div className="bg-white dark:bg-[#111827] border border-rose-200 dark:border-rose-900 rounded-2xl p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle size={18} className="text-rose-600 mt-0.5 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-sm font-black text-slate-900 dark:text-white">{isBn ? 'লোন রেকর্ড লোড হয়নি' : 'Loan records could not be loaded'}</p>
+                <p className="text-xs text-slate-500 mt-1">{error}</p>
+                <button onClick={() => window.location.reload()} className="mt-3 px-3 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black">{isBn ? 'আবার চেষ্টা করুন' : 'Try again'}</button>
+              </div>
+            </div>
+          </div>
+        )}
+
         
         {/* Animated Active Loans summary (only show if there are active loans) */}
-        {!loading && activeLoansCount > 0 && (
+        {!loading && !error && activeLoansCount > 0 && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="neu-raised rounded-[24px] p-6 relative overflow-hidden text-gray-900 dark:text-white"
+            className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-5 relative overflow-hidden text-gray-900 dark:text-white"
           >
             <div className="relative z-10 flex justify-between items-center">
               <div>
@@ -93,7 +114,7 @@ export default function Loans() {
                     </div>
                     <Skeleton className="h-8 w-24 rounded-full shrink-0" />
                   </div>
-                  <div className="flex items-center justify-between pt-4 border-t border-white/20 dark:border-white/5 relative z-10">
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700 relative z-10">
                     <div className="space-y-2">
                       <Skeleton className="h-3 w-12" />
                       <Skeleton className="h-6 w-24" />
@@ -106,7 +127,7 @@ export default function Loans() {
                 </div>
               ))}
             </div>
-          ) : loans.length === 0 ? (
+          ) : error ? null : loans.length === 0 ?
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -133,9 +154,9 @@ export default function Loans() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     key={loan.id} 
-                    className="neu-raised rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 transition-all group relative overflow-hidden cursor-pointer hover:scale-[1.005]"
+                    className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 transition-colors group relative overflow-hidden"
                   >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/5 dark:bg-primary-900/5 rounded-bl-full -mr-10 -mt-10 z-0 group-hover:scale-110 transition-transform"></div>
+                    <div className="absolute top-0 right-0 w-28 h-28 bg-sky-50 dark:bg-sky-950/30 rounded-bl-full -mr-8 -mt-8 z-0"></div>
 
                     <div className="flex justify-between items-start mb-5 relative z-10">
                       <div>
@@ -148,7 +169,7 @@ export default function Loans() {
                       </div>
                     </div>
                     
-                    <div className="flex flex-row justify-between items-end gap-3 pt-4 border-t border-white/20 dark:border-white/5 relative z-10">
+                    <div className="flex flex-row justify-between items-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700 relative z-10">
                       <div>
                         <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider mb-0.5">{isBn ? 'পরিমাণ' : 'Amount'}</p>
                         <p className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{formatCurrency(loan.amount || 0, isBn)}</p>
