@@ -179,11 +179,11 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen neu-bg flex flex-col items-center justify-center p-6 text-center transition-colors">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0b1220] flex flex-col items-center justify-center p-6 text-center transition-colors">
         <motion.div
            initial={{ scale: 0.8, opacity: 0, y: 20 }}
            animate={{ scale: 1, opacity: 1, y: 0 }}
-           className="neu-raised p-8 rounded-[32px] max-w-sm w-full transition-colors relative overflow-hidden border-0 shadow-none"
+           className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm p-8 rounded-[32px] max-w-sm w-full transition-colors relative overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm"
         >
           <div className="absolute top-0 right-0 w-40 h-40 bg-green-500/5 blur-3xl rounded-full -mr-10 -mt-10 pointer-events-none"></div>
           
@@ -240,7 +240,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
           <button 
             type="button"
             onClick={() => navigate('/')}
-            className="w-full neu-btn-primary py-3 rounded-[20px] font-black active:scale-95 transition-all text-sm relative z-10 border-0"
+            className="w-full bg-primary-600 hover:bg-primary-700 text-white shadow-sm py-3 rounded-[20px] font-black active:scale-95 transition-all text-sm relative z-10 border-0"
           >
             {isBn ? 'হোম পেজে ফিরে যান' : 'Back to Home'}
           </button>
@@ -312,7 +312,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
         <motion.section 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="neu-raised rounded-[24px] p-5 border-0"
+          className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 border-0"
         >
           <label className="block text-xs font-black text-gray-700 dark:text-gray-300 mb-3 transition-colors">
             {isBn ? 'লোনের পরিমাণ নির্বাচন করুন' : 'Select Loan Amount'}
@@ -327,8 +327,8 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 onClick={() => setLoanAmount(amt.toString())}
                 className={`px-3 py-2 rounded-full text-xs font-black transition-all border-0 cursor-pointer ${
                   loanAmtNum === amt
-                    ? 'neu-btn-primary shadow-sm'
-                    : 'neu-btn'
+                    ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-sm shadow-sm'
+                    : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700'
                 }`}
               >
                 {formatPresetLabel(amt)}
@@ -343,7 +343,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               type="number" 
               value={loanAmount}
               onChange={(e) => setLoanAmount(e.target.value)}
-              className={`w-full neu-input rounded-full py-3 pl-8 pr-4 text-base font-black outline-none border-2 transition-all text-gray-900 dark:text-white ${presetAmounts.includes(loanAmtNum) ? "border-primary-500/70 ring-2 ring-primary-500/10" : "border-transparent focus:border-primary-500/40"}`} 
+              className={`w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-full py-3 pl-8 pr-4 text-base font-black outline-none border-2 transition-all text-gray-900 dark:text-white ${presetAmounts.includes(loanAmtNum) ? "border-primary-500/70 ring-2 ring-primary-500/10" : "border-transparent focus:border-primary-500/40"}`} 
               placeholder={isBn ? "অন্যান্য পরিমাণ লিখুন (উদাঃ ১০০০০০)" : "Enter custom amount (e.g. 100000)"} 
             />
           </div>
@@ -354,7 +354,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
           <motion.section
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="neu-raised rounded-[24px] p-5 border-0"
+            className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 border-0"
           >
             <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black mb-3">
               {isBn ? 'ডিপোজিটের বিবরণ ও ধরণ' : 'Deposit Details & Type'}
@@ -376,8 +376,8 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 }}
                 className={`p-3 px-4 rounded-full border-2 transition-all flex items-center justify-between cursor-pointer ${
                   (selectProcessing && selectSecurity && (!isInsuranceEnabled || selectInsurance))
-                    ? 'border-primary-500/40 bg-primary-600/10 text-primary-600 dark:text-indigo-400 neu-raised shadow-inner'
-                    : 'neu-btn text-gray-800 dark:text-gray-250 border-0'
+                    ? 'border-primary-500/40 bg-primary-600/10 text-primary-600 dark:text-indigo-400 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm shadow-inner'
+                    : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-800 dark:text-gray-250 border-0'
                 }`}
               >
                 <div className="flex items-center gap-2 relative z-10">
@@ -395,8 +395,8 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 onClick={() => setSelectProcessing(!selectProcessing)}
                 className={`p-3 px-4 rounded-full border-2 transition-all flex items-center justify-between cursor-pointer ${
                   selectProcessing
-                    ? 'border-amber-400/60 bg-amber-500/10 text-amber-700 dark:text-amber-300 neu-raised shadow-inner'
-                    : 'neu-btn text-gray-800 dark:text-gray-250 border-0'
+                    ? 'border-amber-400/60 bg-amber-500/10 text-amber-700 dark:text-amber-300 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm shadow-inner'
+                    : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-800 dark:text-gray-250 border-0'
                 }`}
               >
                 <div className="flex items-center gap-2 relative z-10">
@@ -420,8 +420,8 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 onClick={() => setSelectSecurity(!selectSecurity)}
                 className={`p-3 px-4 rounded-full border-2 transition-all flex items-center justify-between cursor-pointer ${
                   selectSecurity
-                    ? 'border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-300 neu-raised shadow-inner'
-                    : 'neu-btn text-gray-800 dark:text-gray-250 border-0'
+                    ? 'border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-300 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm shadow-inner'
+                    : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-800 dark:text-gray-250 border-0'
                 }`}
               >
                 <div className="flex items-center gap-2 relative z-10">
@@ -443,8 +443,8 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                   onClick={() => setSelectInsurance(!selectInsurance)}
                   className={`p-3 px-4 rounded-full border-2 transition-all flex items-center justify-between cursor-pointer ${
                     selectInsurance
-                      ? 'border-primary-500/40 bg-primary-600/10 text-primary-600 dark:text-indigo-400 neu-raised shadow-inner'
-                      : 'neu-btn text-gray-800 dark:text-gray-250 border-0'
+                      ? 'border-primary-500/40 bg-primary-600/10 text-primary-600 dark:text-indigo-400 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm shadow-inner'
+                      : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-800 dark:text-gray-250 border-0'
                   }`}
                 >
                   <div className="flex items-center gap-2 relative z-10">
@@ -474,7 +474,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
         <motion.section 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="neu-raised rounded-[24px] p-5 border-0"
+          className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 border-0"
         >
           <label className="block text-xs font-black text-gray-700 dark:text-gray-300 mb-3 transition-colors">
             {isBn ? 'পেমেন্ট গেটওয়ে' : 'Payment Method'}
@@ -521,7 +521,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="neu-raised rounded-[24px] p-5 border-0"
+          className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 border-0"
         >
           <div className="flex items-center justify-between gap-3 relative z-10">
             <div>
@@ -531,7 +531,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
             <button
               type="button"
               onClick={handleLiveSupportChat}
-              className="neu-btn-primary font-black text-xs py-2.5 px-4 rounded-full active:scale-95 transition-all border-0 flex items-center gap-1.5 shrink-0"
+              className="bg-primary-600 hover:bg-primary-700 text-white shadow-sm font-black text-xs py-2.5 px-4 rounded-full active:scale-95 transition-all border-0 flex items-center gap-1.5 shrink-0"
             >
               <ShieldCheck size={14} />
               {isBn ? 'পেমেন্ট নির্দেশনা নিন' : 'Live Chat'}
@@ -543,7 +543,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
         <motion.section 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="neu-raised rounded-[24px] p-5 border-0"
+          className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 border-0"
         >
           <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black mb-3">
             {isBn ? 'পেমেন্ট ভেরিফিকেশন প্রুফ' : 'Submit Payment Proof'}
@@ -559,7 +559,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 required
                 value={senderNo}
                 onChange={(e) => setSenderNo(e.target.value)}
-                className="w-full neu-input rounded-full px-5 py-3 text-sm font-bold text-gray-900 dark:text-white outline-none border-0 transition-all" 
+                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-full px-5 py-3 text-sm font-bold text-gray-900 dark:text-white outline-none border-0 transition-all" 
                 placeholder="01XXXXXXXXXX" 
               />
             </div>
@@ -573,7 +573,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 required
                 value={transactionId}
                 onChange={(e) => setTransactionId(e.target.value)}
-                className="w-full neu-input rounded-full px-5 py-3 text-sm font-bold text-gray-900 dark:text-white outline-none border-0 transition-all"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-full px-5 py-3 text-sm font-bold text-gray-900 dark:text-white outline-none border-0 transition-all"
                 placeholder={isBn ? 'bKash/Nagad TrxID লিখুন' : 'Enter bKash/Nagad TrxID'}
               />
             </div>
@@ -665,7 +665,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
           <motion.div 
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="neu-raised rounded-[28px] p-6 max-w-sm w-full border-0 shadow-none"
+            className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[28px] p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-sm"
           >
             <div className="w-14 h-14 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-500 shadow-inner">
               <AlertCircle size={28} />
