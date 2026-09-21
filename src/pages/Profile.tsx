@@ -106,64 +106,72 @@ export default function Profile() {
 
   return (
     <div className="profile-theme min-h-full bg-white dark:bg-black text-slate-900 dark:text-slate-100 pb-[calc(6rem+env(safe-area-inset-bottom))] transition-colors">
-      {/* Profile identity */}
-      <section className="px-4 pt-4">
+      {/* Profile identity — modern member hero */}
+      <section className="profile-hero-wrap">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-[28px] bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm"
+          className="profile-hero"
         >
-          <div className="h-20 bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 dark:from-sky-900 dark:via-blue-950 dark:to-cyan-950" />
-          <div className="px-5 pb-5">
-            <div className="-mt-11 flex items-end justify-between">
-              <div className="relative w-24 h-24 rounded-full p-1 bg-white dark:bg-[#111827] shadow-lg">
+          <div className="profile-hero-bg">
+            <div className="profile-hero-orb profile-hero-orb-a" />
+            <div className="profile-hero-orb profile-hero-orb-b" />
+            <div className="profile-hero-wave" />
+            <div className="profile-hero-title">{isBn ? 'আমার প্রোফাইল' : 'My Profile'}</div>
+          </div>
+
+          <div className="profile-hero-content">
+            <div className="profile-avatar-wrap">
+              <div className="profile-avatar-ring">
                 <img
-                  src={user.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=0ea5e9&color=fff&bold=true`}
+                  src={user.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=14b8a6&color=fff&bold=true`}
                   alt={isBn ? 'প্রোফাইল ছবি' : 'Profile photo'}
-                  className="w-full h-full rounded-full object-cover"
+                  className="profile-avatar"
                   onError={(e) => {
-                    const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=0ea5e9&color=fff&bold=true`;
+                    const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=14b8a6&color=fff&bold=true`;
                     if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
                   }}
                 />
-                <span className="absolute right-1 bottom-1 w-5 h-5 rounded-full bg-emerald-500 border-[3px] border-white dark:border-[#111827]" />
               </div>
-              <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 px-3 py-1.5 text-[10px] font-black text-emerald-700 dark:text-emerald-400">
-                <ShieldCheck size={13} />
-                {accountState}
-              </span>
+              <span className="profile-online-dot" />
             </div>
 
-            <div className="mt-4">
-              <h1 className="text-2xl font-black tracking-tight">{memberName}</h1>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                @{user.username || 'telegram-user'}
-              </p>
+            <div className="profile-hero-name">
+              <h1>{memberName}</h1>
+              <span className="profile-verified"><ShieldCheck size={15} /> {accountState}</span>
+            </div>
+            <p className="profile-hero-username">@{user.username || 'telegram-user'}</p>
+
+            <div className="profile-stat-grid">
+              <div className="profile-stat">
+                <span>{isBn ? 'সদস্য আইডি' : 'MEMBER ID'}</span>
+                <strong>{memberId}</strong>
+              </div>
+              <div className="profile-stat">
+                <span>TELEGRAM ID</span>
+                <strong>{user.id}</strong>
+              </div>
+              <div className="profile-stat profile-stat-action">
+                <span>{isBn ? 'অ্যাকাউন্ট' : 'ACCOUNT'}</span>
+                <strong>{accountState}</strong>
+              </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <div className="rounded-2xl bg-slate-50 dark:bg-[#0f1724] border border-slate-200 dark:border-slate-800 p-3">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{isBn ? 'সদস্য আইডি' : 'Member ID'}</div>
-                <div className="mt-1 text-sm font-black">{memberId}</div>
-              </div>
-              <button
-                type="button"
-                onClick={copyTelegramId}
-                className="rounded-2xl bg-slate-50 dark:bg-[#0f1724] border border-slate-200 dark:border-slate-800 p-3 text-left active:scale-[0.98] transition-transform"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Telegram ID</div>
-                  {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} className="text-slate-400" />}
-                </div>
-                <div className="mt-1 text-sm font-black truncate">{user.id}</div>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => document.getElementById('profile-member-info')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              className="profile-primary-action"
+            >
+              <UserRound size={18} />
+              {isBn ? 'প্রোফাইল তথ্য দেখুন' : 'View Profile Information'}
+              <ChevronRight size={18} />
+            </button>
           </div>
         </motion.div>
       </section>
 
       {/* Member information */}
-      <section className="profile-section profile-section-member px-4 mt-5">
+      <section id="profile-member-info" className="profile-section profile-section-member px-4 mt-5">
         <SectionTitle title={isBn ? 'সদস্য তথ্য' : 'Member information'} />
         <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
           <Row icon={UserRound} title={isBn ? 'ব্যক্তিগত তথ্য' : 'Personal information'} description={isBn ? 'নাম ও প্রাথমিক সদস্য তথ্য' : 'Name and basic member details'} />
