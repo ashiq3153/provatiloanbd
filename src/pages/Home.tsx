@@ -2,7 +2,7 @@ import {
   Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight,
   FileText, CreditCard, PiggyBank, ReceiptText, FolderOpen,
   ChevronRight, CalendarDays, CheckCircle2, Clock3, AlertCircle,
-  ShieldCheck, Eye, EyeOff, UserRound, Star
+  ShieldCheck, Eye, EyeOff, UserRound, Star, BriefcaseBusiness, House, HeartPulse, Plane, UsersRound
 } from 'lucide-react';
 import { getTelegramUser } from '../lib/telegram';
 import { motion, AnimatePresence } from 'motion/react';
@@ -14,7 +14,7 @@ import { Skeleton } from '../components/Skeleton';
 import { toast } from 'sonner';
 import {
   getDashboardStats, getActiveLoans, getTransactions,
-  getLoanApplications, getMyNotifications, markMyNotificationRead, getSuccessStories
+  getLoanApplications, getMyNotifications, markMyNotificationRead, getSuccessStories, reactToSuccessStory
 } from '../lib/api';
 import type { DashboardStats } from '../lib/api';
 import type { LoanApplication, Transaction, SuccessStory } from '../types/database';
@@ -34,6 +34,7 @@ export default function Home() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [stories, setStories] = useState<SuccessStory[]>([]);
+  const [storyReactions, setStoryReactions] = useState<Record<string, { like: number; love: number; wow: number }>>({});
 
   useEffect(() => {
     let mounted = true;
@@ -68,22 +69,23 @@ export default function Home() {
     ? transactions.filter(t => t.type === 'emi_payment' && t.loan_id === activeLoan.id && t.status === 'completed').length
     : 0;
 
+  const paidAmount = activeLoan
+    ? transactions
+        .filter(t => t.type === 'emi_payment' && t.loan_id === activeLoan.id && t.status === 'completed')
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
+    : 0;
+
+  const scheduledRepayment = activeLoan
+    ? Math.max(Number(activeLoan.emi_amount || 0) * Math.max(activeLoan.tenure_months, 1), 1)
+    : 1;
+
   const loanProgress = activeLoan
-    ? Math.min(100, Math.round((completedEmis / Math.max(activeLoan.tenure_months, 1)) * 100))
+    ? Math.min(100, Math.round((paidAmount / scheduledRepayment) * 100))
     : 0;
 
   const outstanding = activeLoan
-    ? Math.max(0, activeLoan.amount - completedEmis * activeLoan.emi_amount)
+    ? Math.max(0, scheduledRepayment - paidAmount)
     : 0;
-
-  const nextEmiDate = useMemo(() => {
-    const d = new Date();
-    if (d.getDate() > 25) d.setMonth(d.getMonth() + 1);
-    d.setDate(25);
-    return d.toLocaleDateString(isBn ? 'bn-BD' : 'en-GB', {
-      day: '2-digit', month: 'long', year: 'numeric'
-    });
-  }, [isBn]);
 
   const categoryName = (category?: string) => {
     const names: Record<string, string> = {
@@ -130,7 +132,7 @@ export default function Home() {
     }
     if (completedEmis < activeLoan.tenure_months) return {
       title: isBn ? 'পরবর্তী কিস্তি প্রস্তুত' : 'Next installment',
-      description: `${formatCurrency(activeLoan.emi_amount, isBn)} • ${nextEmiDate}`,
+      description: isBn ? `পরবর্তী কিস্তি ${formatCurrency(activeLoan.emi_amount, isBn)}` : `Next installment ${formatCurrency(activeLoan.emi_amount, isBn)}`,
       link: '/pay',
       icon: CalendarDays,
       tone: 'blue'
@@ -163,6 +165,35 @@ export default function Home() {
   ];
 
   const recentTransactions = transactions.slice(0, 4);
+
+  const loanCategoryIcon = (category: string) => {
+    const icons: Record<string, any> = {
+      personal: UserRound,
+      business: BriefcaseBusiness,
+      home: House,
+      medical: HeartPulse,
+      probashi: Plane,
+      women: UsersRound,
+    };
+    return icons[category] || ShieldCheck;
+  };
+
+  const handleStoryReaction = async (story: SuccessStory, type: 'like' | 'love' | 'wow') => {
+    const ok = await reactToSuccessStory(story.id, type);
+    if (!ok) {
+      toast.error(isBn ? 'রিঅ্যাকশন দেওয়া যায়নি' : 'Could not add reaction');
+      return;
+    }
+    setStoryReactions(prev => ({
+      ...prev,
+      [story.id]: {
+        like: prev[story.id]?.like ?? Number(story.like_count || 0),
+        love: prev[story.id]?.love ?? Number(story.love_count || 0),
+        wow: prev[story.id]?.wow ?? Number(story.wow_count || 0),
+        [type]: (prev[story.id]?.[type] ?? Number(story[`${type}_count` as keyof SuccessStory] || 0)) + 1,
+      }
+    }));
+  };
 
   const markReadAndOpen = async (n: any) => {
     if (!n.is_read) {
@@ -299,7 +330,7 @@ export default function Home() {
               </div>
               <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
                 <div><p className="text-[10px] text-slate-400">{isBn?'পরবর্তী কিস্তি':'Next installment'}</p><p className="text-sm font-black mt-1">{formatCurrency(activeLoan.emi_amount,isBn)}</p></div>
-                <div className="text-right"><p className="text-[10px] text-slate-400">{isBn?'তারিখ':'Due date'}</p><p className="text-xs font-bold mt-1">{nextEmiDate}</p></div>
+                <div className="text-right"><p className="text-[10px] text-slate-400">{isBn?'পরিশোধ':'Payment'}</p><p className="text-xs font-bold mt-1">{isBn?'কিস্তি পরিশোধ করুন':'Pay installment'}</p></div>
               </div>
             </Link>
           ) : (
@@ -372,7 +403,7 @@ export default function Home() {
             <div className="flex gap-3 w-max">
               {categories.map(([id,label])=>(
                 <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className="text-left w-[190px] shrink-0 snap-start bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3 shadow-sm active:scale-[.98] transition">
-                  <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center"><ShieldCheck size={18}/></div>
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center">{(() => { const Icon = loanCategoryIcon(id); return <Icon size={18}/>; })()}</div>
                   <div className="min-w-0 flex-1"><p className="text-xs font-black truncate">{label}</p><p className="text-[9px] text-slate-400 mt-1">{isBn?'আবেদন দেখুন':'View option'}</p></div>
                   <ChevronRight size={15} className="text-slate-400"/>
                 </button>
@@ -413,9 +444,19 @@ export default function Home() {
                         {story.deposit_payment && <div className="rounded-lg bg-white/5 border border-white/10 p-2"><p className="text-[7px] text-slate-500">{isBn?'ডিপোজিট':'Deposit'}</p><p className="text-[9px] font-bold text-emerald-300 truncate mt-1">{story.deposit_payment}</p></div>}
                       </div>
                     )}
-                    <div className="relative mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
-                      <div className="flex text-amber-400">{Array.from({length:Math.min(story.rating || 5,5)}).map((_,si)=><Star key={si} size={10} fill="currentColor" />)}</div>
-                      <span className="text-[8px] text-slate-500 font-bold">{story.approval_time ? convertDigits(story.approval_time,isBn) : ''}</span>
+                    <div className="relative mt-4 pt-3 border-t border-white/10 flex items-center justify-between gap-2">
+                      <div className="flex text-amber-400 shrink-0">{Array.from({length:Math.min(story.rating || 5,5)}).map((_,si)=><Star key={si} size={10} fill="currentColor" />)}</div>
+                      <div className="flex items-center gap-1.5">
+                        {(['like','love','wow'] as const).map(type => {
+                          const base = type === 'like' ? Number(story.like_count || 0) : type === 'love' ? Number(story.love_count || 0) : Number(story.wow_count || 0);
+                          const count = storyReactions[story.id]?.[type] ?? base;
+                          return (
+                            <button key={type} type="button" onClick={() => handleStoryReaction(story, type)} className="px-1.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[9px] active:scale-95 transition">
+                              {type === 'like' ? '👍' : type === 'love' ? '❤️' : '😮'} {convertDigits(count,isBn)}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </article>
                 ))}
