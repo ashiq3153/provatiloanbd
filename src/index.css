@@ -1955,3 +1955,28 @@ html.dark .user-app-shell .neu-raised.px-4.py-2 {
   border-color: var(--prov-dark-border) !important;
   box-shadow: 0 -8px 24px rgba(0,0,0,.25) !important;
 }
+
+/* ---------- Home financial hero: intentional primary surface ---------- */
+html:not(.dark) .user-app-shell .home-financial-card {
+  background: linear-gradient(135deg, #0F766E 0%, #2563EB 100%) !important;
+  color: #FFFFFF !important;
+  border: 0 !important;
+  box-shadow: 0 12px 28px rgba(15,118,110,.18) !important;
+}
+html:not(.dark) .user-app-shell .home-financial-card .text-slate-200,
+html:not(.dark) .user-app-shell .home-financial-card .text-slate-400 {
+  color: rgba(255,255,255,.76) !important;
+}
+html:not(.dark) .user-app-shell .home-financial-card .border-white\/10 {
+  border-color: rgba(255,255,255,.22) !important;
+}
+html.dark .user-app-shell .home-financial-card {
+  background: linear-gradient(135deg, #111827 0%, #173A43 100%) !important;
+  color: #F8FAFC !important;
+  border: 1px solid #334155 !important;
+}
+
+/* Don't let the generic section tint override intentionally colored sections. */
+html:not(.dark) .user-app-shell .home-financial-card {
+  isolation: isolate;
+}
