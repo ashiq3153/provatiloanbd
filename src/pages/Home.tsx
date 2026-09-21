@@ -2,7 +2,7 @@ import {
   Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight,
   FileText, CreditCard, PiggyBank, ReceiptText, FolderOpen,
   ChevronRight, CalendarDays, CheckCircle2, Clock3, AlertCircle,
-  ShieldCheck, Eye, EyeOff, UserRound
+  ShieldCheck, Eye, EyeOff, UserRound, Star
 } from 'lucide-react';
 import { getTelegramUser } from '../lib/telegram';
 import { motion, AnimatePresence } from 'motion/react';
@@ -14,10 +14,10 @@ import { Skeleton } from '../components/Skeleton';
 import { toast } from 'sonner';
 import {
   getDashboardStats, getActiveLoans, getTransactions,
-  getLoanApplications, getMyNotifications, markMyNotificationRead
+  getLoanApplications, getMyNotifications, markMyNotificationRead, getSuccessStories
 } from '../lib/api';
 import type { DashboardStats } from '../lib/api';
-import type { LoanApplication, Transaction } from '../types/database';
+import type { LoanApplication, Transaction, SuccessStory } from '../types/database';
 
 export default function Home() {
   const user = getTelegramUser();
@@ -32,7 +32,7 @@ export default function Home() {
   const [loans, setLoans] = useState<LoanApplication[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);\n  const [stories, setStories] = useState<SuccessStory[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -51,7 +51,7 @@ export default function Home() {
         setActiveLoan(active[0] || null);
         setTransactions(tx || []);
         setLoans(allLoans || []);
-        setNotifications(notices || []);
+        setNotifications(notices || []);\n        setStories(await getSuccessStories());
       } catch (e) {
         console.error('Home dashboard error:', e);
       } finally {
@@ -335,13 +335,15 @@ export default function Home() {
         {/* Member services */}
         <section>
           <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'সদস্য সেবা':'Member services'}</p><h2 className="text-lg font-black mt-1">{isBn?'দ্রুত সেবা':'Quick services'}</h2></div></div>
-          <div className="grid grid-cols-2 gap-3">
-            {quickActions.map(({label,sub,icon:Icon,link})=>(
-              <Link key={link} to={link} className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3 shadow-sm active:scale-[.98] transition">
-                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0"><Icon size={18}/></div>
-                <div className="min-w-0"><p className="text-xs font-black truncate">{label}</p><p className="text-[10px] text-slate-400 mt-1 truncate">{sub}</p></div>
-              </Link>
-            ))}
+          <div className="-mx-4 px-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
+            <div className="flex gap-3 w-max">
+              {quickActions.map(({label,sub,icon:Icon,link})=>(
+                <Link key={link} to={link} className="w-[180px] shrink-0 snap-start bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3 shadow-sm active:scale-[.98] transition">
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0"><Icon size={18}/></div>
+                  <div className="min-w-0"><p className="text-xs font-black truncate">{label}</p><p className="text-[10px] text-slate-400 mt-1 truncate">{sub}</p></div>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -364,16 +366,61 @@ export default function Home() {
         {/* Loan services */}
         <section>
           <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'ঋণ সেবা':'Loan services'}</p><h2 className="text-lg font-black mt-1">{isBn?'আপনার প্রয়োজন অনুযায়ী':'Choose a service'}</h2></div><Link to="/apply" className="text-xs font-black text-sky-600 dark:text-sky-400">{isBn?'সব দেখুন':'View all'}</Link></div>
-          <div className="grid grid-cols-2 gap-3">
-            {categories.map(([id,label])=>(
-              <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className="text-left bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3 shadow-sm active:scale-[.98] transition">
-                <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center"><ShieldCheck size={18}/></div>
-                <div className="min-w-0 flex-1"><p className="text-xs font-black truncate">{label}</p><p className="text-[9px] text-slate-400 mt-1">{isBn?'আবেদন দেখুন':'View option'}</p></div>
-                <ChevronRight size={15} className="text-slate-400"/>
-              </button>
-            ))}
+          <div className="-mx-4 px-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
+            <div className="flex gap-3 w-max">
+              {categories.map(([id,label])=>(
+                <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className="text-left w-[190px] shrink-0 snap-start bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3 shadow-sm active:scale-[.98] transition">
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center"><ShieldCheck size={18}/></div>
+                  <div className="min-w-0 flex-1"><p className="text-xs font-black truncate">{label}</p><p className="text-[9px] text-slate-400 mt-1">{isBn?'আবেদন দেখুন':'View option'}</p></div>
+                  <ChevronRight size={15} className="text-slate-400"/>
+                </button>
+              ))}
+            </div>
           </div>
         </section>
+
+        {/* Success stories */}
+        {stories.length > 0 && (
+          <section>
+            <div className="flex items-end justify-between mb-3">
+              <div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'সদস্যদের অভিজ্ঞতা':'Member experiences'}</p><h2 className="text-lg font-black mt-1">{isBn?'সাফল্যের গল্প':'Success Stories'}</h2></div>
+              <span className="text-[10px] font-black text-sky-600 dark:text-sky-400">{convertDigits(stories.length,isBn)} {isBn?'জন সদস্য':'members'}</span>
+            </div>
+            <div className="-mx-4 px-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
+              <div className="flex gap-3 w-max">
+                {stories.slice(0,10).map((story, i) => (
+                  <article key={story.id} className="w-[310px] shrink-0 snap-start rounded-[22px] p-4 bg-slate-900 dark:bg-[#111827] border border-slate-700 shadow-lg text-white relative overflow-hidden">
+                    <div className="absolute -right-10 -top-10 w-28 h-28 rounded-full bg-sky-500/10" />
+                    <div className="relative flex items-center gap-3">
+                      <img src={story.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(story.name)}&background=0ea5e9&color=fff&bold=true`} alt="" className="w-11 h-11 rounded-full object-cover border-2 border-white/20" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-black truncate">{story.name}</p>
+                        <p className="text-[9px] text-sky-300 font-bold truncate">{story.loan_type || (isBn?'লোন সদস্য':'Loan member')}</p>
+                      </div>
+                      {story.is_verified && <span className="text-[8px] font-black text-emerald-300 border border-emerald-400/30 rounded-full px-2 py-1">{isBn?'ভেরিফাইড':'VERIFIED'}</span>}
+                    </div>
+                    <div className="relative mt-5">
+                      <p className="text-[9px] text-slate-400 uppercase tracking-wider">{isBn?'লোন পরিমাণ':'Loan amount'}</p>
+                      <p className="text-xl font-black mt-1">{formatCurrency(story.amount || 0,isBn)}</p>
+                    </div>
+                    {(story.profession || story.location || story.loan_tenure || story.deposit_payment) && (
+                      <div className="relative grid grid-cols-2 gap-2 mt-4">
+                        {story.profession && <div className="rounded-lg bg-white/5 border border-white/10 p-2"><p className="text-[7px] text-slate-500">{isBn?'পেশা':'Profession'}</p><p className="text-[9px] font-bold truncate mt-1">{story.profession}</p></div>}
+                        {story.location && <div className="rounded-lg bg-white/5 border border-white/10 p-2"><p className="text-[7px] text-slate-500">{isBn?'লোকেশন':'Location'}</p><p className="text-[9px] font-bold truncate mt-1">{story.location}</p></div>}
+                        {story.loan_tenure && <div className="rounded-lg bg-white/5 border border-white/10 p-2"><p className="text-[7px] text-slate-500">{isBn?'মেয়াদ':'Tenure'}</p><p className="text-[9px] font-bold truncate mt-1">{story.loan_tenure}</p></div>}
+                        {story.deposit_payment && <div className="rounded-lg bg-white/5 border border-white/10 p-2"><p className="text-[7px] text-slate-500">{isBn?'ডিপোজিট':'Deposit'}</p><p className="text-[9px] font-bold text-emerald-300 truncate mt-1">{story.deposit_payment}</p></div>}
+                      </div>
+                    )}
+                    <div className="relative mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+                      <div className="flex text-amber-400">{Array.from({length:Math.min(story.rating || 5,5)}).map((_,si)=><Star key={si} size={10} fill="currentColor" />)}</div>
+                      <span className="text-[8px] text-slate-500 font-bold">{story.approval_time ? convertDigits(story.approval_time,isBn) : ''}</span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Trust / member note */}
         <section className="bg-slate-900 dark:bg-[#111827] text-white rounded-2xl p-5">
