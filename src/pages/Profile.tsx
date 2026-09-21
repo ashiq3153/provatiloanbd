@@ -105,7 +105,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-full bg-[#f6f8fc] dark:bg-[#0b1220] text-slate-900 dark:text-slate-100 pb-[calc(6rem+env(safe-area-inset-bottom))] transition-colors">
+    <div className="profile-theme min-h-full bg-[#f6f8fc] dark:bg-[#0b1220] text-slate-900 dark:text-slate-100 pb-[calc(6rem+env(safe-area-inset-bottom))] transition-colors">
       {/* Profile identity */}
       <section className="px-4 pt-4">
         <motion.div
