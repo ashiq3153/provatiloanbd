@@ -89,8 +89,8 @@ const AccordionSection = ({
             : flagged
             ? "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-amber-400 dark:border-amber-900/60 text-amber-800 dark:text-amber-400 rounded-2xl ring-2 ring-amber-500/10 animate-pulse"
             : hasError
-            ? "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-rose-450/60 dark:border-rose-900 text-rose-700 dark:text-rose-455 rounded-2xl"
-            : "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-white/60 dark:border-white/5 text-gray-805 dark:text-gray-200 hover:border-primary-500/30 rounded-2xl"
+            ? "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-rose-400/60 dark:border-rose-900 text-rose-700 dark:text-rose-400 rounded-2xl"
+            : "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-slate-200 dark:border-slate-800 dark:border-white/5 text-gray-800 dark:text-gray-200 hover:border-primary-500/30 rounded-2xl"
         }`}
       >
         <div className="flex items-center gap-3">
@@ -121,7 +121,7 @@ const AccordionSection = ({
               {isBn ? "সংশোধন প্রয়োজন" : "Needs Revision"}
             </span>
           ) : hasError ? (
-            <span className="flex items-center gap-1 text-[10px] bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-455 px-2 py-1 rounded-full font-black animate-pulse">
+            <span className="flex items-center gap-1 text-[10px] bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-400 px-2 py-1 rounded-full font-black animate-pulse">
               <AlertCircle size={10} />
               {isBn ? `${convertDigits(errorCount.toString(), true)}টি ভুল` : `${errorCount} errors`}
             </span>
@@ -1261,7 +1261,7 @@ export default function ApplyLoan() {
               className={`group w-full rounded-[24px] text-left relative overflow-hidden transition-all duration-300 border cursor-pointer ${
                 isActive 
                   ? "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-primary-500 dark:border-primary-500/80 ring-2 ring-primary-500/20 shadow-[inset_0_0_8px_rgba(59,130,246,0.1)] text-primary-905 dark:text-primary-100"
-                  : "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-white/60 dark:border-white/5 hover:border-gray-200 dark:hover:border-gray-700 hover:scale-[1.01]"
+                  : "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-slate-200 dark:border-slate-800 dark:border-white/5 hover:border-gray-200 dark:hover:border-gray-700 hover:scale-[1.01]"
               }`}
             >
               <div className="flex flex-col sm:flex-row min-h-[160px]">
@@ -1293,15 +1293,15 @@ export default function ApplyLoan() {
                   <div className="grid grid-cols-3 gap-2 py-3 border-t border-b border-gray-200/50 dark:border-gray-700/60 my-3">
                     <div>
                       <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "মেয়াদ" : "Tenure"}</p>
-                      <p className="text-xs font-extrabold text-gray-805 dark:text-gray-200">{cat.tenureRange}</p>
+                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.tenureRange}</p>
                     </div>
                     <div>
                       <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "সুদ" : "Int. Rate"}</p>
-                      <p className="text-xs font-extrabold text-gray-805 dark:text-gray-200">{cat.intRates}</p>
+                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.intRates}</p>
                     </div>
                     <div>
                       <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "প্রসেস" : "Processing"}</p>
-                      <p className="text-xs font-extrabold text-gray-805 dark:text-gray-200">{cat.procTime}</p>
+                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.procTime}</p>
                     </div>
                   </div>
 
@@ -1425,7 +1425,7 @@ export default function ApplyLoan() {
 
         {/* Breakdown */}
         <div className="bg-gradient-to-br from-[#1b2330] via-[#0f131a] to-[#0b0c10] border border-white/10 dark:border-white/5 rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden mt-2">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 dark:bg-white/5 rounded-bl-[100px] -mr-8 -mt-8"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 dark:bg-slate-900 rounded-bl-[100px] -mr-8 -mt-8"></div>
           
           <div className="relative z-10 flex flex-col gap-4">
             {/* Selected Loan Summary */}
@@ -1469,7 +1469,7 @@ export default function ApplyLoan() {
               </div>
               <div>
                 <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{isBn ? "মোট সুদ" : "Total Interest"}</p>
-                <p className="font-semibold text-sm text-rose-450">{formatCurrency(Math.round(amount * category.minRate * tenure), isBn)}</p>
+                <p className="font-semibold text-sm text-rose-400">{formatCurrency(Math.round(amount * category.minRate * tenure), isBn)}</p>
               </div>
               <div>
                 <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{isBn ? "প্রসেসিং ফি" : "Processing Fee"}</p>
@@ -1536,7 +1536,7 @@ export default function ApplyLoan() {
           </div>
         )}
         <div className="mb-4">
-          <h2 className="text-xl font-bold text-gray-905 dark:text-white transition-colors">{isBn ? "আবেদনকারীর তথ্য বিবরণী" : "Applicant Information"}</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors">{isBn ? "আবেদনকারীর তথ্য বিবরণী" : "Applicant Information"}</h2>
           <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">{isBn ? "নিচের সবগুলো সেকশন সঠিকভাবে পূরণ করুন" : "Please fill out all the sections below accurately."}</p>
         </div>
 
@@ -1555,35 +1555,35 @@ export default function ApplyLoan() {
           <div className="space-y-3 text-xs">
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পূর্ণ নাম (NID অনুযায়ী)" : "Full Name (as per NID)"}</label>
-              <input type="text" {...register("fullName")} className={`w-full neu-input ${errors.fullName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: মোঃ রহিম উদ্দিন" : "e.g. Md. Rahim Uddin"} />
+              <input type="text" {...register("fullName")} className={`w-full neu-input ${errors.fullName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: মোঃ রহিম উদ্দিন" : "e.g. Md. Rahim Uddin"} />
               <ErrorText field="fullName" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পিতার নাম" : "Father's Name"}</label>
-                <input type="text" {...register("fatherName")} className={`w-full neu-input ${errors.fatherName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "পিতার নাম" : "Father's Name"} />
+                <input type="text" {...register("fatherName")} className={`w-full neu-input ${errors.fatherName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "পিতার নাম" : "Father's Name"} />
                 <ErrorText field="fatherName" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাতার নাম" : "Mother's Name"}</label>
-                <input type="text" {...register("motherName")} className={`w-full neu-input ${errors.motherName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "মাতার নাম" : "Mother's Name"} />
+                <input type="text" {...register("motherName")} className={`w-full neu-input ${errors.motherName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "মাতার নাম" : "Mother's Name"} />
                 <ErrorText field="motherName" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "আপনার NID নম্বর" : "Your NID Number"}</label>
-              <input type="text" {...register("nidNumber")} className={`w-full neu-input ${errors.nidNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "এনআইডি নম্বর লিখুন" : "Enter NID Number"} />
+              <input type="text" {...register("nidNumber")} className={`w-full neu-input ${errors.nidNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "এনআইডি নম্বর লিখুন" : "Enter NID Number"} />
               <ErrorText field="nidNumber" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "জন্ম তারিখ" : "Date of Birth"}</label>
-                <input type="date" {...register("dob")} className={`w-full neu-input ${errors.dob ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} />
+                <input type="date" {...register("dob")} className={`w-full neu-input ${errors.dob ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} />
                 <ErrorText field="dob" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "লিঙ্গ" : "Gender"}</label>
-                <select {...register("gender")} className={`w-full neu-input ${errors.gender ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
+                <select {...register("gender")} className={`w-full neu-input ${errors.gender ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
                   <option>{isBn ? "পুরুষ" : "Male"}</option>
                   <option>{isBn ? "নারী" : "Female"}</option>
                   <option>{isBn ? "অন্যান্য" : "Other"}</option>
@@ -1596,12 +1596,12 @@ export default function ApplyLoan() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ই-টিন (e-TIN)" : "e-TIN Number"}</label>
-                    <input type="text" {...register("eTin")} className={`w-full neu-input ${errors.eTin ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e-TIN" />
+                    <input type="text" {...register("eTin")} className={`w-full neu-input ${errors.eTin ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="e-TIN" />
                     <ErrorText field="eTin" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রক্তের গ্রুপ" : "Blood Group"}</label>
-                    <select {...register("bloodGroup")} className={`w-full neu-input ${errors.bloodGroup ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
+                    <select {...register("bloodGroup")} className={`w-full neu-input ${errors.bloodGroup ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
                       <option value="">{isBn ? "নির্বাচন করুন" : "Select"}</option>
                       {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => <option key={bg} value={bg}>{bg}</option>)}
                     </select>
@@ -1611,7 +1611,7 @@ export default function ApplyLoan() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2">
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বৈবাহিক অবস্থা" : "Marital Status"}</label>
-                    <select {...register("maritalStatus")} className={`w-full neu-input ${errors.maritalStatus ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
+                    <select {...register("maritalStatus")} className={`w-full neu-input ${errors.maritalStatus ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
                       <option value="">{isBn ? "নির্বাচন করুন" : "Select"}</option>
                       <option value="Single">{isBn ? "অবিবাহিত" : "Single"}</option>
                       <option value="Married">{isBn ? "বিবাহিত" : "Married"}</option>
@@ -1622,12 +1622,12 @@ export default function ApplyLoan() {
                     <>
                       <div>
                         <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "জীবনসঙ্গীর পেশা" : "Spouse's Profession"}</label>
-                        <input type="text" {...register("spouseProfession")} className={`w-full neu-input ${errors.spouseProfession ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Profession" />
+                        <input type="text" {...register("spouseProfession")} className={`w-full neu-input ${errors.spouseProfession ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Profession" />
                         <ErrorText field="spouseProfession" />
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "জীবনসঙ্গীর মাসিক আয়" : "Spouse's Income"}</label>
-                        <input type="number" {...register("spouseIncome")} className={`w-full neu-input ${errors.spouseIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                        <input type="number" {...register("spouseIncome")} className={`w-full neu-input ${errors.spouseIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                         <ErrorText field="spouseIncome" />
                       </div>
                     </>
@@ -1638,18 +1638,18 @@ export default function ApplyLoan() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল নাম্বার" : "Mobile Number"}</label>
-                <input type="tel" {...register("mobile")} className={`w-full neu-input ${errors.mobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
+                <input type="tel" {...register("mobile")} className={`w-full neu-input ${errors.mobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
                 <ErrorText field="mobile" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "হোয়াটসঅ্যাপ (ঐচ্ছিক)" : "WhatsApp (Optional)"}</label>
-                <input type="tel" {...register("whatsapp")} className={`w-full neu-input ${errors.whatsapp ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
+                <input type="tel" {...register("whatsapp")} className={`w-full neu-input ${errors.whatsapp ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
                 <ErrorText field="whatsapp" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ইমেইল (ঐচ্ছিক)" : "Email (Optional)"}</label>
-              <input type="email" {...register("email")} className={`w-full neu-input ${errors.email ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="example@email.com" />
+              <input type="email" {...register("email")} className={`w-full neu-input ${errors.email ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="example@email.com" />
               <ErrorText field="email" />
             </div>
             <AddressSelector
@@ -1710,111 +1710,111 @@ export default function ApplyLoan() {
               <>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কর্মস্থলের নাম / কোম্পানির নাম" : "Company / Organization Name"}</label>
-                  <input type="text" {...register("companyName")} className={`w-full neu-input ${errors.companyName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "কোম্পানির নাম" : "Company Name"} />
+                  <input type="text" {...register("companyName")} className={`w-full neu-input ${errors.companyName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "কোম্পানির নাম" : "Company Name"} />
                   <ErrorText field="companyName" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কর্পোরেট কোড (যদি থাকে)" : "Corporate Code (If Any)"}</label>
-                    <input type="text" {...register("corporateCode")} className={`w-full neu-input ${errors.corporateCode ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Code" />
+                    <input type="text" {...register("corporateCode")} className={`w-full neu-input ${errors.corporateCode ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Code" />
                     <ErrorText field="corporateCode" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পদবী" : "Designation"}</label>
-                    <input type="text" {...register("designation")} className={`w-full neu-input ${errors.designation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Designation" />
+                    <input type="text" {...register("designation")} className={`w-full neu-input ${errors.designation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Designation" />
                     <ErrorText field="designation" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "যোগদানের তারিখ" : "Joining Date"}</label>
-                    <input type="date" {...register("joiningDate")} className={`w-full neu-input ${errors.joiningDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} />
+                    <input type="date" {...register("joiningDate")} className={`w-full neu-input ${errors.joiningDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} />
                     <ErrorText field="joiningDate" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "চাকরি স্থায়ীকরণের তারিখ" : "Confirmation Date"}</label>
-                    <input type="date" {...register("confirmationDate")} className={`w-full neu-input ${errors.confirmationDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} />
+                    <input type="date" {...register("confirmationDate")} className={`w-full neu-input ${errors.confirmationDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} />
                     <ErrorText field="confirmationDate" />
                   </div>
                 </div>
                 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3">{isBn ? "এইচআর/অ্যাডমিন এর তথ্য" : "HR/Admin Info"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3">{isBn ? "এইচআর/অ্যাডমিন এর তথ্য" : "HR/Admin Info"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নাম" : "Name"}</label>
-                      <input type="text" {...register("hrName")} className={`w-full neu-input ${errors.hrName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "এইচআর এর নাম" : "HR Name"} />
+                      <input type="text" {...register("hrName")} className={`w-full neu-input ${errors.hrName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "এইচআর এর নাম" : "HR Name"} />
                       <ErrorText field="hrName" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পদবী" : "Designation"}</label>
-                      <input type="text" {...register("hrDesignation")} className={`w-full neu-input ${errors.hrDesignation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="HR Designation" />
+                      <input type="text" {...register("hrDesignation")} className={`w-full neu-input ${errors.hrDesignation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="HR Designation" />
                       <ErrorText field="hrDesignation" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ইমেইল" : "Email"}</label>
-                      <input type="email" {...register("hrEmail")} className={`w-full neu-input ${errors.hrEmail ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="hr@company.com" />
+                      <input type="email" {...register("hrEmail")} className={`w-full neu-input ${errors.hrEmail ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="hr@company.com" />
                       <ErrorText field="hrEmail" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল" : "Mobile"}</label>
-                      <input type="tel" {...register("hrMobile")} className={`w-full neu-input ${errors.hrMobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
+                      <input type="tel" {...register("hrMobile")} className={`w-full neu-input ${errors.hrMobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
                       <ErrorText field="hrMobile" />
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3">{isBn ? "আর্থিক ও স্যালারি ব্রেকডাউন" : "Financial & Salary Breakdown"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3">{isBn ? "আর্থিক ও স্যালারি ব্রেকডাউন" : "Financial & Salary Breakdown"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বেসিক স্যালারি" : "Basic Salary"}</label>
-                      <input type="number" {...register("basicSalary")} className={`w-full neu-input ${errors.basicSalary ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("basicSalary")} className={`w-full neu-input ${errors.basicSalary ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="basicSalary" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বাড়ি ভাড়া ভাতা (HRA)" : "House Rent Allowance"}</label>
-                      <input type="number" {...register("houseRentAllowance")} className={`w-full neu-input ${errors.houseRentAllowance ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("houseRentAllowance")} className={`w-full neu-input ${errors.houseRentAllowance ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="houseRentAllowance" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "উৎসব বোনাস" : "Festival Bonus"}</label>
-                      <input type="number" {...register("festivalBonus")} className={`w-full neu-input ${errors.festivalBonus ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("festivalBonus")} className={`w-full neu-input ${errors.festivalBonus ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="festivalBonus" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "প্রভিডেন্ট ফান্ড কর্তন" : "Provident Fund Deduction"}</label>
-                      <input type="number" {...register("providentFundDeduction")} className={`w-full neu-input ${errors.providentFundDeduction ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("providentFundDeduction")} className={`w-full neu-input ${errors.providentFundDeduction ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="providentFundDeduction" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নেট টেক হোম পে" : "Net Take Home Pay"}</label>
-                    <input type="number" {...register("netTakeHomePay")} className={`w-full neu-input ${errors.netTakeHomePay ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                    <input type="number" {...register("netTakeHomePay")} className={`w-full neu-input ${errors.netTakeHomePay ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                     <ErrorText field="netTakeHomePay" />
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3">{isBn ? "অন্যান্য ঋণ/কার্ডের তথ্য" : "Existing Loan/Card Info"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3">{isBn ? "অন্যান্য ঋণ/কার্ডের তথ্য" : "Existing Loan/Card Info"}</h4>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বর্তমান লোন ব্যাংক/আর্থিক প্রতিষ্ঠান" : "Existing Loan Bank"}</label>
-                    <input type="text" {...register("existingLoanBank")} className={`w-full neu-input ${errors.existingLoanBank ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: ব্র্যাক ব্যাংক" : "e.g. BRAC Bank"} />
+                    <input type="text" {...register("existingLoanBank")} className={`w-full neu-input ${errors.existingLoanBank ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: ব্র্যাক ব্যাংক" : "e.g. BRAC Bank"} />
                     <ErrorText field="existingLoanBank" />
                   </div>
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "লোনের মাসিক কিস্তি (EMI)" : "Loan EMI"}</label>
-                      <input type="number" {...register("existingLoanEmi")} className={`w-full neu-input ${errors.existingLoanEmi ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("existingLoanEmi")} className={`w-full neu-input ${errors.existingLoanEmi ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="existingLoanEmi" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ক্রেডিট কার্ডের বকেয়া (যদি থাকে)" : "Credit Card Outstanding"}</label>
-                      <input type="number" {...register("existingCreditCardOutstanding")} className={`w-full neu-input ${errors.existingCreditCardOutstanding ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("existingCreditCardOutstanding")} className={`w-full neu-input ${errors.existingCreditCardOutstanding ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="existingCreditCardOutstanding" />
                     </div>
                   </div>
@@ -1825,152 +1825,152 @@ export default function ApplyLoan() {
             {category?.id === 'business' && (
               <>
                 <div>
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "কোম্পানির লিগ্যাল প্রোফাইল" : "Company Legal Profile"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "কোম্পানির লিগ্যাল প্রোফাইল" : "Company Legal Profile"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্যবসার নিবন্ধিত নাম" : "Registered Business Name"}</label>
-                      <input type="text" {...register("businessName")} className={`w-full neu-input ${errors.businessName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Business Name" />
+                      <input type="text" {...register("businessName")} className={`w-full neu-input ${errors.businessName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Business Name" />
                       <ErrorText field="businessName" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্র্যান্ডের নাম (যদি ভিন্ন হয়)" : "Brand Name (If different)"}</label>
-                      <input type="text" {...register("brandName")} className={`w-full neu-input ${errors.brandName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Brand Name" />
+                      <input type="text" {...register("brandName")} className={`w-full neu-input ${errors.brandName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Brand Name" />
                       <ErrorText field="brandName" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ট্রেড লাইসেন্স নম্বর" : "Trade License No"}</label>
-                      <input type="text" {...register("tradeLicense")} className={`w-full neu-input ${errors.tradeLicense ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Tr xxx-xxx" />
+                      <input type="text" {...register("tradeLicense")} className={`w-full neu-input ${errors.tradeLicense ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Tr xxx-xxx" />
                       <ErrorText field="tradeLicense" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ইস্যুর তারিখ" : "Issue Date"}</label>
-                      <input type="date" {...register("tradeLicenseIssueDate")} className={`w-full neu-input ${errors.tradeLicenseIssueDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} />
+                      <input type="date" {...register("tradeLicenseIssueDate")} className={`w-full neu-input ${errors.tradeLicenseIssueDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} />
                       <ErrorText field="tradeLicenseIssueDate" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ভ্যাট/বিআইএন (BIN) নম্বর" : "VAT/BIN Number"}</label>
-                      <input type="text" {...register("vatBinNumber")} className={`w-full neu-input ${errors.vatBinNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="BIN Number" />
+                      <input type="text" {...register("vatBinNumber")} className={`w-full neu-input ${errors.vatBinNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="BIN Number" />
                       <ErrorText field="vatBinNumber" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "আরজেএসসি (RJSC) নম্বর" : "RJSC Reg Number"}</label>
-                      <input type="text" {...register("rjscNumber")} className={`w-full neu-input ${errors.rjscNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Limited Company Only" />
+                      <input type="text" {...register("rjscNumber")} className={`w-full neu-input ${errors.rjscNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Limited Company Only" />
                       <ErrorText field="rjscNumber" />
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "অপারেশনাল ডিটেইলস" : "Operational Details"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "অপারেশনাল ডিটেইলস" : "Operational Details"}</h4>
                   <div className="grid grid-cols-1 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মূল কার্যালয়ের ঠিকানা" : "Main Office Address"}</label>
-                      <textarea rows={2} {...register("shopAddress")} className={`w-full neu-input ${errors.shopAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Head Office Address" />
+                      <textarea rows={2} {...register("shopAddress")} className={`w-full neu-input ${errors.shopAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Head Office Address" />
                       <ErrorText field="shopAddress" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ফ্যাক্টরি/ওয়ারহাউজের ঠিকানা" : "Factory/Warehouse Address"}</label>
-                      <textarea rows={2} {...register("factoryAddress")} className={`w-full neu-input ${errors.factoryAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Factory/Warehouse Address" />
+                      <textarea rows={2} {...register("factoryAddress")} className={`w-full neu-input ${errors.factoryAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Factory/Warehouse Address" />
                       <ErrorText field="factoryAddress" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "শোরুমের সংখ্যা" : "No. of Showrooms"}</label>
-                      <input type="number" {...register("showroomCount")} className={`w-full neu-input ${errors.showroomCount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. 3" />
+                      <input type="number" {...register("showroomCount")} className={`w-full neu-input ${errors.showroomCount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. 3" />
                       <ErrorText field="showroomCount" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোট কর্মচারী" : "Total Employees"}</label>
-                      <input type="number" {...register("totalEmployees")} className={`w-full neu-input ${errors.totalEmployees ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Permanent/Temporary" />
+                      <input type="number" {...register("totalEmployees")} className={`w-full neu-input ${errors.totalEmployees ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Permanent/Temporary" />
                       <ErrorText field="totalEmployees" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্যবসাটি কত বছর ধরে লাভজনক?" : "Years in Profitability"}</label>
-                    <input type="text" {...register("yearsInProfit")} className={`w-full neu-input ${errors.yearsInProfit ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. 5 Years" />
+                    <input type="text" {...register("yearsInProfit")} className={`w-full neu-input ${errors.yearsInProfit ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. 5 Years" />
                     <ErrorText field="yearsInProfit" />
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "আর্থিক ইন-ডেপথ" : "Financial In-Depth"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "আর্থিক ইন-ডেপথ" : "Financial In-Depth"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক গড় বিক্রয়" : "Avg Monthly Sales"}</label>
-                      <input type="number" {...register("avgMonthlySales")} className={`w-full neu-input ${errors.avgMonthlySales ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("avgMonthlySales")} className={`w-full neu-input ${errors.avgMonthlySales ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="avgMonthlySales" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ঋতুভিত্তিক বিক্রয়ের তারতম্য" : "Seasonal Sales Var."}</label>
-                      <input type="text" {...register("seasonalSales")} className={`w-full neu-input ${errors.seasonalSales ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. High in Winter" />
+                      <input type="text" {...register("seasonalSales")} className={`w-full neu-input ${errors.seasonalSales ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. High in Winter" />
                       <ErrorText field="seasonalSales" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কস্ট অফ গুডস সোল্ড (COGS)" : "COGS"}</label>
-                      <input type="number" {...register("cogs")} className={`w-full neu-input ${errors.cogs ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("cogs")} className={`w-full neu-input ${errors.cogs ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="cogs" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নেট প্রফিট মার্জিন (%)" : "Net Profit Margin (%)"}</label>
-                      <input type="number" {...register("netProfitMargin")} className={`w-full neu-input ${errors.netProfitMargin ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="%" />
+                      <input type="number" {...register("netProfitMargin")} className={`w-full neu-input ${errors.netProfitMargin ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="%" />
                       <ErrorText field="netProfitMargin" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "দেনাদার (Accounts Receivable)" : "Accounts Receivable"}</label>
-                      <input type="number" {...register("accountsReceivable")} className={`w-full neu-input ${errors.accountsReceivable ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("accountsReceivable")} className={`w-full neu-input ${errors.accountsReceivable ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="accountsReceivable" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পাওনাদার (Accounts Payable)" : "Accounts Payable"}</label>
-                      <input type="number" {...register("accountsPayable")} className={`w-full neu-input ${errors.accountsPayable ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("accountsPayable")} className={`w-full neu-input ${errors.accountsPayable ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="accountsPayable" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বর্তমান স্টকের বাজারমূল্য" : "Current Stock Value"}</label>
-                      <input type="number" {...register("currentStockValue")} className={`w-full neu-input ${errors.currentStockValue ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("currentStockValue")} className={`w-full neu-input ${errors.currentStockValue ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="currentStockValue" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "অন্যান্য আয় (যদি থাকে)" : "Other Income / Monthly"}</label>
-                      <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="monthlyIncome" />
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "লোনের উদ্দেশ্য ও ব্যাংকিং হিস্ট্রি" : "Loan Purpose & Banking"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "লোনের উদ্দেশ্য ও ব্যাংকিং হিস্ট্রি" : "Loan Purpose & Banking"}</h4>
                   <div className="mb-3">
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "লোন ইউটিলাইজেশন প্ল্যান" : "Loan Utilization Plan"}</label>
-                    <textarea rows={2} {...register("loanPurposeDetails")} className={`w-full neu-input ${errors.loanPurposeDetails ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder={isBn ? "Working Capital, CapEx, নাকি Expansion?" : "Working Capital, CapEx, or Expansion?"} />
+                    <textarea rows={2} {...register("loanPurposeDetails")} className={`w-full neu-input ${errors.loanPurposeDetails ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all resize-none`} placeholder={isBn ? "Working Capital, CapEx, নাকি Expansion?" : "Working Capital, CapEx, or Expansion?"} />
                     <ErrorText field="loanPurposeDetails" />
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "প্রধান কারেন্ট অ্যাকাউন্ট" : "Main Current Account"}</label>
-                      <input type="text" {...register("mainCurrentAccount")} className={`w-full neu-input ${errors.mainCurrentAccount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Account Number & Bank" />
+                      <input type="text" {...register("mainCurrentAccount")} className={`w-full neu-input ${errors.mainCurrentAccount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Account Number & Bank" />
                       <ErrorText field="mainCurrentAccount" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "সিসি/ওডি (CC/OD) লিমিট" : "CC/OD Limit Account"}</label>
-                      <input type="text" {...register("ccOdLimit")} className={`w-full neu-input ${errors.ccOdLimit ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="If any" />
+                      <input type="text" {...register("ccOdLimit")} className={`w-full neu-input ${errors.ccOdLimit ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="If any" />
                       <ErrorText field="ccOdLimit" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "অন্যান্য সক্রিয় লোন/লিজ" : "Other Active Loans/Leases"}</label>
-                    <input type="text" {...register("otherActiveLoans")} className={`w-full neu-input ${errors.otherActiveLoans ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Details of active loans" />
+                    <input type="text" {...register("otherActiveLoans")} className={`w-full neu-input ${errors.otherActiveLoans ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Details of active loans" />
                     <ErrorText field="otherActiveLoans" />
                   </div>
                 </div>
@@ -1980,25 +1980,25 @@ export default function ApplyLoan() {
             {category?.id === 'women' && (
               <>
                 <div className="mb-4">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "উদ্যোক্তার প্রোফাইল ও শেয়ারহোল্ডিং" : "Entrepreneur Profile & Shareholding"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "উদ্যোক্তার প্রোফাইল ও শেয়ারহোল্ডিং" : "Entrepreneur Profile & Shareholding"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্যবসার নাম" : "Business Name"}</label>
-                      <input type="text" {...register("businessName")} className={`w-full neu-input ${errors.businessName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="আপনার স্টোর বা কোম্পানির নাম" />
+                      <input type="text" {...register("businessName")} className={`w-full neu-input ${errors.businessName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="আপনার স্টোর বা কোম্পানির নাম" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্র্যান্ডের নাম (যদি ভিন্ন হয়)" : "Brand Name"}</label>
-                      <input type="text" {...register("brandName")} className={`w-full neu-input ${errors.brandName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. MyBrand" />
+                      <input type="text" {...register("brandName")} className={`w-full neu-input ${errors.brandName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. MyBrand" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "আপনার শেয়ার বা ইক্যুইটি (%)" : "Your Share/Equity (%)"}</label>
-                      <input type="text" {...register("equityPercentage")} className={`w-full neu-input ${errors.equityPercentage ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. 51%" />
+                      <input type="text" {...register("equityPercentage")} className={`w-full neu-input ${errors.equityPercentage ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. 51%" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "আপনার পদবী" : "Applicant Role"}</label>
-                      <select {...register("applicantRole")} className={`w-full neu-input ${errors.applicantRole ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
+                      <select {...register("applicantRole")} className={`w-full neu-input ${errors.applicantRole ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
                         <option value="">{isBn ? "নির্বাচন করুন" : "Select"}</option>
                         <option value="Proprietor">{isBn ? "প্রোপরাইটর" : "Proprietor"}</option>
                         <option value="Managing Director">{isBn ? "ম্যানেজিং ডিরেক্টর" : "Managing Director"}</option>
@@ -2009,20 +2009,20 @@ export default function ApplyLoan() {
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "ব্যবসায়িক মডেল ও উদ্ভাবন" : "Business Model & Innovation"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "ব্যবসায়িক মডেল ও উদ্ভাবন" : "Business Model & Innovation"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পণ্য বা সেবার ধরন" : "Product/Service Type"}</label>
-                      <input type="text" {...register("productType")} className={`w-full neu-input ${errors.productType ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Boutique, E-commerce" />
+                      <input type="text" {...register("productType")} className={`w-full neu-input ${errors.productType ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Boutique, E-commerce" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কাঁচামালের উৎস" : "Raw Material Source"}</label>
-                      <input type="text" {...register("rawMaterialSource")} className={`w-full neu-input ${errors.rawMaterialSource ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Local/Imported" />
+                      <input type="text" {...register("rawMaterialSource")} className={`w-full neu-input ${errors.rawMaterialSource ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Local/Imported" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বিক্রির মূল চ্যানেল" : "Main Sales Channel"}</label>
-                    <select {...register("salesChannel")} className={`w-full neu-input ${errors.salesChannel ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
+                    <select {...register("salesChannel")} className={`w-full neu-input ${errors.salesChannel ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
                       <option value="">{isBn ? "নির্বাচন করুন" : "Select"}</option>
                       <option value="Facebook Page">{isBn ? "ফেসবুক পেজ" : "Facebook Page"}</option>
                       <option value="Website">{isBn ? "ওয়েবসাইট" : "Website"}</option>
@@ -2032,35 +2032,35 @@ export default function ApplyLoan() {
                   </div>
                   <div className="mt-3">
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "দোকান / অফিসের ঠিকানা" : "Shop / Office Address"}</label>
-                    <textarea rows={1.5} {...register("shopAddress")} className={`w-full neu-input ${errors.shopAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder={isBn ? "ঠিকানা লিখুন" : "Enter Address"} />
+                    <textarea rows={1.5} {...register("shopAddress")} className={`w-full neu-input ${errors.shopAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all resize-none`} placeholder={isBn ? "ঠিকানা লিখুন" : "Enter Address"} />
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "লাইসেন্স ও সরকারি স্কিম" : "Licenses & Govt. Schemes"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "লাইসেন্স ও সরকারি স্কিম" : "Licenses & Govt. Schemes"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ট্রেড লাইসেন্স নম্বর" : "Trade License No"}</label>
-                      <input type="text" {...register("tradeLicense")} className={`w-full neu-input ${errors.tradeLicense ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Tr xxx-xxx" />
+                      <input type="text" {...register("tradeLicense")} className={`w-full neu-input ${errors.tradeLicense ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Tr xxx-xxx" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "লাইসেন্স ইস্যুর তারিখ" : "License Issue Date"}</label>
-                      <input type="date" {...register("tradeLicenseIssueDate")} className={`w-full neu-input ${errors.tradeLicenseIssueDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} />
+                      <input type="date" {...register("tradeLicenseIssueDate")} className={`w-full neu-input ${errors.tradeLicenseIssueDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ভ্যাট/বিআইএন (BIN)" : "VAT/BIN No"}</label>
-                      <input type="text" {...register("vatBinNumber")} className={`w-full neu-input ${errors.vatBinNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="If any" />
+                      <input type="text" {...register("vatBinNumber")} className={`w-full neu-input ${errors.vatBinNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="If any" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "আরজেএসসি (RJSC) রেজিঃ" : "RJSC Reg (Ltd Co)"}</label>
-                      <input type="text" {...register("rjscNumber")} className={`w-full neu-input ${errors.rjscNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="If any" />
+                      <input type="text" {...register("rjscNumber")} className={`w-full neu-input ${errors.rjscNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="If any" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "সরকারি স্কিম/ফান্ডিং (বাংলাদেশ ব্যাংক/SME)" : "Govt. Scheme / SME Funding"}</label>
-                    <select {...register("govtScheme")} className={`w-full neu-input ${errors.govtScheme ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
+                    <select {...register("govtScheme")} className={`w-full neu-input ${errors.govtScheme ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
                       <option value="">{isBn ? "সাধারণ লোন" : "General Loan"}</option>
                       <option value="BB Refinancing">{isBn ? "বাংলাদেশ ব্যাংক রিফাইন্যান্সিং" : "BB Refinancing Scheme"}</option>
                       <option value="SME Foundation">{isBn ? "এসএমই ফাউন্ডেশন" : "SME Foundation"}</option>
@@ -2071,7 +2071,7 @@ export default function ApplyLoan() {
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়/বিক্রি" : "Monthly Income/Sales"}</label>
-                    <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                    <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                   </div>
                 </div>
               </>
@@ -2080,80 +2080,80 @@ export default function ApplyLoan() {
             {category?.id === 'expat' && (
               <>
                 <div>
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "আবেদনকারীর আন্তর্জাতিক প্রোফাইল" : "Applicant's International Profile"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "আবেদনকারীর আন্তর্জাতিক প্রোফাইল" : "Applicant's International Profile"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কর্মরত দেশের নাম" : "Working Country"}</label>
-                      <input type="text" {...register("workingCountry")} className={`w-full neu-input ${errors.workingCountry ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Dubai / KSA" />
+                      <input type="text" {...register("workingCountry")} className={`w-full neu-input ${errors.workingCountry ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Dubai / KSA" />
                       <ErrorText field="workingCountry" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ভিসার ধরন" : "Visa Type"}</label>
-                      <input type="text" {...register("visaType")} className={`w-full neu-input ${errors.visaType ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Work Visa" />
+                      <input type="text" {...register("visaType")} className={`w-full neu-input ${errors.visaType ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Work Visa" />
                       <ErrorText field="visaType" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পাসপোর্ট নম্বর" : "Passport Number"}</label>
-                      <input type="text" {...register("passportNumber")} className={`w-full neu-input ${errors.passportNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="AXXXXXXXX" />
+                      <input type="text" {...register("passportNumber")} className={`w-full neu-input ${errors.passportNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="AXXXXXXXX" />
                       <ErrorText field="passportNumber" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পাসপোর্ট ইস্যুর তারিখ" : "Passport Issue Date"}</label>
-                      <input type="date" {...register("passportIssueDate")} className={`w-full neu-input ${errors.passportIssueDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} />
+                      <input type="date" {...register("passportIssueDate")} className={`w-full neu-input ${errors.passportIssueDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} />
                       <ErrorText field="passportIssueDate" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পাসপোর্টের মেয়াদ" : "Passport Expiry Date"}</label>
-                      <input type="date" {...register("passportExpiryDate")} className={`w-full neu-input ${errors.passportExpiryDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} />
+                      <input type="date" {...register("passportExpiryDate")} className={`w-full neu-input ${errors.passportExpiryDate ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} />
                       <ErrorText field="passportExpiryDate" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রেসিডেন্স কার্ড/আকামা (Iqama)" : "Residence Card/Iqama No"}</label>
-                      <input type="text" {...register("iqamaNumber")} className={`w-full neu-input ${errors.iqamaNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Iqama Number" />
+                      <input type="text" {...register("iqamaNumber")} className={`w-full neu-input ${errors.iqamaNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Iqama Number" />
                       <ErrorText field="iqamaNumber" />
                     </div>
                   </div>
                   <div className="mb-3">
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বিদেশে বর্তমান থাকার ঠিকানা" : "Current Foreign Address"}</label>
-                    <textarea rows={2} {...register("foreignAddress")} className={`w-full neu-input ${errors.foreignAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Foreign Address" />
+                    <textarea rows={2} {...register("foreignAddress")} className={`w-full neu-input ${errors.foreignAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Foreign Address" />
                     <ErrorText field="foreignAddress" />
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বিদেশী মোবাইল নম্বর" : "Foreign Mobile No"}</label>
-                      <input type="tel" {...register("foreignMobile")} className={`w-full neu-input ${errors.foreignMobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="+XX..." />
+                      <input type="tel" {...register("foreignMobile")} className={`w-full neu-input ${errors.foreignMobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="+XX..." />
                       <ErrorText field="foreignMobile" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বিদেশী হোয়াটসঅ্যাপ নম্বর" : "Foreign WhatsApp No"}</label>
-                      <input type="tel" {...register("foreignWhatsapp")} className={`w-full neu-input ${errors.foreignWhatsapp ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="+XX..." />
+                      <input type="tel" {...register("foreignWhatsapp")} className={`w-full neu-input ${errors.foreignWhatsapp ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="+XX..." />
                       <ErrorText field="foreignWhatsapp" />
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "বৈদেশিক কর্মসংস্থানের ইন-ডেপথ" : "Foreign Employment Details"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "বৈদেশিক কর্মসংস্থানের ইন-ডেপথ" : "Foreign Employment Details"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বিদেশী কোম্পানির নাম" : "Foreign Company Name"}</label>
-                      <input type="text" {...register("foreignCompanyName")} className={`w-full neu-input ${errors.foreignCompanyName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Company Name" />
+                      <input type="text" {...register("foreignCompanyName")} className={`w-full neu-input ${errors.foreignCompanyName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Company Name" />
                       <ErrorText field="foreignCompanyName" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কোম্পানির ল্যান্ডলাইন/ওয়েবসাইট" : "Company Website/Phone"}</label>
-                      <input type="text" {...register("foreignCompanyContact")} className={`w-full neu-input ${errors.foreignCompanyContact ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Contact info" />
+                      <input type="text" {...register("foreignCompanyContact")} className={`w-full neu-input ${errors.foreignCompanyContact ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Contact info" />
                       <ErrorText field="foreignCompanyContact" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "শ্রমিকের ক্যাটাগরি" : "Worker Category"}</label>
-                      <select {...register("workerCategory")} className={`w-full neu-input ${errors.workerCategory ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
+                      <select {...register("workerCategory")} className={`w-full neu-input ${errors.workerCategory ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
                         <option value="">{isBn ? "নির্বাচন করুন" : "Select"}</option>
                         <option value="Skilled">{isBn ? "স্কিলড" : "Skilled"}</option>
                         <option value="Unskilled">{isBn ? "আনস্কিলড" : "Unskilled"}</option>
@@ -2163,78 +2163,78 @@ export default function ApplyLoan() {
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয় (বিডিটি)" : "Monthly Income (BDT)"}</label>
-                      <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("monthlyIncome")} className={`w-full neu-input ${errors.monthlyIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="monthlyIncome" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "সুপারভাইজারের নাম ও কন্টাক্ট" : "Supervisor's Name & Contact"}</label>
-                    <input type="text" {...register("supervisorNameContact")} className={`w-full neu-input ${errors.supervisorNameContact ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Name, Phone" />
+                    <input type="text" {...register("supervisorNameContact")} className={`w-full neu-input ${errors.supervisorNameContact ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Name, Phone" />
                     <ErrorText field="supervisorNameContact" />
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "রেমিট্যান্স ও ব্যাংকিং চ্যানেল" : "Remittance & Banking Channel"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "রেমিট্যান্স ও ব্যাংকিং চ্যানেল" : "Remittance & Banking Channel"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "গড়ে কত টাকা পাঠান" : "Avg Monthly Remittance"}</label>
-                      <input type="number" {...register("avgMonthlyRemittance")} className={`w-full neu-input ${errors.avgMonthlyRemittance ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("avgMonthlyRemittance")} className={`w-full neu-input ${errors.avgMonthlyRemittance ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="avgMonthlyRemittance" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "টাকা পাঠানোর মাধ্যম" : "Remittance Channel"}</label>
-                      <input type="text" {...register("remittanceChannel")} className={`w-full neu-input ${errors.remittanceChannel ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. bKash, Western Union" />
+                      <input type="text" {...register("remittanceChannel")} className={`w-full neu-input ${errors.remittanceChannel ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. bKash, Western Union" />
                       <ErrorText field="remittanceChannel" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "দেশে টাকা গ্রহণকারীর ব্যাংক অ্যাকাউন্ট" : "Receiver's Bank Account (BD)"}</label>
-                    <input type="text" {...register("receiverBankAccount")} className={`w-full neu-input ${errors.receiverBankAccount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Bank, Account Number" />
+                    <input type="text" {...register("receiverBankAccount")} className={`w-full neu-input ${errors.receiverBankAccount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Bank, Account Number" />
                     <ErrorText field="receiverBankAccount" />
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "স্থানীয় অ্যাটর্নি/কো-অ্যার্প্লিকেন্ট (Local Co-Applicant)" : "Local Attorney / Co-Applicant"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "স্থানীয় অ্যাটর্নি/কো-অ্যার্প্লিকেন্ট (Local Co-Applicant)" : "Local Attorney / Co-Applicant"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কো-অ্যার্প্লিকেন্টের নাম" : "Co-Applicant Name"}</label>
-                      <input type="text" {...register("coApplicantName")} className={`w-full neu-input ${errors.coApplicantName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Full Name" />
+                      <input type="text" {...register("coApplicantName")} className={`w-full neu-input ${errors.coApplicantName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Full Name" />
                       <ErrorText field="coApplicantName" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "প্রবাসীর সাথে সম্পর্ক" : "Relation with Expat"}</label>
-                      <input type="text" {...register("coApplicantRelation")} className={`w-full neu-input ${errors.coApplicantRelation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Relation" />
+                      <input type="text" {...register("coApplicantRelation")} className={`w-full neu-input ${errors.coApplicantRelation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Relation" />
                       <ErrorText field="coApplicantRelation" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পেশা" : "Profession"}</label>
-                      <input type="text" {...register("coApplicantProfession")} className={`w-full neu-input ${errors.coApplicantProfession ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Profession" />
+                      <input type="text" {...register("coApplicantProfession")} className={`w-full neu-input ${errors.coApplicantProfession ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Profession" />
                       <ErrorText field="coApplicantProfession" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মাসিক আয়" : "Monthly Income"}</label>
-                      <input type="number" {...register("coApplicantIncome")} className={`w-full neu-input ${errors.coApplicantIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("coApplicantIncome")} className={`w-full neu-input ${errors.coApplicantIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="coApplicantIncome" />
                     </div>
                   </div>
                   <div className="mb-3">
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "এনআইডি (NID) নম্বর" : "NID Number"}</label>
-                    <input type="text" {...register("coApplicantNid")} className={`w-full neu-input ${errors.coApplicantNid ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="NID Number" />
+                    <input type="text" {...register("coApplicantNid")} className={`w-full neu-input ${errors.coApplicantNid ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="NID Number" />
                     <ErrorText field="coApplicantNid" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বর্তমান ঠিকানা" : "Current Address"}</label>
-                      <textarea rows={2} {...register("coApplicantCurrentAddress")} className={`w-full neu-input ${errors.coApplicantCurrentAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Current Address" />
+                      <textarea rows={2} {...register("coApplicantCurrentAddress")} className={`w-full neu-input ${errors.coApplicantCurrentAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Current Address" />
                       <ErrorText field="coApplicantCurrentAddress" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "স্থায়ী ঠিকানা" : "Permanent Address"}</label>
-                      <textarea rows={2} {...register("coApplicantPermanentAddress")} className={`w-full neu-input ${errors.coApplicantPermanentAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Permanent Address" />
+                      <textarea rows={2} {...register("coApplicantPermanentAddress")} className={`w-full neu-input ${errors.coApplicantPermanentAddress ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Permanent Address" />
                       <ErrorText field="coApplicantPermanentAddress" />
                     </div>
                   </div>
@@ -2245,32 +2245,32 @@ export default function ApplyLoan() {
             {category?.id === 'student' && (
               <>
                 <div>
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "শিক্ষার্থীর একাডেমিক হিস্ট্রি" : "Student's Academic History"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "শিক্ষার্থীর একাডেমিক হিস্ট্রি" : "Student's Academic History"}</h4>
                   
                   {/* SSC */}
                   <div className="mb-4">
                     <h5 className="text-xs font-bold text-primary-600 mb-2">SSC / O-Level</h5>
                     <div className="grid grid-cols-2 gap-3 mb-2">
                       <div>
-                        <input type="text" {...register("sscRoll")} className={`w-full neu-input ${errors.sscRoll ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রোল নম্বর" : "Roll Number"} />
+                        <input type="text" {...register("sscRoll")} className={`w-full neu-input ${errors.sscRoll ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রোল নম্বর" : "Roll Number"} />
                       </div>
                       <div>
-                        <input type="text" {...register("sscReg")} className={`w-full neu-input ${errors.sscReg ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রেজিস্ট্রেশন নম্বর" : "Registration No"} />
+                        <input type="text" {...register("sscReg")} className={`w-full neu-input ${errors.sscReg ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রেজিস্ট্রেশন নম্বর" : "Registration No"} />
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-3 mb-2">
                       <div>
-                        <input type="text" {...register("sscBoard")} className={`w-full neu-input ${errors.sscBoard ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "বোর্ড" : "Board"} />
+                        <input type="text" {...register("sscBoard")} className={`w-full neu-input ${errors.sscBoard ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "বোর্ড" : "Board"} />
                       </div>
                       <div>
-                        <input type="text" {...register("sscGpa")} className={`w-full neu-input ${errors.sscGpa ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="GPA" />
+                        <input type="text" {...register("sscGpa")} className={`w-full neu-input ${errors.sscGpa ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="GPA" />
                       </div>
                       <div>
-                        <input type="text" {...register("sscYear")} className={`w-full neu-input ${errors.sscYear ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "পাসের সন" : "Passing Year"} />
+                        <input type="text" {...register("sscYear")} className={`w-full neu-input ${errors.sscYear ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "পাসের সন" : "Passing Year"} />
                       </div>
                     </div>
                     <div>
-                      <input type="text" {...register("sscInstitution")} className={`w-full neu-input ${errors.sscInstitution ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "প্রতিষ্ঠানের নাম" : "Institution Name"} />
+                      <input type="text" {...register("sscInstitution")} className={`w-full neu-input ${errors.sscInstitution ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "প্রতিষ্ঠানের নাম" : "Institution Name"} />
                     </div>
                   </div>
 
@@ -2279,25 +2279,25 @@ export default function ApplyLoan() {
                     <h5 className="text-xs font-bold text-primary-600 mb-2">HSC / A-Level / Diploma</h5>
                     <div className="grid grid-cols-2 gap-3 mb-2">
                       <div>
-                        <input type="text" {...register("hscRoll")} className={`w-full neu-input ${errors.hscRoll ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রোল নম্বর" : "Roll Number"} />
+                        <input type="text" {...register("hscRoll")} className={`w-full neu-input ${errors.hscRoll ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রোল নম্বর" : "Roll Number"} />
                       </div>
                       <div>
-                        <input type="text" {...register("hscReg")} className={`w-full neu-input ${errors.hscReg ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রেজিস্ট্রেশন নম্বর" : "Registration No"} />
+                        <input type="text" {...register("hscReg")} className={`w-full neu-input ${errors.hscReg ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রেজিস্ট্রেশন নম্বর" : "Registration No"} />
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-3 mb-2">
                       <div>
-                        <input type="text" {...register("hscBoard")} className={`w-full neu-input ${errors.hscBoard ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "বোর্ড" : "Board"} />
+                        <input type="text" {...register("hscBoard")} className={`w-full neu-input ${errors.hscBoard ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "বোর্ড" : "Board"} />
                       </div>
                       <div>
-                        <input type="text" {...register("hscGpa")} className={`w-full neu-input ${errors.hscGpa ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="GPA" />
+                        <input type="text" {...register("hscGpa")} className={`w-full neu-input ${errors.hscGpa ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="GPA" />
                       </div>
                       <div>
-                        <input type="text" {...register("hscYear")} className={`w-full neu-input ${errors.hscYear ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "পাসের সন" : "Passing Year"} />
+                        <input type="text" {...register("hscYear")} className={`w-full neu-input ${errors.hscYear ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "পাসের সন" : "Passing Year"} />
                       </div>
                     </div>
                     <div>
-                      <input type="text" {...register("hscInstitution")} className={`w-full neu-input ${errors.hscInstitution ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "প্রতিষ্ঠানের নাম" : "Institution Name"} />
+                      <input type="text" {...register("hscInstitution")} className={`w-full neu-input ${errors.hscInstitution ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "প্রতিষ্ঠানের নাম" : "Institution Name"} />
                     </div>
                   </div>
 
@@ -2306,49 +2306,49 @@ export default function ApplyLoan() {
                     <h5 className="text-xs font-bold text-primary-600 mb-2">Graduation / Bachelor (If applicable)</h5>
                     <div className="grid grid-cols-2 gap-3 mb-2">
                       <div>
-                        <input type="text" {...register("gradRoll")} className={`w-full neu-input ${errors.gradRoll ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রোল নম্বর" : "Roll Number"} />
+                        <input type="text" {...register("gradRoll")} className={`w-full neu-input ${errors.gradRoll ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রোল নম্বর" : "Roll Number"} />
                       </div>
                       <div>
-                        <input type="text" {...register("gradReg")} className={`w-full neu-input ${errors.gradReg ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রেজিস্ট্রেশন নম্বর" : "Registration No"} />
+                        <input type="text" {...register("gradReg")} className={`w-full neu-input ${errors.gradReg ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "রেজিস্ট্রেশন নম্বর" : "Registration No"} />
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-3 mb-2">
                       <div>
-                        <input type="text" {...register("gradBoard")} className={`w-full neu-input ${errors.gradBoard ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "ইউনিভার্সিটি" : "University"} />
+                        <input type="text" {...register("gradBoard")} className={`w-full neu-input ${errors.gradBoard ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "ইউনিভার্সিটি" : "University"} />
                       </div>
                       <div>
-                        <input type="text" {...register("gradCgpa")} className={`w-full neu-input ${errors.gradCgpa ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="CGPA" />
+                        <input type="text" {...register("gradCgpa")} className={`w-full neu-input ${errors.gradCgpa ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="CGPA" />
                       </div>
                       <div>
-                        <input type="text" {...register("gradYear")} className={`w-full neu-input ${errors.gradYear ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "পাসের সন" : "Passing Year"} />
+                        <input type="text" {...register("gradYear")} className={`w-full neu-input ${errors.gradYear ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "পাসের সন" : "Passing Year"} />
                       </div>
                     </div>
                     <div>
-                      <input type="text" {...register("gradInstitution")} className={`w-full neu-input ${errors.gradInstitution ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "প্রতিষ্ঠানের নাম" : "Institution Name"} />
+                      <input type="text" {...register("gradInstitution")} className={`w-full neu-input ${errors.gradInstitution ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-3 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "প্রতিষ্ঠানের নাম" : "Institution Name"} />
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "ভর্তিচ্ছু কোর্স ও গন্তব্য" : "Target Course & Destination"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "ভর্তিচ্ছু কোর্স ও গন্তব্য" : "Target Course & Destination"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বিশ্ববিদ্যালয়ের নাম" : "Target University Name"}</label>
-                      <input type="text" {...register("targetUniversity")} className={`w-full neu-input ${errors.targetUniversity ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="University Name" />
+                      <input type="text" {...register("targetUniversity")} className={`w-full neu-input ${errors.targetUniversity ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="University Name" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ফ্যাকাল্টি/ডিপার্টমেন্ট" : "Faculty/Department"}</label>
-                      <input type="text" {...register("targetDepartment")} className={`w-full neu-input ${errors.targetDepartment ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Department" />
+                      <input type="text" {...register("targetDepartment")} className={`w-full neu-input ${errors.targetDepartment ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Department" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "কোর্সের গ্লোবাল র্যাংকিং" : "Course Global Ranking"}</label>
-                      <input type="text" {...register("courseRanking")} className={`w-full neu-input ${errors.courseRanking ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Top 500" />
+                      <input type="text" {...register("courseRanking")} className={`w-full neu-input ${errors.courseRanking ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Top 500" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ক্রেডিট আওয়ার" : "Credit Hours"}</label>
-                      <input type="text" {...register("creditHours")} className={`w-full neu-input ${errors.creditHours ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Total Credits" />
+                      <input type="text" {...register("creditHours")} className={`w-full neu-input ${errors.creditHours ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Total Credits" />
                     </div>
                   </div>
                   <div>
@@ -2363,35 +2363,35 @@ export default function ApplyLoan() {
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "কো-অ্যার্প্লিকেন্ট/স্পনসরের আর্থিক প্রোফাইল" : "Sponsor's Financial Profile"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "কো-অ্যার্প্লিকেন্ট/স্পনসরের আর্থিক প্রোফাইল" : "Sponsor's Financial Profile"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "স্পনসরের নাম" : "Sponsor Name"}</label>
-                      <input type="text" {...register("sponsorName")} className={`w-full neu-input ${errors.sponsorName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Full Name" />
+                      <input type="text" {...register("sponsorName")} className={`w-full neu-input ${errors.sponsorName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Full Name" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "শিক্ষার্থীর সাথে সম্পর্ক" : "Relation to Student"}</label>
-                      <input type="text" {...register("sponsorRelation")} className={`w-full neu-input ${errors.sponsorRelation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Father/Mother" />
+                      <input type="text" {...register("sponsorRelation")} className={`w-full neu-input ${errors.sponsorRelation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Father/Mother" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "আয়ের উৎস" : "Income Source"}</label>
-                      <input type="text" {...register("sponsorIncomeSource")} className={`w-full neu-input ${errors.sponsorIncomeSource ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Job/Business" />
+                      <input type="text" {...register("sponsorIncomeSource")} className={`w-full neu-input ${errors.sponsorIncomeSource ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Job/Business" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "চাকরি বা ব্যবসার বিস্তারিত" : "Job/Business Details"}</label>
-                      <input type="text" {...register("sponsorJobDetails")} className={`w-full neu-input ${errors.sponsorJobDetails ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Company / Position" />
+                      <input type="text" {...register("sponsorJobDetails")} className={`w-full neu-input ${errors.sponsorJobDetails ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Company / Position" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "করযোগ্য আয় (Taxable Income)" : "Taxable Income"}</label>
-                      <input type="number" {...register("sponsorTaxableIncome")} className={`w-full neu-input ${errors.sponsorTaxableIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("sponsorTaxableIncome")} className={`w-full neu-input ${errors.sponsorTaxableIncome ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নেট ওর্থ (Net Worth)" : "Net Worth"}</label>
-                      <input type="text" {...register("sponsorNetWorth")} className={`w-full neu-input ${errors.sponsorNetWorth ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Property Details" />
+                      <input type="text" {...register("sponsorNetWorth")} className={`w-full neu-input ${errors.sponsorNetWorth ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Property Details" />
                     </div>
                   </div>
                 </div>
@@ -2401,7 +2401,7 @@ export default function ApplyLoan() {
             {category?.id === 'emergency' && (
               <>
                 <div className="mb-4">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "আবেদনকারী ও রোগীর সম্পর্ক" : "Applicant & Patient Relation"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "আবেদনকারী ও রোগীর সম্পর্ক" : "Applicant & Patient Relation"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পেশা" : "Profession"}</label>
@@ -2410,69 +2410,69 @@ export default function ApplyLoan() {
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রোগীর নাম" : "Patient Name"}</label>
-                      <input type="text" {...register("patientName")} className={`w-full neu-input ${errors.patientName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Full Name" />
+                      <input type="text" {...register("patientName")} className={`w-full neu-input ${errors.patientName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Full Name" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রোগী আবেদনকারীর কে হন" : "Relation with Patient"}</label>
-                      <input type="text" {...register("patientRelation")} className={`w-full neu-input ${errors.patientRelation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Father/Mother" />
+                      <input type="text" {...register("patientRelation")} className={`w-full neu-input ${errors.patientRelation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Father/Mother" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রোগীর এনআইডি/জন্ম নিবন্ধন" : "Patient NID/Birth Reg."}</label>
-                      <input type="text" {...register("patientNid")} className={`w-full neu-input ${errors.patientNid ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Number" />
+                      <input type="text" {...register("patientNid")} className={`w-full neu-input ${errors.patientNid ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Number" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রোগীর বর্তমান শারীরিক অবস্থা" : "Patient's Current Condition"}</label>
-                    <textarea rows={2} {...register("patientCondition")} className={`w-full neu-input ${errors.patientCondition ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Current Status" />
+                    <textarea rows={2} {...register("patientCondition")} className={`w-full neu-input ${errors.patientCondition ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all resize-none`} placeholder="Current Status" />
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "ক্লিনিকাল ডিটেইলস" : "Clinical Details"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "ক্লিনিকাল ডিটেইলস" : "Clinical Details"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "হাসপাতালের নাম" : "Hospital Name"}</label>
-                      <input type="text" {...register("hospitalName")} className={`w-full neu-input ${errors.hospitalName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Hospital Name" />
+                      <input type="text" {...register("hospitalName")} className={`w-full neu-input ${errors.hospitalName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Hospital Name" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ডিপার্টমেন্ট" : "Department"}</label>
-                      <input type="text" {...register("hospitalDepartment")} className={`w-full neu-input ${errors.hospitalDepartment ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Cardiology" />
+                      <input type="text" {...register("hospitalDepartment")} className={`w-full neu-input ${errors.hospitalDepartment ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Cardiology" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রেফারিং ডাক্তারের নাম" : "Referring Doctor"}</label>
-                      <input type="text" {...register("referringDoctor")} className={`w-full neu-input ${errors.referringDoctor ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Doctor Name" />
+                      <input type="text" {...register("referringDoctor")} className={`w-full neu-input ${errors.referringDoctor ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Doctor Name" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ডাক্তারের বিএমডিসি (BMDC) রেজিঃ" : "Doctor BMDC Reg."}</label>
-                      <input type="text" {...register("doctorBmdc")} className={`w-full neu-input ${errors.doctorBmdc ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Reg. Number" />
+                      <input type="text" {...register("doctorBmdc")} className={`w-full neu-input ${errors.doctorBmdc ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Reg. Number" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "চিকিৎসার ধরন" : "Treatment Type"}</label>
-                    <input type="text" {...register("treatmentType")} className={`w-full neu-input ${errors.treatmentType ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Surgery, ICU" />
+                    <input type="text" {...register("treatmentType")} className={`w-full neu-input ${errors.treatmentType ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="e.g. Surgery, ICU" />
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "আর্থিক জরুরি অবস্থা" : "Financial Emergency"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "আর্থিক জরুরি অবস্থা" : "Financial Emergency"}</h4>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোট এস্টিমেটেড খরচ" : "Total Estimated Cost"}</label>
-                      <input type="number" {...register("estimatedCost")} className={`w-full neu-input ${errors.estimatedCost ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("estimatedCost")} className={`w-full neu-input ${errors.estimatedCost ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নিজে কত টাকা বহন করছেন" : "Applicant's Contribution"}</label>
-                      <input type="number" {...register("applicantContribution")} className={`w-full neu-input ${errors.applicantContribution ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("applicantContribution")} className={`w-full neu-input ${errors.applicantContribution ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ইন্সুরেন্স কভারেজ আছে কি?" : "Insurance Coverage?"}</label>
-                      <select {...register("insuranceCoverage")} className={`w-full neu-input ${errors.insuranceCoverage ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`}>
+                      <select {...register("insuranceCoverage")} className={`w-full neu-input ${errors.insuranceCoverage ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`}>
                         <option value="">{isBn ? "নির্বাচন করুন" : "Select"}</option>
                         <option value="yes">{isBn ? "হ্যাঁ" : "Yes"}</option>
                         <option value="no">{isBn ? "না" : "No"}</option>
@@ -2480,16 +2480,16 @@ export default function ApplyLoan() {
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ইন্সুরেন্স কত দিচ্ছে" : "Insurance Amount"}</label>
-                      <input type="number" {...register("insuranceAmount")} className={`w-full neu-input ${errors.insuranceAmount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                      <input type="number" {...register("insuranceAmount")} className={`w-full neu-input ${errors.insuranceAmount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ঘাটতি বা লোনের পরিমাণ" : "Shortfall/Loan Amount"}</label>
-                    <input type="number" {...register("shortfallAmount")} className={`w-full neu-input ${errors.shortfallAmount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
+                    <input type="number" {...register("shortfallAmount")} className={`w-full neu-input ${errors.shortfallAmount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "এইচআর/কলিগের জরুরি কন্টাক্ট নম্বর" : "HR/Colleague Emergency Contact"}</label>
-                    <input type="text" {...register("hrContactNumber")} className={`w-full neu-input ${errors.hrContactNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="01XXX-XXXXXX" />
+                    <input type="text" {...register("hrContactNumber")} className={`w-full neu-input ${errors.hrContactNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="01XXX-XXXXXX" />
                   </div>
                 </div>
               </>
@@ -2512,12 +2512,12 @@ export default function ApplyLoan() {
           <div className="space-y-3 text-xs">
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ব্যাংকের নাম" : "Bank Name"}</label>
-              <input type="text" {...register("bankName")} className={`w-full neu-input ${errors.bankName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="DBBL / BRAC Bank / Islami Bank" />
+              <input type="text" {...register("bankName")} className={`w-full neu-input ${errors.bankName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="DBBL / BRAC Bank / Islami Bank" />
               <ErrorText field="bankName" />
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "একাউন্টের নাম" : "Account Name"}</label>
-              <input type="text" {...register("accountName")} className={`w-full neu-input ${errors.accountName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Account Holder Name" />
+              <input type="text" {...register("accountName")} className={`w-full neu-input ${errors.accountName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Account Holder Name" />
               <ErrorText field="accountName" />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -2528,13 +2528,13 @@ export default function ApplyLoan() {
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "রাউটিং নাম্বার (ঐচ্ছিক)" : "Routing Number (Optional)"}</label>
-                <input type="text" {...register("routingNumber")} className={`w-full neu-input ${errors.routingNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Routing Number" />
+                <input type="text" {...register("routingNumber")} className={`w-full neu-input ${errors.routingNumber ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Routing Number" />
                 <ErrorText field="routingNumber" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল ব্যাংকিং নম্বর (বিকাশ/নগদ) (ঐচ্ছিক)" : "Mobile Banking Number (bKash/Nagad) (Optional)"}</label>
-              <input type="tel" {...register("mobileBanking")} className={`w-full neu-input ${errors.mobileBanking ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
+              <input type="tel" {...register("mobileBanking")} className={`w-full neu-input ${errors.mobileBanking ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
               <ErrorText field="mobileBanking" />
             </div>
           </div>
@@ -2555,24 +2555,24 @@ export default function ApplyLoan() {
           <div className="space-y-3 text-xs">
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নমিনির নাম" : "Nominee Name"}</label>
-              <input type="text" {...register("nomineeName")} className={`w-full neu-input ${errors.nomineeName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="Nominee Name" />
+              <input type="text" {...register("nomineeName")} className={`w-full neu-input ${errors.nomineeName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Nominee Name" />
               <ErrorText field="nomineeName" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "সম্পর্ক" : "Relationship"}</label>
-                <input type="text" {...register("nomineeRelation")} className={`w-full neu-input ${errors.nomineeRelation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: ভাই / স্ত্রী" : "e.g. Brother / Wife"} />
+                <input type="text" {...register("nomineeRelation")} className={`w-full neu-input ${errors.nomineeRelation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: ভাই / স্ত্রী" : "e.g. Brother / Wife"} />
                 <ErrorText field="nomineeRelation" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল নাম্বার" : "Mobile Number"}</label>
-                <input type="text" {...register("nomineeMobile")} className={`w-full neu-input ${errors.nomineeMobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
+                <input type="text" {...register("nomineeMobile")} className={`w-full neu-input ${errors.nomineeMobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
                 <ErrorText field="nomineeMobile" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "NID নম্বর" : "NID Number"}</label>
-              <input type="text" {...register("nomineeNid")} className={`w-full neu-input ${errors.nomineeNid ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-850 dark:text-white font-medium outline-none transition-all`} placeholder="নমিনির এনআইডি নম্বর" />
+              <input type="text" {...register("nomineeNid")} className={`w-full neu-input ${errors.nomineeNid ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="নমিনির এনআইডি নম্বর" />
               <ErrorText field="nomineeNid" />
             </div>
           </div>
@@ -2593,74 +2593,74 @@ export default function ApplyLoan() {
           >
             <div className="space-y-4 text-xs">
               <div>
-                <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "গ্যারান্টর ১ (পরিবারের সদস্য/আত্মীয়)" : "Guarantor 1 (Family/Relative)"}</h4>
+                <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "গ্যারান্টর ১ (পরিবারের সদস্য/আত্মীয়)" : "Guarantor 1 (Family/Relative)"}</h4>
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নাম" : "Name"}</label>
-                      <input type="text" {...register("g1Name")} className={`w-full neu-input ${errors.g1Name ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Name" />
+                      <input type="text" {...register("g1Name")} className={`w-full neu-input ${errors.g1Name ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Name" />
                       <ErrorText field="g1Name" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "সম্পর্ক" : "Relation"}</label>
-                      <input type="text" {...register("g1Relation")} className={`w-full neu-input ${errors.g1Relation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Relation" />
+                      <input type="text" {...register("g1Relation")} className={`w-full neu-input ${errors.g1Relation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Relation" />
                       <ErrorText field="g1Relation" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "এনআইডি" : "NID"}</label>
-                      <input type="text" {...register("g1Nid")} className={`w-full neu-input ${errors.g1Nid ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="NID No" />
+                      <input type="text" {...register("g1Nid")} className={`w-full neu-input ${errors.g1Nid ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="NID No" />
                       <ErrorText field="g1Nid" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল" : "Mobile"}</label>
-                      <input type="tel" {...register("g1Mobile")} className={`w-full neu-input ${errors.g1Mobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
+                      <input type="tel" {...register("g1Mobile")} className={`w-full neu-input ${errors.g1Mobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
                       <ErrorText field="g1Mobile" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ঠিকানা" : "Address"}</label>
-                    <input type="text" {...register("g1Address")} className={`w-full neu-input ${errors.g1Address ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Address" />
+                    <input type="text" {...register("g1Address")} className={`w-full neu-input ${errors.g1Address ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Address" />
                     <ErrorText field="g1Address" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পেশা" : "Profession"}</label>
-                    <input type="text" {...register("g1Profession")} className={`w-full neu-input ${errors.g1Profession ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Profession" />
+                    <input type="text" {...register("g1Profession")} className={`w-full neu-input ${errors.g1Profession ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Profession" />
                     <ErrorText field="g1Profession" />
                   </div>
                 </div>
               </div>
 
               <div className="pt-2">
-                <h4 className="text-sm font-bold text-gray-905 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "গ্যারান্টর ২ (সহকর্মী/অফিসিয়াল)" : "Guarantor 2 (Colleague/Official)"}</h4>
+                <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "গ্যারান্টর ২ (সহকর্মী/অফিসিয়াল)" : "Guarantor 2 (Colleague/Official)"}</h4>
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "নাম" : "Name"}</label>
-                      <input type="text" {...register("g2Name")} className={`w-full neu-input ${errors.g2Name ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Name" />
+                      <input type="text" {...register("g2Name")} className={`w-full neu-input ${errors.g2Name ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Name" />
                       <ErrorText field="g2Name" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পদবী" : "Designation"}</label>
-                      <input type="text" {...register("g2Designation")} className={`w-full neu-input ${errors.g2Designation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Designation" />
+                      <input type="text" {...register("g2Designation")} className={`w-full neu-input ${errors.g2Designation ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Designation" />
                       <ErrorText field="g2Designation" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "অফিসিয়াল আইডি" : "Official ID"}</label>
-                    <input type="text" {...register("g2OfficialId")} className={`w-full neu-input ${errors.g2OfficialId ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="ID No" />
+                    <input type="text" {...register("g2OfficialId")} className={`w-full neu-input ${errors.g2OfficialId ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="ID No" />
                     <ErrorText field="g2OfficialId" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "অফিসিয়াল ইমেইল" : "Official Email"}</label>
-                      <input type="email" {...register("g2Email")} className={`w-full neu-input ${errors.g2Email ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="Email" />
+                      <input type="email" {...register("g2Email")} className={`w-full neu-input ${errors.g2Email ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Email" />
                       <ErrorText field="g2Email" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "মোবাইল" : "Mobile"}</label>
-                      <input type="tel" {...register("g2Mobile")} className={`w-full neu-input ${errors.g2Mobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-805 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
+                      <input type="tel" {...register("g2Mobile")} className={`w-full neu-input ${errors.g2Mobile ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="01XXXXXXXXX" />
                       <ErrorText field="g2Mobile" />
                     </div>
                   </div>
@@ -2711,10 +2711,10 @@ export default function ApplyLoan() {
           className={`w-full transition-all border-2 ${
             documents[id] 
               ? 'border-solid border-green-500 bg-green-50/10 dark:bg-green-950/5' 
-              : 'border-dashed border-white/60 dark:border-white/5 bg-gray-100/10 dark:bg-gray-950/10'
+              : 'border-dashed border-slate-200 dark:border-slate-800 dark:border-white/5 bg-gray-100/10 dark:bg-gray-950/10'
           } rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:scale-[1.01] transition-all cursor-pointer text-center block bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
         >
-           <div className={`w-10 h-10 ${documents[id] ? 'neu-badge-green border-white/20' : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700'} transition-colors rounded-full flex items-center justify-center shadow-sm mx-auto`}>
+           <div className={`w-10 h-10 ${documents[id] ? 'neu-badge-green border-slate-200 dark:border-slate-800' : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700'} transition-colors rounded-full flex items-center justify-center shadow-sm mx-auto`}>
              {isUploading ? (
                <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
              ) : documents[id] ? (
@@ -2752,8 +2752,8 @@ export default function ApplyLoan() {
       </div>
 
       {/* Uploads Block */}
-      <div className={`transition-all rounded-2xl border ${flaggedSections.documents ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-white/60 dark:border-white/5'} p-4 space-y-4 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm`}>
-        <h3 className="font-bold text-gray-805 dark:text-gray-200 text-sm border-b border-gray-200/50 dark:border-gray-800 transition-colors pb-2">{isBn ? "পরিচয়পত্র ও ছবি" : "Identity Documents & Photos"}</h3>
+      <div className={`transition-all rounded-2xl border ${flaggedSections.documents ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-200 dark:border-slate-800 dark:border-white/5'} p-4 space-y-4 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm`}>
+        <h3 className="font-bold text-gray-800 dark:text-gray-200 text-sm border-b border-gray-200/50 dark:border-gray-800 transition-colors pb-2">{isBn ? "পরিচয়পত্র ও ছবি" : "Identity Documents & Photos"}</h3>
         
         {/* Upload Slot Grid */}
         <div className="grid grid-cols-2 gap-3">
@@ -2769,8 +2769,8 @@ export default function ApplyLoan() {
       </div>
 
       {/* Income Proofs Block */}
-      <div className="rounded-2xl border border-white/60 dark:border-white/5 p-4 space-y-4 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm">
-        <h3 className="font-bold text-gray-805 dark:text-gray-200 text-sm border-b border-gray-200/50 dark:border-gray-800 transition-colors pb-2">
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 dark:border-white/5 p-4 space-y-4 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm">
+        <h3 className="font-bold text-gray-800 dark:text-gray-200 text-sm border-b border-gray-200/50 dark:border-gray-800 transition-colors pb-2">
           {isBn ? "আয়ের প্রমাণপত্র" : "Income Proof"} ({category?.title})
         </h3>
         <div className="grid grid-cols-1 gap-3">
@@ -2786,7 +2786,7 @@ export default function ApplyLoan() {
               </div>
 
               <div className="border-t border-gray-200/50 dark:border-gray-800 pt-4">
-                <h4 className="text-xs font-bold text-gray-805 dark:text-gray-300 mb-3">{isBn ? "গ্যারান্টর ১ ডকুমেন্টস" : "Guarantor 1 Documents"}</h4>
+                <h4 className="text-xs font-bold text-gray-800 dark:text-gray-300 mb-3">{isBn ? "গ্যারান্টর ১ ডকুমেন্টস" : "Guarantor 1 Documents"}</h4>
                 <div className="grid grid-cols-2 gap-3">
                   {renderFileUploader("guarantor1_nid", isBn ? "এনআইডি কপি" : "NID Copy")}
                   {renderFileUploader("guarantor1_photo", isBn ? "পাসপোর্ট সাইজ ছবি" : "Photo")}
@@ -2795,7 +2795,7 @@ export default function ApplyLoan() {
               </div>
 
               <div className="border-t border-gray-200/50 dark:border-gray-800 pt-4">
-                <h4 className="text-xs font-bold text-gray-805 dark:text-gray-300 mb-3">{isBn ? "গ্যারান্টর ২ ডকুমেন্টস" : "Guarantor 2 Documents"}</h4>
+                <h4 className="text-xs font-bold text-gray-800 dark:text-gray-300 mb-3">{isBn ? "গ্যারান্টর ২ ডকুমেন্টস" : "Guarantor 2 Documents"}</h4>
                 <div className="grid grid-cols-2 gap-3">
                   {renderFileUploader("guarantor2_nid", isBn ? "এনআইডি কপি" : "NID Copy")}
                   {renderFileUploader("guarantor2_photo", isBn ? "পাসপোর্ট সাইজ ছবি" : "Photo")}
@@ -2816,7 +2816,7 @@ export default function ApplyLoan() {
                 {renderFileUploader("audited_financials", isBn ? "অডিটেড ফাইন্যান্সিয়ালস (৩ বছর)" : "Audited Financials (3 Yrs)")}
               </div>
               <div className="border-t border-gray-200/50 dark:border-gray-800 pt-4">
-                <h4 className="text-xs font-bold text-gray-805 dark:text-gray-300 mb-3">{isBn ? "পার্টনার/ডিরেক্টরদের KYC" : "Partners/Directors KYC"}</h4>
+                <h4 className="text-xs font-bold text-gray-800 dark:text-gray-300 mb-3">{isBn ? "পার্টনার/ডিরেক্টরদের KYC" : "Partners/Directors KYC"}</h4>
                 <div className="grid grid-cols-2 gap-3">
                   {renderFileUploader("director_kyc", isBn ? "NID, ছবি ও e-TIN (একসাথে স্ক্যান)" : "NID, Photo & e-TIN (Combined)")}
                 </div>
@@ -2884,13 +2884,13 @@ export default function ApplyLoan() {
       </div>
 
       {/* Review Details Summary Card */}
-      <div className="rounded-2xl border border-white/60 dark:border-white/5 overflow-hidden mt-4 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 dark:border-white/5 overflow-hidden mt-4 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="bg-gray-100/40 dark:bg-gray-900/20 p-4 border-b border-gray-200/50 dark:border-gray-800 flex justify-between items-center">
           <div className="flex items-center gap-2">
             {category?.icon && <category.icon size={18} className="text-gray-500" />}
-            <span className="font-bold text-sm text-gray-850 dark:text-gray-205">{category?.title} লোন</span>
+            <span className="font-bold text-sm text-gray-800 dark:text-gray-200">{category?.title} লোন</span>
           </div>
-          <span className="text-xs font-bold neu-badge-purple border-white/20 px-2.5 py-1 rounded-full">New</span>
+          <span className="text-xs font-bold neu-badge-purple border-slate-200 dark:border-slate-800 px-2.5 py-1 rounded-full">New</span>
         </div>
         
         <div className="p-4 divide-y divide-gray-200/40 dark:divide-gray-700/50">
@@ -2944,7 +2944,7 @@ export default function ApplyLoan() {
       animate={{ opacity: 1, scale: 1 }}
       className="text-center py-10 px-5 space-y-6"
     >
-      <div className="w-24 h-24 neu-badge-green border-white/20 rounded-full flex items-center justify-center mx-auto mb-6 text-white shadow-lg">
+      <div className="w-24 h-24 neu-badge-green border-slate-200 dark:border-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-white shadow-lg">
         <CheckCircle2 size={48} strokeWidth={2.5} />
       </div>
       <div>
@@ -3004,7 +3004,7 @@ export default function ApplyLoan() {
     <div className="min-h-full bg-slate-50 dark:bg-[#0b1220] transition-colors flex flex-col relative">
       {/* Dynamic Header */}
       {step < 5 && (
-        <div className="px-5 pt-6 pb-4 sticky top-0 z-30 flex items-center justify-between border-b border-gray-200/30 dark:border-gray-850/50">
+        <div className="px-5 pt-6 pb-4 sticky top-0 z-30 flex items-center justify-between border-b border-gray-200/30 dark:border-gray-800/50">
            {step > 1 ? (
              <button onClick={prevStep} className="p-2 -ml-2 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
                <ChevronLeft size={20} />
@@ -3096,7 +3096,7 @@ export default function ApplyLoan() {
               {(verificationStage === 'confirm' || verificationStage === 'failed') && (
                 <button 
                   onClick={handleCloseVerification}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-white p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-805 transition-colors cursor-pointer"
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-white p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                 >
                   <X size={18} />
                 </button>
@@ -3108,13 +3108,13 @@ export default function ApplyLoan() {
               {verificationStage === 'confirm' && (
                 <>
                   <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                    <h4 className="font-bold text-gray-905 dark:text-white text-xs">
+                    <h4 className="font-bold text-gray-900 dark:text-white text-xs">
                       {isBn ? 'লোন ও আবেদনকারী সারসংক্ষেপ' : 'Loan & Applicant Summary'}
                     </h4>
                     <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-600 dark:text-gray-400">
                       <div>
                         <span className="block text-[10px] text-gray-400">{isBn ? 'ঋণ ক্যাটাগরি' : 'Category'}</span>
-                        <span className="font-bold text-gray-805 dark:text-gray-200 capitalize">{category?.title}</span>
+                        <span className="font-bold text-gray-800 dark:text-gray-200 capitalize">{category?.title}</span>
                       </div>
                       <div>
                         <span className="block text-[10px] text-gray-400">{isBn ? 'ঋণের পরিমাণ' : 'Amount'}</span>
@@ -3122,7 +3122,7 @@ export default function ApplyLoan() {
                       </div>
                       <div>
                         <span className="block text-[10px] text-gray-400">{isBn ? 'সময়কাল' : 'Tenure'}</span>
-                        <span className="font-bold text-gray-805 dark:text-gray-200">{convertDigits(tenure, isBn)} {isBn ? 'মাস' : 'Months'}</span>
+                        <span className="font-bold text-gray-800 dark:text-gray-200">{convertDigits(tenure, isBn)} {isBn ? 'মাস' : 'Months'}</span>
                       </div>
                       <div>
                         <span className="block text-[10px] text-gray-400">{isBn ? 'মাসিক কিস্তি' : 'Monthly EMI'}</span>
@@ -3133,7 +3133,7 @@ export default function ApplyLoan() {
 
                   {/* Summary Warnings Checklist */}
                   <div className="space-y-3 pt-2">
-                    <h4 className="font-bold text-gray-805 dark:text-gray-200 text-xs border-b border-gray-150 dark:border-gray-700 pb-2">
+                    <h4 className="font-bold text-gray-800 dark:text-gray-200 text-xs border-b border-gray-100 dark:border-gray-700 pb-2">
                       {isBn ? 'আইনি ঘোষণা ও সতর্কবার্তা চেকলিস্ট' : 'Legal Declaration & Warnings Checklist'}
                     </h4>
                     <p className="text-[10px] text-gray-400 leading-normal">
@@ -3238,7 +3238,7 @@ export default function ApplyLoan() {
                     {/* Glowing inner spin reverse */}
                     <div className="absolute inset-2 rounded-full border-4 border-t-transparent border-r-transparent border-b-blue-500 border-l-blue-400 animate-spin duration-1500" style={{ animationDirection: 'reverse' }}></div>
                     {/* Glass Circle + Gradient SVG "P" Logo */}
-                    <div className="w-20 h-20 bg-white/10 dark:bg-gray-900/40 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg border border-white/20">
+                    <div className="w-20 h-20 bg-white/10 dark:bg-gray-900/40 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg border border-slate-200 dark:border-slate-800">
                       <svg className="w-9 h-9 text-emerald-500 filter drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                         <path d="M8 20V4h6a4 4 0 0 1 0 8H8" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
@@ -3325,7 +3325,7 @@ export default function ApplyLoan() {
               {/* STAGE 3: Success Visuals */}
               {verificationStage === 'success' && (
                 <div className="text-center py-8 space-y-4">
-                  <div className="w-20 h-20 neu-badge-green border-white/20 rounded-full flex items-center justify-center mx-auto text-white shadow-lg">
+                  <div className="w-20 h-20 neu-badge-green border-slate-200 dark:border-slate-800 rounded-full flex items-center justify-center mx-auto text-white shadow-lg">
                     <CheckCircle2 size={44} strokeWidth={2.5} />
                   </div>
                   <div>
@@ -3351,10 +3351,10 @@ export default function ApplyLoan() {
                     <X size={40} strokeWidth={2.5} />
                   </button>
                   <div>
-                    <h4 className="text-lg font-black text-rose-600 dark:text-rose-450">
+                    <h4 className="text-lg font-black text-rose-600 dark:text-rose-400">
                       {isBn ? 'যাচাইকরণ ব্যর্থ!' : 'Verification Failed'}
                     </h4>
-                    <div className="bg-rose-50 dark:bg-rose-950/20 text-rose-705 dark:text-rose-450 p-4 rounded-2xl border border-rose-100 dark:border-rose-900/40 text-left mt-4 text-[11px] leading-relaxed font-semibold">
+                    <div className="bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 p-4 rounded-2xl border border-rose-100 dark:border-rose-900/40 text-left mt-4 text-[11px] leading-relaxed font-semibold">
                       <p className="flex items-center gap-1 mb-1 font-black uppercase tracking-wider text-[9px]"><AlertCircle size={12} /> {isBn ? 'ব্যর্থতার কারণ:' : 'Error details:'}</p>
                       {verifyingError}
                     </div>
@@ -3374,7 +3374,7 @@ export default function ApplyLoan() {
         )}
       {/* Local Terms Modal */}
       {showTermsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-hidden text-gray-805 dark:text-gray-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-hidden text-gray-800 dark:text-gray-200">
           <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -3490,7 +3490,7 @@ export default function ApplyLoan() {
             <div className="bg-gray-100/40 dark:bg-gray-950/20 px-6 py-4 border-t border-gray-200/50 dark:border-gray-800 flex justify-end shrink-0">
               <button 
                 onClick={() => setShowTermsModal(false)}
-                className="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-850 dark:text-white rounded-xl font-bold text-xs"
+                className="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-800 dark:text-white rounded-xl font-bold text-xs"
               >
                 {isBn ? 'বন্ধ করুন' : 'Close'}
               </button>
