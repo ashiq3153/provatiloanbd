@@ -76,7 +76,7 @@ export default function Profile() {
   }) => {
     const content = (
       <>
-        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+        <div className={`profile-row-icon w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
           tone === 'danger'
             ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
             : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
@@ -105,7 +105,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="profile-theme min-h-full bg-[#f6f8fc] dark:bg-[#0b1220] text-slate-900 dark:text-slate-100 pb-[calc(6rem+env(safe-area-inset-bottom))] transition-colors">
+    <div className="profile-theme min-h-full bg-white dark:bg-black text-slate-900 dark:text-slate-100 pb-[calc(6rem+env(safe-area-inset-bottom))] transition-colors">
       {/* Profile identity */}
       <section className="px-4 pt-4">
         <motion.div
