@@ -1102,6 +1102,36 @@ body {
   -webkit-backdrop-filter: none !important;
 }
 
+/* Dark mode must override legacy light .bg-white utilities. This is the
+   key separation between page, section and card in the approved dark theme. */
+.dark .user-app-shell .bg-white,
+.dark .user-app-shell [class*="bg-white/"] {
+  background: var(--ui-dark-card) !important;
+  background-image: none !important;
+  border-color: var(--ui-dark-border) !important;
+  color: var(--ui-dark-text) !important;
+  box-shadow: 0 10px 24px rgba(0,0,0,.24) !important;
+}
+
+/* Dark sections stay one step lighter than the page, while cards stay
+   another step lighter so the hierarchy is visible without grey wash. */
+.dark .user-app-shell section {
+  background: var(--ui-dark-section);
+  color: var(--ui-dark-text);
+}
+.dark .profile-theme section > div,
+.dark .profile-theme section > button,
+.dark .profile-theme .profile-card {
+  background: var(--ui-dark-card) !important;
+  color: var(--ui-dark-text) !important;
+  border-color: var(--ui-dark-border) !important;
+}
+.dark .apply-loan-screen .apply-accordion-body,
+.dark .apply-loan-screen section {
+  background: var(--ui-dark-section) !important;
+  color: var(--ui-dark-text) !important;
+}
+
 /* Secondary/nested surfaces. */
 .user-app-shell .neu-sunken,
 .user-app-shell [class*="bg-gray-50"],
