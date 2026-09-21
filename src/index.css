@@ -89,7 +89,7 @@
     transform: none !important;
   }
   #root {
-    @apply h-screen w-screen sm:p-4 flex items-center justify-center;
+    @apply h-screen w-screen p-0 flex items-stretch justify-stretch;
   }
 }
 
@@ -856,6 +856,58 @@ body {
 }
 
 .user-app-shell .address-widget {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+
+/* Final viewport edge-to-edge correction.
+   The previous responsive root padding created a visible frame around
+   the entire Mini App on some Telegram WebView sizes. */
+html, body, #root {
+  width: 100vw !important;
+  min-width: 100vw !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+#root {
+  padding: 0 !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+}
+
+.user-app-shell {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* Application forms: use one controlled page gutter instead of
+   stacking the page gutter + accordion gutter. */
+.apply-loan-screen {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.apply-loan-content {
+  padding-inline: 12px !important;
+}
+
+.apply-accordion-body {
+  padding-inline: 0 !important;
+  background: transparent !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+}
+
+.apply-accordion-body > * {
+  min-width: 0;
+}
+
+.apply-accordion-body .address-widget {
   width: 100% !important;
   max-width: none !important;
 }
