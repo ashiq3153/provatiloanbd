@@ -217,7 +217,7 @@ export default function Withdraw() {
               value={amount} 
               onChange={(e) => setAmount(e.target.value)} 
               placeholder="0.00" 
-              className="w-full pl-12 pr-4 py-4 neu-input rounded-full outline-none font-black text-2xl text-gray-900 dark:text-white transition-all" 
+              className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-full outline-none font-black text-2xl text-gray-900 dark:text-white transition-all" 
             />
           </div>
         </motion.div>
@@ -287,7 +287,7 @@ export default function Withdraw() {
                     value={newBankName} 
                     onChange={e => setNewBankName(e.target.value)} 
                     placeholder={isBn ? 'যেমন: ইসলামী ব্যাংক' : 'e.g. Islami Bank'}
-                    className="w-full neu-input rounded-full px-4 py-2 text-xs font-bold text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-full px-4 py-2 text-xs font-bold text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -298,7 +298,7 @@ export default function Withdraw() {
                     value={newAccountName} 
                     onChange={e => setNewAccountName(e.target.value)} 
                     placeholder={isBn ? 'যেমন: আরিফ হোসেন' : 'e.g. Arif Hossain'}
-                    className="w-full neu-input rounded-full px-4 py-2 text-xs font-bold text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-full px-4 py-2 text-xs font-bold text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -309,7 +309,7 @@ export default function Withdraw() {
                     value={newAccountNumber} 
                     onChange={e => setNewAccountNumber(e.target.value)} 
                     placeholder="1234567890"
-                    className="w-full neu-input rounded-full px-4 py-2 text-xs font-mono text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-full px-4 py-2 text-xs font-mono text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -319,7 +319,7 @@ export default function Withdraw() {
                     value={newRoutingNumber} 
                     onChange={e => setNewRoutingNumber(e.target.value)} 
                     placeholder="123456"
-                    className="w-full neu-input rounded-full px-4 py-2 text-xs font-mono text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-full px-4 py-2 text-xs font-mono text-gray-900 dark:text-white focus:border-primary-500 outline-none transition-all"
                   />
                 </div>
                 <div className="flex gap-2 pt-1">
@@ -441,7 +441,7 @@ export default function Withdraw() {
                         </p>
                       </div>
                     </div>
-                    <span className={depositStatus.processingFee ? 'neu-badge-green px-2.5 py-1 text-[10px] rounded-full font-bold' : 'neu-badge-orange px-2.5 py-1 text-[10px] rounded-full font-bold'}>
+                    <span className={depositStatus.processingFee ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 text-[10px] rounded-full font-bold' : 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 px-2.5 py-1 text-[10px] rounded-full font-bold'}>
                       {depositStatus.processingFee ? (isBn ? 'সম্পন্ন' : 'Completed') : (isBn ? 'বকেয়া' : 'Pending')}
                     </span>
                   </div>
@@ -460,7 +460,7 @@ export default function Withdraw() {
                         </p>
                       </div>
                     </div>
-                    <span className={depositStatus.securityDeposit ? 'neu-badge-green px-2.5 py-1 text-[10px] rounded-full font-bold' : 'neu-badge-red px-2.5 py-1 text-[10px] rounded-full font-bold'}>
+                    <span className={depositStatus.securityDeposit ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 text-[10px] rounded-full font-bold' : 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 px-2.5 py-1 text-[10px] rounded-full font-bold'}>
                       {depositStatus.securityDeposit ? (isBn ? 'সম্পন্ন' : 'Completed') : (isBn ? 'বকেয়া' : 'Pending')}
                     </span>
                   </div>
