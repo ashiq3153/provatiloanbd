@@ -26,13 +26,13 @@ export default function Terms() {
   ];
 
   return (
-    <div className="h-full w-full overflow-y-auto neu-bg flex flex-col relative transition-colors font-sans pb-12">
+    <div className="h-full w-full overflow-y-auto bg-slate-50 dark:bg-[#0b1220] flex flex-col relative transition-colors font-sans pb-12">
       {/* Premium Neumorphic Header */}
-      <div className="px-5 py-4 sticky top-0 z-30 flex items-center justify-between bg-transparent shrink-0">
+      <div className="px-5 py-4 sticky top-0 z-30 flex items-center justify-between bg-slate-50 dark:bg-[#0b1220] shrink-0 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full neu-btn flex items-center justify-center text-gray-700 dark:text-gray-300 active:scale-95 transition-all border-0 cursor-pointer"
+            className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-gray-700 dark:text-gray-300 active:scale-95 transition-all border-0 cursor-pointer"
           >
             <ArrowLeft size={18} />
           </button>
@@ -47,16 +47,16 @@ export default function Terms() {
         </div>
         
         {/* Language Switcher */}
-        <div className="flex neu-sunken rounded-2xl p-1 border-0">
+        <div className="flex bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-1 border-0">
           <button
             onClick={() => setCurrentLang('bn')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all border-0 cursor-pointer ${currentLang === 'bn' ? 'neu-btn-primary shadow-none' : 'text-gray-500 dark:text-gray-400 bg-transparent hover:text-gray-900 dark:hover:text-white'}`}
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all border-0 cursor-pointer ${currentLang === 'bn' ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-sm shadow-none' : 'text-gray-500 dark:text-gray-400 bg-transparent hover:text-gray-900 dark:hover:text-white'}`}
           >
             বাংলা
           </button>
           <button
             onClick={() => setCurrentLang('en')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all border-0 cursor-pointer ${currentLang === 'en' ? 'neu-btn-primary shadow-none' : 'text-gray-500 dark:text-gray-400 bg-transparent hover:text-gray-900 dark:hover:text-white'}`}
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all border-0 cursor-pointer ${currentLang === 'en' ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-sm shadow-none' : 'text-gray-500 dark:text-gray-400 bg-transparent hover:text-gray-900 dark:hover:text-white'}`}
           >
             EN
           </button>
@@ -65,7 +65,7 @@ export default function Terms() {
 
       <div className="flex-1 max-w-5xl w-full mx-auto p-4 flex flex-col md:flex-row gap-6 relative">
         {/* Table of Contents sidebar */}
-        <aside className="w-full md:w-64 shrink-0 md:sticky md:top-24 h-max space-y-2 neu-raised p-4 rounded-[24px] border-0 transition-colors bg-transparent">
+        <aside className="w-full md:w-64 shrink-0 md:sticky md:top-24 h-max space-y-2 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm p-4 rounded-[24px] border-0 transition-colors bg-transparent">
           <p className="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 px-3 tracking-widest mb-3">
             {isBn ? 'সূচিপত্র' : 'Table of Contents'}
           </p>
@@ -73,7 +73,7 @@ export default function Terms() {
             onClick={() => setActiveSection('all')}
             className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-black transition-all border-0 cursor-pointer ${
               activeSection === 'all' 
-                ? 'neu-btn-primary shadow-none' 
+                ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-sm shadow-none' 
                 : 'text-gray-600 dark:text-gray-400 bg-transparent hover:text-gray-900 dark:hover:text-white'
             }`}
           >
@@ -88,7 +88,7 @@ export default function Terms() {
                 onClick={() => setActiveSection(s.id)}
                 className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 border-0 cursor-pointer ${
                   isSel 
-                    ? 'neu-btn-primary shadow-none' 
+                    ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-sm shadow-none' 
                     : 'text-gray-600 dark:text-gray-400 bg-transparent hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
@@ -103,7 +103,7 @@ export default function Terms() {
         <div className="flex-1 space-y-6">
           {/* Section 1: Terms & Conditions */}
           {(activeSection === 'all' || activeSection === 'terms') && (
-            <section className="neu-raised rounded-[24px] p-5 space-y-4 border-0 transition-colors">
+            <section className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 space-y-4 border-0 transition-colors">
               <h2 className="text-base font-black text-gray-900 dark:text-white border-b border-gray-150 dark:border-gray-800 pb-3 flex items-center gap-2">
                 <FileText className="text-primary-500" size={20} />
                 {isBn ? '১. নিয়ম ও শর্তাবলী' : '1. Terms & Conditions'}
@@ -126,7 +126,7 @@ export default function Terms() {
 
           {/* Section 2: Loan Guidelines */}
           {(activeSection === 'all' || activeSection === 'guidelines') && (
-            <section className="neu-raised rounded-[24px] p-5 space-y-4 border-0 transition-colors">
+            <section className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 space-y-4 border-0 transition-colors">
               <h2 className="text-base font-black text-gray-900 dark:text-white border-b border-gray-150 dark:border-gray-800 pb-3 flex items-center gap-2">
                 <ShieldCheck className="text-primary-500" size={20} />
                 {isBn ? '২. ঋণ নির্দেশিকা' : '2. Loan Guidelines'}
@@ -163,7 +163,7 @@ export default function Terms() {
 
           {/* Section 3: Important Notices */}
           {(activeSection === 'all' || activeSection === 'notices') && (
-            <section className="neu-raised rounded-[24px] p-5 space-y-4 border-0 transition-colors">
+            <section className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 space-y-4 border-0 transition-colors">
               <h2 className="text-base font-black text-gray-900 dark:text-white border-b border-gray-150 dark:border-gray-800 pb-3 flex items-center gap-2">
                 <BadgeAlert className="text-amber-500" size={20} />
                 {isBn ? '৩. গুরুত্বপূর্ণ নোটিশ' : '3. Important Notices'}
@@ -188,7 +188,7 @@ export default function Terms() {
 
           {/* Section 4: User Responsibilities */}
           {(activeSection === 'all' || activeSection === 'responsibilities') && (
-            <section className="neu-raised rounded-[24px] p-5 space-y-4 border-0 transition-colors">
+            <section className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 space-y-4 border-0 transition-colors">
               <h2 className="text-base font-black text-gray-900 dark:text-white border-b border-gray-150 dark:border-gray-800 pb-3 flex items-center gap-2">
                 <UserCheck className="text-primary-500" size={20} />
                 {isBn ? '৪. ব্যবহারকারীর দায়িত্ব' : '4. User Responsibilities'}
@@ -213,7 +213,7 @@ export default function Terms() {
 
           {/* Section 5: Savings & Deposit Policies */}
           {(activeSection === 'all' || activeSection === 'deposit_policy') && (
-            <section className="neu-raised rounded-[24px] p-5 space-y-4 border-0 transition-colors">
+            <section className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 space-y-4 border-0 transition-colors">
               <h2 className="text-base font-black text-gray-900 dark:text-white border-b border-gray-150 dark:border-gray-800 pb-3 flex items-center gap-2">
                 <Landmark className="text-primary-500" size={20} />
                 {isBn ? '৫. সঞ্চয় ও ডিপোজিট নীতিমালা' : '5. Savings & Deposit Policies'}
@@ -252,7 +252,7 @@ export default function Terms() {
 
           {/* Section 6: Loan Approval Conditions */}
           {(activeSection === 'all' || activeSection === 'approval_cond') && (
-            <section className="neu-raised rounded-[24px] p-5 space-y-4 border-0 transition-colors">
+            <section className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 space-y-4 border-0 transition-colors">
               <h2 className="text-base font-black text-gray-900 dark:text-white border-b border-gray-150 dark:border-gray-800 pb-3 flex items-center gap-2">
                 <CheckCircle2 className="text-primary-500" size={20} />
                 {isBn ? '৬. ঋণ অনুমোদন শর্তাবলী' : '6. Loan Approval Conditions'}
@@ -279,7 +279,7 @@ export default function Terms() {
 
           {/* Section 7: Withdrawal Conditions */}
           {(activeSection === 'all' || activeSection === 'withdrawal_cond') && (
-            <section className="neu-raised rounded-[24px] p-5 space-y-4 border-0 transition-colors">
+            <section className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 space-y-4 border-0 transition-colors">
               <h2 className="text-base font-black text-gray-900 dark:text-white border-b border-gray-150 dark:border-gray-800 pb-3 flex items-center gap-2">
                 <Landmark className="text-primary-500" size={20} />
                 {isBn ? '৭. লোন উত্তোলন শর্তাবলী' : '7. Withdrawal Conditions'}
@@ -304,7 +304,7 @@ export default function Terms() {
 
           {/* Section 8: Verification Rules */}
           {(activeSection === 'all' || activeSection === 'verification_rules') && (
-            <section className="neu-raised rounded-[24px] p-5 space-y-4 border-0 transition-colors">
+            <section className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 space-y-4 border-0 transition-colors">
               <h2 className="text-base font-black text-gray-900 dark:text-white border-b border-gray-150 dark:border-gray-800 pb-3 flex items-center gap-2">
                 <ShieldCheck className="text-primary-500" size={20} />
                 {isBn ? '৮. যাচাইকরণ নিয়মাবলী' : '8. Verification Rules'}
@@ -327,7 +327,7 @@ export default function Terms() {
 
           {/* Section 9: Privacy Policy */}
           {(activeSection === 'all' || activeSection === 'privacy') && (
-            <section className="neu-raised rounded-[24px] p-5 space-y-4 border-0 transition-colors">
+            <section className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 space-y-4 border-0 transition-colors">
               <h2 className="text-base font-black text-gray-900 dark:text-white border-b border-gray-150 dark:border-gray-800 pb-3 flex items-center gap-2">
                 <ShieldAlert className="text-primary-500" size={20} />
                 {isBn ? '৯. গোপনীয়তা নীতি' : '9. Privacy Policy'}
@@ -350,7 +350,7 @@ export default function Terms() {
 
           {/* Section 10: Warnings & Risk Notices */}
           {(activeSection === 'all' || activeSection === 'warnings') && (
-            <section className="neu-raised rounded-[24px] p-5 space-y-4 border-0 transition-colors">
+            <section className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 space-y-4 border-0 transition-colors">
               <h2 className="text-base font-black text-rose-600 dark:text-rose-400 border-b border-gray-150 dark:border-gray-800 pb-3 flex items-center gap-2">
                 <AlertCircle className="text-rose-500" size={20} />
                 {isBn ? '১০. সতর্কবার্তা ও ঝুঁকি নোটিশ' : '10. Warnings & Risk Notices'}
@@ -373,7 +373,7 @@ export default function Terms() {
 
           {/* Section 11: FAQ */}
           {(activeSection === 'all' || activeSection === 'faq') && (
-            <section className="neu-raised rounded-[24px] p-5 space-y-4 border-0 transition-colors">
+            <section className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 space-y-4 border-0 transition-colors">
               <h2 className="text-base font-black text-gray-900 dark:text-white border-b border-gray-150 dark:border-gray-800 pb-3 flex items-center gap-2">
                 <HelpCircle className="text-primary-500" size={20} />
                 {isBn ? '১১. সাধারণ জিজ্ঞাসা (FAQ)' : '11. FAQ'}
