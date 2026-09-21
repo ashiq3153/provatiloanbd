@@ -649,7 +649,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               className="w-full bg-gradient-to-r from-primary-600 via-primary-500 to-indigo-500 hover:from-primary-700 hover:to-indigo-600 disabled:opacity-50 text-white py-3.5 rounded-full font-black text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 border-0 shadow-[0_8px_24px_rgba(79,70,229,0.22)]"
             >
               {submitted ? (
-                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <span className="w-5 h-5 border-2 border-slate-200 dark:border-slate-800 border-t-white rounded-full animate-spin"></span>
               ) : (
                 isBn ? 'ডিপোজিট রিকোয়েস্ট পাঠান' : 'Submit Deposit Request'
               )}
@@ -661,7 +661,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
 
       {/* Confirmation Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-none-none">
           <motion.div 
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
