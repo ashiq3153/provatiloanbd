@@ -37,7 +37,7 @@ export default function Transactions() {
   const user = getTelegramUser();
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'transactions' | 'applications'>('transactions');
-  const [filter, setFilter] = useState<'all' | 'deposit' | 'withdraw'>('all');
+  const [filter, setFilter] = useState<'all' | 'deposit' | 'withdraw' | 'emi' | 'loan'>('all');
   const [appFilter, setAppFilter] = useState<'all' | 'pending' | 'under_review' | 'approved' | 'rejected' | 'action_required' | 'cancelled'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'amount-high' | 'amount-low'>('newest');
@@ -138,8 +138,6 @@ export default function Transactions() {
     return app.status === appFilter;
   });
 
-  const formatStatusLabel = (status: TransactionStatus) => status === 'completed' ? (isBn ? 'সম্পন্ন' : 'Completed') : status === 'pending' ? (isBn ? 'অপেক্ষমাণ' : 'Pending') : (isBn ? 'ব্যর্থ' : 'Failed');
-
   const getIcon = (type: TransactionType) => {
     switch (type) {
       case 'deposit': return <ArrowDownToLine size={20} />;
@@ -151,10 +149,10 @@ export default function Transactions() {
 
   const getIconStyles = (type: TransactionType) => {
     switch (type) {
-      case 'deposit': return 'neu-sunken text-emerald-600 dark:text-emerald-400 border-white/20';
-      case 'withdraw': return 'neu-sunken text-rose-600 dark:text-rose-400 border-white/20';
-      case 'emi': return 'neu-sunken text-violet-600 dark:text-violet-400 border-white/20';
-      case 'loan': return 'neu-sunken text-blue-600 dark:text-blue-400 border-white/20';
+      case 'deposit': return 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900';
+      case 'withdraw': return 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900';
+      case 'emi': return 'bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-900';
+      case 'loan': return 'bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-900';
     }
   };
 
@@ -238,21 +236,13 @@ export default function Transactions() {
   return (
     <div className="min-h-screen neu-bg flex flex-col relative transition-colors pb-24">
       {/* Premium Header */}
-      {!loading && !error && view === 'transactions' && filteredTransactions.length === 0 && (
-        <div className="mx-4 mt-4 p-6 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 text-center">
-          <div className="mx-auto w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center"><LayoutList size={19} className="text-slate-500"/></div>
-          <p className="text-sm font-black mt-3">{isBn ? 'কোনো লেনদেন পাওয়া যায়নি' : 'No transactions found'}</p>
-          <p className="text-xs text-slate-500 mt-1">{searchQuery ? (isBn ? 'সার্চ বা ফিল্টার পরিবর্তন করে দেখুন।' : 'Try changing your search or filter.') : (isBn ? 'আপনার লেনদেন এখানে দেখা যাবে।' : 'Your transactions will appear here.')}</p>
-        </div>
-      )}
-
       {error && !loading && (
         <div className="mx-4 mt-4 p-4 rounded-2xl bg-white dark:bg-[#111827] border border-rose-200 dark:border-rose-900">
           <div className="flex items-start gap-3"><AlertCircle size={18} className="text-rose-600 mt-0.5"/><div className="min-w-0"><p className="text-sm font-black">{isBn ? 'রেকর্ড লোড হয়নি' : 'Records could not be loaded'}</p><p className="text-xs text-slate-500 mt-1">{error}</p><button onClick={() => window.location.reload()} className="mt-3 px-3 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black">{isBn ? 'আবার চেষ্টা করুন' : 'Try again'}</button></div></div>
         </div>
       )}
 
-      <div className="neu-bg px-5 py-4 sticky top-0 z-30 shadow-md border-b border-white/20 dark:border-white/5 transition-colors flex items-center justify-between">
+      <div className="bg-white dark:bg-[#0f172a] px-5 py-4 sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 transition-colors flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full neu-sunken flex items-center justify-center text-primary-600 dark:text-primary-400">
             <LayoutList size={20} />
@@ -271,12 +261,12 @@ export default function Transactions() {
       <div className="flex-1 w-full min-w-0 px-3 sm:px-5 py-4 sm:py-5 space-y-4 sm:space-y-6">
 
         {/* Tabs */}
-        <div className="flex neu-sunken p-1 rounded-[16px] transition-colors sticky top-2 z-20 backdrop-blur-xl">
+        <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl transition-colors sticky top-2 z-20 border border-slate-200 dark:border-slate-800">
            <button
               onClick={() => setView('transactions')}
               className={`flex-1 py-3 text-sm font-bold rounded-[12px] transition-all flex justify-center items-center gap-2 ${
                 view === 'transactions' 
-                  ? 'neu-raised-sm text-gray-900 dark:text-white' 
+                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' 
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'
               }`}
             >
@@ -287,7 +277,7 @@ export default function Transactions() {
               onClick={() => setView('applications')}
               className={`flex-1 py-3 text-sm font-bold rounded-[12px] transition-all flex justify-center items-center gap-2 ${
                 view === 'applications' 
-                  ? 'neu-raised-sm text-gray-900 dark:text-white' 
+                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' 
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'
               }`}
             >
@@ -383,7 +373,7 @@ export default function Transactions() {
               transition={{ duration: 0.2 }}
             >
               <div className="flex gap-2 mb-4 overflow-x-auto hide-scrollbar pb-2">
-                {(['all', 'deposit', 'withdraw'] as const).map((f) => (
+                {(['all', 'deposit', 'withdraw', 'emi', 'loan'] as const).map((f) => (
                   <button
                     key={f}
                     onClick={() => setFilter(f)}
@@ -393,7 +383,11 @@ export default function Transactions() {
                         : 'neu-btn text-gray-600 dark:text-gray-300'
                     }`}
                   >
-                    {isBn && f === "all" ? "সব" : isBn && f === "deposit" ? "জমা" : isBn && f === "withdraw" ? "উত্তোলন" : f}
+                    {isBn ? ({
+    all: 'সব', deposit: 'জমা', withdraw: 'উত্তোলন', emi: 'EMI', loan: 'লোন'
+  } as Record<string,string>)[f] : ({
+    all: 'All', deposit: 'Deposit', withdraw: 'Withdraw', emi: 'EMI', loan: 'Loan'
+  } as Record<string,string>)[f]}
                   </button>
                 ))}
               </div>
@@ -469,7 +463,7 @@ export default function Transactions() {
               className="space-y-4"
             >
               <div className="flex gap-2 mb-2 overflow-x-auto hide-scrollbar pb-2">
-                {(['all', 'pending', 'approved', 'rejected'] as const).map((f) => (
+                {(['all', 'pending', 'under_review', 'action_required', 'approved', 'rejected', 'cancelled'] as const).map((f) => (
                   <button
                     key={f}
                     onClick={() => setAppFilter(f)}
@@ -479,7 +473,15 @@ export default function Transactions() {
                         : 'neu-btn text-gray-600 dark:text-gray-300'
                     }`}
                   >
-                    {isBn && f === "all" ? "সব" : isBn && f === "pending" ? "অপেক্ষমান" : isBn && f === "approved" ? "অনুমোদিত" : isBn && f === "rejected" ? "বাতিল" : f}
+                    {isBn ? ({
+    all: 'সব', pending: 'জমা হয়েছে', under_review: 'যাচাই চলছে',
+    action_required: 'পদক্ষেপ প্রয়োজন', approved: 'অনুমোদিত',
+    rejected: 'প্রত্যাখ্যাত', cancelled: 'বাতিল'
+  } as Record<string,string>)[f] : ({
+    all: 'All', pending: 'Submitted', under_review: 'Under review',
+    action_required: 'Action required', approved: 'Approved',
+    rejected: 'Rejected', cancelled: 'Cancelled'
+  } as Record<string,string>)[f]}
                   </button>
                 ))}
               </div>
@@ -494,7 +496,7 @@ export default function Transactions() {
                       </div>
                       <Skeleton className="h-8 w-24 rounded-full shrink-0" />
                     </div>
-                    <div className="flex items-center justify-between pt-4 border-t border-white/20 dark:border-white/5 relative z-10">
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700 relative z-10">
                       <div className="space-y-2">
                         <Skeleton className="h-3 w-12" />
                         <Skeleton className="h-6 w-24" />
@@ -523,9 +525,9 @@ export default function Transactions() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     key={app.id}
-                    className="neu-raised p-6 rounded-[24px] transition-all relative overflow-hidden group cursor-pointer hover:scale-[1.005]"
+                    className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 transition-colors relative overflow-hidden group"
                   >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/5 dark:bg-primary-900/5 rounded-bl-full -mr-10 -mt-10 z-0 group-hover:scale-110 transition-transform"></div>
+                    <div className="absolute top-0 right-0 w-28 h-28 bg-sky-50 dark:bg-sky-950/30 rounded-bl-full -mr-8 -mt-8 z-0"></div>
                     
                     <div className="flex justify-between items-start mb-5 relative z-10">
                       <div>
@@ -536,11 +538,11 @@ export default function Transactions() {
                       </div>
                       <div className={`px-3 py-1.5 rounded-full border flex items-center gap-1.5 text-xs font-bold capitalize ${getAppStatusStyles(app.status)}`}>
                          {getAppStatusIcon(app.status)}
-                         {isBn && app.status === "pending" ? "অপেক্ষমান" : isBn && app.status === "approved" ? "অনুমোদিত" : isBn && app.status === "rejected" ? "বাতিল" : app.status}
+                         {getAppStatusLabel(app.status)}
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-white/20 dark:border-white/5 relative z-10">
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700 relative z-10">
                       <div>
                          <p className="text-[11px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mb-0.5">{isBn ? "পরিমাণ" : "Amount"}</p>
                          <p className="font-black text-gray-900 dark:text-white text-xl">{formatCurrency(app.amount, isBn)}</p>
@@ -560,9 +562,17 @@ export default function Transactions() {
                        </div>
                     )}
 
-                    <div className="mt-5 pt-4 border-t border-white/20 dark:border-white/5 flex justify-end relative z-10">
-                      <Link to={`/application/${app.id}`} className="text-primary-600 dark:text-primary-400 flex items-center gap-1 font-bold text-sm neu-btn px-4 py-2 rounded-lg active:scale-95 transition-all">
-                        {isBn ? "বিস্তারিত দেখুন" : "View Details"} <ChevronRight size={16} />
+                    <div className="mt-5 pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-end relative z-10">
+                      <Link
+                        to={app.status === 'action_required' ? `/apply?edit=${app.id}` : `/application/${app.id}`}
+                        className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold active:scale-95 transition-all ${app.status === 'action_required'
+                          ? 'bg-amber-600 text-white hover:bg-amber-700'
+                          : 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'}`}
+                      >
+                        {app.status === 'action_required'
+                          ? (isBn ? 'তথ্য আপডেট করুন' : 'Update required')
+                          : (isBn ? 'বিস্তারিত দেখুন' : 'View details')}
+                        <ChevronRight size={16} />
                       </Link>
                     </div>
                   </motion.div>
