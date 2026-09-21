@@ -56,7 +56,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isSupportPage = location.pathname === '/support';
 
   return (
-    <div className="user-app-shell flex flex-col h-full min-h-0 sm:h-[100dvh] sm:max-h-none w-full max-w-none mx-0 neu-bg sm:rounded-none relative overflow-hidden shadow-none sm:border-0 my-auto transition-colors">
+    <div className="user-app-shell flex flex-col h-full min-h-0 w-full max-w-none mx-0 neu-bg rounded-none relative overflow-hidden shadow-none border-0 my-0 transition-colors">
       {userProfile?.is_locked && !isSupportPage && (
         <div className="absolute inset-0 z-[100] bg-gray-900/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
           <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-red-100 dark:border-red-900/30 flex flex-col items-center">
