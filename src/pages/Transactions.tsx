@@ -43,10 +43,12 @@ export default function Transactions() {
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'amount-high' | 'amount-low'>('newest');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [applications, setApplications] = useState<LoanApp[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      setError(null);
       try {
         const [txnData, appData] = await Promise.all([
           getTransactions(user.id),
@@ -95,6 +97,7 @@ export default function Transactions() {
         setApplications(mappedApps);
       } catch (err) {
         console.error('Transactions fetch error:', err);
+        setError(isBn ? 'রেকর্ড লোড করা যায়নি।' : 'Could not load records.');
       } finally {
         setLoading(false);
       }
@@ -225,6 +228,12 @@ export default function Transactions() {
   return (
     <div className="min-h-screen neu-bg flex flex-col relative transition-colors pb-24">
       {/* Premium Header */}
+      {error && !loading && (
+        <div className="mx-4 mt-4 p-4 rounded-2xl bg-white dark:bg-[#111827] border border-rose-200 dark:border-rose-900">
+          <div className="flex items-start gap-3"><AlertCircle size={18} className="text-rose-600 mt-0.5"/><div className="min-w-0"><p className="text-sm font-black">{isBn ? 'রেকর্ড লোড হয়নি' : 'Records could not be loaded'}</p><p className="text-xs text-slate-500 mt-1">{error}</p><button onClick={() => window.location.reload()} className="mt-3 px-3 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black">{isBn ? 'আবার চেষ্টা করুন' : 'Try again'}</button></div></div>
+        </div>
+      )}
+
       <div className="neu-bg px-5 py-4 sticky top-0 z-30 shadow-md border-b border-white/20 dark:border-white/5 transition-colors flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full neu-sunken flex items-center justify-center text-primary-600 dark:text-primary-400">
