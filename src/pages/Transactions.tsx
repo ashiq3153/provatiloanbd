@@ -160,12 +160,12 @@ export default function Transactions() {
 
   const getAppStatusStyles = (status: LoanAppStatus) => {
     switch (status) {
-      case 'pending': return 'neu-badge-orange border-white/20';
-      case 'under_review': return 'neu-badge-orange border-white/20';
-      case 'approved': return 'neu-badge-green border-white/20';
-      case 'rejected': return 'neu-badge-red border-white/20';
-      case 'action_required': return 'neu-badge-orange border-white/20';
-      case 'cancelled': return 'neu-badge-red border-white/20';
+      case 'pending': return 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900';
+      case 'under_review': return 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900';
+      case 'approved': return 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900';
+      case 'rejected': return 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900';
+      case 'action_required': return 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900';
+      case 'cancelled': return 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900';
     }
   };
 
@@ -234,7 +234,7 @@ export default function Transactions() {
   };
 
   return (
-    <div className="min-h-screen neu-bg flex flex-col relative transition-colors pb-24">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b1220] flex flex-col relative transition-colors pb-24">
       {/* Premium Header */}
       {error && !loading && (
         <div className="mx-4 mt-4 p-4 rounded-2xl bg-white dark:bg-[#111827] border border-rose-200 dark:border-rose-900">
@@ -244,7 +244,7 @@ export default function Transactions() {
 
       <div className="bg-white dark:bg-[#0f172a] px-5 py-4 sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 transition-colors flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full neu-sunken flex items-center justify-center text-primary-600 dark:text-primary-400">
+          <div className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-primary-600 dark:text-primary-400">
             <LayoutList size={20} />
           </div>
           <div>
@@ -296,9 +296,9 @@ export default function Transactions() {
               exit={{ opacity: 0, height: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="neu-raised p-4 sm:p-5 rounded-[20px] sm:rounded-[24px] relative overflow-hidden text-gray-900 dark:text-white">
+              <div className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-5 rounded-[20px] sm:rounded-[24px] relative overflow-hidden text-gray-900 dark:text-white">
                 <div className="flex justify-between items-start mb-3">
-                  <div className="w-10 h-10 neu-sunken rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                  <div className="w-10 h-10 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                     <TrendingUp size={20} />
                   </div>
                 </div>
@@ -306,9 +306,9 @@ export default function Transactions() {
                 <p className="text-xl sm:text-2xl font-black mt-1">{formatCurrency(stats.totalDeposit, isBn)}</p>
               </div>
 
-              <div className="neu-raised p-5 rounded-[24px] relative overflow-hidden text-gray-900 dark:text-white">
+              <div className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm p-5 rounded-[24px] relative overflow-hidden text-gray-900 dark:text-white">
                 <div className="flex justify-between items-start mb-3">
-                  <div className="w-10 h-10 neu-sunken rounded-full flex items-center justify-center text-rose-600 dark:text-rose-400">
+                  <div className="w-10 h-10 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full flex items-center justify-center text-rose-600 dark:text-rose-400">
                     <TrendingDown size={20} />
                   </div>
                 </div>
@@ -338,7 +338,7 @@ export default function Transactions() {
             </div>
 
             {/* Sort and Export Options */}
-            <div className="flex gap-2 justify-between items-center neu-raised p-1.5 sm:p-2 rounded-[16px] min-w-0">
+            <div className="flex gap-2 justify-between items-center bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm p-1.5 sm:p-2 rounded-[16px] min-w-0">
               <div className="flex-1 px-2">
                 <select
                   value={sortBy}
@@ -354,7 +354,7 @@ export default function Transactions() {
               
               <button
                 onClick={exportToCSV}
-                className="p-3 neu-btn text-primary-600 dark:text-primary-400 rounded-xl active:scale-95 transition-all flex items-center justify-center"
+                className="p-3 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-primary-600 dark:text-primary-400 rounded-xl active:scale-95 transition-all flex items-center justify-center"
                 title={isBn ? "এক্সপোর্ট করুন" : "Export"}
               >
                 <Download size={18} />
@@ -379,8 +379,8 @@ export default function Transactions() {
                     onClick={() => setFilter(f)}
                     className={`px-6 py-2.5 rounded-full text-sm font-bold capitalize whitespace-nowrap active:scale-95 transition-all ${
                       filter === f 
-                        ? 'neu-btn-primary text-white' 
-                        : 'neu-btn text-gray-600 dark:text-gray-300'
+                        ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-sm text-white' 
+                        : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-600 dark:text-gray-300'
                     }`}
                   >
                     {isBn ? ({
@@ -395,7 +395,7 @@ export default function Transactions() {
               <div className="space-y-3">
                 {loading ? (
                   [1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="neu-raised p-3 sm:p-5 rounded-[18px] sm:rounded-[20px] flex items-center gap-4">
+                    <div key={i} className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm p-3 sm:p-5 rounded-[18px] sm:rounded-[20px] flex items-center gap-4">
                       <Skeleton className="w-12 h-12 rounded-full shrink-0" />
                       <div className="flex-1 space-y-2">
                         <Skeleton className="h-4 w-3/4" />
@@ -408,8 +408,8 @@ export default function Transactions() {
                     </div>
                   ))
                 ) : filteredTransactions.length === 0 ? (
-                  <div className="text-center py-16 bg-transparent border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-[24px] neu-raised-sm">
-                    <div className="w-20 h-20 bg-gray-200/50 dark:bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 dark:text-gray-600 neu-sunken">
+                  <div className="text-center py-16 bg-transparent border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-[24px] bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm-sm">
+                    <div className="w-20 h-20 bg-gray-200/50 dark:bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 dark:text-gray-600 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                       <Search size={40} />
                     </div>
                     <p className="text-gray-500 dark:text-gray-400 font-bold">{searchQuery ? (isBn ? "কোনো লেনদেন পাওয়া যায়নি" : "No transactions found") : (isBn ? "কোনো লেনদেন পাওয়া যায়নি" : "No transactions found")}</p>
@@ -424,7 +424,7 @@ export default function Transactions() {
                        animate={{ opacity: 1, y: 0 }}
                        transition={{ delay: index * 0.05 }}
                        key={tx.id}
-                       className="neu-raised p-3 sm:p-5 rounded-[18px] sm:rounded-[20px] transition-all cursor-pointer flex items-center gap-4 group hover:scale-[1.005]"
+                       className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm p-3 sm:p-5 rounded-[18px] sm:rounded-[20px] transition-all cursor-pointer flex items-center gap-4 group hover:scale-[1.005]"
                     >
                       <div className={`w-12 h-12 rounded-full flex items-center justify-center border group-hover:scale-110 transition-transform ${getIconStyles(tx.type)}`}>
                         {getIcon(tx.type)}
@@ -469,8 +469,8 @@ export default function Transactions() {
                     onClick={() => setAppFilter(f)}
                     className={`px-6 py-2.5 rounded-full text-sm font-bold capitalize whitespace-nowrap active:scale-95 transition-all ${
                       appFilter === f 
-                        ? 'neu-btn-primary text-white' 
-                        : 'neu-btn text-gray-600 dark:text-gray-300'
+                        ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-sm text-white' 
+                        : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-600 dark:text-gray-300'
                     }`}
                   >
                     {isBn ? ({
@@ -488,7 +488,7 @@ export default function Transactions() {
 
               {loading ? (
                 [1, 2, 3].map((i) => (
-                  <div key={i} className="neu-raised p-6 rounded-[24px] relative overflow-hidden">
+                  <div key={i} className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm p-6 rounded-[24px] relative overflow-hidden">
                     <div className="flex justify-between items-start mb-5 relative z-10">
                       <div className="space-y-3 flex-1 pr-6">
                         <Skeleton className="h-6 w-1/2" />
@@ -509,12 +509,12 @@ export default function Transactions() {
                   </div>
                 ))
               ) : filteredApplications.length === 0 ? (
-                <div className="text-center py-16 bg-transparent border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-[24px] neu-raised-sm">
-                    <div className="w-20 h-20 bg-gray-200/50 dark:bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300 dark:text-gray-600 neu-sunken">
+                <div className="text-center py-16 bg-transparent border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-[24px] bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm-sm">
+                    <div className="w-20 h-20 bg-gray-200/50 dark:bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300 dark:text-gray-600 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                       <FileText size={40} />
                     </div>
                     <p className="text-gray-500 dark:text-gray-400 font-bold">{isBn ? "এখনো কোনো আবেদন নেই" : "No loan applications yet"}</p>
-                    <Link to="/apply" className="mt-5 inline-block px-8 py-3 neu-btn-primary text-white rounded-full text-base font-bold active:scale-95 transition-all">
+                    <Link to="/apply" className="mt-5 inline-block px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white shadow-sm text-white rounded-full text-base font-bold active:scale-95 transition-all">
                       {isBn ? "এখনই আবেদন করুন" : "Apply Now"}
                     </Link>
                 </div>
@@ -554,7 +554,7 @@ export default function Transactions() {
                     </div>
                     
                     {app.status === 'pending' && (
-                       <div className="mt-5 neu-sunken p-4 rounded-xl flex items-start gap-3 relative z-10 border border-orange-500/20">
+                       <div className="mt-5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-xl flex items-start gap-3 relative z-10 border border-orange-500/20">
                          <AlertCircle size={18} className="text-amber-500 dark:text-amber-400 mt-0.5 shrink-0" />
                          <p className="text-xs text-amber-800 dark:text-amber-255 font-medium leading-relaxed">
                            {isBn ? "আপনার আবেদনটি বর্তমানে পর্যালোচনার অধীনে রয়েছে। খুব শীঘ্রই আপডেট জানানো হবে।" : "Your application is currently under review by our team. You'll be notified soon."}
