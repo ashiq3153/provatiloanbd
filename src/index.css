@@ -78,13 +78,15 @@
   }
   /* Dark mode body & background */
   .dark body {
-    background-color: #001821 !important;
+    /* One consistent dark-mode background across every screen. */
+    background-color: #0b1220 !important;
   }
   .dark body::before {
-    background-image: url('./assets/dark_bg.png') !important;
-    opacity: 1;
-    filter: blur(8px);
-    transform: scale(1.05);
+    /* Do not let the dark asset create a different page background. */
+    background-image: none !important;
+    opacity: 0 !important;
+    filter: none !important;
+    transform: none !important;
   }
   #root {
     @apply h-screen w-screen sm:p-4 flex items-center justify-center;
