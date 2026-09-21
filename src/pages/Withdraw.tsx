@@ -372,7 +372,7 @@ export default function Withdraw() {
           className="w-full mt-2 bg-primary-600 hover:bg-primary-700 text-white shadow-sm disabled:opacity-50 disabled:active:scale-100 text-white py-4 rounded-full font-bold text-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
-            <span className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+            <span className="w-6 h-6 border-2 border-slate-200 dark:border-slate-800 border-t-white rounded-full animate-spin"></span>
           ) : (
             <>
               {isBn ? 'নিশ্চিত করুন' : 'Confirm Withdrawal'}
@@ -390,7 +390,7 @@ export default function Withdraw() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-none-none z-50 flex items-center justify-center p-4"
             onClick={() => setShowDepositModal(false)}
           >
             <motion.div
