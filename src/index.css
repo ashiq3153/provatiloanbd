@@ -1016,3 +1016,278 @@ body {
 .user-app-shell .hover\:bg-primary-700:hover {
   background-color: #0369a1 !important;
 }
+
+
+/* ================================================================
+   V1.1 VISUAL DESIGN SYSTEM — layered fintech palette
+   Goal: clear hierarchy between canvas, sections, cards, controls,
+   active states and semantic statuses. No grey-overlay/glass look.
+   ================================================================ */
+:root {
+  --app-light-bg: #f5f8fc;
+  --app-light-section: #edf3f9;
+  --app-light-card: #ffffff;
+  --app-light-card-soft: #f8fbff;
+  --app-light-input: #f2f6fb;
+  --app-light-border: #dce6f1;
+  --app-light-border-strong: #c7d6e6;
+  --app-light-text: #172033;
+  --app-light-muted: #6b7b91;
+
+  --app-dark-bg: #0b1220;
+  --app-dark-section: #101b2c;
+  --app-dark-card: #152238;
+  --app-dark-card-soft: #192840;
+  --app-dark-input: #0e1828;
+  --app-dark-border: #263852;
+  --app-dark-border-strong: #344967;
+  --app-dark-text: #f5f8ff;
+  --app-dark-muted: #93a4bb;
+
+  --app-sky: #0ea5e9;
+  --app-cyan: #06b6d4;
+  --app-emerald: #10b981;
+  --app-violet: #8b5cf6;
+  --app-amber: #f59e0b;
+  --app-rose: #f43f5e;
+}
+
+/* Canvas */
+.user-app-shell {
+  background: var(--app-light-bg) !important;
+  color: var(--app-light-text);
+}
+.dark .user-app-shell {
+  background: var(--app-dark-bg) !important;
+  color: var(--app-dark-text);
+}
+
+/* Section surfaces: visibly different from the canvas, but quieter
+   than the actual cards. */
+.user-app-shell .bg-slate-50,
+.user-app-shell .bg-gray-50,
+.user-app-shell .bg-gray-50\/40 {
+  background-color: var(--app-light-section) !important;
+  background-image: none !important;
+}
+.dark .user-app-shell .dark\:bg-slate-900,
+.dark .user-app-shell .dark\:bg-gray-900,
+.dark .user-app-shell .dark\:bg-gray-950\/20 {
+  background-color: var(--app-dark-section) !important;
+  background-image: none !important;
+}
+
+/* Primary card family */
+.user-app-shell .bg-white {
+  background-color: var(--app-light-card) !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.dark .user-app-shell .dark\:bg-gray-800,
+.dark .user-app-shell .dark\:bg-gray-850,
+.dark .user-app-shell .dark\:bg-gray-900 {
+  background-color: var(--app-dark-card) !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Softer nested surfaces */
+.user-app-shell .bg-slate-100,
+.user-app-shell .bg-gray-100 {
+  background-color: var(--app-light-card-soft) !important;
+}
+.dark .user-app-shell .dark\:bg-slate-800,
+.dark .user-app-shell .dark\:bg-gray-800\/60 {
+  background-color: var(--app-dark-card-soft) !important;
+}
+
+/* Inputs are deliberately darker/lighter than cards so controls read
+   as controls instead of becoming part of the surrounding card. */
+.user-app-shell input,
+.user-app-shell textarea,
+.user-app-shell select {
+  background-color: var(--app-light-input) !important;
+  border-color: var(--app-light-border-strong) !important;
+  color: var(--app-light-text) !important;
+  box-shadow: inset 0 1px 2px rgba(23,32,51,.035) !important;
+}
+.dark .user-app-shell input,
+.dark .user-app-shell textarea,
+.dark .user-app-shell select {
+  background-color: var(--app-dark-input) !important;
+  border-color: var(--app-dark-border) !important;
+  color: var(--app-dark-text) !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.18) !important;
+}
+.user-app-shell input:focus,
+.user-app-shell textarea:focus,
+.user-app-shell select:focus {
+  border-color: var(--app-sky) !important;
+  box-shadow: 0 0 0 3px rgba(14,165,233,.12) !important;
+}
+
+/* Borders: visible but not the primary visual language. */
+.user-app-shell .border-slate-200,
+.user-app-shell .border-gray-200,
+.user-app-shell .border-gray-100 {
+  border-color: var(--app-light-border) !important;
+}
+.dark .user-app-shell .border-slate-800,
+.dark .user-app-shell .border-gray-800,
+.dark .user-app-shell .border-gray-700 {
+  border-color: var(--app-dark-border) !important;
+}
+
+/* Text hierarchy */
+.user-app-shell .text-gray-900,
+.user-app-shell .text-gray-800,
+.user-app-shell .text-slate-900 {
+  color: var(--app-light-text) !important;
+}
+.user-app-shell .text-gray-500,
+.user-app-shell .text-gray-400,
+.user-app-shell .text-slate-500,
+.user-app-shell .text-slate-400 {
+  color: var(--app-light-muted) !important;
+}
+.dark .user-app-shell .text-gray-900,
+.dark .user-app-shell .text-gray-800,
+.dark .user-app-shell .text-slate-900 {
+  color: var(--app-dark-text) !important;
+}
+.dark .user-app-shell .text-gray-500,
+.dark .user-app-shell .text-gray-400,
+.dark .user-app-shell .text-slate-500,
+.dark .user-app-shell .text-slate-400 {
+  color: var(--app-dark-muted) !important;
+}
+
+/* Semantic status surfaces — these intentionally remain distinct. */
+.user-app-shell .bg-emerald-50 { background-color: #ecfdf5 !important; }
+.user-app-shell .bg-amber-50 { background-color: #fffbeb !important; }
+.user-app-shell .bg-rose-50 { background-color: #fff1f2 !important; }
+.user-app-shell .bg-violet-50 { background-color: #f5f3ff !important; }
+.dark .user-app-shell .dark\:bg-emerald-950\/30,
+.dark .user-app-shell .dark\:bg-emerald-950\/40 { background-color: #10352e !important; }
+.dark .user-app-shell .dark\:bg-amber-950\/30,
+.dark .user-app-shell .dark\:bg-amber-950\/40 { background-color: #3a2b10 !important; }
+.dark .user-app-shell .dark\:bg-rose-950\/30,
+.dark .user-app-shell .dark\:bg-rose-950\/40 { background-color: #3b1823 !important; }
+.dark .user-app-shell .dark\:bg-violet-950\/30,
+.dark .user-app-shell .dark\:bg-violet-950\/40 { background-color: #281d48 !important; }
+
+/* Interactive selection: selected controls get a filled accent,
+   unselected controls retain a quiet surface. */
+.user-app-shell button[class*="border-primary-500"],
+.user-app-shell a[class*="border-primary-500"] {
+  background: linear-gradient(135deg, #e0f2fe, #dbeafe) !important;
+  border-color: #38bdf8 !important;
+  color: #075985 !important;
+  box-shadow: 0 5px 14px rgba(14,165,233,.12) !important;
+}
+.dark .user-app-shell button[class*="border-primary-500"],
+.dark .user-app-shell a[class*="border-primary-500"] {
+  background: linear-gradient(135deg, #12344a, #153052) !important;
+  border-color: #22b7e8 !important;
+  color: #dff7ff !important;
+  box-shadow: 0 7px 18px rgba(6,182,212,.12) !important;
+}
+
+/* Active/primary actions */
+.user-app-shell .bg-primary-500,
+.user-app-shell .bg-primary-600 {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+  color: #fff !important;
+}
+.user-app-shell .bg-emerald-500 { background-color: #10b981 !important; color: #fff !important; }
+.user-app-shell .bg-violet-500 { background-color: #8b5cf6 !important; color: #fff !important; }
+.user-app-shell .bg-amber-500 { background-color: #f59e0b !important; color: #fff !important; }
+
+/* Home: give major sections a quiet tinted surface and featured
+   member/loan cards a stronger white/navy surface. */
+.home-modern {
+  background: var(--app-light-bg) !important;
+}
+.dark .home-modern {
+  background: var(--app-dark-bg) !important;
+}
+.home-modern section > div {
+  border-color: var(--app-light-border);
+}
+.dark .home-modern section > div {
+  border-color: var(--app-dark-border);
+}
+.home-modern .home-balance-card {
+  background: linear-gradient(145deg, #ffffff, #f1f6fb) !important;
+  border: 1px solid #d7e3ef !important;
+}
+.dark .home-modern .home-balance-card {
+  background: linear-gradient(145deg, #172941, #101c2e) !important;
+  border: 1px solid #2e4562 !important;
+}
+.home-modern .home-action-card {
+  color: #fff !important;
+}
+.home-modern .home-deposit { background: linear-gradient(135deg,#0f766e,#0d9488) !important; }
+.home-modern .home-withdraw { background: linear-gradient(135deg,#b45309,#d97706) !important; }
+
+/* Profile: identity is the hero; information groups use a cool tinted
+   section while rows stay white/navy cards. */
+.profile-theme {
+  background: var(--app-light-bg) !important;
+}
+.dark .profile-theme { background: var(--app-dark-bg) !important; }
+.profile-theme section > .profile-card {
+  background: var(--app-light-card) !important;
+  border-color: var(--app-light-border) !important;
+}
+.dark .profile-theme section > .profile-card {
+  background: var(--app-dark-card) !important;
+  border-color: var(--app-dark-border-strong) !important;
+}
+
+/* Apply Loan: category cards, accordion headers and form bodies get
+   separate visual levels. */
+.apply-loan-screen { background: var(--app-light-bg) !important; }
+.dark .apply-loan-screen { background: var(--app-dark-bg) !important; }
+.apply-loan-screen .apply-accordion-body {
+  background: var(--app-light-section) !important;
+  border-color: var(--app-light-border) !important;
+}
+.dark .apply-loan-screen .apply-accordion-body {
+  background: var(--app-dark-section) !important;
+  border-color: var(--app-dark-border) !important;
+}
+.apply-loan-screen input,
+.apply-loan-screen textarea,
+.apply-loan-screen select {
+  background: var(--app-light-input) !important;
+}
+.dark .apply-loan-screen input,
+.dark .apply-loan-screen textarea,
+.dark .apply-loan-screen select {
+  background: var(--app-dark-input) !important;
+}
+
+/* Bottom navigation is a distinct navigation surface, not another card. */
+.user-app-shell nav {
+  background: rgba(255,255,255,.96) !important;
+  border-color: #dbe5f0 !important;
+  box-shadow: 0 -8px 28px rgba(30,64,96,.08) !important;
+}
+.dark .user-app-shell nav {
+  background: #101b2c !important;
+  border-color: #263852 !important;
+  box-shadow: 0 -10px 30px rgba(0,0,0,.30) !important;
+}
+
+/* Do not let old glass rules survive on actual surfaces. */
+.user-app-shell [class*="backdrop-blur"],
+.user-app-shell .neu-raised,
+.user-app-shell .neu-raised-sm,
+.user-app-shell .neu-sunken {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
