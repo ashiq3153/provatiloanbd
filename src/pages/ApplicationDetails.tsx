@@ -30,7 +30,7 @@ export default function ApplicationDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen neu-bg flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0b1220] flex items-center justify-center">
         <Loader2 className="animate-spin text-primary-600" size={32} />
       </div>
     );
@@ -38,13 +38,13 @@ export default function ApplicationDetails() {
 
   if (!appDetails) {
     return (
-      <div className="min-h-screen neu-bg flex flex-col items-center justify-center p-6">
-        <div className="w-20 h-20 neu-sunken rounded-full flex items-center justify-center mb-4">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0b1220] flex flex-col items-center justify-center p-6">
+        <div className="w-20 h-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-center mb-4">
           <FileText size={32} className="text-gray-400" />
         </div>
         <p className="text-gray-900 dark:text-white font-bold text-lg mb-2">{isBn ? 'আবেদন পাওয়া যায়নি' : 'Application not found'}</p>
         <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-6">{isBn ? 'দুঃখিত, এই আইডি দিয়ে কোনো আবেদন খুঁজে পাওয়া যায়নি।' : 'Sorry, no application could be found with this ID.'}</p>
-        <button onClick={() => navigate(-1)} className="px-8 py-3 neu-btn-primary text-white rounded-full font-bold active:scale-95 transition-all">
+        <button onClick={() => navigate(-1)} className="px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold active:scale-95 transition-all shadow-sm">
           {isBn ? 'ফিরে যান' : 'Go Back'}
         </button>
       </div>
@@ -115,11 +115,11 @@ export default function ApplicationDetails() {
   };
 
   return (
-    <div className="min-h-screen neu-bg flex flex-col relative transition-colors pb-24">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b1220] flex flex-col relative transition-colors pb-24">
       {/* Premium Header */}
-      <div className="neu-bg px-5 py-4 sticky top-0 z-30 shadow-md border-b border-white/20 dark:border-white/5 transition-colors flex items-center justify-between">
+      <div className="bg-white dark:bg-[#0f172a] px-5 py-4 sticky top-0 z-30 shadow-sm border-b border-slate-200 dark:border-slate-800 transition-colors flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full neu-btn flex items-center justify-center text-gray-700 dark:text-gray-300 active:scale-95 transition-all">
+          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-gray-700 dark:text-gray-300 active:scale-95 transition-all">
             <ArrowLeft size={20} />
           </button>
           <div>
@@ -138,7 +138,7 @@ export default function ApplicationDetails() {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="neu-raised rounded-[32px] p-8 text-center relative overflow-hidden group"
+          className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 rounded-2xl p-6 text-center relative overflow-hidden shadow-sm"
         >
           <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary-500/5 to-transparent dark:from-primary-900/5 z-0"></div>
           
@@ -165,7 +165,7 @@ export default function ApplicationDetails() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="neu-raised rounded-[24px] overflow-hidden"
+          className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm"
         >
           <div className="p-5 bg-transparent border-b border-white/20 dark:border-white/5">
              <h3 className="font-bold text-gray-900 dark:text-white text-base flex items-center gap-2">
@@ -186,7 +186,7 @@ export default function ApplicationDetails() {
               </span>
               <span className="text-sm font-bold text-gray-900 dark:text-white">{convertDigits(appDetails.tenure_months, isBn)} {isBn ? 'মাস' : 'months'}</span>
             </div>
-            <div className="p-5 flex justify-between items-center neu-sunken border-t border-white/20 dark:border-white/5">
+            <div className="p-5 flex justify-between items-center bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800">
               <span className="text-sm font-bold flex items-center gap-2 text-primary-700 dark:text-primary-400">
                  <Wallet size={18} /> {isBn ? 'সম্ভাব্য মাসিক কিস্তি (EMI)' : 'Estimated EMI'}
               </span>
@@ -201,7 +201,7 @@ export default function ApplicationDetails() {
              initial={{ opacity: 0, y: 10 }}
              animate={{ opacity: 1, y: 0 }}
              transition={{ delay: 0.2 }}
-             className="neu-sunken border border-orange-500/25 rounded-[24px] p-6 relative overflow-hidden"
+             className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-2xl p-5 relative overflow-hidden"
            >
              <div className="flex items-center gap-3 mb-3 relative z-10">
                <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-800/50 flex items-center justify-center shrink-0">
@@ -211,7 +211,7 @@ export default function ApplicationDetails() {
                  {isBn ? 'এডমিন নোটস' : 'Admin Notes'}
                </h3>
              </div>
-             <p className="text-sm text-orange-800 dark:text-orange-200 leading-relaxed neu-raised-sm p-4 rounded-xl relative z-10 font-medium">
+             <p className="text-sm text-amber-900 dark:text-amber-100 leading-relaxed bg-white/70 dark:bg-black/10 border border-amber-200/70 dark:border-amber-900/30 p-4 rounded-xl relative z-10 font-medium">
                {(() => {
                  const feedbackStr = appDetails.admin_feedback;
                  if (!feedbackStr) return '';
