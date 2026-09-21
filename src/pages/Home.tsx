@@ -14,10 +14,10 @@ import { Skeleton } from '../components/Skeleton';
 import { toast } from 'sonner';
 import {
   getDashboardStats, getActiveLoans, getTransactions,
-  getLoanApplications, getMyNotifications, markMyNotificationRead, getSuccessStories, reactToSuccessStory
+  getLoanApplications, getMyNotifications, markMyNotificationRead, getSuccessStories, reactToSuccessStory, getLoanEmiSchedule
 } from '../lib/api';
 import type { DashboardStats } from '../lib/api';
-import type { LoanApplication, Transaction, SuccessStory } from '../types/database';
+import type { LoanApplication, Transaction, SuccessStory, LoanEmiSchedule } from '../types/database';
 
 export default function Home() {
   const user = getTelegramUser();
@@ -35,6 +35,7 @@ export default function Home() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [stories, setStories] = useState<SuccessStory[]>([]);
   const [storyReactions, setStoryReactions] = useState<Record<string, { like: number; love: number; wow: number }>>({});
+  const [emiSchedule, setEmiSchedule] = useState<LoanEmiSchedule[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -55,6 +56,7 @@ export default function Home() {
         setLoans(allLoans || []);
         setNotifications(notices || []);
         setStories(await getSuccessStories());
+        if (active[0]?.id) setEmiSchedule(await getLoanEmiSchedule(active[0].id));
       } catch (e) {
         console.error('Home dashboard error:', e);
       } finally {
@@ -65,27 +67,25 @@ export default function Home() {
   }, [user.id]);
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
-  const completedEmis = activeLoan
-    ? transactions.filter(t => t.type === 'emi_payment' && t.loan_id === activeLoan.id && t.status === 'completed').length
-    : 0;
-
-  const paidAmount = activeLoan
-    ? transactions
-        .filter(t => t.type === 'emi_payment' && t.loan_id === activeLoan.id && t.status === 'completed')
-        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
-    : 0;
-
-  const scheduledRepayment = activeLoan
-    ? Math.max(Number(activeLoan.emi_amount || 0) * Math.max(activeLoan.tenure_months, 1), 1)
-    : 1;
-
+  const completedEmis = emiSchedule.filter(e => e.status === 'paid').length;
+  const scheduledRepayment = emiSchedule.length
+    ? emiSchedule.reduce((sum, e) => sum + Number(e.total_due || 0), 0)
+    : Number(activeLoan?.total_payable || 0);
+  const paidAmount = emiSchedule.length
+    ? emiSchedule.reduce((sum, e) => sum + Number(e.paid_amount || 0), 0)
+    : transactions
+        .filter(t => t.type === 'emi_payment' && t.loan_id === activeLoan?.id && t.status === 'completed')
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0);
   const loanProgress = activeLoan
-    ? Math.min(100, Math.round((paidAmount / scheduledRepayment) * 100))
+    ? Math.min(100, Math.round((paidAmount / Math.max(scheduledRepayment, 1)) * 100))
     : 0;
-
   const outstanding = activeLoan
     ? Math.max(0, scheduledRepayment - paidAmount)
     : 0;
+  const nextInstallment = emiSchedule.find(e => ['pending','partial','overdue'].includes(e.status));
+  const nextEmiDate = nextInstallment
+    ? new Date(nextInstallment.due_date).toLocaleDateString(isBn ? 'bn-BD' : 'en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
+    : null;
 
   const categoryName = (category?: string) => {
     const names: Record<string, string> = {
@@ -132,7 +132,7 @@ export default function Home() {
     }
     if (completedEmis < activeLoan.tenure_months) return {
       title: isBn ? 'পরবর্তী কিস্তি প্রস্তুত' : 'Next installment',
-      description: isBn ? `পরবর্তী কিস্তি ${formatCurrency(activeLoan.emi_amount, isBn)}` : `Next installment ${formatCurrency(activeLoan.emi_amount, isBn)}`,
+      description: nextInstallment ? `${formatCurrency(nextInstallment.total_due, isBn)} • ${nextEmiDate}` : (isBn ? `পরবর্তী কিস্তি ${formatCurrency(activeLoan.emi_amount, isBn)}` : `Next installment ${formatCurrency(activeLoan.emi_amount, isBn)}`),
       link: '/pay',
       icon: CalendarDays,
       tone: 'blue'
@@ -330,7 +330,7 @@ export default function Home() {
               </div>
               <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
                 <div><p className="text-[10px] text-slate-400">{isBn?'পরবর্তী কিস্তি':'Next installment'}</p><p className="text-sm font-black mt-1">{formatCurrency(activeLoan.emi_amount,isBn)}</p></div>
-                <div className="text-right"><p className="text-[10px] text-slate-400">{isBn?'পরিশোধ':'Payment'}</p><p className="text-xs font-bold mt-1">{isBn?'কিস্তি পরিশোধ করুন':'Pay installment'}</p></div>
+                <div className="text-right"><p className="text-[10px] text-slate-400">{isBn?'তারিখ':'Due date'}</p><p className="text-xs font-bold mt-1">{nextEmiDate || (isBn?'শিডিউল নেই':'Schedule unavailable')}</p></div>
               </div>
             </Link>
           ) : (
