@@ -724,3 +724,91 @@ a.dark\:bg-gray-800:active,
 .dark [class*="bg-white/"][class*="dark:bg-gray-800/"] {
   background-color: #111827 !important;
 }
+
+
+/* ================================================================
+   Final mobile viewport + surface consistency pass
+   ================================================================ */
+html, body, #root {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+#root {
+  padding: 0 !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+}
+
+body {
+  overflow: hidden;
+  background: #f5f7fb !important;
+}
+
+.dark body {
+  background: #0b1220 !important;
+}
+
+.user-app-shell {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Address/form widgets: clear, solid, readable surfaces. */
+.address-widget {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06) !important;
+}
+
+.dark .address-widget {
+  background: #111c2e !important;
+  border-color: #2a374b !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22) !important;
+}
+
+.address-widget .neu-input {
+  background: #f8fafc !important;
+  border-color: #dbe3ec !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+}
+
+.dark .address-widget .neu-input {
+  background: #0f1724 !important;
+  border-color: #2a374b !important;
+  color: #f8fafc !important;
+}
+
+.address-widget .neu-input::placeholder {
+  color: #64748b !important;
+}
+
+.dark .address-widget .neu-input::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Admin panel: prevent translucent/washed-out widgets and keep full-width mobile content. */
+.admin-panel-shell {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.admin-panel-shell .admin-surface {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+.dark .admin-panel-shell .admin-surface {
+  background: #111c2e !important;
+  border-color: #2a374b !important;
+}
+
+@media (max-width: 639px) {
+  .user-app-shell {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+}
