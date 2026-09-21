@@ -163,7 +163,7 @@ export default function Profile() {
       </section>
 
       {/* Member information */}
-      <section className="px-4 mt-5">
+      <section className="profile-section profile-section-member px-4 mt-5">
         <SectionTitle title={isBn ? 'সদস্য তথ্য' : 'Member information'} />
         <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
           <Row icon={UserRound} title={isBn ? 'ব্যক্তিগত তথ্য' : 'Personal information'} description={isBn ? 'নাম ও প্রাথমিক সদস্য তথ্য' : 'Name and basic member details'} />
@@ -185,7 +185,7 @@ export default function Profile() {
       </section>
 
       {/* Account & security */}
-      <section className="px-4 mt-5">
+      <section className="profile-section profile-section-security px-4 mt-5">
         <SectionTitle title={isBn ? 'অ্যাকাউন্ট ও নিরাপত্তা' : 'Account & security'} />
         <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
           <Row icon={LockKeyhole} title={isBn ? 'নিরাপত্তা' : 'Security'} description={isBn ? 'Telegram ভিত্তিক অ্যাকাউন্ট পরিচয়' : 'Telegram-based account identity'} />
@@ -197,7 +197,7 @@ export default function Profile() {
       </section>
 
       {/* Preferences */}
-      <section className="px-4 mt-5">
+      <section className="profile-section profile-section-preferences px-4 mt-5">
         <SectionTitle title={isBn ? 'পছন্দ ও অ্যাপ সেটিংস' : 'Preferences & app settings'} />
         <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
           <Row
@@ -243,7 +243,7 @@ export default function Profile() {
       </section>
 
       {/* Support */}
-      <section className="px-4 mt-5">
+      <section className="profile-section profile-section-support px-4 mt-5">
         <SectionTitle title={isBn ? 'সহায়তা' : 'Support'} />
         <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
           <Link to="/support" className="block">
@@ -253,7 +253,7 @@ export default function Profile() {
       </section>
 
       {/* Telegram account note */}
-      <section className="px-4 mt-5">
+      <section className="profile-section profile-section-telegram px-4 mt-5">
         <div className="rounded-2xl bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900/50 p-4 flex gap-3">
           <MessageCircle className="text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" size={19} />
           <div>
