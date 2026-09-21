@@ -1980,3 +1980,130 @@ html.dark .user-app-shell .home-financial-card {
 html:not(.dark) .user-app-shell .home-financial-card {
   isolation: isolate;
 }
+
+/* ================================================================
+   PROVATI COLORFUL SURFACE PASS — BACKGROUND STAYS PURE
+   User-approved direction:
+   Light canvas = WHITE, Dark canvas = BLACK.
+   Visual color lives in sections/cards/widgets/actions.
+   ================================================================ */
+
+html:not(.dark) .user-app-shell {
+  background: #FFFFFF !important;
+}
+html.dark .user-app-shell {
+  background: #000000 !important;
+}
+
+/* Sections: clearly visible color fields, while page canvas stays pure. */
+html:not(.dark) .user-app-shell section {
+  background: #F0FDFA !important;
+  border-color: #CCFBF1 !important;
+}
+html:not(.dark) .user-app-shell section:nth-of-type(3n) {
+  background: #EFF6FF !important;
+  border-color: #DBEAFE !important;
+}
+html:not(.dark) .user-app-shell section:nth-of-type(3n+1) {
+  background: #F5F3FF !important;
+  border-color: #EDE9FE !important;
+}
+html:not(.dark) .user-app-shell section:nth-of-type(4n) {
+  background: #FFF7ED !important;
+  border-color: #FFEDD5 !important;
+}
+
+/* Card/widget surfaces: pastel functional colors, not another white block. */
+html:not(.dark) .user-app-shell section > .bg-white,
+html:not(.dark) .user-app-shell section > [class*="bg-white/"],
+html:not(.dark) .user-app-shell section > .neu-raised,
+html:not(.dark) .user-app-shell section > .neu-raised-sm {
+  background: #FFFFFF !important;
+}
+html:not(.dark) .user-app-shell section:nth-of-type(3n) > .bg-white,
+html:not(.dark) .user-app-shell section:nth-of-type(3n) > [class*="bg-white/"] {
+  background: #F0F9FF !important;
+  border-color: #BAE6FD !important;
+}
+html:not(.dark) .user-app-shell section:nth-of-type(3n+1) > .bg-white,
+html:not(.dark) .user-app-shell section:nth-of-type(3n+1) > [class*="bg-white/"] {
+  background: #F0FDFA !important;
+  border-color: #99F6E4 !important;
+}
+html:not(.dark) .user-app-shell section:nth-of-type(4n) > .bg-white,
+html:not(.dark) .user-app-shell section:nth-of-type(4n) > [class*="bg-white/"] {
+  background: #FFF7ED !important;
+  border-color: #FED7AA !important;
+}
+
+/* Common nested widgets: use distinct soft roles. */
+html:not(.dark) .user-app-shell .bg-sky-50 { background:#E0F2FE !important; }
+html:not(.dark) .user-app-shell .bg-emerald-50 { background:#DCFCE7 !important; }
+html:not(.dark) .user-app-shell .bg-amber-50 { background:#FEF3C7 !important; }
+html:not(.dark) .user-app-shell .bg-rose-50 { background:#FEE2E2 !important; }
+html:not(.dark) .user-app-shell .bg-violet-50 { background:#EDE9FE !important; }
+
+/* Dark canvas stays BLACK; surfaces carry the color. */
+html.dark .user-app-shell {
+  background: #000000 !important;
+}
+html.dark .user-app-shell section {
+  background: #082F2B !important;
+  border-color: #134E4A !important;
+}
+html.dark .user-app-shell section:nth-of-type(3n) {
+  background: #0B2340 !important;
+  border-color: #1E40AF !important;
+}
+html.dark .user-app-shell section:nth-of-type(3n+1) {
+  background: #21163A !important;
+  border-color: #5B21B6 !important;
+}
+html.dark .user-app-shell section:nth-of-type(4n) {
+  background: #321A08 !important;
+  border-color: #92400E !important;
+}
+
+/* Dark cards/widgets: visibly colored, but still restrained enough for finance. */
+html.dark .user-app-shell section > .bg-white,
+html.dark .user-app-shell section > [class*="bg-white/"],
+html.dark .user-app-shell section > .neu-raised,
+html.dark .user-app-shell section > .neu-raised-sm {
+  background: #111827 !important;
+  border-color: #334155 !important;
+}
+html.dark .user-app-shell section:nth-of-type(3n) > .bg-white,
+html.dark .user-app-shell section:nth-of-type(3n) > [class*="bg-white/"] {
+  background: #0F2742 !important;
+  border-color: #1D4ED8 !important;
+}
+html.dark .user-app-shell section:nth-of-type(3n+1) > .bg-white,
+html.dark .user-app-shell section:nth-of-type(3n+1) > [class*="bg-white/"] {
+  background: #172B2A !important;
+  border-color: #0F766E !important;
+}
+html.dark .user-app-shell section:nth-of-type(4n) > .bg-white,
+html.dark .user-app-shell section:nth-of-type(4n) > [class*="bg-white/"] {
+  background: #2A1A0B !important;
+  border-color: #B45309 !important;
+}
+
+/* Home financial card remains the focal 10% accent. */
+html:not(.dark) .user-app-shell .home-financial-card {
+  background: linear-gradient(135deg,#0F766E 0%,#2563EB 100%) !important;
+  border: 0 !important;
+}
+html.dark .user-app-shell .home-financial-card {
+  background: linear-gradient(135deg,#115E59 0%,#1E3A8A 100%) !important;
+  border: 1px solid #2DD4BF !important;
+}
+
+/* Keep bottom navigation distinct from the page canvas. */
+html:not(.dark) .user-app-shell .neu-raised.px-4.py-2 {
+  background: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+}
+html.dark .user-app-shell .neu-raised.px-4.py-2 {
+  background: #111827 !important;
+  border-color: #334155 !important;
+}
