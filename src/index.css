@@ -2580,22 +2580,26 @@ html.dark .profile-theme > section:first-child > div {
 }
 .profile-primary-action:active { transform: scale(.99); }
 
+/* Dark mode keeps the Profile hero as a clean white member card.
+   The app canvas remains dark; only this identity hero follows the reference. */
 html.dark .profile-hero {
-  background: #071B19;
-  border-color: #115E59;
-  box-shadow: 0 16px 36px rgba(0,0,0,.35);
+  background: #FFFFFF;
+  border-color: #99F6E4;
+  box-shadow: 0 18px 42px rgba(0,0,0,.38);
 }
 html.dark .profile-hero-bg {
-  background: linear-gradient(135deg,#064E3B 0%,#047857 48%,#075985 100%);
+  background: linear-gradient(135deg,#047857 0%,#10B981 52%,#0891B2 100%);
 }
-html.dark .profile-hero-wave { background: #071B19; }
-html.dark .profile-hero-wave::after { border-color: rgba(45,212,191,.16); }
-html.dark .profile-avatar { border-color: #071B19; }
-html.dark .profile-online-dot { border-color: #071B19; }
-html.dark .profile-hero-name h1 { color:#F8FAFC; }
-html.dark .profile-hero-username { color:#94A3B8; }
-html.dark .profile-verified { background:#063B2B; color:#6EE7B7; }
-html.dark .profile-stat-grid { background:#0F172A; border-color:#334155; }
-html.dark .profile-stat { border-color:#334155; }
-html.dark .profile-stat strong { color:#F8FAFC; }
-html.dark .profile-stat-action strong { color:#34D399; }
+html.dark .profile-hero-wave {
+  background: #FFFFFF;
+}
+html.dark .profile-hero-wave::after { border-color: rgba(16,185,129,.18); }
+html.dark .profile-avatar { border-color: #FFFFFF; }
+html.dark .profile-online-dot { border-color: #FFFFFF; }
+html.dark .profile-hero-name h1 { color:#0F172A; }
+html.dark .profile-hero-username { color:#64748B; }
+html.dark .profile-verified { background:#DCFCE7; color:#15803D; }
+html.dark .profile-stat-grid { background:#F8FAFC; border-color:#E2E8F0; }
+html.dark .profile-stat { border-color:#E2E8F0; }
+html.dark .profile-stat strong { color:#0F172A; }
+html.dark .profile-stat-action strong { color:#059669; }
