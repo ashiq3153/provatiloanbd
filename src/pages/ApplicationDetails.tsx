@@ -58,7 +58,7 @@ export default function ApplicationDetails() {
       case 'approved': return 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 border-slate-200 dark:border-slate-800';
       case 'active': return 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 border-slate-200 dark:border-slate-800';
       case 'rejected': return 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 border-slate-200 dark:border-slate-800';
-      case 'action_required': return 'neu-badge-purple border-slate-200 dark:border-slate-800';
+      case 'action_required': return 'bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 border-slate-200 dark:border-slate-800';
       case 'completed': return 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 border-slate-200 dark:border-slate-800';
       default: return 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 border-slate-200 dark:border-slate-800';
     }
