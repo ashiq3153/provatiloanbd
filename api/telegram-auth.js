@@ -5,13 +5,14 @@ import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const ADMIN_BOT_TOKEN = process.env.TELEGRAM_ADMIN_BOT_TOKEN;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const ADMIN_CHAT_IDS = new Set(String(process.env.TELEGRAM_ADMIN_CHAT_IDS || "").split(",").map(v => v.trim()).filter(Boolean));
 const MAX_AUTH_AGE_SECONDS = 24 * 60 * 60;
 
-export function verifyInitData(initData) {
-  if (!BOT_TOKEN || typeof initData !== "string" || !initData.trim()) return null;
+function verifyInitDataWithToken(initData, botToken) {
+  if (!botToken || typeof initData !== "string" || !initData.trim()) return null;
   const params = new URLSearchParams(initData);
   const receivedHash = params.get("hash");
   const authDate = Number(params.get("auth_date"));
@@ -19,7 +20,7 @@ export function verifyInitData(initData) {
   const now = Math.floor(Date.now() / 1000);
   if (authDate > now + 60 || now - authDate > MAX_AUTH_AGE_SECONDS) return null;
   const dataCheckString = [...params.entries()].filter(([key]) => key !== "hash").sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => `${key}=${value}`).join("\n");
-  const secretKey = crypto.createHmac("sha256", "WebAppData").update(BOT_TOKEN).digest();
+  const secretKey = crypto.createHmac("sha256", "WebAppData").update(botToken).digest();
   const calculatedHash = crypto.createHmac("sha256", secretKey).update(dataCheckString).digest("hex");
   const expected = Buffer.from(calculatedHash, "hex");
   const received = Buffer.from(receivedHash, "hex");
@@ -27,6 +28,14 @@ export function verifyInitData(initData) {
   const userRaw = params.get("user");
   if (!userRaw) return null;
   try { const user = JSON.parse(userRaw); return user?.id ? { user, auth_date: authDate } : null; } catch { return null; }
+}
+
+export function verifyInitData(initData) {
+  const userResult = verifyInitDataWithToken(initData, BOT_TOKEN);
+  if (userResult) return { ...userResult, verifiedBot: "user" };
+  const adminResult = verifyInitDataWithToken(initData, ADMIN_BOT_TOKEN);
+  if (adminResult) return { ...adminResult, verifiedBot: "admin" };
+  return null;
 }
 
 function adminClient() {
@@ -477,6 +486,7 @@ export default async function handler(req, res) {
   }
 
   if (req.body?.action === "admin") {
+      if (result.verifiedBot !== "admin") return res.status(403).json({ ok: false, error: "Admin panel must be opened from the Admin Bot" });
       if (!ADMIN_CHAT_IDS.has(String(result.user.id))) return res.status(403).json({ ok: false, error: "Admin access denied" });
       const adminActionName = String(req.body.adminAction || "unknown");
       const adminRole = await getAdminRole(Number(result.user.id));
