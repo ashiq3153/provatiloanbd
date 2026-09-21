@@ -443,6 +443,8 @@ export default function Home() {
           </section>
         )}
 
+        {/* Mobile-first responsive spacing */}
+        <div className="h-px bg-transparent sm:hidden" aria-hidden="true" />
         {/* Member services */}
         <section>
           <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'সদস্য সেবা':'Member services'}</p><h2 className="text-lg font-black mt-1">{isBn?'দ্রুত সেবা':'Quick services'}</h2></div></div>
