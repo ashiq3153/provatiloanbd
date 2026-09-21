@@ -486,8 +486,7 @@ export default async function handler(req, res) {
   }
 
   if (req.body?.action === "admin") {
-      if (result.verifiedBot !== "admin") return res.status(403).json({ ok: false, error: "Admin panel must be opened from the Admin Bot" });
-      if (!ADMIN_CHAT_IDS.has(String(result.user.id))) return res.status(403).json({ ok: false, error: "Admin access denied" });
+      // Admin access remains bound to the server-side allowlist and role.\n      // Both the User Bot and Admin Bot signatures are accepted here so an existing\n      // admin session cannot lose database access merely because the Mini App was\n      // launched from the other configured Telegram bot.\n      if (!ADMIN_CHAT_IDS.has(String(result.user.id))) return res.status(403).json({ ok: false, error: "Admin access denied" });
       const adminActionName = String(req.body.adminAction || "unknown");
       const adminRole = await getAdminRole(Number(result.user.id));
       const allowedRoles = ADMIN_ACTION_ROLES[adminActionName] || [];
