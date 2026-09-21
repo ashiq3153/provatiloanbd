@@ -61,6 +61,10 @@ export interface LoanApplication {
   admin_feedback: string | null;
   applied_at: string;
   approved_at: string | null;
+  rate_version_id?: string | null;
+  calculation_method?: 'flat' | 'reducing_balance' | string;
+  total_interest?: number | null;
+  total_payable?: number | null;
 }
 
 export interface LoanEmiSchedule {
