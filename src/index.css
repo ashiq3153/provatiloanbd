@@ -1386,3 +1386,209 @@ html, body, #root {
   padding:0 !important;
   border-radius:0 !important;
 }
+
+/* ================================================================
+   APPROVED LIGHT MODE — CLEAN FINTECH REFERENCE DIRECTION
+   White canvas + tinted sections + distinct functional cards.
+   Scoped to light mode only; dark mode rules remain untouched.
+   ================================================================ */
+:root {
+  --lm-page: #f5f7fb;
+  --lm-section: #eef3f8;
+  --lm-card: #ffffff;
+  --lm-card-soft: #f8fafc;
+  --lm-input: #f7f9fc;
+  --lm-border: #e2e8f0;
+  --lm-text: #182235;
+  --lm-muted: #718096;
+  --lm-blue: #2563eb;
+  --lm-blue-soft: #eaf2ff;
+  --lm-green: #10b981;
+  --lm-green-soft: #e8f8f1;
+  --lm-orange: #f59e0b;
+  --lm-orange-soft: #fff5df;
+  --lm-red: #ef4444;
+  --lm-red-soft: #fff0f0;
+  --lm-purple: #8b5cf6;
+  --lm-purple-soft: #f2edff;
+}
+
+/* App canvas */
+.user-app-shell:not(.dark) {
+  background: var(--lm-page) !important;
+  color: var(--lm-text) !important;
+}
+
+/* Section = visibly tinted canvas, not white */
+.user-app-shell:not(.dark) section {
+  background: var(--lm-section);
+  border-color: var(--lm-border);
+}
+
+/* Primary cards = clean white floating surfaces */
+.user-app-shell:not(.dark) .bg-white,
+.user-app-shell:not(.dark) [class*="bg-white/"],
+.user-app-shell:not(.dark) .neu-raised,
+.user-app-shell:not(.dark) .neu-raised-sm {
+  background: var(--lm-card) !important;
+  background-image: none !important;
+  color: var(--lm-text) !important;
+  border-color: var(--lm-border) !important;
+  box-shadow: 0 5px 18px rgba(15,23,42,.055) !important;
+  backdrop-filter: none !important;
+}
+
+/* Secondary widgets */
+.user-app-shell:not(.dark) .bg-slate-50,
+.user-app-shell:not(.dark) [class*="bg-gray-50"],
+.user-app-shell:not(.dark) [class*="bg-slate-100"] {
+  background: var(--lm-card-soft) !important;
+  color: var(--lm-text) !important;
+  border-color: var(--lm-border) !important;
+}
+
+/* Inputs */
+.user-app-shell:not(.dark) input,
+.user-app-shell:not(.dark) textarea,
+.user-app-shell:not(.dark) select,
+.user-app-shell:not(.dark) .neu-input {
+  background: var(--lm-input) !important;
+  color: var(--lm-text) !important;
+  border: 1px solid #dbe3ed !important;
+  box-shadow: inset 0 1px 2px rgba(15,23,42,.025) !important;
+}
+.user-app-shell:not(.dark) input:focus,
+.user-app-shell:not(.dark) textarea:focus,
+.user-app-shell:not(.dark) select:focus {
+  background: #fff !important;
+  border-color: var(--lm-blue) !important;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.10) !important;
+}
+
+/* Text hierarchy */
+.user-app-shell:not(.dark) .text-gray-900,
+.user-app-shell:not(.dark) .text-gray-800,
+.user-app-shell:not(.dark) .text-slate-900,
+.user-app-shell:not(.dark) .text-slate-800 { color: var(--lm-text) !important; }
+.user-app-shell:not(.dark) .text-gray-500,
+.user-app-shell:not(.dark) .text-gray-400,
+.user-app-shell:not(.dark) .text-slate-500,
+.user-app-shell:not(.dark) .text-slate-400 { color: var(--lm-muted) !important; }
+
+/* Functional color language */
+.user-app-shell:not(.dark) .bg-sky-50,
+.user-app-shell:not(.dark) .bg-blue-50 { background: var(--lm-blue-soft) !important; }
+.user-app-shell:not(.dark) .bg-emerald-50 { background: var(--lm-green-soft) !important; }
+.user-app-shell:not(.dark) .bg-amber-50 { background: var(--lm-orange-soft) !important; }
+.user-app-shell:not(.dark) .bg-rose-50 { background: var(--lm-red-soft) !important; }
+.user-app-shell:not(.dark) .bg-violet-50 { background: var(--lm-purple-soft) !important; }
+
+.user-app-shell:not(.dark) .text-sky-600,
+.user-app-shell:not(.dark) .text-blue-600 { color: var(--lm-blue) !important; }
+.user-app-shell:not(.dark) .text-emerald-600 { color: #059669 !important; }
+.user-app-shell:not(.dark) .text-amber-600 { color: #d97706 !important; }
+.user-app-shell:not(.dark) .text-rose-600 { color: #dc2626 !important; }
+.user-app-shell:not(.dark) .text-violet-600 { color: #7c3aed !important; }
+
+/* Primary buttons: vivid blue like the reference */
+.user-app-shell:not(.dark) .bg-sky-500,
+.user-app-shell:not(.dark) .bg-sky-600,
+.user-app-shell:not(.dark) .bg-blue-500,
+.user-app-shell:not(.dark) .bg-blue-600,
+.user-app-shell:not(.dark) .bg-primary-500,
+.user-app-shell:not(.dark) .bg-primary-600,
+.user-app-shell:not(.dark) .neu-btn-primary {
+  background: var(--lm-blue) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 7px 16px rgba(37,99,235,.18) !important;
+}
+
+/* Green actions / savings */
+.user-app-shell:not(.dark) .bg-emerald-500,
+.user-app-shell:not(.dark) .bg-emerald-600 { background: var(--lm-green) !important; color:#fff !important; }
+
+/* Orange / warning actions */
+.user-app-shell:not(.dark) .bg-amber-500,
+.user-app-shell:not(.dark) .bg-orange-500 { background: var(--lm-orange) !important; color:#fff !important; }
+
+/* Selected controls get a tinted surface + blue edge */
+.user-app-shell:not(.dark) button[class*="border-primary-500"],
+.user-app-shell:not(.dark) button[class*="border-primary-600"],
+.user-app-shell:not(.dark) button[class*="border-sky-500"],
+.user-app-shell:not(.dark) a[class*="border-primary-500"] {
+  background: var(--lm-blue-soft) !important;
+  border-color: var(--lm-blue) !important;
+  color: #1d4ed8 !important;
+}
+
+/* Profile: make each information group visibly layered */
+.profile-theme:not(.dark) {
+  background: var(--lm-page) !important;
+}
+.profile-theme:not(.dark) > section {
+  background: var(--lm-section) !important;
+  border-radius: 18px;
+}
+.profile-theme:not(.dark) > section > div,
+.profile-theme:not(.dark) .profile-card {
+  background: var(--lm-card) !important;
+  border-color: var(--lm-border) !important;
+  box-shadow: 0 5px 18px rgba(15,23,42,.055) !important;
+}
+.profile-theme:not(.dark) .bg-slate-50 {
+  background: #f4f7fb !important;
+}
+
+/* Home: blue financial hero, white cards, green/orange semantic accents */
+.home-modern:not(.dark),
+.app-home-theme:not(.dark) {
+  background: var(--lm-page) !important;
+}
+.home-modern:not(.dark) section,
+.app-home-theme:not(.dark) section {
+  background: transparent;
+}
+.home-modern:not(.dark) .home-balance-card {
+  background: linear-gradient(135deg,#2563eb 0%,#315de0 100%) !important;
+  color:#fff !important;
+  border:0 !important;
+  box-shadow: 0 10px 24px rgba(37,99,235,.20) !important;
+}
+.home-modern:not(.dark) .home-action-card {
+  background: var(--lm-card) !important;
+  color: var(--lm-text) !important;
+  border:1px solid var(--lm-border) !important;
+}
+
+/* Apply Loan: cards white, category icon carries semantic color, CTA blue */
+.apply-loan-screen:not(.dark) {
+  background: var(--lm-page) !important;
+}
+.apply-loan-screen:not(.dark) .apply-accordion-body,
+.apply-loan-screen:not(.dark) section {
+  background: var(--lm-section) !important;
+  border-color: var(--lm-border) !important;
+}
+.apply-loan-screen:not(.dark) .apply-accordion-body > *,
+.apply-loan-screen:not(.dark) .bg-white {
+  background-color: var(--lm-card) !important;
+}
+
+/* Bottom navigation */
+.user-app-shell:not(.dark) .neu-raised.px-4.py-2 {
+  background: rgba(255,255,255,.97) !important;
+  border: 1px solid var(--lm-border) !important;
+  box-shadow: 0 -5px 20px rgba(15,23,42,.08) !important;
+}
+
+/* Disabled */
+.user-app-shell:not(.dark) button:disabled,
+.user-app-shell:not(.dark) input:disabled,
+.user-app-shell:not(.dark) select:disabled,
+.user-app-shell:not(.dark) textarea:disabled {
+  background: #edf1f5 !important;
+  color: #9aa6b5 !important;
+  border-color: #dbe2e9 !important;
+  box-shadow: none !important;
+}
