@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
 import { toast } from 'sonner';
 import { getTelegramUser } from '../lib/telegram';
-import { createTransaction, uploadDocument, getLoanApplications } from '../lib/api';
+import { createTransaction, uploadDocument, getLoanApplications, getDashboardStats, getTransactions } from '../lib/api';
 
 import bkashLogo from '../assets/bkash.png';
 import nagadLogo from '../assets/nagad.png';
@@ -43,16 +43,26 @@ export default function Deposit() {
   const [screenshotPreview, setScreenshotPreview] = useState<string>('');
   const [uploading, setUploading] = useState(false);
   const [associatedLoanId, setAssociatedLoanId] = useState<string | null>(null);
+  const [savingsBalance, setSavingsBalance] = useState(0);
+  const [recentDeposits, setRecentDeposits] = useState<any[]>([]);
+  const [pageError, setPageError] = useState(false);
 
   useEffect(() => {
     if (user && user.id) {
-      getLoanApplications(user.id).then(loans => {
+      Promise.all([getLoanApplications(user.id), getDashboardStats(user.id), getTransactions(user.id)])
+        .then(([loans, dashboard, transactions]) => {
+          setSavingsBalance(Number(dashboard?.savingsBalance || 0));
+          setRecentDeposits((transactions || []).filter(t => t.type === 'deposit').slice(0, 3));
         const activeLoan = loans.find(l => l.status === 'pending' || l.status === 'under_review' || l.status === 'action_required');
         if (activeLoan) {
           setAssociatedLoanId(activeLoan.id);
           setLoanAmount(activeLoan.amount.toString());
         }
-      });
+        })
+        .catch((error) => {
+          console.error('Deposit page load error:', error);
+          setPageError(true);
+        });
     }
   }, [user]);
 
@@ -189,7 +199,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               : 'Your deposit request has been submitted successfully. Our admin panel is verifying it.'}
           </p>
           
-          <div className="neu-sunken p-4 rounded-2xl mb-6 transition-colors relative z-10 border-0">
+          <div className="bg-slate-100 dark:bg-slate-900 p-4 rounded-2xl mb-6 transition-colors relative z-10 border-0">
             <p className="text-[10px] uppercase tracking-wider font-black text-orange-600 dark:text-orange-400 mb-1 transition-colors">
               {isBn ? 'আপডেট সময়' : 'Estimated Time'}
             </p>
@@ -240,13 +250,13 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
   }
 
   return (
-    <div className="min-h-screen neu-bg flex flex-col relative transition-colors pb-24">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b1220] flex flex-col relative transition-colors pb-24">
       {/* Premium Header */}
-      <div className="px-5 py-4 sticky top-0 z-30 flex items-center gap-4 shrink-0 bg-transparent">
+      <div className="px-4 sm:px-5 py-4 sticky top-0 z-30 flex items-center gap-3 shrink-0 bg-white dark:bg-[#0f172a] border-b border-slate-200 dark:border-slate-800">
         <button 
           type="button"
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full neu-btn flex items-center justify-center text-gray-700 dark:text-gray-300 active:scale-95 transition-all border-0"
+          className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-gray-700 dark:text-gray-300 active:scale-95 transition-all"
         >
           <ArrowLeft size={18} />
         </button>
@@ -260,8 +270,44 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
         </div>
       </div>
 
-      <div className="flex-1 p-4 space-y-4 bg-transparent">
+      <div className="flex-1 p-4 space-y-4">
+        {pageError && (
+          <div className="bg-white dark:bg-[#111827] border border-amber-200 dark:border-amber-900 rounded-2xl p-4 text-sm text-slate-700 dark:text-slate-300">
+            {isBn ? 'কিছু অ্যাকাউন্ট তথ্য লোড করা যায়নি। ডিপোজিট রিকোয়েস্ট করা যাবে, তবে ব্যালেন্স তথ্য সাময়িকভাবে অনুপলব্ধ।' : 'Some account information could not be loaded. You can still submit a deposit request, but balance information is temporarily unavailable.'}
+          </div>
+        )}
+
+        <section className="bg-slate-900 dark:bg-[#111827] text-white rounded-2xl p-5 border border-slate-800 dark:border-slate-700">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{isBn ? 'সঞ্চয় ব্যালেন্স' : 'Savings Balance'}</p>
+              <p className="mt-2 text-3xl font-black tracking-tight">৳{savingsBalance.toLocaleString('en-IN')}</p>
+              <p className="mt-1 text-xs text-slate-400">{isBn ? 'আপনার অ্যাকাউন্টে বর্তমানে রেকর্ডকৃত সঞ্চয়' : 'Recorded savings balance on your account'}</p>
+            </div>
+            <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center"><Landmark size={20} /></div>
+          </div>
+        </section>
         
+        {recentDeposits.length > 0 && (
+          <section className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{isBn ? 'সাম্প্রতিক ডিপোজিট' : 'Recent Deposits'}</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-white mt-1">{isBn ? 'শেষ কয়েকটি জমার অবস্থা' : 'Latest deposit activity'}</p>
+              </div>
+              <CreditCard size={18} className="text-slate-400" />
+            </div>
+            <div className="space-y-2">
+              {recentDeposits.map((tx) => (
+                <div key={tx.id} className="flex items-center justify-between gap-3 py-2.5 border-t border-slate-100 dark:border-slate-800 first:border-t-0">
+                  <div><p className="text-xs font-bold text-slate-800 dark:text-slate-200">৳{Number(tx.amount || 0).toLocaleString('en-IN')}</p><p className="text-[10px] text-slate-400">{new Date(tx.created_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-US')}</p></div>
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-black border ${tx.status === 'completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900' : tx.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900' : 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900'}`}>{tx.status}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Step 1: Loan Amount Selection */}
         <motion.section 
           initial={{ opacity: 0, y: 10 }}
@@ -416,7 +462,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               )}
 
               {/* Total Row */}
-              <div className="p-3 px-5 neu-sunken rounded-full flex items-center justify-between border-0 text-gray-900 dark:text-white">
+              <div className="p-3 px-5 bg-slate-100 dark:bg-slate-900 rounded-full flex items-center justify-between border-0 text-gray-900 dark:text-white">
                 <span className="text-xs font-black text-gray-500 dark:text-gray-400">{isBn ? 'মোট সম্ভাব্য জমা' : 'Total Charges'}</span>
                 <span className="text-base font-black">{selectedPaymentAmount > 0 ? `৳${selectedPaymentAmount.toLocaleString('en-IN')}` : (isBn ? 'উপরে থেকে নির্বাচন করুন' : 'Select an option above')}</span>
               </div>
@@ -443,7 +489,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 className={`py-2 px-1.5 rounded-[20px] text-xs font-bold border-2 transition-all flex flex-col items-center justify-center gap-1.5 relative overflow-hidden cursor-pointer ${
                   method === m.id 
                     ? `${m.border} ${m.bgLight} shadow-inner ring-1 ring-black/5 dark:ring-white/5` 
-                    : 'neu-btn border-0'
+                    : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700'
                 }`}
               >
                 <img src={m.logo} alt={m.name} className="h-6 object-contain mix-blend-multiply dark:mix-blend-normal rounded-sm relative z-10" />
@@ -461,7 +507,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 className={`py-2 px-1.5 rounded-[20px] text-xs font-bold border-2 transition-all flex flex-col items-center justify-center gap-1 relative overflow-hidden cursor-pointer ${
                   method === m.id 
                     ? `border-primary-500/40 bg-primary-600/10 shadow-inner` 
-                    : 'neu-btn border-0'
+                    : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700'
                 }`}
               >
                 <img src={m.logo} alt={m.name} className="h-6 object-contain mix-blend-multiply dark:mix-blend-normal rounded-sm relative z-10" />
@@ -565,7 +611,7 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
                 />
                 <label 
                   htmlFor="screenshot-upload" 
-                  className="w-full neu-sunken border-2 border-dashed border-gray-300 dark:border-gray-800 rounded-[24px] py-5 flex flex-col items-center justify-center gap-2 hover:border-primary-500/40 cursor-pointer"
+                  className="w-full bg-slate-100 dark:bg-slate-900 border-2 border-dashed border-gray-300 dark:border-gray-800 rounded-[24px] py-5 flex flex-col items-center justify-center gap-2 hover:border-primary-500/40 cursor-pointer"
                 >
                   {uploading ? (
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
@@ -636,14 +682,14 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
               <button 
                 type="button"
                 onClick={() => setShowConfirmModal(false)}
-                className="flex-1 py-3 rounded-full font-black text-xs neu-btn border-0"
+                className="flex-1 py-3 rounded-full font-black text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
               >
                 {isBn ? 'বাতিল' : 'Cancel'}
               </button>
               <button 
                 type="button"
                 onClick={processDeposit}
-                className="flex-1 py-3 rounded-full font-black text-xs neu-btn-primary border-0"
+                className="flex-1 py-3 rounded-full font-black text-xs bg-gradient-to-r from-primary-600 to-indigo-600 border border-primary-500/30"
               >
                 {isBn ? 'হ্যাঁ, সাবমিট' : 'Yes, Submit'}
               </button>
