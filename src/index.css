@@ -2787,3 +2787,61 @@ html.dark .profile-theme .profile-section-support .profile-row-icon {
 html.dark .profile-theme .profile-section .border-slate-100 {
   border-color:#263449 !important;
 }
+
+/* PROFILE V3 — final polish: compact hero, readable dark mode, card-first sections */
+.profile-theme .profile-hero-wrap { padding:0 16px 0 !important; }
+.profile-theme .profile-hero {
+  margin:14px 0 0 !important;
+  border-radius:0 0 28px 28px !important;
+}
+.profile-theme .profile-hero-bg { height:205px !important; }
+.profile-theme .profile-hero-title { padding-top:24px !important; font-size:20px !important; }
+.profile-theme .profile-hero-wave {
+  bottom:-104px !important;
+  height:160px !important;
+  left:-7% !important;
+  width:114% !important;
+}
+.profile-theme .profile-hero-content {
+  margin-top:-61px !important;
+  padding:0 22px 20px !important;
+}
+.profile-theme .profile-avatar-wrap,
+.profile-theme .profile-avatar-ring { width:108px !important; height:108px !important; }
+.profile-theme .profile-hero-name h1 { font-size:25px !important; }
+.profile-theme .profile-hero-username { margin-top:3px !important; margin-bottom:14px !important; }
+.profile-theme .profile-stat-grid { border-radius:18px !important; }
+.profile-theme .profile-stat { padding:12px 6px !important; }
+.profile-theme .profile-primary-action { margin-top:12px !important; }
+
+/* Dark mode: lower hero is an elevated surface, never pure black. */
+html.dark .profile-theme .profile-hero {
+  background:#0F172A !important;
+  border-color:#1F6F67 !important;
+}
+html.dark .profile-theme .profile-hero-wave {
+  background:#0F172A !important;
+}
+html.dark .profile-theme .profile-hero-name h1 {
+  color:#F8FAFC !important;
+  text-shadow:0 1px 1px rgba(0,0,0,.18);
+}
+html.dark .profile-theme .profile-hero-username {
+  color:#A7B4C7 !important;
+}
+html.dark .profile-theme .profile-stat-grid {
+  background:#172033 !important;
+  border-color:#334155 !important;
+}
+html.dark .profile-theme .profile-stat span { color:#94A3B8 !important; }
+html.dark .profile-theme .profile-stat strong { color:#F8FAFC !important; }
+html.dark .profile-theme .profile-stat-action strong { color:#34D399 !important; }
+html.dark .profile-theme .profile-section > .profile-section-title,
+html.dark .profile-theme .profile-section > h2 {
+  color:#94A3B8 !important;
+}
+html.dark .profile-theme .profile-section > div.overflow-hidden {
+  background:#111827 !important;
+  border-color:#263449 !important;
+  box-shadow:0 8px 22px rgba(0,0,0,.20) !important;
+}
