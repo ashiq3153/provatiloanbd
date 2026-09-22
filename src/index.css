@@ -2603,3 +2603,187 @@ html.dark .profile-stat-grid { background:#F8FAFC; border-color:#E2E8F0; }
 html.dark .profile-stat { border-color:#E2E8F0; }
 html.dark .profile-stat strong { color:#0F172A; }
 html.dark .profile-stat-action strong { color:#059669; }
+
+/* ================================================================
+   PROFILE HERO V2 — clean reference-style composition
+   ================================================================ */
+.profile-theme .profile-hero-wrap {
+  padding: 0 16px 4px !important;
+}
+.profile-theme .profile-hero {
+  margin: 16px 0 0 !important;
+  border-radius: 0 0 30px 30px !important;
+  overflow: hidden !important;
+  background: #F8FAFC !important;
+  border: 1px solid #D1FAE5 !important;
+  box-shadow: 0 12px 30px rgba(15,23,42,.08) !important;
+}
+.profile-theme .profile-hero-bg {
+  height: 220px !important;
+  background: linear-gradient(145deg,#059669 0%,#10B981 48%,#0EA5A4 100%) !important;
+}
+.profile-theme .profile-hero-title {
+  padding-top: 26px !important;
+  font-size: 21px !important;
+  letter-spacing: -.03em !important;
+}
+.profile-theme .profile-hero-wave {
+  left: -8% !important;
+  bottom: -112px !important;
+  width: 116% !important;
+  height: 175px !important;
+  background: #F8FAFC !important;
+  border-radius: 52% 52% 0 0 / 72% 72% 0 0 !important;
+  transform: rotate(-1deg) !important;
+}
+.profile-theme .profile-hero-wave::after {
+  display:none !important;
+}
+.profile-theme .profile-hero-orb-a {
+  width: 150px !important;
+  height: 150px !important;
+  right: -42px !important;
+  top: -35px !important;
+  background: rgba(255,255,255,.08) !important;
+}
+.profile-theme .profile-hero-orb-b {
+  width: 110px !important;
+  height: 110px !important;
+  left: -50px !important;
+  bottom: -35px !important;
+  background: rgba(255,255,255,.08) !important;
+}
+.profile-theme .profile-hero-content {
+  margin-top: -66px !important;
+  padding: 0 24px 22px !important;
+}
+.profile-theme .profile-avatar-wrap,
+.profile-theme .profile-avatar-ring {
+  width: 112px !important;
+  height: 112px !important;
+}
+.profile-theme .profile-avatar-ring {
+  padding: 4px !important;
+  background: linear-gradient(135deg,#38BDF8,#2563EB 55%,#14B8A6) !important;
+}
+.profile-theme .profile-avatar {
+  border-width: 4px !important;
+}
+.profile-theme .profile-online-dot {
+  width: 23px !important;
+  height: 23px !important;
+  right: 0 !important;
+  bottom: 3px !important;
+}
+.profile-theme .profile-hero-name {
+  margin-top: 10px !important;
+}
+.profile-theme .profile-hero-name h1 {
+  font-size: 26px !important;
+  line-height: 1.15 !important;
+}
+.profile-theme .profile-verified {
+  padding: 5px 10px !important;
+}
+.profile-theme .profile-hero-username {
+  margin-bottom: 17px !important;
+}
+.profile-theme .profile-stat-grid {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 8px 22px rgba(15,23,42,.05) !important;
+}
+.profile-theme .profile-stat {
+  padding: 14px 7px !important;
+}
+.profile-theme .profile-stat strong {
+  font-size: 12px !important;
+}
+.profile-theme .profile-primary-action {
+  margin-top: 14px !important;
+  border-radius: 14px !important;
+  padding: 13px 16px !important;
+  background: linear-gradient(135deg,#2563EB,#0EA5E9) !important;
+  box-shadow: 0 10px 22px rgba(37,99,235,.18) !important;
+}
+
+/* Section cards: white cards with colored icon chips, not colored blocks. */
+.profile-theme .profile-section {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 16px 2px !important;
+  border-radius: 0 !important;
+}
+.profile-theme .profile-section > .profile-section-title,
+.profile-theme .profile-section > h2 {
+  color: #64748B !important;
+}
+.profile-theme .profile-section > div.overflow-hidden {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 22px !important;
+  box-shadow: 0 7px 22px rgba(15,23,42,.055) !important;
+}
+.profile-theme .profile-section-member .profile-row-icon {
+  background:#EFF6FF !important;
+  color:#2563EB !important;
+}
+.profile-theme .profile-section-security .profile-row-icon {
+  background:#ECFDF5 !important;
+  color:#059669 !important;
+}
+.profile-theme .profile-section-preferences .profile-row-icon {
+  background:#F5F3FF !important;
+  color:#7C3AED !important;
+}
+.profile-theme .profile-section-support .profile-row-icon {
+  background:#FFF7ED !important;
+  color:#EA580C !important;
+}
+.profile-theme .profile-section .border-slate-100 {
+  border-color:#E2E8F0 !important;
+}
+.profile-theme .profile-section button,
+.profile-theme .profile-section a > div {
+  min-height:74px !important;
+}
+.profile-theme .profile-section .text-slate-900 { color:#0F172A !important; }
+.profile-theme .profile-section .text-slate-500 { color:#64748B !important; }
+
+/* Dark mode keeps the same hierarchy without painting whole sections. */
+html.dark .profile-theme .profile-hero {
+  background:#0B1220 !important;
+  border-color:#115E59 !important;
+}
+html.dark .profile-theme .profile-hero-bg {
+  background:linear-gradient(145deg,#065F46 0%,#047857 48%,#075985 100%) !important;
+}
+html.dark .profile-theme .profile-hero-wave {
+  background:#0B1220 !important;
+}
+html.dark .profile-theme .profile-stat-grid {
+  background:#111827 !important;
+  border-color:#334155 !important;
+}
+html.dark .profile-theme .profile-section {
+  background:transparent !important;
+}
+html.dark .profile-theme .profile-section > div.overflow-hidden {
+  background:#111827 !important;
+  border-color:#263449 !important;
+}
+html.dark .profile-theme .profile-section-member .profile-row-icon {
+  background:#0C2A3A !important; color:#38BDF8 !important;
+}
+html.dark .profile-theme .profile-section-security .profile-row-icon {
+  background:#083B2D !important; color:#34D399 !important;
+}
+html.dark .profile-theme .profile-section-preferences .profile-row-icon {
+  background:#25183F !important; color:#A78BFA !important;
+}
+html.dark .profile-theme .profile-section-support .profile-row-icon {
+  background:#3A210D !important; color:#FB923C !important;
+}
+html.dark .profile-theme .profile-section .border-slate-100 {
+  border-color:#263449 !important;
+}
