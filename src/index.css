@@ -3584,3 +3584,48 @@ html:not(.dark) .app-home-theme .home-loan-service-card > div:first-child{
 html:not(.dark) .app-home-theme .home-empty-card a{
   background:linear-gradient(135deg,#2436d8,#2d8be8) !important;color:#fff !important;
 }
+
+
+/* FINAL HOME LIGHT-MODE SURFACE OVERRIDE — canvas remains white; UI surfaces carry color. */
+html:not(.dark) .user-app-shell .pv-home-financial-hero {
+  background: linear-gradient(135deg,#2520c9 0%,#315be8 48%,#19b9d8 100%) !important;
+  color:#ffffff !important;
+  border:1px solid #667af0 !important;
+  box-shadow:0 18px 38px rgba(37,32,201,.22) !important;
+  opacity:1 !important;
+}
+html:not(.dark) .user-app-shell .pv-home-financial-hero,
+html:not(.dark) .user-app-shell .pv-home-financial-hero * {
+  -webkit-text-fill-color:initial !important;
+}
+html:not(.dark) .user-app-shell .pv-home-financial-hero p,
+html:not(.dark) .user-app-shell .pv-home-financial-hero span {
+  color:#ffffff !important;
+}
+html:not(.dark) .user-app-shell .pv-home-financial-hero p.text-slate-400,
+html:not(.dark) .user-app-shell .pv-home-financial-hero p.text-slate-200 {
+  color:#eaf5ff !important;
+}
+html:not(.dark) .user-app-shell .pv-home-financial-hero .bg-white\\/10 {
+  background:rgba(255,255,255,.18) !important;
+}
+html:not(.dark) .user-app-shell .pv-home-financial-hero .border-white\\/10 {
+  border-color:rgba(255,255,255,.30) !important;
+}
+/* Keep the surrounding layers colored instead of white-on-white. */
+html:not(.dark) .user-app-shell .home-panel-info {
+  background:linear-gradient(135deg,#e5f7ff,#edf1ff) !important;
+  border-color:#9ed8f2 !important;
+}
+html:not(.dark) .user-app-shell .home-loan-section {
+  background:linear-gradient(135deg,#eeeaff,#e5f6ff) !important;
+  border-color:#b6b8ee !important;
+}
+html:not(.dark) .user-app-shell .home-loan-card {
+  background:linear-gradient(135deg,#e8f3ff,#f0ebff) !important;
+  border-color:#b8c9ee !important;
+}
+html:not(.dark) .user-app-shell .home-empty-card {
+  background:linear-gradient(135deg,#e8e4ff,#e4f7ff) !important;
+  border-color:#bdb8ee !important;
+}
