@@ -3523,3 +3523,64 @@ html:not(.dark) select:focus {
   box-shadow:0 0 0 3px rgba(37,99,235,.12) !important;
   outline:none !important;
 }
+
+
+/* =====================================================================
+   HOME VISUAL SURFACES — explicit role mapping
+   ===================================================================== */
+html:not(.dark) .app-home-theme .home-financial-card{
+  background:linear-gradient(135deg,#2436d8 0%,#3159e8 48%,#1599d8 100%) !important;
+  color:#fff !important;
+  border:1px solid #6d83ef !important;
+  box-shadow:0 18px 40px rgba(36,54,216,.20) !important;
+}
+html:not(.dark) .app-home-theme .home-financial-card p.text-slate-400,
+html:not(.dark) .app-home-theme .home-financial-card p.text-slate-200{color:#eaf2ff !important}
+
+html:not(.dark) .app-home-theme .home-panel-info{
+  background:linear-gradient(135deg,#eaf8ff,#edf3ff) !important;
+  border:1px solid #b9dff2 !important;
+}
+html:not(.dark) .app-home-theme .home-loan-section{
+  background:linear-gradient(135deg,#eef0ff,#eaf8ff) !important;
+  border:1px solid #aebff2 !important;
+}
+html:not(.dark) .app-home-theme .home-loan-card{
+  background:linear-gradient(135deg,#ffffff,#f0f8ff) !important;
+  border:1px solid #b8d8ef !important;
+  box-shadow:0 10px 28px rgba(37,99,235,.10) !important;
+}
+html:not(.dark) .app-home-theme .home-empty-card{
+  background:linear-gradient(135deg,#f2efff,#eaf8ff) !important;
+  border:1px solid #c5c5ef !important;
+}
+html:not(.dark) .app-home-theme .home-panel-savings{
+  background:linear-gradient(135deg,#ecfbf6,#eef8ff) !important;
+  border:1px solid #b8dfd3 !important;
+}
+html:not(.dark) .app-home-theme .home-service-card{
+  background:linear-gradient(135deg,#edf4ff,#eafaff) !important;
+  border:1px solid #c0d9ee !important;
+}
+html:not(.dark) .app-home-theme .home-loan-service-card{
+  background:linear-gradient(135deg,#f2efff,#edf5ff) !important;
+  border:1px solid #cbc9ed !important;
+}
+html:not(.dark) .app-home-theme .home-activity-card{
+  background:#f3f8ff !important;
+  border:1px solid #c8d9ec !important;
+}
+html:not(.dark) .app-home-theme .home-service-card p.text-slate-400,
+html:not(.dark) .app-home-theme .home-loan-service-card p.text-slate-400,
+html:not(.dark) .app-home-theme .home-activity-card p.text-slate-400{
+  color:#475569 !important;
+}
+html:not(.dark) .app-home-theme .home-service-card > div:first-child{
+  background:#dcecff !important;color:#2446b8 !important;
+}
+html:not(.dark) .app-home-theme .home-loan-service-card > div:first-child{
+  background:#e9e3ff !important;color:#6941c6 !important;
+}
+html:not(.dark) .app-home-theme .home-empty-card a{
+  background:linear-gradient(135deg,#2436d8,#2d8be8) !important;color:#fff !important;
+}
