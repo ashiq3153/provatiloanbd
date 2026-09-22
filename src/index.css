@@ -3357,3 +3357,169 @@ html:not(.dark) .admin-panel-shell [class*="backdrop-blur"] {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+
+
+/* =====================================================================
+   PROVATI v1.1 — LIGHT SEMANTIC SURFACE SYSTEM
+   Page canvas stays white. Meaningful UI surfaces carry role-based color.
+   Dark mode is intentionally untouched by this block.
+   ===================================================================== */
+html:not(.dark) {
+  --pv-canvas:#ffffff;
+  --pv-ink:#111827;
+  --pv-body:#334155;
+  --pv-muted:#64748b;
+  --pv-blue:#2436d8;
+  --pv-blue-2:#2563eb;
+  --pv-cyan:#38bdf8;
+  --pv-teal:#0f9f8f;
+  --pv-green:#16a34a;
+  --pv-amber:#f59e0b;
+  --pv-red:#dc2626;
+  --pv-purple:#7c3aed;
+  --pv-section-blue:#eef4ff;
+  --pv-section-cyan:#ecfbff;
+  --pv-section-teal:#ecfbf6;
+  --pv-section-violet:#f4f0ff;
+  --pv-section-amber:#fff8e8;
+  --pv-control:#edf3fb;
+  --pv-border:#d6e2f1;
+}
+html:not(.dark) body,
+html:not(.dark) .user-app-shell { background:#fff !important; color:var(--pv-ink) !important; }
+html:not(.dark) body::before { display:none !important; }
+
+/* Never let a page canvas become a tinted slab. */
+html:not(.dark) .user-app-shell > main,
+html:not(.dark) .home-modern,
+html:not(.dark) .profile-theme,
+html:not(.dark) .app-apply-theme,
+html:not(.dark) [class*="min-h-screen"][class*="bg-slate-50"] {
+  background:#fff !important;
+}
+
+/* Generic surfaces: visibly separate from the white canvas. */
+html:not(.dark) .neu-raised,
+html:not(.dark) .neu-raised-sm,
+html:not(.dark) .neu-flat-card {
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  background:var(--pv-section-blue) !important;
+  border-color:#cfe0f5 !important;
+  color:var(--pv-ink) !important;
+}
+html:not(.dark) .neu-sunken,
+html:not(.dark) .neu-input {
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  background:var(--pv-control) !important;
+  border-color:#cbd9ea !important;
+  color:var(--pv-ink) !important;
+}
+
+/* Existing Tailwind surfaces become deliberate layers, not white-on-white. */
+html:not(.dark) .bg-white { background-color:#f7f9ff !important; }
+html:not(.dark) .bg-slate-100 { background-color:#eaf2ff !important; }
+html:not(.dark) .bg-gray-50 { background-color:#f1f7ff !important; }
+html:not(.dark) .bg-gray-100 { background-color:#eaf1fb !important; }
+
+/* Preserve semantic tints and strengthen their meaning. */
+html:not(.dark) .bg-emerald-50 { background-color:#e9fbf2 !important; }
+html:not(.dark) .bg-green-50 { background-color:#ecfdf3 !important; }
+html:not(.dark) .bg-sky-50 { background-color:#eaf8ff !important; }
+html:not(.dark) .bg-blue-50 { background-color:#edf3ff !important; }
+html:not(.dark) .bg-violet-50,
+html:not(.dark) .bg-purple-50 { background-color:#f3edff !important; }
+html:not(.dark) .bg-amber-50,
+html:not(.dark) .bg-orange-50 { background-color:#fff6df !important; }
+html:not(.dark) .bg-rose-50,
+html:not(.dark) .bg-red-50 { background-color:#fff0f2 !important; }
+
+/* Readability: decorative pale text is not allowed for normal content. */
+html:not(.dark) .text-gray-400,
+html:not(.dark) .text-slate-400 { color:#64748b !important; }
+html:not(.dark) .text-gray-500,
+html:not(.dark) .text-slate-500 { color:#475569 !important; }
+html:not(.dark) .text-gray-600,
+html:not(.dark) .text-slate-600 { color:#334155 !important; }
+html:not(.dark) input,
+html:not(.dark) textarea,
+html:not(.dark) select { color:var(--pv-ink) !important; background-color:#edf3fb; }
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder { color:#64748b !important; opacity:1 !important; }
+
+/* Semantic actions. Primary/submit/apply/continue = blue; success remains green. */
+html:not(.dark) .neu-btn-primary,
+html:not(.dark) button.bg-primary-600,
+html:not(.dark) a.bg-primary-600 {
+  background:linear-gradient(135deg,#2436d8,#2d7ff9) !important;
+  color:#fff !important;
+  border-color:transparent !important;
+}
+html:not(.dark) button:disabled {
+  background:#e2e8f0 !important; color:#64748b !important;
+  box-shadow:none !important; opacity:1 !important;
+}
+
+/* HOME — each major layer has its own visual role. */
+html:not(.dark) .home-modern .home-financial-card,
+html:not(.dark) .home-modern [class*="financial-card"] {
+  background:linear-gradient(135deg,#2436d8,#1557d6) !important; color:#fff !important;
+}
+html:not(.dark) .home-modern .home-next-action,
+html:not(.dark) .home-modern [class*="next-action"] {
+  background:linear-gradient(135deg,#eaf8ff,#eef4ff) !important;
+  border-color:#a9def4 !important;
+}
+html:not(.dark) .home-modern .home-loan-section,
+html:not(.dark) .home-modern [class*="loan-section"],
+html:not(.dark) .home-modern [class*="portfolio"] {
+  background:linear-gradient(135deg,#f1efff,#eaf7ff) !important;
+  border-color:#c9c7f7 !important;
+}
+
+/* PROFILE — identity, information and account areas are distinct. */
+html:not(.dark) .profile-theme [class*="profile-hero"],
+html:not(.dark) .profile-theme [class*="profile-header"] {
+  background:linear-gradient(135deg,#0f9f8f,#22c7a9 55%,#38bdf8) !important;
+}
+html:not(.dark) .profile-theme [class*="member-information"],
+html:not(.dark) .profile-theme [class*="member-info"] {
+  background:linear-gradient(135deg,#ecfbf6,#eef8ff) !important;
+}
+html:not(.dark) .profile-theme [class*="account-security"],
+html:not(.dark) .profile-theme [class*="security"] {
+  background:linear-gradient(135deg,#f4f0ff,#eef4ff) !important;
+}
+
+/* APPLY/LOANS — selection is blue, informational surfaces cyan/violet,
+   requirements neutral-blue, warnings amber. */
+html:not(.dark) .app-apply-theme .apply-accordion-body { background:#eef6ff !important; }
+html:not(.dark) .app-apply-theme [aria-selected="true"],
+html:not(.dark) .app-apply-theme [aria-pressed="true"] {
+  background:#2436d8 !important; color:#fff !important; border-color:#2436d8 !important;
+}
+
+/* Transactions: money direction and state keep universal financial semantics. */
+html:not(.dark) .text-emerald-600 { color:#087f5b !important; }
+html:not(.dark) .text-rose-600 { color:#b42318 !important; }
+html:not(.dark) .text-amber-600 { color:#a15c00 !important; }
+html:not(.dark) .text-blue-600,
+html:not(.dark) .text-primary-600 { color:#2436d8 !important; }
+
+/* Bottom navigation is a surface, not another white rectangle. */
+html:not(.dark) .user-app-shell nav,
+html:not(.dark) .user-app-shell [class*="bottom-nav"],
+html:not(.dark) .user-app-shell [class*="bottom-"][class*="neu-raised"] {
+  background:linear-gradient(135deg,#eef4ff,#e8f8ff) !important;
+  border-color:#c9d9ef !important;
+}
+
+/* Focus communicates interaction without changing semantic meaning. */
+html:not(.dark) input:focus,
+html:not(.dark) textarea:focus,
+html:not(.dark) select:focus {
+  border-color:#2563eb !important;
+  box-shadow:0 0 0 3px rgba(37,99,235,.12) !important;
+  outline:none !important;
+}
