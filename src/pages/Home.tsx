@@ -307,7 +307,7 @@ export default function Home() {
         )}
 
         {/* Financial overview */}
-        <section className="home-financial-card rounded-[28px] p-5 text-white shadow-xl overflow-hidden relative">
+        <section className="home-financial-card rounded-[28px] p-5 text-white shadow-xl overflow-hidden relative border border-indigo-200/40">
           <div className="absolute -right-16 -top-16 w-40 h-40 rounded-full border border-sky-400/10" />
           <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full border border-sky-400/10" />
           <div className="flex items-center justify-between relative">
@@ -373,7 +373,7 @@ export default function Home() {
           </div>
           {loading ? <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-5"><Skeleton className="h-5 w-40"/><Skeleton className="h-3 w-full mt-5"/></div> :
           activeLoan ? (
-            <Link to={`/application/${activeLoan.id}`} className="block bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+            <Link to={`/application/${activeLoan.id}`} className="home-loan-card block rounded-2xl p-5 shadow-sm">
               <div className="flex justify-between gap-3">
                 <div><h3 className="font-black">{categoryName(activeLoan.loan_category)}</h3><p className="text-[10px] text-slate-400 mt-1 font-bold">LN-{activeLoan.id.slice(0,8).toUpperCase()}</p></div>
                 <span className="h-fit px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-[9px] font-black">{isBn?'সক্রিয়':'ACTIVE'}</span>
@@ -392,7 +392,7 @@ export default function Home() {
               </div>
             </Link>
           ) : (
-            <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-6 text-center">
+            <div className="home-empty-card rounded-2xl p-6 text-center">
               <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 mx-auto flex items-center justify-center"><FileText size={20} className="text-slate-500"/></div>
               <h3 className="font-black mt-3">{isBn?'কোনো সক্রিয় ঋণ নেই':'No active loan'}</h3>
               <p className="text-xs text-slate-500 mt-1">{isBn?'আপনার প্রয়োজন অনুযায়ী ঋণ সেবা দেখুন।':'Explore loan services for your needs.'}</p>
@@ -434,7 +434,7 @@ export default function Home() {
 
         {/* Savings summary */}
         {!loading && stats && (
-          <section className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+          <section className="home-panel home-panel-savings rounded-2xl p-4 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div><p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{isBn ? 'সঞ্চয় হিসাব' : 'Savings account'}</p><p className="text-xl font-black mt-1">{balanceVisible ? formatCurrency(stats.savingsBalance || 0, isBn) : '••••••'}</p></div>
               <Link to="/deposit" className="px-3 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[11px] font-black">{isBn ? 'জমা দিন' : 'Deposit'}</Link>
@@ -451,7 +451,7 @@ export default function Home() {
           <div className="-mx-4 px-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
             <div className="flex gap-3 w-max">
               {quickActions.map(({label,sub,icon:Icon,link})=>(
-                <Link key={link} to={link} className="w-[180px] shrink-0 snap-start bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3 shadow-sm active:scale-[.98] transition">
+                <Link key={link} to={link} className="home-service-card w-[180px] shrink-0 snap-start rounded-2xl p-4 flex items-center gap-3 shadow-sm active:scale-[.98] transition">
                   <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0"><Icon size={18}/></div>
                   <div className="min-w-0"><p className="text-xs font-black truncate">{label}</p><p className="text-[10px] text-slate-400 mt-1 truncate">{sub}</p></div>
                 </Link>
@@ -463,7 +463,7 @@ export default function Home() {
         {/* Recent activity */}
         <section>
           <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'লেনদেন':'Activity'}</p><h2 className="text-lg font-black mt-1">{isBn?'সাম্প্রতিক কার্যক্রম':'Recent activity'}</h2></div><Link to="/transactions" className="text-xs font-black text-sky-600 dark:text-sky-400">{isBn?'সব দেখুন':'View all'}</Link></div>
-          <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
+          <div className="home-activity-card rounded-2xl overflow-hidden">
             {recentTransactions.length ? recentTransactions.map((tx,i)=>(
               <div key={tx.id} className={`p-4 flex items-center gap-3 ${i<recentTransactions.length-1?'border-b border-slate-100 dark:border-slate-800':''}`}>
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tx.type==='deposit'?'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400':tx.type==='emi_payment'?'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400':'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
