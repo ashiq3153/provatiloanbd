@@ -1,0 +1,42 @@
+/* Provatilo Home — semantic colorful light-mode surfaces.
+   Canvas stays white; functional surfaces carry color by meaning. */
+.home-modern.app-home-theme .home-financial-card{
+  background:linear-gradient(135deg,#2420c9 0%,#3157e8 48%,#28b7e8 100%) !important;
+  color:#fff !important;
+  border:1px solid #6a7ff0 !important;
+  box-shadow:0 16px 34px rgba(36,32,201,.22) !important;
+}
+.home-modern.app-home-theme .home-financial-card p{color:#fff !important}
+.home-modern.app-home-theme .home-financial-card p.text-slate-400,
+.home-modern.app-home-theme .home-financial-card p.text-slate-200{color:#eaf5ff !important}
+.home-modern.app-home-theme .home-financial-card .bg-white\/10{background:rgba(255,255,255,.16) !important}
+.home-modern.app-home-theme .home-financial-card .border-white\/10{border-color:rgba(255,255,255,.28) !important}
+
+.home-modern.app-home-theme > div > a.block{
+  background:linear-gradient(135deg,#e8f7ff 0%,#e7f0ff 100%) !important;
+  border:1px solid #9ed8f2 !important;
+  box-shadow:0 10px 24px rgba(53,169,239,.13) !important;
+}
+.home-modern.app-home-theme > div > a.block .text-slate-400{color:#43516a !important}
+.home-modern.app-home-theme > div > a.block .text-slate-500{color:#334155 !important}
+
+.home-modern.app-home-theme .home-empty-card{
+  background:linear-gradient(135deg,#eeeaff 0%,#e8f6ff 100%) !important;
+  border:1px solid #c4c5ef !important;
+  box-shadow:0 10px 24px rgba(83,72,200,.10) !important;
+}
+.home-modern.app-home-theme .home-empty-card .bg-slate-100{
+  background:#e7e2ff !important;
+  color:#4c3bb3 !important;
+}
+.home-modern.app-home-theme .home-empty-card p.text-slate-500{color:#43516a !important}
+.home-modern.app-home-theme .home-empty-card a{
+  background:linear-gradient(135deg,#2520c9,#35a9ef) !important;
+  color:#fff !important;
+  box-shadow:0 9px 20px rgba(37,32,201,.22) !important;
+}
+
+.home-modern.app-home-theme nav{
+  background:linear-gradient(135deg,#e8efff 0%,#e5f8ff 100%) !important;
+  border-color:#c1d4ee !important;
+}
