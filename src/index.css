@@ -3943,3 +3943,155 @@ html.dark, html.dark body, html.dark #root { background:#fff !important; color:v
 .admin-panel-shell [class*="backdrop-blur"] {
   backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
 }
+
+
+/* ===== V1.1 FIX: enforce real light-mode surface hierarchy across every screen =====
+   Canvas alone is white. Surfaces are intentionally tinted by role; never let
+   the generic .bg-white utility wash out a branded hero/card or its text. */
+html, html.dark, body, body.dark, #root {
+  color-scheme: light !important;
+  background: #ffffff !important;
+}
+html.dark .dark, html.dark .dark\:bg-black,
+html.dark .dark\:bg-gray-900,
+html.dark .dark\:bg-gray-800 { background-color: inherit !important; }
+.user-app-shell, .admin-panel-shell,
+.user-app-shell > main, .admin-panel-shell > main {
+  background:#fff !important;
+  color:#101a33 !important;
+}
+
+/* Strong color on structural panels, including nested cards and widgets. */
+.user-app-shell :is(section,article,aside,li, .card, [role="region"]),
+.admin-panel-shell :is(section,article,aside,li, .card, [role="region"]) {
+  color:#101a33;
+}
+.user-app-shell :is(section,article,aside,li, .card, [role="region"]).bg-white,
+.user-app-shell :is(section,article,aside,li, .card, [role="region"])[class~="bg-white"],
+.admin-panel-shell :is(section,article,aside,li, .card, [role="region"]).bg-white,
+.admin-panel-shell :is(section,article,aside,li, .card, [role="region"])[class~="bg-white"] {
+  background:linear-gradient(135deg,#e4efff 0%,#e0f7ff 100%) !important;
+  border:1px solid #b3c9ed !important;
+  color:#101a33 !important;
+  box-shadow:0 8px 24px rgba(38,72,150,.11) !important;
+}
+
+/* Financial hero must win over every generic white-card rule. */
+.user-app-shell .home-financial-card,
+.user-app-shell .home-balance-card,
+.user-app-shell .pv-home-financial-hero,
+.user-app-shell [class*="financial-hero"],
+.user-app-shell [class*="balance-card"] {
+  background:linear-gradient(125deg,#2420c9 0%,#3158e8 52%,#13a8d5 100%) !important;
+  border:1px solid #737df1 !important;
+  color:#fff !important;
+  box-shadow:0 16px 34px rgba(37,32,201,.24) !important;
+}
+.user-app-shell .home-financial-card *,
+.user-app-shell .home-balance-card *,
+.user-app-shell .pv-home-financial-hero *,
+.user-app-shell [class*="financial-hero"] *,
+.user-app-shell [class*="balance-card"] * {
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  opacity:1 !important;
+  text-shadow:none !important;
+}
+
+/* Distinct section families throughout member and admin screens. */
+.user-app-shell :is(.home-loan-section,[class*="portfolio"],[class*="loan-section"]),
+.admin-panel-shell :is([class*="portfolio"],[class*="loan-section"],[class*="dashboard-section"]) {
+  background:linear-gradient(135deg,#e9e7ff,#e2f5ff) !important;
+  border-color:#aeb5ef !important;
+  color:#101a33 !important;
+}
+.user-app-shell :is(.home-empty-card,.home-loan-card,[class*="empty-state"],[class*="empty-card"]),
+.admin-panel-shell :is([class*="empty-state"],[class*="empty-card"]) {
+  background:linear-gradient(135deg,#eee8ff,#e1f6ff) !important;
+  border:1px solid #bcb9ed !important;
+  color:#101a33 !important;
+}
+.user-app-shell :is(.home-panel-savings,[class*="savings"],[class*="deposit-card"]),
+.admin-panel-shell :is([class*="savings"],[class*="deposit-card"]) {
+  background:linear-gradient(135deg,#dcf8ed,#e1f6ff) !important;
+  border-color:#9bdac5 !important;
+  color:#101a33 !important;
+}
+.user-app-shell :is([class*="action-card"],[class*="next-action"],[class*="notice-card"]),
+.admin-panel-shell :is([class*="action-card"],[class*="notice-card"]) {
+  background:linear-gradient(135deg,#e1f5ff,#e9edff) !important;
+  border:1px solid #9bcfee !important;
+  color:#101a33 !important;
+}
+
+/* Fix washed-out labels and values globally: no pale gray/opacity text. */
+.user-app-shell :is(p,span,label,small,h1,h2,h3,h4,h5,h6,strong,b,li,dt,dd),
+.admin-panel-shell :is(p,span,label,small,h1,h2,h3,h4,h5,h6,strong,b,li,dt,dd) {
+  text-shadow:none !important;
+}
+.user-app-shell :is(.text-slate-300,.text-slate-400,.text-slate-500,.text-gray-300,.text-gray-400,.text-gray-500,.text-blue-50,.text-blue-100,.text-indigo-50,.text-indigo-100),
+.admin-panel-shell :is(.text-slate-300,.text-slate-400,.text-slate-500,.text-gray-300,.text-gray-400,.text-gray-500,.text-blue-50,.text-blue-100,.text-indigo-50,.text-indigo-100) {
+  color:#43516b !important;
+  -webkit-text-fill-color:#43516b !important;
+  opacity:1 !important;
+}
+.user-app-shell .home-financial-card :is(.text-slate-300,.text-slate-400,.text-slate-500,.text-blue-50,.text-blue-100),
+.user-app-shell .home-balance-card :is(.text-slate-300,.text-slate-400,.text-slate-500),
+.user-app-shell .pv-home-financial-hero :is(.text-slate-300,.text-slate-400,.text-slate-500) {
+  color:#eff8ff !important;
+  -webkit-text-fill-color:#eff8ff !important;
+}
+
+/* Controls use tinted fills; focused and selected states are unmistakable. */
+.user-app-shell :is(input,textarea,select),
+.admin-panel-shell :is(input,textarea,select) {
+  background:#fff3d6 !important;
+  border:1.5px solid #d8b85f !important;
+  color:#101a33 !important;
+  -webkit-text-fill-color:#101a33 !important;
+  opacity:1 !important;
+}
+.user-app-shell :is(input,textarea,select)::placeholder,
+.admin-panel-shell :is(input,textarea,select)::placeholder {
+  color:#59657a !important; opacity:1 !important;
+}
+.user-app-shell :is(input,textarea,select):focus,
+.admin-panel-shell :is(input,textarea,select):focus {
+  background:#fff !important;
+  border-color:#2879ed !important;
+  box-shadow:0 0 0 3px rgba(40,121,237,.18) !important;
+}
+.user-app-shell :is(button,a)[class*="bg-blue-"],
+.user-app-shell :is(button,a)[class*="bg-primary"],
+.admin-panel-shell :is(button,a)[class*="bg-blue-"],
+.admin-panel-shell :is(button,a)[class*="bg-primary"] {
+  background:linear-gradient(120deg,#2924cf,#2879ed) !important;
+  color:#fff !important; -webkit-text-fill-color:#fff !important;
+}
+.user-app-shell :is(button,a)[class*="bg-emerald-"],
+.user-app-shell :is(button,a)[class*="bg-green-"],
+.admin-panel-shell :is(button,a)[class*="bg-emerald-"],
+.admin-panel-shell :is(button,a)[class*="bg-green-"] {
+  background:linear-gradient(120deg,#087f4f,#18ad73) !important;
+  color:#fff !important; -webkit-text-fill-color:#fff !important;
+}
+.user-app-shell :is(button,a):disabled,
+.user-app-shell button:disabled,
+.admin-panel-shell :is(button,a):disabled,
+.admin-panel-shell button:disabled {
+  background:#e5eaf2 !important; color:#526176 !important;
+  -webkit-text-fill-color:#526176 !important; border-color:#cbd5e1 !important;
+  opacity:1 !important; box-shadow:none !important;
+}
+
+/* Navigation and selected controls. */
+.user-app-shell nav, .admin-panel-shell nav {
+  background:linear-gradient(120deg,#e2eaff,#def6ff) !important;
+  border-color:#b7cbea !important;
+}
+.user-app-shell nav [aria-current="page"],
+.user-app-shell nav [aria-selected="true"],
+.user-app-shell nav [data-state="active"] {
+  background:#087f75 !important; color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
