@@ -3629,3 +3629,317 @@ html:not(.dark) .user-app-shell .home-empty-card {
   background:linear-gradient(135deg,#e8e4ff,#e4f7ff) !important;
   border-color:#bdb8ee !important;
 }
+
+
+/* =====================================================================
+   PROVATI FINAL LIGHT MODE — semantic, high-contrast color hierarchy
+   White is reserved for the page canvas. Cards, panels, controls and
+   action states use role-based colors across member and admin screens.
+   ===================================================================== */
+:root {
+  color-scheme: light !important;
+  --pv-canvas:#ffffff;
+  --pv-ink:#101a33;
+  --pv-body:#263653;
+  --pv-muted:#4b5d79;
+  --pv-primary:#2924cf;
+  --pv-primary-2:#2879ed;
+  --pv-cyan:#20a9df;
+  --pv-teal:#087f75;
+  --pv-green:#087f4f;
+  --pv-amber:#9a5700;
+  --pv-red:#b42336;
+  --pv-purple:#6941c6;
+  --pv-blue-panel:#e3edff;
+  --pv-cyan-panel:#dcf5ff;
+  --pv-teal-panel:#dcf7ef;
+  --pv-purple-panel:#eee7ff;
+  --pv-amber-panel:#fff0cb;
+  --pv-rose-panel:#ffe6eb;
+  --pv-control:#eaf1ff;
+  --pv-line:#b9cbed;
+}
+html, body, #root { background:#fff !important; color:var(--pv-ink) !important; color-scheme:light !important; }
+html.dark, html.dark body, html.dark #root { background:#fff !important; color:var(--pv-ink) !important; color-scheme:light !important; }
+.user-app-shell, .admin-panel-shell,
+.user-app-shell > main, .user-app-shell main,
+.home-modern, .profile-theme, .app-apply-theme {
+  background:#fff !important;
+  color:var(--pv-ink) !important;
+}
+
+/* Consistent readable text in all app screens, including admin. */
+.user-app-shell :is(p,span,label,small,h1,h2,h3,h4,h5,h6,li,dt,dd),
+.admin-panel-shell :is(p,span,label,small,h1,h2,h3,h4,h5,h6,li,dt,dd) {
+  text-shadow:none !important;
+}
+.user-app-shell .text-slate-300,
+.user-app-shell .text-slate-400,
+.user-app-shell .text-slate-500,
+.user-app-shell .text-gray-300,
+.user-app-shell .text-gray-400,
+.user-app-shell .text-gray-500,
+.admin-panel-shell .text-slate-300,
+.admin-panel-shell .text-slate-400,
+.admin-panel-shell .text-slate-500,
+.admin-panel-shell .text-gray-300,
+.admin-panel-shell .text-gray-400,
+.admin-panel-shell .text-gray-500 {
+  color:#4b5d79 !important;
+  -webkit-text-fill-color:#4b5d79 !important;
+  opacity:1 !important;
+}
+.user-app-shell .text-slate-600,
+.user-app-shell .text-gray-600,
+.admin-panel-shell .text-slate-600,
+.admin-panel-shell .text-gray-600 { color:#263653 !important; opacity:1 !important; }
+.user-app-shell .opacity-10,
+.user-app-shell .opacity-20,
+.user-app-shell .opacity-30,
+.user-app-shell .opacity-40,
+.user-app-shell .opacity-50,
+.user-app-shell .opacity-60,
+.user-app-shell .opacity-70,
+.admin-panel-shell .opacity-10,
+.admin-panel-shell .opacity-20,
+.admin-panel-shell .opacity-30,
+.admin-panel-shell .opacity-40,
+.admin-panel-shell .opacity-50,
+.admin-panel-shell .opacity-60,
+.admin-panel-shell .opacity-70 { opacity:1 !important; }
+
+/* Hero / financial summary: the strongest brand surface, always readable. */
+.user-app-shell .pv-home-financial-hero,
+.user-app-shell .home-financial-card,
+.user-app-shell .home-balance-card {
+  background:linear-gradient(125deg,#2520c9 0%,#3158e8 52%,#13a8d5 100%) !important;
+  color:#fff !important; border:1px solid #777ff0 !important;
+  box-shadow:0 16px 34px rgba(37,32,201,.22) !important;
+}
+.user-app-shell .pv-home-financial-hero *,
+.user-app-shell .home-financial-card *,
+.user-app-shell .home-balance-card * {
+  color:#fff !important; -webkit-text-fill-color:#fff !important; opacity:1 !important;
+}
+.user-app-shell .pv-home-financial-hero :is(.bg-white\\/10,[class*="bg-white/10"]) {background:rgba(255,255,255,.17)!important}
+.user-app-shell .pv-home-financial-hero :is(.border-white\\/10,[class*="border-white/10"]) {border-color:rgba(255,255,255,.3)!important}
+
+/* Purposeful section colors: notice/action, portfolio, empty states, service areas. */
+.user-app-shell a.block,
+.user-app-shell .home-next-action,
+.user-app-shell [class*="next-action"] {
+  background:linear-gradient(120deg,#e0f5ff,#e8edff) !important;
+  border:1px solid #91d5f0 !important; color:#101a33 !important;
+  box-shadow:0 8px 22px rgba(36,105,190,.10) !important;
+}
+.user-app-shell .home-loan-section,
+.user-app-shell [class*="loan-section"],
+.user-app-shell [class*="portfolio"] {
+  background:linear-gradient(125deg,#e8e7ff,#e1f5ff) !important;
+  border:1px solid #aaaef0 !important; color:#101a33 !important;
+}
+.user-app-shell .home-loan-card,
+.user-app-shell .home-empty-card {
+  background:linear-gradient(135deg,#e7e5ff,#e1f6ff) !important;
+  border:1px solid #b7c5f1 !important; color:#101a33 !important;
+  box-shadow:0 8px 22px rgba(63,74,180,.10) !important;
+}
+.user-app-shell .home-panel-savings,
+.user-app-shell [class*="savings-panel"] {
+  background:linear-gradient(130deg,#ddf8ee,#e3f6ff) !important;
+  border:1px solid #9bdcc7 !important; color:#101a33 !important;
+}
+.user-app-shell .home-service-card,
+.user-app-shell .home-activity-card {
+  background:linear-gradient(135deg,#e4f4ff,#edf0ff) !important;
+  border:1px solid #b5d5ef !important; color:#101a33 !important;
+}
+.user-app-shell .home-loan-service-card {
+  background:linear-gradient(135deg,#eee7ff,#e6f4ff) !important;
+  border:1px solid #c7b9f0 !important; color:#101a33 !important;
+}
+
+/* General cards and nested widgets: no more white rectangles on white. */
+.user-app-shell .neu-raised,
+.user-app-shell .neu-raised-sm,
+.user-app-shell .neu-flat-card,
+.user-app-shell .bg-white,
+.user-app-shell [class~="bg-white"],
+.admin-panel-shell .neu-raised,
+.admin-panel-shell .neu-raised-sm,
+.admin-panel-shell .neu-flat-card,
+.admin-panel-shell .bg-white,
+.admin-panel-shell [class~="bg-white"] {
+  background:linear-gradient(135deg,#e9f0ff,#e4f7ff) !important;
+  border-color:#bfd1ee !important; color:#101a33 !important;
+  box-shadow:0 7px 20px rgba(36,75,160,.09) !important;
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+}
+.user-app-shell .neu-sunken,
+.user-app-shell .neu-input,
+.user-app-shell [class*="bg-slate-50"],
+.user-app-shell [class*="bg-slate-100"],
+.user-app-shell [class*="bg-gray-50"],
+.user-app-shell [class*="bg-gray-100"],
+.admin-panel-shell .neu-sunken,
+.admin-panel-shell .neu-input,
+.admin-panel-shell [class*="bg-slate-50"],
+.admin-panel-shell [class*="bg-slate-100"],
+.admin-panel-shell [class*="bg-gray-50"],
+.admin-panel-shell [class*="bg-gray-100"] {
+  background:#e5edff !important; border-color:#c1d0ed !important;
+  color:#101a33 !important; box-shadow:none !important;
+}
+
+/* Status colors mean what they should: success, warning, danger, information. */
+.user-app-shell [class*="bg-emerald-50"],
+.user-app-shell [class*="bg-green-50"],
+.admin-panel-shell [class*="bg-emerald-50"],
+.admin-panel-shell [class*="bg-green-50"] {
+  background:#d9f7e8 !important; border-color:#8dd8b2 !important; color:#075b3c !important;
+}
+.user-app-shell [class*="bg-amber-50"],
+.user-app-shell [class*="bg-yellow-50"],
+.user-app-shell [class*="bg-orange-50"],
+.admin-panel-shell [class*="bg-amber-50"],
+.admin-panel-shell [class*="bg-yellow-50"],
+.admin-panel-shell [class*="bg-orange-50"] {
+  background:#fff0c7 !important; border-color:#f0cd76 !important; color:#784500 !important;
+}
+.user-app-shell [class*="bg-rose-50"],
+.user-app-shell [class*="bg-red-50"],
+.admin-panel-shell [class*="bg-rose-50"],
+.admin-panel-shell [class*="bg-red-50"] {
+  background:#ffe5e9 !important; border-color:#f3b0bc !important; color:#8e1e31 !important;
+}
+.user-app-shell [class*="bg-sky-50"],
+.user-app-shell [class*="bg-blue-50"],
+.admin-panel-shell [class*="bg-sky-50"],
+.admin-panel-shell [class*="bg-blue-50"] {
+  background:#dff2ff !important; border-color:#a8d9f5 !important; color:#124b91 !important;
+}
+.user-app-shell [class*="bg-violet-50"],
+.user-app-shell [class*="bg-purple-50"],
+.admin-panel-shell [class*="bg-violet-50"],
+.admin-panel-shell [class*="bg-purple-50"] {
+  background:#eee5ff !important; border-color:#c9b5f3 !important; color:#56319a !important;
+}
+
+/* Primary/submit/continue actions are blue; success actions green; destructive red. */
+.user-app-shell button[class*="bg-primary"],
+.user-app-shell button[class*="bg-blue-"],
+.user-app-shell button[class*="bg-sky-"],
+.user-app-shell a[class*="bg-primary"],
+.user-app-shell a[class*="bg-blue-"],
+.user-app-shell a[class*="bg-sky-"],
+.admin-panel-shell button[class*="bg-primary"],
+.admin-panel-shell button[class*="bg-blue-"],
+.admin-panel-shell button[class*="bg-sky-"] {
+  background:linear-gradient(120deg,#2924cf,#2879ed) !important;
+  color:#fff !important; -webkit-text-fill-color:#fff !important;
+  border-color:transparent !important; box-shadow:0 7px 18px rgba(41,36,207,.22) !important;
+}
+.user-app-shell button[class*="bg-emerald-"],
+.user-app-shell button[class*="bg-green-"],
+.admin-panel-shell button[class*="bg-emerald-"],
+.admin-panel-shell button[class*="bg-green-"] {
+  background:linear-gradient(120deg,#087f4f,#18ad73) !important;
+  color:#fff !important; -webkit-text-fill-color:#fff !important;
+}
+.user-app-shell button[class*="bg-rose-"],
+.user-app-shell button[class*="bg-red-"],
+.admin-panel-shell button[class*="bg-rose-"],
+.admin-panel-shell button[class*="bg-red-"] {
+  background:#c52d43 !important; color:#fff !important; -webkit-text-fill-color:#fff !important;
+}
+.user-app-shell button:disabled,
+.user-app-shell input:disabled,
+.user-app-shell select:disabled,
+.user-app-shell textarea:disabled,
+.admin-panel-shell button:disabled,
+.admin-panel-shell input:disabled,
+.admin-panel-shell select:disabled,
+.admin-panel-shell textarea:disabled {
+  background:#e2e8f0 !important; color:#526176 !important;
+  border-color:#cbd5e1 !important; opacity:1 !important; box-shadow:none !important;
+}
+
+/* Inputs: tinted fill, dark value text, clear focus and placeholder. */
+.user-app-shell input,
+.user-app-shell textarea,
+.user-app-shell select,
+.admin-panel-shell input,
+.admin-panel-shell textarea,
+.admin-panel-shell select {
+  background:#fff4d9 !important; color:#101a33 !important;
+  -webkit-text-fill-color:#101a33 !important;
+  border:1.5px solid #e8c56d !important; opacity:1 !important;
+}
+.user-app-shell input::placeholder,
+.user-app-shell textarea::placeholder,
+.admin-panel-shell input::placeholder,
+.admin-panel-shell textarea::placeholder {color:#58647a !important;opacity:1!important;-webkit-text-fill-color:#58647a!important}
+.user-app-shell input:focus,
+.user-app-shell textarea:focus,
+.user-app-shell select:focus,
+.admin-panel-shell input:focus,
+.admin-panel-shell textarea:focus,
+.admin-panel-shell select:focus {
+  background:#fff !important; border-color:#2879ed !important;
+  box-shadow:0 0 0 3px rgba(40,121,237,.18) !important; outline:none !important;
+}
+
+/* Selected tabs, chips, radio/checkbox states, and navigation. */
+.user-app-shell [aria-selected="true"],
+.user-app-shell [aria-pressed="true"],
+.user-app-shell [data-state="active"],
+.admin-panel-shell [aria-selected="true"],
+.admin-panel-shell [aria-pressed="true"],
+.admin-panel-shell [data-state="active"] {
+  background:linear-gradient(120deg,#2924cf,#2879ed) !important;
+  color:#fff !important; border-color:transparent !important;
+}
+.user-app-shell nav,
+.user-app-shell [class*="bottom-nav"],
+.admin-panel-shell nav {
+  background:linear-gradient(120deg,#e2eaff,#def6ff) !important;
+  border-color:#b7cbea !important; color:#17213b !important;
+}
+.user-app-shell nav a,
+.user-app-shell nav button {color:#263653 !important}
+.user-app-shell nav a[aria-current="page"],
+.user-app-shell nav button[aria-current="page"] {
+  background:#087f75 !important; color:#fff !important; border-radius:14px !important;
+}
+
+/* Profile hero and account-information blocks. */
+.user-app-shell .profile-theme [class*="hero"],
+.user-app-shell .profile-theme [class*="header"] {
+  background:linear-gradient(135deg,#087f75,#19b99e 58%,#28aee3) !important;
+  color:#fff !important;
+}
+.user-app-shell .profile-theme [class*="hero"] *,
+.user-app-shell .profile-theme [class*="header"] * {color:#fff !important;-webkit-text-fill-color:#fff!important}
+.user-app-shell .profile-theme [class*="member"],
+.user-app-shell .profile-theme [class*="information"] {
+  background:linear-gradient(135deg,#ddf8ef,#e3f5ff) !important;
+  border-color:#a8ddce !important; color:#101a33 !important;
+}
+
+/* Loan application cards and step controls. */
+.user-app-shell .app-apply-theme section,
+.user-app-shell .apply-loan-screen section {
+  background:linear-gradient(135deg,#e8edff,#e1f6ff) !important;
+  border-color:#b7c8ef !important; color:#101a33 !important;
+}
+.user-app-shell .apply-accordion-body,
+.user-app-shell .apply-accordion-body > * {
+  background:linear-gradient(135deg,#e3edff,#e5f7ff) !important;
+  border-color:#b9d2ef !important; color:#101a33 !important;
+}
+
+/* Remove glass/washed effects but preserve functional interaction. */
+.user-app-shell [class*="backdrop-blur"],
+.admin-panel-shell [class*="backdrop-blur"] {
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+}
