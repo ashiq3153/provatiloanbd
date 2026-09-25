@@ -309,3 +309,104 @@ html.dark .home-modern .home-activity-card {
   .home-modern .pv-home-financial-hero.home-balance-art { padding: 18px 14px 14px !important; }
   .home-modern .balance-action-icon { width: 44px !important; height: 44px !important; }
 }
+
+
+/* Reference-size refinements: four compact service/category tiles across,
+   high-contrast type, and testimonial card proportions matching the supplied
+   dashboard reference. */
+.home-modern.app-home-theme section > div > p,
+.home-modern.app-home-theme section > div > div > p:first-child {
+  color: #64748b;
+}
+.home-modern.app-home-theme section h2 {
+  color: #111827;
+  letter-spacing: -.025em;
+}
+.dark .home-modern.app-home-theme section h2,
+html.dark .home-modern.app-home-theme section h2 {
+  color: #f8fafc;
+}
+.home-modern .home-service-tile,
+.home-modern .home-category-tile {
+  min-width: 0;
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,.22) !important;
+  box-shadow: 0 7px 16px rgba(25,45,95,.12) !important;
+}
+.home-modern .home-service-tile .service-icon,
+.home-modern .home-category-tile .category-icon {
+  color: #fff !important;
+  background: rgba(15,23,42,.16) !important;
+  border: 1px solid rgba(255,255,255,.22) !important;
+}
+.home-modern .home-service-tile .service-title,
+.home-modern .home-service-tile .service-subtitle,
+.home-modern .home-category-tile .category-title,
+.home-modern .home-service-tile > svg,
+.home-modern .home-category-tile > svg {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,.12);
+}
+.home-modern .home-tile-orb {
+  background: rgba(255,255,255,.14) !important;
+  box-shadow: 0 0 0 13px rgba(255,255,255,.06);
+}
+.home-modern .category-personal { background: linear-gradient(145deg,#16b9ed,#0876df) !important; }
+.home-modern .category-business { background: linear-gradient(145deg,#7937ee,#4d20d2) !important; }
+.home-modern .category-home { background: linear-gradient(145deg,#25cdb6,#079b91) !important; }
+.home-modern .category-car { background: linear-gradient(145deg,#ffad35,#f16b08) !important; }
+.home-modern .category-medical { background: linear-gradient(145deg,#ff438d,#e51265) !important; }
+.home-modern .category-student { background: linear-gradient(145deg,#168eea,#075bd0) !important; }
+.home-modern .category-probashi { background: linear-gradient(145deg,#a54df3,#6b22d9) !important; }
+.home-modern .category-women { background: linear-gradient(145deg,#f044a0,#d51a78) !important; }
+
+/* Testimonial: vivid blue-violet card, warm corner accent, readable white
+   testimonial text and balanced member portrait/content columns. */
+.home-modern .home-success-story {
+  min-height: 188px;
+  padding: 16px !important;
+  border-radius: 22px !important;
+  background: linear-gradient(118deg,#143cda 0%,#2928d8 58%,#4b21d0 100%) !important;
+  box-shadow: 0 10px 24px rgba(45,48,180,.2) !important;
+}
+.home-modern .home-success-story::before {
+  width: 210px;
+  height: 150px;
+  right: -60px;
+  top: -68px;
+  opacity: .98;
+  background: linear-gradient(135deg,#ffcb36 0%,#ff8a3d 38%,#fa3995 72%,#a43cf0 100%);
+}
+.home-modern .home-success-story::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  right: 18px;
+  bottom: 12px;
+  width: 74px;
+  height: 48px;
+  pointer-events: none;
+  opacity: .32;
+  background-image: radial-gradient(circle,rgba(255,255,255,.95) 1.4px,transparent 1.8px);
+  background-size: 14px 14px;
+}
+.home-modern .home-success-story p,
+.home-modern .home-success-story span {
+  color: #fff;
+}
+.home-modern .home-success-story .text-white\/75 { color: rgba(255,255,255,.82) !important; }
+.home-modern .home-success-story img {
+  object-position: center;
+  box-shadow: 0 3px 12px rgba(0,0,0,.15);
+}
+.home-modern .home-story-dots { display: none; }
+
+@media (max-width: 390px) {
+  .home-modern .home-service-tile { height: 108px !important; padding: 9px !important; border-radius: 15px !important; }
+  .home-modern .home-category-tile { height: 84px !important; padding: 9px !important; border-radius: 14px !important; }
+  .home-modern .home-service-tile .service-title { font-size: 10px !important; }
+  .home-modern .home-service-tile .service-subtitle { font-size: 9px !important; }
+  .home-modern .home-category-tile .category-title { font-size: 9px !important; }
+  .home-modern .home-success-story { padding: 14px !important; }
+}
