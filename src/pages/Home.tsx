@@ -249,8 +249,8 @@ export default function Home() {
         <header className="home-dashboard-header relative overflow-hidden flex flex-col gap-3 rounded-b-[26px] px-3 py-3 -mx-3 sm:-mx-4 sm:px-5 shadow-md">
           <div className="relative z-10 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0 text-white">
-              <span className="text-[26px] leading-none font-black tracking-tight">❖</span>
-              <span className="min-w-0"><span className="block text-[17px] leading-tight font-black tracking-wide whitespace-nowrap">PROVATI LOAN</span><span className="block text-[8px] leading-tight tracking-[.12em] font-semibold text-white/85 whitespace-nowrap">PROVATI SOMOBAY SOMITI</span></span>
+              <span className="home-logo-mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 8C14 10 20 16 22 25L22 43C12 37 7 29 5 20V8Z" fill="currentColor"/><path d="M43 8C34 10 28 16 26 25L26 43C36 37 41 29 43 20V8Z" fill="currentColor"/><path d="M10 4C17 5 22 10 24 17C26 10 31 5 38 4V13C32 15 28 19 26 25H22C20 19 16 15 10 13V4Z" fill="currentColor"/></svg></span>
+              <span className="min-w-0"><span className="block text-[17px] leading-tight font-black tracking-wide whitespace-nowrap">PROVATI LOAN</span><span className="home-brand-subtitle block text-[8px] leading-tight tracking-[.12em] font-semibold text-white/85 whitespace-nowrap">PROVATI SOMOBAY SOMITI</span></span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <div className="relative">
@@ -430,7 +430,7 @@ export default function Home() {
                     <div className="home-story-dots absolute right-5 bottom-4 pointer-events-none" aria-hidden="true"/>
                     <div className="relative z-10 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2.5 min-w-0"><Star size={25} className="text-white shrink-0" fill="none"/><div className="min-w-0"><p className="text-sm sm:text-base font-extrabold">{isBn?'সাফল্যের গল্প':'Member success story'}</p><p className="text-[10px] sm:text-xs text-white/75 mt-0.5">{isBn?'আমাদের সদস্যদের সাফল্যের পথ':'Stories of our members’ success'}</p></div></div>
-                      {story.is_verified && <span className="text-[9px] font-extrabold text-white border border-white/45 rounded-full px-2.5 py-1 shrink-0">{isBn?'যাচাইকৃত':'Verified'}</span>}
+                      {story.is_verified && <span className="home-story-verified text-[9px] font-extrabold rounded-full px-2.5 py-1 shrink-0">{isBn?'যাচাইকৃত':'Verified'}</span>}
                     </div>
                     <div className="relative z-10 mt-4 flex items-center gap-3 sm:gap-4">
                       <img src={story.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(story.name)}&background=0ea5e9&color=fff&bold=true`} alt="" className="w-[68px] h-[68px] sm:w-[78px] sm:h-[78px] rounded-full object-cover border-2 border-white/80 bg-white/20 shrink-0"/>
@@ -475,7 +475,7 @@ export default function Home() {
         </section>
 
         {/* Trust / member note */}
-        <section className="bg-slate-900 dark:bg-[#111827] text-white rounded-2xl p-5">
+        <section className="home-member-note rounded-2xl p-5">
           <div className="flex gap-3"><ShieldCheck className="text-sky-400 shrink-0" size={21}/><div><p className="font-black text-sm">{isBn?'সদস্য তথ্য ও হিসাব':'Member account & records'}</p><p className="text-[11px] text-slate-400 leading-5 mt-1">{isBn?'আপনার সঞ্চয়, ঋণ, কিস্তি, লেনদেন ও নথির তথ্য এক জায়গা থেকে দেখুন।':'View your savings, loans, installments, transactions and documents in one place.'}</p></div></div>
         </section>
       </div>
