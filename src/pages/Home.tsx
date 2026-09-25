@@ -409,14 +409,14 @@ export default function Home() {
         <div className="h-px bg-transparent sm:hidden" aria-hidden="true" />
         {/* Member services */}
         <section>
-          <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'সদস্য সেবা':'Member services'}</p><h2 className="text-lg font-black mt-1">{isBn?'দ্রুত সেবা':'Quick services'}</h2></div></div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-500">{isBn?'সদস্য সেবা':'MEMBER SERVICES'}</p><h2 className="text-xl font-extrabold mt-1 text-slate-900 dark:text-white">{isBn?'দ্রুত সেবা':'Quick services'}</h2></div><Link to="/support" className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 dark:text-sky-300">{isBn?'সব দেখুন':'View all'} <ChevronRight size={16}/></Link></div>
+          <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
             {quickActions.map(({label,sub,icon:Icon,link}, index)=>(
-              <Link key={link} to={link} className={`home-service-tile service-tone-${index % 5} relative isolate overflow-hidden min-w-0 min-h-[112px] rounded-2xl p-3 flex flex-col items-start justify-between border active:scale-[.98] transition-transform`}>
-                <span aria-hidden="true" className="absolute -right-5 -top-6 w-20 h-20 rounded-full bg-white/30 pointer-events-none"/>
-                <span className="relative z-10 w-10 h-10 rounded-xl service-icon flex items-center justify-center shadow-sm"><Icon size={19}/></span>
-                <span className="relative z-10 min-w-0 w-full"><span className="block text-xs font-extrabold service-title truncate">{label}</span><span className="block text-[10px] service-subtitle mt-1 truncate">{sub}</span></span>
-                <ChevronRight size={15} className="absolute right-3 top-3 z-10 text-slate-500"/>
+              <Link key={link} to={link} className={`home-service-tile service-tone-${index} relative isolate overflow-hidden min-w-0 h-[112px] sm:h-[126px] rounded-[18px] p-2.5 sm:p-3 flex flex-col items-start justify-between active:scale-[.97] transition-transform`}>
+                <span aria-hidden="true" className="home-tile-orb absolute -right-5 -top-5 w-16 h-16 rounded-full pointer-events-none"/>
+                <span className="relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full service-icon flex items-center justify-center"><Icon size={18}/></span>
+                <span className="relative z-10 min-w-0 w-full"><span className="block text-[11px] sm:text-sm font-extrabold service-title truncate">{label}</span><span className="block text-[9px] sm:text-[11px] service-subtitle mt-0.5 leading-tight truncate">{sub}</span></span>
+                <ChevronRight size={16} className="absolute right-2 top-2 z-10 text-white/90"/>
               </Link>
             ))}
           </div>
@@ -424,62 +424,51 @@ export default function Home() {
 
         {/* Loan services */}
         <section>
-          <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'ঋণ সেবা':'Loan services'}</p><h2 className="text-lg font-black mt-1">{isBn?'আপনার প্রয়োজন অনুযায়ী':'Choose a service'}</h2></div><Link to="/apply" className="text-xs font-black text-sky-600 dark:text-sky-400">{isBn?'সব দেখুন':'View all'}</Link></div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {categories.map(([id,label], index)=>(
-              <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className={`home-category-tile category-tone-${index % 6} relative isolate overflow-hidden text-left min-w-0 min-h-[88px] rounded-2xl p-3 flex flex-col items-start justify-between border active:scale-[.98] transition-transform`}>
-                <span aria-hidden="true" className="absolute -right-5 -top-6 w-20 h-20 rounded-full bg-white/30 pointer-events-none"/>
-                <span className="relative z-10 w-9 h-9 rounded-xl category-icon flex items-center justify-center shadow-sm">{(()=>{const Icon=loanCategoryIcon(id);return <Icon size={18}/>;})()}</span>
-                <span className="relative z-10 block text-xs font-extrabold category-title truncate max-w-full">{label}</span>
-                <ChevronRight size={15} className="absolute right-3 top-3 z-10 text-slate-500"/>
+          <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-500">{isBn?'ঋণ সেবা':'LOAN SERVICES'}</p><h2 className="text-xl font-extrabold mt-1 text-slate-900 dark:text-white">{isBn?'আপনার প্রয়োজন অনুযায়ী':'Choose a service'}</h2></div><Link to="/apply" className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 dark:text-sky-300">{isBn?'সব দেখুন':'View all'} <ChevronRight size={16}/></Link></div>
+          <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
+            {categories.map(([id,label])=>(
+              <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className={`home-category-tile category-${id} relative isolate overflow-hidden text-left min-w-0 h-[88px] sm:h-[98px] rounded-[16px] p-2.5 sm:p-3 flex flex-col items-start justify-between active:scale-[.97] transition-transform`}>
+                <span aria-hidden="true" className="home-tile-orb absolute -right-5 -top-5 w-16 h-16 rounded-full pointer-events-none"/>
+                <span className="relative z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full category-icon flex items-center justify-center">{(()=>{const Icon=loanCategoryIcon(id);return <Icon size={17}/>;})()}</span>
+                <span className="relative z-10 block text-[10px] sm:text-xs font-extrabold category-title truncate max-w-full">{label}</span>
+                <ChevronRight size={15} className="absolute right-2 top-2 z-10 text-white/90"/>
               </button>
             ))}
           </div>
         </section>
 
-        {/* Success stories */}
+        {/* Success stories — compact reference-inspired testimonial card */}
         {stories.length > 0 && (
           <section>
             <div className="flex items-end justify-between mb-3">
-              <div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'সদস্যদের অভিজ্ঞতা':'Member experiences'}</p><h2 className="text-lg font-black mt-1">{isBn?'সাফল্যের গল্প':'Success Stories'}</h2></div>
-              <span className="text-[10px] font-black text-sky-600 dark:text-sky-400">{convertDigits(stories.length,isBn)} {isBn?'জন সদস্য':'members'}</span>
+              <div><p className="text-[10px] uppercase tracking-wider font-black text-slate-500">{isBn?'সদস্যদের অভিজ্ঞতা':'SUCCESS STORIES'}</p><h2 className="text-xl font-extrabold mt-1 text-slate-900 dark:text-white">{isBn?'সাফল্যের গল্প':'Success Stories'}</h2></div>
+              <Link to="/success-stories" className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 dark:text-sky-300">{isBn?'সব দেখুন':'View all'} <ChevronRight size={16}/></Link>
             </div>
             <div className="-mx-4 px-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
               <div className="flex gap-3 w-max">
-                {stories.slice(0,10).map((story, i) => (
-                  <article key={story.id} className="home-success-story w-full min-w-[calc(100vw-3rem)] max-w-[620px] shrink-0 snap-start rounded-[22px] p-4 border shadow-lg text-white relative overflow-hidden">
-                    <div className="absolute -right-10 -top-10 w-28 h-28 rounded-full bg-sky-500/10" />
-                    <div className="relative flex items-center gap-3">
-                      <img src={story.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(story.name)}&background=0ea5e9&color=fff&bold=true`} alt="" className="w-11 h-11 rounded-full object-cover border-2 border-white/20" />
+                {stories.slice(0,10).map((story) => (
+                  <article key={story.id} className="home-success-story w-[calc(100vw-2rem)] max-w-[620px] min-w-[calc(100vw-2rem)] sm:min-w-[min(620px,calc(100vw-3rem))] shrink-0 snap-start rounded-[22px] p-4 sm:p-5 text-white relative overflow-hidden">
+                    <div className="home-story-dots absolute right-5 bottom-4 pointer-events-none" aria-hidden="true"/>
+                    <div className="relative z-10 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0"><Star size={25} className="text-white shrink-0" fill="none"/><div className="min-w-0"><p className="text-sm sm:text-base font-extrabold">{isBn?'সাফল্যের গল্প':'Member success story'}</p><p className="text-[10px] sm:text-xs text-white/75 mt-0.5">{isBn?'আমাদের সদস্যদের সাফল্যের পথ':'Stories of our members’ success'}</p></div></div>
+                      {story.is_verified && <span className="text-[9px] font-extrabold text-white border border-white/45 rounded-full px-2.5 py-1 shrink-0">{isBn?'যাচাইকৃত':'Verified'}</span>}
+                    </div>
+                    <div className="relative z-10 mt-4 flex items-center gap-3 sm:gap-4">
+                      <img src={story.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(story.name)}&background=0ea5e9&color=fff&bold=true`} alt="" className="w-[68px] h-[68px] sm:w-[78px] sm:h-[78px] rounded-full object-cover border-2 border-white/80 bg-white/20 shrink-0"/>
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-black truncate">{story.name}</p>
-                        <p className="text-[9px] text-sky-300 font-bold truncate">{story.loan_type || (isBn?'লোন সদস্য':'Loan member')}</p>
+                        <p className="text-sm sm:text-base font-bold leading-snug line-clamp-3">{story.testimonial || story.story || (isBn?'প্রভাতী লোনের মাধ্যমে আমি আমার লক্ষ্য পূরণে এগিয়ে যেতে পেরেছি।':'With Provati Loan, I was able to move closer to my goals.')}</p>
+                        <p className="text-xs sm:text-sm font-extrabold mt-2 truncate">{story.name}</p>
+                        <p className="text-[10px] sm:text-xs text-white/75 mt-0.5 truncate">{story.loan_type || story.profession || (isBn?'সদস্য':'Member')} {story.amount ? ` • ${formatCurrency(story.amount,isBn)}` : ''}</p>
                       </div>
-                      {story.is_verified && <span className="text-[8px] font-black text-emerald-300 border border-emerald-400/30 rounded-full px-2 py-1">{isBn?'ভেরিফাইড':'VERIFIED'}</span>}
+                      <span className="hidden sm:block text-5xl leading-none font-black text-white/20 self-end" aria-hidden="true">”</span>
                     </div>
-                    <div className="relative mt-5">
-                      <p className="text-[9px] text-slate-400 uppercase tracking-wider">{isBn?'লোন পরিমাণ':'Loan amount'}</p>
-                      <p className="text-xl font-black mt-1">{formatCurrency(story.amount || 0,isBn)}</p>
-                    </div>
-                    {(story.profession || story.location || story.loan_tenure || story.deposit_payment) && (
-                      <div className="relative grid grid-cols-2 gap-2 mt-4">
-                        {story.profession && <div className="rounded-lg bg-white/5 border border-white/10 p-2"><p className="text-[7px] text-slate-500">{isBn?'পেশা':'Profession'}</p><p className="text-[9px] font-bold truncate mt-1">{story.profession}</p></div>}
-                        {story.location && <div className="rounded-lg bg-white/5 border border-white/10 p-2"><p className="text-[7px] text-slate-500">{isBn?'লোকেশন':'Location'}</p><p className="text-[9px] font-bold truncate mt-1">{story.location}</p></div>}
-                        {story.loan_tenure && <div className="rounded-lg bg-white/5 border border-white/10 p-2"><p className="text-[7px] text-slate-500">{isBn?'মেয়াদ':'Tenure'}</p><p className="text-[9px] font-bold truncate mt-1">{story.loan_tenure}</p></div>}
-                        {story.deposit_payment && <div className="rounded-lg bg-white/5 border border-white/10 p-2"><p className="text-[7px] text-slate-500">{isBn?'ডিপোজিট':'Deposit'}</p><p className="text-[9px] font-bold text-emerald-300 truncate mt-1">{story.deposit_payment}</p></div>}
-                      </div>
-                    )}
-                    <div className="relative mt-4 pt-3 border-t border-white/10 flex items-center justify-between gap-2">
-                      <div className="flex text-amber-400 shrink-0">{Array.from({length:Math.min(story.rating || 5,5)}).map((_,si)=><Star key={si} size={10} fill="currentColor" />)}</div>
+                    <div className="relative z-10 mt-3 pt-3 border-t border-white/20 flex items-center justify-between gap-2">
+                      <div className="flex text-amber-300 shrink-0">{Array.from({length:Math.min(story.rating || 5,5)}).map((_,si)=><Star key={si} size={12} fill="currentColor" />)}</div>
                       <div className="flex items-center gap-1.5">
                         {(['like','love','wow'] as const).map(type => {
                           const base = type === 'like' ? Number(story.like_count || 0) : type === 'love' ? Number(story.love_count || 0) : Number(story.wow_count || 0);
                           const count = storyReactions[story.id]?.[type] ?? base;
-                          return (
-                            <button key={type} type="button" onClick={() => handleStoryReaction(story, type)} className="px-1.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[9px] active:scale-95 transition">
-                              {type === 'like' ? '👍' : type === 'love' ? '❤️' : '😮'} {convertDigits(count,isBn)}
-                            </button>
-                          );
+                          return <button key={type} type="button" onClick={() => handleStoryReaction(story, type)} className="px-2 py-1 rounded-full bg-white/15 border border-white/25 text-[10px] text-white active:scale-95 transition">{type === 'like' ? '👍' : type === 'love' ? '❤️' : '😮'} {convertDigits(count,isBn)}</button>;
                         })}
                       </div>
                     </div>
