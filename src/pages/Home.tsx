@@ -403,12 +403,23 @@ export default function Home() {
           <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'সদস্য সেবা':'Member services'}</p><h2 className="text-lg font-black mt-1">{isBn?'দ্রুত সেবা':'Quick services'}</h2></div></div>
           <div className="-mx-4 px-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
             <div className="flex gap-3 w-max">
-              {quickActions.map(({label,sub,icon:Icon,link})=>(
-                <Link key={link} to={link} className="home-service-card w-[180px] shrink-0 snap-start rounded-2xl p-4 flex items-center gap-3 shadow-sm active:scale-[.98] transition">
-                  <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0"><Icon size={18}/></div>
-                  <div className="min-w-0"><p className="text-xs font-black truncate">{label}</p><p className="text-[10px] text-slate-400 mt-1 truncate">{sub}</p></div>
-                </Link>
-              ))}
+              {quickActions.map(({label,sub,icon:Icon,link}, index)=> {
+                const palettes = [
+                  'from-indigo-600 via-violet-600 to-fuchsia-500',
+                  'from-sky-600 via-blue-600 to-indigo-500',
+                  'from-emerald-600 via-teal-600 to-cyan-500',
+                  'from-rose-600 via-pink-600 to-orange-400',
+                  'from-amber-600 via-orange-500 to-red-500',
+                ];
+                return (
+                  <Link key={link} to={link} className={`relative isolate overflow-hidden w-[166px] min-h-[88px] shrink-0 snap-start rounded-2xl p-3 flex items-center gap-3 bg-gradient-to-br ${palettes[index % palettes.length]} text-white border border-white/20 shadow-lg active:scale-[.97] transition-all duration-200`}>
+                    <span aria-hidden="true" className="absolute -right-5 -top-7 w-24 h-24 rounded-full border-[12px] border-white/10 pointer-events-none"/>
+                    <span aria-hidden="true" className="absolute right-7 -bottom-8 w-20 h-20 rounded-full bg-white/10 blur-sm pointer-events-none"/>
+                    <span className="relative z-10 w-10 h-10 rounded-xl bg-white/20 border border-white/25 text-white flex items-center justify-center shrink-0 shadow-inner"><Icon size={19}/></span>
+                    <span className="relative z-10 min-w-0"><span className="block text-xs font-extrabold text-white truncate">{label}</span><span className="block text-[10px] text-white/85 mt-1 truncate">{sub}</span></span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -418,13 +429,25 @@ export default function Home() {
           <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'ঋণ সেবা':'Loan services'}</p><h2 className="text-lg font-black mt-1">{isBn?'আপনার প্রয়োজন অনুযায়ী':'Choose a service'}</h2></div><Link to="/apply" className="text-xs font-black text-sky-600 dark:text-sky-400">{isBn?'সব দেখুন':'View all'}</Link></div>
           <div className="-mx-4 px-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
             <div className="flex gap-3 w-max">
-              {categories.map(([id,label])=>(
-                <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className="text-left w-[190px] shrink-0 snap-start bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3 shadow-sm active:scale-[.98] transition">
-                  <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center">{(() => { const Icon = loanCategoryIcon(id); return <Icon size={18}/>; })()}</div>
-                  <div className="min-w-0 flex-1"><p className="text-xs font-black truncate">{label}</p><p className="text-[9px] text-slate-400 mt-1">{isBn?'আবেদন দেখুন':'View option'}</p></div>
-                  <ChevronRight size={15} className="text-slate-400"/>
-                </button>
-              ))}
+              {categories.map(([id,label], index)=> {
+                const palettes = [
+                  'from-cyan-600 via-sky-600 to-blue-700',
+                  'from-violet-600 via-purple-600 to-fuchsia-600',
+                  'from-emerald-600 via-green-600 to-lime-600',
+                  'from-orange-600 via-rose-600 to-pink-600',
+                  'from-blue-700 via-indigo-600 to-violet-600',
+                  'from-pink-600 via-rose-600 to-red-500',
+                ];
+                return (
+                  <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className={`relative isolate overflow-hidden text-left w-[174px] min-h-[94px] shrink-0 snap-start rounded-2xl p-3 flex items-center gap-3 bg-gradient-to-br ${palettes[index % palettes.length]} text-white border border-white/20 shadow-lg active:scale-[.97] transition-all duration-200`}>
+                    <span aria-hidden="true" className="absolute -right-6 -top-7 w-24 h-24 rounded-full border-[12px] border-white/10 pointer-events-none"/>
+                    <span aria-hidden="true" className="absolute right-8 -bottom-8 w-20 h-20 rounded-full bg-white/10 blur-sm pointer-events-none"/>
+                    <span className="relative z-10 w-10 h-10 rounded-xl bg-white/20 border border-white/25 text-white flex items-center justify-center shrink-0 shadow-inner">{(() => { const Icon = loanCategoryIcon(id); return <Icon size={19}/>; })()}</span>
+                    <span className="relative z-10 min-w-0 flex-1"><span className="block text-xs font-extrabold text-white truncate">{label}</span><span className="block text-[9px] text-white/85 mt-1">{isBn?'আবেদন দেখুন':'View option'}</span></span>
+                    <ChevronRight size={15} className="relative z-10 text-white/85 shrink-0"/>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </section>
