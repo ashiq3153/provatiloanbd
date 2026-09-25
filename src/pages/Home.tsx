@@ -308,26 +308,28 @@ export default function Home() {
           </Link>
         )}
 
-        {/* Financial overview: member savings with a toggle to loan outstanding */}
-        <section className="pv-home-financial-hero home-financial-card rounded-[28px] p-5 text-white shadow-xl overflow-hidden relative border border-indigo-200/40">
-          <div className="absolute -right-16 -top-16 w-40 h-40 rounded-full border border-white/15 pointer-events-none" />
-          <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full border border-white/15 pointer-events-none" />
-          <div className="relative flex items-center justify-between gap-3">
-            <div><p className="text-[10px] font-extrabold uppercase tracking-[.14em] text-white/70">PROVATI • {isBn ? "আমার হিসাব" : "My account"}</p>
-              <div className="mt-2 inline-flex rounded-full bg-slate-950/25 p-1 border border-white/15" role="group">
-                <button type="button" onClick={()=>setBalanceView("savings")} className={"rounded-full px-3 py-1.5 text-[10px] font-extrabold transition-all "+(balanceView==="savings"?"bg-white text-indigo-700 shadow-md":"text-white/75")}>{isBn?"সঞ্চয়":"Savings"}</button>
-                <button type="button" onClick={()=>setBalanceView("outstanding")} className={"rounded-full px-3 py-1.5 text-[10px] font-extrabold transition-all "+(balanceView==="outstanding"?"bg-white text-indigo-700 shadow-md":"text-white/75")}>{isBn?"ঋণ বকেয়া":"Loan due"}</button>
-              </div></div>
-            <button type="button" onClick={()=>setBalanceVisible(v=>!v)} className="w-11 h-11 rounded-full bg-white/15 border border-white/20 flex items-center justify-center text-white" aria-label={balanceVisible?"Hide balance":"Show balance"}>{balanceVisible?<Eye size={18}/>:<EyeOff size={18}/>}</button>
+        {/* Colorful account balance card — one balance at a time */}
+        <section className="pv-home-financial-hero home-financial-card home-balance-art rounded-[28px] p-5 text-white shadow-xl overflow-hidden relative border border-indigo-200/40">
+          <div className="home-balance-art-orb home-balance-art-orb-one" />
+          <div className="home-balance-art-orb home-balance-art-orb-two" />
+          <div className="home-balance-art-ribbon" />
+          <div className="relative z-10 flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-extrabold uppercase tracking-[.14em] text-white/75">PROVATI • {isBn ? "আমার হিসাব" : "My account"}</p>
+              <p className="mt-3 text-xs font-bold text-white/85">{balanceView==="savings"?(isBn?"সঞ্চয় ব্যালেন্স":"Savings balance"):(isBn?"ঋণের বকেয়া":"Loan outstanding")}</p>
+            </div>
+            <button type="button" onClick={()=>setBalanceVisible(v=>!v)} className="w-11 h-11 rounded-full bg-white/15 border border-white/25 flex items-center justify-center text-white shadow-inner" aria-label={balanceVisible?"Hide balance":"Show balance"}>{balanceVisible?<Eye size={18}/>:<EyeOff size={18}/>}</button>
           </div>
-          <div className="relative mt-4 min-h-[68px]"><p className="text-[11px] font-bold text-white/75">{balanceView==="savings"?(isBn?"বর্তমান সঞ্চয় ব্যালেন্স":"Current savings balance"):(isBn?"ঋণের মোট বকেয়া":"Outstanding loan balance")}</p>
-            <AnimatePresence mode="wait"><motion.p key={balanceView} initial={{opacity:0,y:7}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-5}} transition={{duration:.18}} className="text-3xl sm:text-4xl font-black tracking-tight mt-1 text-white">{loading?<Skeleton className="h-9 w-40 bg-white/20"/>:balanceVisible?formatCurrency(balanceView==="savings"?(stats?.savingsBalance||0):(stats?.totalOutstanding||outstanding),isBn):"৳ • • • • • •"}</motion.p></AnimatePresence>
+          <div className="relative z-10 mt-2 min-h-[60px]">
+            <AnimatePresence mode="wait"><motion.p key={balanceView} initial={{opacity:0,y:9}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-6}} transition={{duration:.2}} className="text-3xl sm:text-4xl font-black tracking-tight text-white">{loading?<Skeleton className="h-9 w-40 bg-white/20"/>:balanceVisible?formatCurrency(balanceView==="savings"?(stats?.savingsBalance||0):(stats?.totalOutstanding||outstanding),isBn):"৳ • • • • • •"}</motion.p></AnimatePresence>
           </div>
-          <div className="grid grid-cols-2 gap-3 mt-3 pt-4 border-t border-white/15">
-            <div className="rounded-2xl bg-white/10 border border-white/10 p-3"><p className="text-[10px] text-white/70 font-bold">{isBn?"সঞ্চয়":"Savings"}</p><p className="font-black mt-1 text-white">{balanceVisible?formatCurrency(stats?.savingsBalance||0,isBn):"৳••••••"}</p></div>
-            <div className="rounded-2xl bg-white/10 border border-white/10 p-3"><p className="text-[10px] text-white/70 font-bold">{isBn?"ঋণ বকেয়া":"Loan outstanding"}</p><p className="font-black mt-1 text-white">{balanceVisible?formatCurrency(stats?.totalOutstanding||outstanding,isBn):"৳••••••"}</p></div>
+          <div className="relative z-10 mt-5 flex items-center justify-between gap-3">
+            <div className="inline-flex rounded-full bg-slate-950/25 p-1 border border-white/20 backdrop-blur-sm" role="group" aria-label={isBn?"ব্যালেন্স নির্বাচন":"Select balance"}>
+              <button type="button" onClick={()=>setBalanceView("savings")} className={"rounded-full px-4 py-2 text-[11px] font-extrabold transition-all "+(balanceView==="savings"?"bg-white text-indigo-700 shadow-md":"text-white/85")}>{isBn?"সঞ্চয়":"Savings"}</button>
+              <button type="button" onClick={()=>setBalanceView("outstanding")} className={"rounded-full px-4 py-2 text-[11px] font-extrabold transition-all "+(balanceView==="outstanding"?"bg-white text-indigo-700 shadow-md":"text-white/85")}>{isBn?"ঋণ বকেয়া":"Loan due"}</button>
+            </div>
+            <Link to="/transactions" className="relative z-10 flex items-center gap-1 rounded-full bg-white/15 border border-white/20 px-3 py-2 text-[10px] font-extrabold text-white"><ReceiptText size={14}/>{isBn?"হিসাব":"Statement"}</Link>
           </div>
-          <Link to="/transactions" className="relative mt-4 flex items-center justify-between rounded-xl bg-white text-indigo-700 px-4 py-3 font-black text-xs shadow-lg"><span className="flex items-center gap-2"><ReceiptText size={16}/>{isBn?"সম্পূর্ণ আর্থিক হিসাব":"Full financial statement"}</span><ChevronRight size={16}/></Link>
         </section>
         <section className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#111827] p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3"><div><p className="text-[10px] font-black uppercase tracking-wider text-slate-400">{isBn?"এক নজরে হিসাব":"Account at a glance"}</p><h2 className="text-base font-black mt-1">{isBn?"সঞ্চয় ও ঋণের সারাংশ":"Savings & loan summary"}</h2></div><Link to="/transactions" className="text-xs font-black text-indigo-600">{isBn?"বিস্তারিত":"Details"}</Link></div>
