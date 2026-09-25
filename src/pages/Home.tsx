@@ -409,54 +409,30 @@ export default function Home() {
         {/* Member services */}
         <section>
           <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'সদস্য সেবা':'Member services'}</p><h2 className="text-lg font-black mt-1">{isBn?'দ্রুত সেবা':'Quick services'}</h2></div></div>
-          <div className="-mx-4 px-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
-            <div className="flex gap-3 w-max">
-              {quickActions.map(({label,sub,icon:Icon,link}, index)=> {
-                const palettes = [
-                  'from-slate-800 via-indigo-900 to-slate-900',
-                  'from-sky-800 via-cyan-900 to-slate-900',
-                  'from-emerald-800 via-teal-900 to-slate-900',
-                  'from-rose-800 via-rose-900 to-slate-900',
-                  'from-violet-800 via-indigo-900 to-slate-900',
-                ];
-                return (
-                  <Link key={link} to={link} className={`home-service-tile relative isolate overflow-hidden w-[154px] h-[68px] shrink-0 snap-start rounded-xl px-3 py-2 flex items-center gap-2.5 border shadow-sm active:scale-[.97] transition-all duration-200 service-tone-${index % 5}`}>
-                    <span aria-hidden="true" className="absolute -right-5 -top-7 w-24 h-24 rounded-full border-[12px] border-white/10 pointer-events-none"/>
-                    <span aria-hidden="true" className="absolute right-7 -bottom-8 w-20 h-20 rounded-full bg-white/10 blur-sm pointer-events-none"/>
-                    <span className="relative z-10 w-8 h-8 rounded-lg service-icon flex items-center justify-center shrink-0 shadow-inner"><Icon size={16} className="!text-white"/></span>
-                    <span className="relative z-10 min-w-0 flex-1"><span className="block text-[11px] font-extrabold service-title truncate">{label}</span><span className="block text-[9px] service-subtitle mt-0.5 truncate">{sub}</span></span>
-                  </Link>
-                );
-              })}
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {quickActions.map(({label,sub,icon:Icon,link}, index)=>(
+              <Link key={link} to={link} className={`home-service-tile service-tone-${index % 5} relative isolate overflow-hidden min-w-0 min-h-[112px] rounded-2xl p-3 flex flex-col items-start justify-between border active:scale-[.98] transition-transform`}>
+                <span aria-hidden="true" className="absolute -right-5 -top-6 w-20 h-20 rounded-full bg-white/30 pointer-events-none"/>
+                <span className="relative z-10 w-10 h-10 rounded-xl service-icon flex items-center justify-center shadow-sm"><Icon size={19}/></span>
+                <span className="relative z-10 min-w-0 w-full"><span className="block text-xs font-extrabold service-title truncate">{label}</span><span className="block text-[10px] service-subtitle mt-1 truncate">{sub}</span></span>
+                <ChevronRight size={15} className="absolute right-3 top-3 z-10 text-slate-500"/>
+              </Link>
+            ))}
           </div>
         </section>
 
         {/* Loan services */}
         <section>
           <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'ঋণ সেবা':'Loan services'}</p><h2 className="text-lg font-black mt-1">{isBn?'আপনার প্রয়োজন অনুযায়ী':'Choose a service'}</h2></div><Link to="/apply" className="text-xs font-black text-sky-600 dark:text-sky-400">{isBn?'সব দেখুন':'View all'}</Link></div>
-          <div className="-mx-4 px-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
-            <div className="flex gap-3 w-max">
-              {categories.map(([id,label], index)=> {
-                const palettes = [
-                  'from-slate-800 via-sky-900 to-slate-900',
-                  'from-indigo-800 via-violet-900 to-slate-900',
-                  'from-emerald-800 via-teal-900 to-slate-900',
-                  'from-rose-800 via-pink-900 to-slate-900',
-                  'from-blue-800 via-indigo-900 to-slate-900',
-                  'from-fuchsia-800 via-purple-900 to-slate-900',
-                ];
-                return (
-                  <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className={`home-category-tile relative isolate overflow-hidden text-left w-[160px] h-[72px] shrink-0 snap-start rounded-xl px-3 py-2 flex items-center gap-2.5 border shadow-sm active:scale-[.97] transition-all duration-200 category-tone-${index % 6}`}>
-                    <span aria-hidden="true" className="absolute -right-6 -top-7 w-24 h-24 rounded-full border-[12px] border-white/10 pointer-events-none"/>
-                    <span aria-hidden="true" className="absolute right-8 -bottom-8 w-20 h-20 rounded-full bg-white/10 blur-sm pointer-events-none"/>
-                    <span className="relative z-10 w-8 h-8 rounded-lg category-icon flex items-center justify-center shrink-0 shadow-inner">{(() => { const Icon = loanCategoryIcon(id); return <Icon size={16} className="!text-white"/>; })()}</span>
-                    <span className="relative z-10 min-w-0 flex-1"><span className="block text-[11px] font-extrabold category-title truncate">{label}</span><span className="block text-[9px] category-subtitle mt-0.5">{isBn?'আবেদন দেখুন':'View option'}</span></span>
-                    <ChevronRight size={14} className="relative z-10 !text-white/80 shrink-0"/>
-                  </button>
-                );
-              })}
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {categories.map(([id,label], index)=>(
+              <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className={`home-category-tile category-tone-${index % 6} relative isolate overflow-hidden text-left min-w-0 min-h-[88px] rounded-2xl p-3 flex flex-col items-start justify-between border active:scale-[.98] transition-transform`}>
+                <span aria-hidden="true" className="absolute -right-5 -top-6 w-20 h-20 rounded-full bg-white/30 pointer-events-none"/>
+                <span className="relative z-10 w-9 h-9 rounded-xl category-icon flex items-center justify-center shadow-sm">{(()=>{const Icon=loanCategoryIcon(id);return <Icon size={18}/>;})()}</span>
+                <span className="relative z-10 block text-xs font-extrabold category-title truncate max-w-full">{label}</span>
+                <ChevronRight size={15} className="absolute right-3 top-3 z-10 text-slate-500"/>
+              </button>
+            ))}
           </div>
         </section>
 
