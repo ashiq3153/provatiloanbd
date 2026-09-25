@@ -29,6 +29,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [balanceVisible, setBalanceVisible] = useState(true);
+  const [balanceView, setBalanceView] = useState<'savings' | 'outstanding'>('savings');
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activeLoan, setActiveLoan] = useState<LoanApplication | null>(null);
   const [loans, setLoans] = useState<LoanApplication[]>([]);
@@ -308,25 +309,35 @@ export default function Home() {
           </Link>
         )}
 
-        {/* Financial overview */}
+        {/* Financial overview: member savings with a toggle to loan outstanding */}
         <section className="pv-home-financial-hero home-financial-card rounded-[28px] p-5 text-white shadow-xl overflow-hidden relative border border-indigo-200/40">
-          <div className="absolute -right-16 -top-16 w-40 h-40 rounded-full border border-sky-400/10" />
-          <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full border border-sky-400/10" />
-          <div className="flex items-center justify-between relative">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[.14em] text-slate-400">{isBn?'আমার আর্থিক অবস্থা':'Financial position'}</p>
-              <p className="text-sm font-bold text-slate-200 mt-1">{isBn?'সঞ্চয়':'Savings balance'}</p>
-            </div>
-            <button onClick={()=>setBalanceVisible(v=>!v)} className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center">
-              {balanceVisible?<Eye size={16}/>:<EyeOff size={16}/>}
-            </button>
+          <div className="absolute -right-16 -top-16 w-40 h-40 rounded-full border border-white/15 pointer-events-none" />
+          <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full border border-white/15 pointer-events-none" />
+          <div className="relative flex items-center justify-between gap-3">
+            <div><p className="text-[10px] font-extrabold uppercase tracking-[.14em] text-white/70">PROVATI • {isBn ? "আমার হিসাব" : "My account"}</p>
+              <div className="mt-2 inline-flex rounded-full bg-slate-950/25 p-1 border border-white/15" role="group">
+                <button type="button" onClick={()=>setBalanceView("savings")} className={"rounded-full px-3 py-1.5 text-[10px] font-extrabold transition-all "+(balanceView==="savings"?"bg-white text-indigo-700 shadow-md":"text-white/75")}>{isBn?"সঞ্চয়":"Savings"}</button>
+                <button type="button" onClick={()=>setBalanceView("outstanding")} className={"rounded-full px-3 py-1.5 text-[10px] font-extrabold transition-all "+(balanceView==="outstanding"?"bg-white text-indigo-700 shadow-md":"text-white/75")}>{isBn?"ঋণ বকেয়া":"Loan due"}</button>
+              </div></div>
+            <button type="button" onClick={()=>setBalanceVisible(v=>!v)} className="w-11 h-11 rounded-full bg-white/15 border border-white/20 flex items-center justify-center text-white" aria-label={balanceVisible?"Hide balance":"Show balance"}>{balanceVisible?<Eye size={18}/>:<EyeOff size={18}/>}</button>
           </div>
-          {loading ? <Skeleton className="h-9 w-40 mt-4 bg-slate-700" /> :
-            <p className="text-3xl font-black tracking-tight mt-3">{balanceVisible?formatCurrency(stats?.savingsBalance||0,isBn):'৳••••••'}</p>}
-          <div className="grid grid-cols-2 gap-3 mt-5 pt-4 border-t border-white/10">
-            <div><p className="text-[10px] text-slate-400 font-bold">{isBn?'মোট ব্যালেন্স':'Total balance'}</p><p className="font-black mt-1">{balanceVisible?formatCurrency(stats?.totalBalance||0,isBn):'৳••••'}</p></div>
-            <div><p className="text-[10px] text-slate-400 font-bold">{isBn?'মোট বকেয়া ঋণ':'Outstanding loan'}</p><p className="font-black mt-1">{balanceVisible?formatCurrency(stats?.totalOutstanding||0,isBn):'৳••••'}</p></div>
+          <div className="relative mt-4 min-h-[68px]"><p className="text-[11px] font-bold text-white/75">{balanceView==="savings"?(isBn?"বর্তমান সঞ্চয় ব্যালেন্স":"Current savings balance"):(isBn?"ঋণের মোট বকেয়া":"Outstanding loan balance")}</p>
+            <AnimatePresence mode="wait"><motion.p key={balanceView} initial={{opacity:0,y:7}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-5}} transition={{duration:.18}} className="text-3xl sm:text-4xl font-black tracking-tight mt-1 text-white">{loading?<Skeleton className="h-9 w-40 bg-white/20"/>:balanceVisible?formatCurrency(balanceView==="savings"?(stats?.savingsBalance||0):(stats?.totalOutstanding||outstanding),isBn):"৳ • • • • • •"}</motion.p></AnimatePresence>
           </div>
+          <div className="grid grid-cols-2 gap-3 mt-3 pt-4 border-t border-white/15">
+            <div className="rounded-2xl bg-white/10 border border-white/10 p-3"><p className="text-[10px] text-white/70 font-bold">{isBn?"সঞ্চয়":"Savings"}</p><p className="font-black mt-1 text-white">{balanceVisible?formatCurrency(stats?.savingsBalance||0,isBn):"৳••••••"}</p></div>
+            <div className="rounded-2xl bg-white/10 border border-white/10 p-3"><p className="text-[10px] text-white/70 font-bold">{isBn?"ঋণ বকেয়া":"Loan outstanding"}</p><p className="font-black mt-1 text-white">{balanceVisible?formatCurrency(stats?.totalOutstanding||outstanding,isBn):"৳••••••"}</p></div>
+          </div>
+          <Link to="/transactions" className="relative mt-4 flex items-center justify-between rounded-xl bg-white text-indigo-700 px-4 py-3 font-black text-xs shadow-lg"><span className="flex items-center gap-2"><ReceiptText size={16}/>{isBn?"সম্পূর্ণ আর্থিক হিসাব":"Full financial statement"}</span><ChevronRight size={16}/></Link>
+        </section>
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#111827] p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3"><div><p className="text-[10px] font-black uppercase tracking-wider text-slate-400">{isBn?"এক নজরে হিসাব":"Account at a glance"}</p><h2 className="text-base font-black mt-1">{isBn?"সঞ্চয় ও ঋণের সারাংশ":"Savings & loan summary"}</h2></div><Link to="/transactions" className="text-xs font-black text-indigo-600">{isBn?"বিস্তারিত":"Details"}</Link></div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/25 p-3"><p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300">{isBn?"সঞ্চয় ব্যালেন্স":"Savings balance"}</p><p className="text-sm font-black mt-1">{balanceVisible?formatCurrency(stats?.savingsBalance||0,isBn):"৳••••••"}</p></div>
+            <div className="rounded-xl bg-indigo-50 dark:bg-indigo-950/25 p-3"><p className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300">{isBn?"মোট অনুমোদিত ঋণ":"Approved loan total"}</p><p className="text-sm font-black mt-1">{balanceVisible?formatCurrency(loans.filter(l=>["approved","active","completed"].includes(l.status)).reduce((sum,l)=>sum+Number(l.amount||0),0),isBn):"৳••••••"}</p></div>
+            <div className="rounded-xl bg-amber-50 dark:bg-amber-950/25 p-3"><p className="text-[10px] font-bold text-amber-700 dark:text-amber-300">{isBn?"ঋণ পরিশোধ":"Loan repaid"}</p><p className="text-sm font-black mt-1">{balanceVisible?formatCurrency(paidAmount,isBn):"৳••••••"}</p></div>
+            <div className="rounded-xl bg-rose-50 dark:bg-rose-950/25 p-3"><p className="text-[10px] font-bold text-rose-700 dark:text-rose-300">{isBn?"বকেয়া ঋণ":"Loan outstanding"}</p><p className="text-sm font-black mt-1">{balanceVisible?formatCurrency(stats?.totalOutstanding||outstanding,isBn):"৳••••••"}</p></div>
+          </div><div className="mt-3 flex gap-2"><Link to="/loans" className="flex-1 rounded-xl bg-indigo-600 text-white text-center py-3 text-xs font-black">{isBn?"আমার ঋণ":"My loans"}</Link><Link to="/pay" className="flex-1 rounded-xl bg-orange-500 text-white text-center py-3 text-xs font-black">{isBn?"EMI হিসাব":"EMI details"}</Link></div>
         </section>
 
         {/* Next important action */}
@@ -434,17 +445,6 @@ export default function Home() {
           </section>
         )}
 
-        {/* Savings summary */}
-        {!loading && stats && (
-          <section className="home-panel home-panel-savings rounded-2xl p-4 shadow-sm">
-            <div className="flex items-center justify-between gap-3">
-              <div><p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{isBn ? 'সঞ্চয় হিসাব' : 'Savings account'}</p><p className="text-xl font-black mt-1">{balanceVisible ? formatCurrency(stats.savingsBalance || 0, isBn) : '••••••'}</p></div>
-              <Link to="/deposit" className="px-3 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[11px] font-black">{isBn ? 'জমা দিন' : 'Deposit'}</Link>
-            </div>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-2">{isBn ? 'বর্তমান সঞ্চয় ব্যালেন্স' : 'Current savings balance'}</p>
-          </section>
-        )}
-
         {/* Mobile-first responsive spacing */}
         <div className="h-px bg-transparent sm:hidden" aria-hidden="true" />
         {/* Member services */}
@@ -459,22 +459,6 @@ export default function Home() {
                 </Link>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* Recent activity */}
-        <section>
-          <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'লেনদেন':'Activity'}</p><h2 className="text-lg font-black mt-1">{isBn?'সাম্প্রতিক কার্যক্রম':'Recent activity'}</h2></div><Link to="/transactions" className="text-xs font-black text-sky-600 dark:text-sky-400">{isBn?'সব দেখুন':'View all'}</Link></div>
-          <div className="home-activity-card rounded-2xl overflow-hidden">
-            {recentTransactions.length ? recentTransactions.map((tx,i)=>(
-              <div key={tx.id} className={`p-4 flex items-center gap-3 ${i<recentTransactions.length-1?'border-b border-slate-100 dark:border-slate-800':''}`}>
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tx.type==='deposit'?'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400':tx.type==='emi_payment'?'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400':'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
-                  {tx.type==='deposit'?<ArrowDownToLine size={17}/>:tx.type==='emi_payment'?<CreditCard size={17}/>:<Wallet size={17}/>}
-                </div>
-                <div className="flex-1 min-w-0"><p className="text-xs font-black">{activityLabel(tx.type)}</p><p className="text-[10px] text-slate-400 mt-1">{new Date(tx.created_at).toLocaleDateString(isBn?'bn-BD':'en-GB')} • {formatActivityStatus(tx.status)}</p></div>
-                <div className="text-right"><p className="text-xs font-black">{formatCurrency(tx.amount,isBn)}</p><p className={`text-[9px] font-bold mt-1 ${tx.status==='completed'?'text-emerald-600 dark:text-emerald-400':tx.status==='failed'?'text-rose-600 dark:text-rose-400':'text-amber-600 dark:text-amber-400'}`}>{formatActivityStatus(tx.status)}</p></div>
-              </div>
-            )) : <div className="p-8 text-center text-xs font-bold text-slate-400">{isBn?'সাম্প্রতিক কোনো কার্যক্রম নেই':'No recent activity'}</div>}
           </div>
         </section>
 
@@ -546,6 +530,22 @@ export default function Home() {
             </div>
           </section>
         )}
+
+        {/* Recent activity */}
+        <section>
+          <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'লেনদেন':'Activity'}</p><h2 className="text-lg font-black mt-1">{isBn?'সাম্প্রতিক কার্যক্রম':'Recent activity'}</h2></div><Link to="/transactions" className="text-xs font-black text-sky-600 dark:text-sky-400">{isBn?'সব দেখুন':'View all'}</Link></div>
+          <div className="home-activity-card rounded-2xl overflow-hidden">
+            {recentTransactions.length ? recentTransactions.map((tx,i)=>(
+              <div key={tx.id} className={`p-4 flex items-center gap-3 ${i<recentTransactions.length-1?'border-b border-slate-100 dark:border-slate-800':''}`}>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tx.type==='deposit'?'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400':tx.type==='emi_payment'?'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400':'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+                  {tx.type==='deposit'?<ArrowDownToLine size={17}/>:tx.type==='emi_payment'?<CreditCard size={17}/>:<Wallet size={17}/>}
+                </div>
+                <div className="flex-1 min-w-0"><p className="text-xs font-black">{activityLabel(tx.type)}</p><p className="text-[10px] text-slate-400 mt-1">{new Date(tx.created_at).toLocaleDateString(isBn?'bn-BD':'en-GB')} • {formatActivityStatus(tx.status)}</p></div>
+                <div className="text-right"><p className="text-xs font-black">{formatCurrency(tx.amount,isBn)}</p><p className={`text-[9px] font-bold mt-1 ${tx.status==='completed'?'text-emerald-600 dark:text-emerald-400':tx.status==='failed'?'text-rose-600 dark:text-rose-400':'text-amber-600 dark:text-amber-400'}`}>{formatActivityStatus(tx.status)}</p></div>
+              </div>
+            )) : <div className="p-8 text-center text-xs font-bold text-slate-400">{isBn?'সাম্প্রতিক কোনো কার্যক্রম নেই':'No recent activity'}</div>}
+          </div>
+        </section>
 
         {/* Trust / member note */}
         <section className="bg-slate-900 dark:bg-[#111827] text-white rounded-2xl p-5">
