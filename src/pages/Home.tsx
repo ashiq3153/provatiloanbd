@@ -230,7 +230,7 @@ export default function Home() {
   return (
 
     <main className="home-modern app-home-theme w-full min-w-0 bg-[#f6f8fc] dark:bg-[#0b1220] text-slate-900 dark:text-slate-100 pb-[calc(6rem+env(safe-area-inset-bottom))] transition-colors">
-      <div className="px-4 sm:px-5 pt-3 space-y-5">
+      <div className="px-2.5 sm:px-4 pt-2 space-y-4">
 
         {error && !loading && (
           <section className="bg-white dark:bg-[#111827] border border-rose-200 dark:border-rose-900 rounded-2xl p-5 shadow-sm">
@@ -242,7 +242,7 @@ export default function Home() {
         )}
 
         {/* Header */}
-        <header className="flex items-center justify-between gap-3">
+        <header className="home-dashboard-header flex items-center justify-between gap-3 rounded-b-[24px] px-3 py-3 -mx-2.5 sm:-mx-4 sm:px-4 shadow-sm">
           <Link to="/profile" className="flex items-center gap-3 min-w-0">
             <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white dark:border-slate-700 bg-slate-200 dark:bg-slate-800 shadow-sm shrink-0">
               <img
@@ -309,10 +309,10 @@ export default function Home() {
         )}
 
         {/* Colorful account balance card — one balance at a time */}
-        <section className="pv-home-financial-hero home-financial-card home-balance-art rounded-[28px] p-5 text-white shadow-xl overflow-hidden relative border border-indigo-200/40">
+        <section className="pv-home-financial-hero home-financial-card home-balance-art rounded-[24px] p-4 text-white shadow-xl overflow-hidden relative border border-indigo-200/40">
           <div className="home-balance-art-orb home-balance-art-orb-one" />
           <div className="home-balance-art-orb home-balance-art-orb-two" />
-          <div className="home-balance-art-ribbon" />
+
           <div className="relative z-10 flex items-start justify-between gap-3">
             <div>
               <p className="text-[10px] font-extrabold uppercase tracking-[.14em] text-white/75">PROVATI • {isBn ? "আমার হিসাব" : "My account"}</p>
@@ -335,7 +335,7 @@ export default function Home() {
             Keep the home dashboard focused on the colorful single-balance card and key actions. */}
 
         {/* Next important action */}
-        <Link to={nextAction.link} className="block bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm active:scale-[.99] transition">
+        <Link to={nextAction.link} className="home-next-action block border rounded-2xl p-3.5 shadow-sm active:scale-[.99] transition">
           <div className="flex items-center gap-3">
             <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${nextAction.tone==='amber'?'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400':'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400'}`}>
               <nextAction.icon size={20}/>
@@ -412,11 +412,11 @@ export default function Home() {
                   'from-violet-800 via-indigo-900 to-slate-900',
                 ];
                 return (
-                  <Link key={link} to={link} className={`relative isolate overflow-hidden w-[154px] h-[68px] shrink-0 snap-start rounded-xl px-3 py-2 flex items-center gap-2.5 bg-gradient-to-br ${palettes[index % palettes.length]} !text-white border border-white/15 shadow-md active:scale-[.97] transition-all duration-200`}>
+                  <Link key={link} to={link} className={`home-service-tile relative isolate overflow-hidden w-[154px] h-[68px] shrink-0 snap-start rounded-xl px-3 py-2 flex items-center gap-2.5 border shadow-sm active:scale-[.97] transition-all duration-200 service-tone-${index % 5}`}>
                     <span aria-hidden="true" className="absolute -right-5 -top-7 w-24 h-24 rounded-full border-[12px] border-white/10 pointer-events-none"/>
                     <span aria-hidden="true" className="absolute right-7 -bottom-8 w-20 h-20 rounded-full bg-white/10 blur-sm pointer-events-none"/>
-                    <span className="relative z-10 w-8 h-8 rounded-lg bg-white/15 border border-white/20 !text-white flex items-center justify-center shrink-0 shadow-inner"><Icon size={16} className="!text-white"/></span>
-                    <span className="relative z-10 min-w-0 flex-1"><span className="block text-[11px] font-extrabold !text-white truncate">{label}</span><span className="block text-[9px] !text-white/80 mt-0.5 truncate">{sub}</span></span>
+                    <span className="relative z-10 w-8 h-8 rounded-lg service-icon flex items-center justify-center shrink-0 shadow-inner"><Icon size={16} className="!text-white"/></span>
+                    <span className="relative z-10 min-w-0 flex-1"><span className="block text-[11px] font-extrabold service-title truncate">{label}</span><span className="block text-[9px] service-subtitle mt-0.5 truncate">{sub}</span></span>
                   </Link>
                 );
               })}
@@ -439,11 +439,11 @@ export default function Home() {
                   'from-fuchsia-800 via-purple-900 to-slate-900',
                 ];
                 return (
-                  <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className={`relative isolate overflow-hidden text-left w-[160px] h-[72px] shrink-0 snap-start rounded-xl px-3 py-2 flex items-center gap-2.5 bg-gradient-to-br ${palettes[index % palettes.length]} !text-white border border-white/15 shadow-md active:scale-[.97] transition-all duration-200`}>
+                  <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className={`home-category-tile relative isolate overflow-hidden text-left w-[160px] h-[72px] shrink-0 snap-start rounded-xl px-3 py-2 flex items-center gap-2.5 border shadow-sm active:scale-[.97] transition-all duration-200 category-tone-${index % 6}`}>
                     <span aria-hidden="true" className="absolute -right-6 -top-7 w-24 h-24 rounded-full border-[12px] border-white/10 pointer-events-none"/>
                     <span aria-hidden="true" className="absolute right-8 -bottom-8 w-20 h-20 rounded-full bg-white/10 blur-sm pointer-events-none"/>
-                    <span className="relative z-10 w-8 h-8 rounded-lg bg-white/15 border border-white/20 !text-white flex items-center justify-center shrink-0 shadow-inner">{(() => { const Icon = loanCategoryIcon(id); return <Icon size={16} className="!text-white"/>; })()}</span>
-                    <span className="relative z-10 min-w-0 flex-1"><span className="block text-[11px] font-extrabold !text-white truncate">{label}</span><span className="block text-[9px] !text-white/80 mt-0.5">{isBn?'আবেদন দেখুন':'View option'}</span></span>
+                    <span className="relative z-10 w-8 h-8 rounded-lg category-icon flex items-center justify-center shrink-0 shadow-inner">{(() => { const Icon = loanCategoryIcon(id); return <Icon size={16} className="!text-white"/>; })()}</span>
+                    <span className="relative z-10 min-w-0 flex-1"><span className="block text-[11px] font-extrabold category-title truncate">{label}</span><span className="block text-[9px] category-subtitle mt-0.5">{isBn?'আবেদন দেখুন':'View option'}</span></span>
                     <ChevronRight size={14} className="relative z-10 !text-white/80 shrink-0"/>
                   </button>
                 );
@@ -462,7 +462,7 @@ export default function Home() {
             <div className="-mx-4 px-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
               <div className="flex gap-3 w-max">
                 {stories.slice(0,10).map((story, i) => (
-                  <article key={story.id} className="w-[310px] shrink-0 snap-start rounded-[22px] p-4 bg-slate-900 dark:bg-[#111827] border border-slate-700 shadow-lg text-white relative overflow-hidden">
+                  <article key={story.id} className="home-success-story w-[310px] shrink-0 snap-start rounded-[22px] p-4 border shadow-lg text-white relative overflow-hidden">
                     <div className="absolute -right-10 -top-10 w-28 h-28 rounded-full bg-sky-500/10" />
                     <div className="relative flex items-center gap-3">
                       <img src={story.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(story.name)}&background=0ea5e9&color=fff&bold=true`} alt="" className="w-11 h-11 rounded-full object-cover border-2 border-white/20" />
