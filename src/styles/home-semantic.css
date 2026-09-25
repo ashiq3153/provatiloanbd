@@ -40,3 +40,68 @@
   background:linear-gradient(135deg,#e8efff 0%,#e5f8ff 100%) !important;
   border-color:#c1d4ee !important;
 }
+
+/* Balance card artwork: layered flowing curves, warm accent corner and dotted details. */
+.home-modern.app-home-theme .home-balance-art{
+  isolation:isolate;
+  background:
+    radial-gradient(ellipse at 100% 0%,rgba(255,190,18,.98) 0%,rgba(255,111,20,.96) 25%,transparent 45%),
+    radial-gradient(ellipse at 93% 108%,rgba(130,47,255,.95) 0%,rgba(61,45,238,.85) 30%,transparent 52%),
+    linear-gradient(128deg,#1037db 0%,#162bd1 48%,#0757e6 100%) !important;
+}
+.home-modern.app-home-theme .home-balance-art-orb-one{
+  position:absolute; z-index:0; pointer-events:none;
+  width:64%; height:88%; right:-13%; top:-42%;
+  border-radius:0 0 0 76%;
+  background:linear-gradient(140deg,#ff4d8d 0%,#ff711c 55%,#ffd329 100%);
+  opacity:.98;
+  clip-path:ellipse(74% 68% at 72% 26%);
+}
+.home-modern.app-home-theme .home-balance-art-orb-two{
+  position:absolute; z-index:0; pointer-events:none;
+  width:72%; height:65%; right:-20%; bottom:-42%;
+  border-radius:70% 0 0 0;
+  background:linear-gradient(140deg,#8b39f5 0%,#4433ed 52%,#2457ff 100%);
+  opacity:.96;
+  transform:rotate(-7deg);
+}
+.home-modern.app-home-theme .home-balance-art-ribbon{
+  position:absolute; z-index:0; pointer-events:none;
+  width:54%; height:100%; right:9%; top:-57%;
+  border-radius:0 0 55% 55%;
+  background:linear-gradient(140deg,rgba(236,55,196,.9),rgba(255,110,34,.95));
+  opacity:.82;
+  clip-path:ellipse(68% 62% at 64% 34%);
+}
+.home-modern.app-home-theme .home-balance-art::after{
+  content:""; position:absolute; z-index:1; pointer-events:none;
+  right:7%; top:19%; width:54px; height:42px; opacity:.5;
+  background-image:radial-gradient(circle,rgba(255,255,255,.85) 1.4px,transparent 1.8px);
+  background-size:13px 13px;
+  mask-image:linear-gradient(135deg,#000,transparent);
+}
+
+/* Success stories retain all member details; only their card background is decorated. */
+.home-modern.app-home-theme article.w-\\[310px\\]{
+  isolation:isolate;
+  border-color:rgba(161,155,255,.38) !important;
+  background:
+    radial-gradient(ellipse at 100% 0%,rgba(255,119,29,.98) 0%,rgba(255,63,132,.9) 22%,transparent 43%),
+    radial-gradient(ellipse at 0% 100%,rgba(104,39,235,.98) 0%,rgba(48,45,219,.95) 37%,transparent 68%),
+    linear-gradient(135deg,#1d25c9 0%,#3828d8 55%,#171d74 100%) !important;
+  box-shadow:0 15px 30px rgba(50,35,190,.24) !important;
+}
+.home-modern.app-home-theme article.w-\\[310px\\]::before{
+  content:""; position:absolute; z-index:0; pointer-events:none;
+  width:78%; height:80%; right:-20%; top:-40%;
+  border-radius:0 0 0 70%;
+  background:linear-gradient(135deg,rgba(255,65,155,.95),rgba(255,150,20,.96),rgba(255,205,40,.9));
+  clip-path:ellipse(68% 65% at 70% 25%);
+}
+.home-modern.app-home-theme article.w-\\[310px\\]::after{
+  content:""; position:absolute; z-index:0; pointer-events:none;
+  right:7%; bottom:10%; width:54px; height:48px; opacity:.48;
+  background-image:radial-gradient(circle,rgba(255,255,255,.85) 1.4px,transparent 1.8px);
+  background-size:13px 13px;
+  mask-image:linear-gradient(135deg,#000,transparent);
+}
