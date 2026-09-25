@@ -1,5 +1,4 @@
 import '../styles/home-semantic.css';
-import logoImg from '../assets/logo.png';
 import {
   Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight,
   FileText, CreditCard, PiggyBank, ReceiptText, FolderOpen,
