@@ -410,3 +410,92 @@ html.dark .home-modern.app-home-theme section h2 {
   .home-modern .home-category-tile .category-title { font-size: 9px !important; }
   .home-modern .home-success-story { padding: 14px !important; }
 }
+
+/* Screenshot review fixes: high contrast on brand, stories, activity note;
+   compact swipe-only loan category rail; keep balance hero free of action clutter. */
+.home-modern .home-dashboard-header .home-logo-mark,
+.home-modern .home-dashboard-header .home-brand-title,
+.home-modern .home-dashboard-header .home-brand-subtitle,
+.home-modern .home-dashboard-header .home-brand-title *,
+.home-modern .home-dashboard-header .home-brand-subtitle * {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  opacity: 1 !important;
+}
+.home-modern .home-dashboard-header .home-logo-mark svg { fill: none; }
+.home-modern .home-dashboard-header .home-logo-mark svg path { fill: #fff !important; }
+
+/* Balance card is intentionally informational: remove the action row and
+   savings/loan-due/statement controls from its layout. */
+.home-modern .pv-home-financial-hero.home-balance-art {
+  padding-bottom: 20px !important;
+}
+.home-modern .home-category-carousel {
+  display: grid !important;
+  grid-auto-flow: column !important;
+  grid-template-rows: minmax(84px, auto) !important;
+  grid-auto-columns: calc((100% - 30px) / 4) !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scroll-snap-type: x mandatory !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  touch-action: pan-x pan-y;
+}
+.home-modern .home-category-carousel::-webkit-scrollbar { display: none; }
+.home-modern .home-category-carousel .home-category-tile {
+  width: 100% !important;
+  scroll-snap-align: start;
+}
+@media (min-width: 640px) {
+  .home-modern .home-category-carousel {
+    grid-auto-columns: calc((100% - 30px) / 4) !important;
+  }
+}
+
+/* Success story text was inheriting global dark text colors in the actual
+   WebView despite the white card wrapper. Set foreground explicitly. */
+.home-modern .home-success-story,
+.home-modern .home-success-story *:not(button) {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+.home-modern .home-success-story .home-story-verified {
+  background: #2563eb !important;
+  border: 1px solid rgba(255,255,255,.75) !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  box-shadow: 0 3px 10px rgba(7,25,90,.22);
+}
+.home-modern .home-success-story button {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  background: rgba(255,255,255,.15) !important;
+  border-color: rgba(255,255,255,.28) !important;
+}
+
+/* The member records panel was rendering as a dark navy block with dark
+   inherited text. Use a soft blue-white surface and explicit readable ink. */
+.home-modern .home-member-note {
+  background: #eaf2ff !important;
+  border: 1px solid #d7e5fb !important;
+  color: #172554 !important;
+  box-shadow: 0 6px 18px rgba(25,55,110,.07);
+}
+.home-modern .home-member-note p {
+  color: #172554 !important;
+  -webkit-text-fill-color: #172554 !important;
+}
+.home-modern .home-member-note svg {
+  color: #2563eb !important;
+}
+.dark .home-modern .home-member-note,
+html.dark .home-modern .home-member-note {
+  background: #13213a !important;
+  border-color: #263c60 !important;
+}
+.dark .home-modern .home-member-note p,
+html.dark .home-modern .home-member-note p {
+  color: #f1f5f9 !important;
+  -webkit-text-fill-color: #f1f5f9 !important;
+}
