@@ -151,3 +151,118 @@
 .home-modern.app-home-theme .home-success-story::after{content:"";position:absolute;z-index:0;pointer-events:none;right:6%;bottom:8%;width:58px;height:48px;opacity:.5;background-image:radial-gradient(circle,rgba(255,255,255,.9) 1.4px,transparent 1.8px);background-size:13px 13px}
 .home-modern.app-home-theme .home-success-story>*{position:relative;z-index:1}
 .home-modern.app-home-theme .home-success-story p.text-slate-400,.home-modern.app-home-theme .home-success-story p.text-slate-500{color:#e0e7ff!important}
+
+/* Final approved visual pass: compact mobile canvas, blue/cyan hero header, rich balance card, vivid light service tiles. */
+.home-modern.app-home-theme{
+  background:#f7f9fd !important;
+}
+.home-modern.app-home-theme .home-dashboard-header{
+  min-height:172px;
+  margin-top:0 !important;
+  background:
+    radial-gradient(ellipse at 100% 0%,rgba(255,83,129,.92) 0%,rgba(255,154,36,.78) 21%,transparent 42%),
+    radial-gradient(ellipse at 13% 115%,rgba(38,208,228,.95) 0%,rgba(13,151,230,.58) 36%,transparent 64%),
+    linear-gradient(116deg,#0754df 0%,#087bea 58%,#09b9d3 100%) !important;
+  border:0 !important;
+  border-radius:0 0 26px 26px !important;
+  box-shadow:0 8px 22px rgba(17,94,212,.16) !important;
+}
+.home-modern.app-home-theme .home-dashboard-header::before{
+  content:"";position:absolute;pointer-events:none;inset:-38px -40px auto 38%;
+  height:150px;border-radius:0 0 0 75%;
+  background:linear-gradient(135deg,rgba(145,54,241,.72),rgba(245,75,164,.74),rgba(255,145,20,.7));
+  clip-path:ellipse(65% 66% at 66% 18%);
+}
+.home-modern.app-home-theme .home-dashboard-header::after{
+  content:"";position:absolute;pointer-events:none;right:10%;top:84px;width:62px;height:46px;opacity:.46;
+  background-image:radial-gradient(circle,rgba(255,255,255,.88) 1.5px,transparent 1.9px);background-size:13px 13px;
+}
+.home-modern.app-home-theme .home-dashboard-header > *{position:relative;z-index:2}
+.home-modern.app-home-theme .home-dashboard-header img{filter:drop-shadow(0 2px 5px rgba(0,0,0,.14))}
+.home-modern.app-home-theme .home-financial-card{
+  min-height:306px;
+  background:
+    radial-gradient(ellipse at 100% 0%,#ffc928 0%,#ff7b25 19%,transparent 41%),
+    radial-gradient(ellipse at 88% 100%,#7b3ef3 0%,#4a34e8 31%,transparent 54%),
+    linear-gradient(128deg,#1a3bdc 0%,#2d27d4 48%,#1f39d9 100%) !important;
+  border:1px solid rgba(255,255,255,.42) !important;
+  box-shadow:0 18px 34px rgba(47,47,199,.22) !important;
+}
+.home-modern.app-home-theme .home-balance-art::before{
+  content:"";position:absolute;z-index:0;pointer-events:none;
+  width:72%;height:64%;right:-17%;top:-29%;
+  background:linear-gradient(135deg,#a43df2 0%,#ee4ba6 31%,#ff7620 68%,#ffd12e 100%);
+  clip-path:ellipse(72% 64% at 71% 28%);
+}
+.home-modern.app-home-theme .home-balance-art::after{
+  content:"";position:absolute;z-index:0;pointer-events:none;right:9%;top:35%;width:58px;height:44px;opacity:.42;
+  background-image:radial-gradient(circle,rgba(255,255,255,.85) 1.4px,transparent 1.8px);background-size:13px 13px;
+}
+.home-modern.app-home-theme .home-balance-art-orb-one,
+.home-modern.app-home-theme .home-balance-art-orb-two{z-index:0}
+.home-modern.app-home-theme .home-balance-art-orb-one{display:none}
+.home-modern.app-home-theme .home-balance-art-orb-two{
+  width:76%;height:58%;right:-21%;bottom:-37%;
+  background:linear-gradient(145deg,#7438ed 0%,#4730e5 54%,#243bdf 100%);
+  clip-path:ellipse(75% 67% at 72% 51%);
+}
+.home-modern.app-home-theme .balance-action-icon{
+  background:rgba(255,255,255,.9) !important;
+  color:#1556cf !important;
+}
+.home-modern.app-home-theme .balance-action-0{background:#eef8ff!important;color:#1455c3!important}
+.home-modern.app-home-theme .balance-action-1{background:#dffbff!important;color:#079ec7!important}
+.home-modern.app-home-theme .balance-action-2{background:#fff5d8!important;color:#f2a000!important}
+.home-modern.app-home-theme .balance-action-3{background:#f1e5ff!important;color:#823be8!important}
+.home-modern.app-home-theme .balance-action-4{background:#ffe5ef!important;color:#e84687!important}
+
+.home-modern.app-home-theme .home-service-tile,
+.home-modern.app-home-theme .home-category-tile{
+  color:#fff !important;
+  border:0 !important;
+  box-shadow:0 9px 18px rgba(23,67,133,.13) !important;
+}
+.home-modern.app-home-theme .home-service-tile::before,
+.home-modern.app-home-theme .home-category-tile::before{
+  background:rgba(255,255,255,.14) !important;
+}
+.home-modern.app-home-theme .service-tone-0{background:linear-gradient(135deg,#20bff5,#1387eb)!important}
+.home-modern.app-home-theme .service-tone-1{background:linear-gradient(135deg,#32d7ba,#11ad95)!important}
+.home-modern.app-home-theme .service-tone-2{background:linear-gradient(135deg,#ffb34a,#ff8f21)!important}
+.home-modern.app-home-theme .service-tone-3{background:linear-gradient(135deg,#f56aa8,#ef3f86)!important}
+.home-modern.app-home-theme .service-icon,
+.home-modern.app-home-theme .category-icon{
+  background:rgba(255,255,255,.16)!important;
+  border:1px solid rgba(255,255,255,.28)!important;
+  color:#fff!important;
+}
+.home-modern.app-home-theme .service-title,
+.home-modern.app-home-theme .service-subtitle,
+.home-modern.app-home-theme .category-title,
+.home-modern.app-home-theme .category-subtitle{color:#fff!important}
+.home-modern.app-home-theme .home-category-tile.category-tone-0{background:linear-gradient(135deg,#28c7f6,#168fe9)!important}
+.home-modern.app-home-theme .home-category-tile.category-tone-1{background:linear-gradient(135deg,#8f60f3,#693ee7)!important}
+.home-modern.app-home-theme .home-category-tile.category-tone-2{background:linear-gradient(135deg,#31d4bc,#13b69c)!important}
+.home-modern.app-home-theme .home-category-tile.category-tone-3{background:linear-gradient(135deg,#ff8d42,#fa691f)!important}
+.home-modern.app-home-theme .home-category-tile.category-tone-4{background:linear-gradient(135deg,#4ca9f8,#2478ec)!important}
+.home-modern.app-home-theme .home-category-tile.category-tone-5{background:linear-gradient(135deg,#f76ba9,#ec3f82)!important}
+
+.home-modern.app-home-theme .home-success-story{
+  width:100% !important;
+  background:
+    radial-gradient(ellipse at 100% 0%,#ffbf25 0%,#ff7927 20%,transparent 43%),
+    radial-gradient(ellipse at 0% 100%,#7139f0 0%,#3730df 43%,transparent 69%),
+    linear-gradient(135deg,#172ddd 0%,#3031db 55%,#202692 100%) !important;
+}
+.home-modern.app-home-theme .home-success-story::before{
+  background:linear-gradient(135deg,#a33cf0 0%,#ef4ba7 34%,#ff7a20 70%,#ffd02c 100%)!important;
+}
+.home-modern.app-home-theme .home-success-story::after{
+  right:9%!important;bottom:11%!important;
+}
+@media (max-width:420px){
+  .home-modern.app-home-theme .home-dashboard-header{min-height:164px}
+  .home-modern.app-home-theme .home-financial-card{min-height:300px}
+  .home-modern.app-home-theme .home-service-tile{width:154px}
+  .home-modern.app-home-theme .home-category-tile{width:150px}
+}
