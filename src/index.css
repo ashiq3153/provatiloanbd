@@ -585,3 +585,134 @@ html:not(.dark) body :is([class*="bg-red-"],[class*="bg-rose-"]) :where(*),
 html:not(.dark) body :is([class*="bg-red-"],[class*="bg-rose-"]) {color:#7f1d1d!important;-webkit-text-fill-color:#7f1d1d!important}
 html:not(.dark) body :is([class*="bg-blue-"],[class*="bg-sky-"],[class*="bg-indigo-"]) :where(*),
 html:not(.dark) body :is([class*="bg-blue-"],[class*="bg-sky-"],[class*="bg-indigo-"]) {color:#1e3a8a!important;-webkit-text-fill-color:#1e3a8a!important}
+
+
+/* ─────────────────────────────────────────────────────────────
+   PROVATI v1.1 — clean banking palette based on supplied reference
+   Solid white/black canvas; color belongs to functional surfaces.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --app-canvas-light: #ffffff;
+  --app-canvas-dark: #000000;
+  --app-blue: #2d5be8;
+  --app-blue-deep: #1748d5;
+  --app-cyan: #10b9c8;
+  --app-cyan-deep: #0799aa;
+  --app-card-light: #ffffff;
+  --app-card-dark: #111318;
+}
+
+/* Do not render decorative blurred PNGs as the page canvas. Keep the
+   approved light_bg.png and dark_bg.png assets in the repository for use
+   where explicitly needed, but the overall canvas is flat as requested. */
+html:not(.dark) body,
+html:not(.dark) #root {
+  background: var(--app-canvas-light) !important;
+}
+html.dark body,
+html.dark #root,
+body.dark {
+  background: var(--app-canvas-dark) !important;
+}
+body::before,
+.dark body::before {
+  content: none !important;
+  display: none !important;
+  background-image: none !important;
+  filter: none !important;
+}
+
+/* Solid, crisp cards instead of the old glass/neumorphic treatment. */
+html:not(.dark) body .neu-raised,
+html:not(.dark) body .neu-raised-sm,
+html:not(.dark) body .neu-flat-card,
+html:not(.dark) body .neu-sunken,
+html:not(.dark) body .bg-white.rounded-2xl,
+html:not(.dark) body .bg-white.rounded-3xl,
+html:not(.dark) body .bg-white.rounded-\[20px\],
+html:not(.dark) body .bg-white.rounded-\[24px\],
+html:not(.dark) body .bg-white.rounded-\[28px\] {
+  background-color: #ffffff !important;
+  background-image: none;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid #e5eaf2 !important;
+  box-shadow: 0 5px 18px rgba(20, 39, 80, 0.07) !important;
+}
+html.dark body .neu-raised,
+html.dark body .neu-raised-sm,
+html.dark body .neu-flat-card,
+html.dark body .neu-sunken,
+html.dark body .dark\:bg-gray-800.rounded-2xl,
+html.dark body .dark\:bg-gray-800.rounded-3xl,
+html.dark body .dark\:bg-gray-850.rounded-2xl,
+html.dark body .dark\:bg-gray-850.rounded-3xl {
+  background-color: #111318 !important;
+  background-image: none;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid #282b33 !important;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.28) !important;
+}
+
+/* Blue/cyan primary actions and navigation active states, as in reference. */
+body .neu-btn-primary,
+body button[class*="bg-blue-"],
+body a[class*="bg-blue-"],
+body button[class*="bg-indigo-"],
+body a[class*="bg-indigo-"] {
+  background: linear-gradient(135deg, var(--app-blue), var(--app-blue-deep)) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 7px 16px rgba(45, 91, 232, 0.22) !important;
+}
+body :is(button,a,[role="button"])[class*="bg-cyan-"],
+body :is(button,a,[role="button"])[class*="bg-teal-"] {
+  background: linear-gradient(135deg, var(--app-cyan), var(--app-cyan-deep)) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+/* Ensure semantic blue and cyan panels retain white, high-contrast content
+   despite legacy global text-color rules. */
+html:not(.dark) body :is(.home-financial-card,[class*="from-blue-"],[class*="from-indigo-"],[class*="from-cyan-"],[class*="from-teal-"],[class*="bg-blue-600"],[class*="bg-blue-700"],[class*="bg-indigo-600"],[class*="bg-cyan-600"],[class*="bg-teal-600"]),
+html.dark body :is(.home-financial-card,[class*="from-blue-"],[class*="from-indigo-"],[class*="from-cyan-"],[class*="from-teal-"],[class*="bg-blue-600"],[class*="bg-blue-700"],[class*="bg-indigo-600"],[class*="bg-cyan-600"],[class*="bg-teal-600"]) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+html:not(.dark) body :is(.home-financial-card,[class*="from-blue-"],[class*="from-indigo-"],[class*="from-cyan-"],[class*="from-teal-"],[class*="bg-blue-600"],[class*="bg-blue-700"],[class*="bg-indigo-600"],[class*="bg-cyan-600"],[class*="bg-teal-600"]) :where(p,span,label,small,h1,h2,h3,h4,strong,b,button),
+html.dark body :is(.home-financial-card,[class*="from-blue-"],[class*="from-indigo-"],[class*="from-cyan-"],[class*="from-teal-"],[class*="bg-blue-600"],[class*="bg-blue-700"],[class*="bg-indigo-600"],[class*="bg-cyan-600"],[class*="bg-teal-600"]) :where(p,span,label,small,h1,h2,h3,h4,strong,b,button) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Reference-inspired financial tiles: blue for income/primary, cyan for
+   outgoing/secondary. Apply only where semantic tile classes exist. */
+.home-modern.app-home-theme .home-financial-card {
+  background: linear-gradient(135deg, #2d5be8 0%, #1748d5 100%) !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 20px rgba(45, 91, 232, 0.2) !important;
+}
+.home-modern.app-home-theme .home-financial-card:nth-of-type(even) {
+  background: linear-gradient(135deg, #10b9c8 0%, #0799aa 100%) !important;
+}
+
+/* The fixed bottom navigation is clean white in light mode and near-black
+   in dark mode, with a blue active control. */
+html:not(.dark) body .user-app-shell nav,
+html:not(.dark) body .user-app-shell [class*="bottom-4"][class*="rounded"] {
+  background-color: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: #e5eaf2 !important;
+}
+html.dark body .user-app-shell nav,
+html.dark body .user-app-shell [class*="bottom-4"][class*="rounded"] {
+  background-color: #111318 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: #282b33 !important;
+}
