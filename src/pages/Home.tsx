@@ -405,18 +405,18 @@ export default function Home() {
             <div className="flex gap-3 w-max">
               {quickActions.map(({label,sub,icon:Icon,link}, index)=> {
                 const palettes = [
-                  'from-indigo-600 via-violet-600 to-fuchsia-500',
-                  'from-sky-600 via-blue-600 to-indigo-500',
-                  'from-emerald-600 via-teal-600 to-cyan-500',
-                  'from-rose-600 via-pink-600 to-orange-400',
-                  'from-amber-600 via-orange-500 to-red-500',
+                  'from-slate-800 via-indigo-900 to-slate-900',
+                  'from-sky-800 via-cyan-900 to-slate-900',
+                  'from-emerald-800 via-teal-900 to-slate-900',
+                  'from-rose-800 via-rose-900 to-slate-900',
+                  'from-violet-800 via-indigo-900 to-slate-900',
                 ];
                 return (
-                  <Link key={link} to={link} className={`relative isolate overflow-hidden w-[166px] min-h-[88px] shrink-0 snap-start rounded-2xl p-3 flex items-center gap-3 bg-gradient-to-br ${palettes[index % palettes.length]} text-white border border-white/20 shadow-lg active:scale-[.97] transition-all duration-200`}>
+                  <Link key={link} to={link} className={`relative isolate overflow-hidden w-[154px] h-[68px] shrink-0 snap-start rounded-xl px-3 py-2 flex items-center gap-2.5 bg-gradient-to-br ${palettes[index % palettes.length]} !text-white border border-white/15 shadow-md active:scale-[.97] transition-all duration-200`}>
                     <span aria-hidden="true" className="absolute -right-5 -top-7 w-24 h-24 rounded-full border-[12px] border-white/10 pointer-events-none"/>
                     <span aria-hidden="true" className="absolute right-7 -bottom-8 w-20 h-20 rounded-full bg-white/10 blur-sm pointer-events-none"/>
-                    <span className="relative z-10 w-10 h-10 rounded-xl bg-white/20 border border-white/25 text-white flex items-center justify-center shrink-0 shadow-inner"><Icon size={19}/></span>
-                    <span className="relative z-10 min-w-0"><span className="block text-xs font-extrabold text-white truncate">{label}</span><span className="block text-[10px] text-white/85 mt-1 truncate">{sub}</span></span>
+                    <span className="relative z-10 w-8 h-8 rounded-lg bg-white/15 border border-white/20 !text-white flex items-center justify-center shrink-0 shadow-inner"><Icon size={16} className="!text-white"/></span>
+                    <span className="relative z-10 min-w-0 flex-1"><span className="block text-[11px] font-extrabold !text-white truncate">{label}</span><span className="block text-[9px] !text-white/80 mt-0.5 truncate">{sub}</span></span>
                   </Link>
                 );
               })}
@@ -431,20 +431,20 @@ export default function Home() {
             <div className="flex gap-3 w-max">
               {categories.map(([id,label], index)=> {
                 const palettes = [
-                  'from-cyan-600 via-sky-600 to-blue-700',
-                  'from-violet-600 via-purple-600 to-fuchsia-600',
-                  'from-emerald-600 via-green-600 to-lime-600',
-                  'from-orange-600 via-rose-600 to-pink-600',
-                  'from-blue-700 via-indigo-600 to-violet-600',
-                  'from-pink-600 via-rose-600 to-red-500',
+                  'from-slate-800 via-sky-900 to-slate-900',
+                  'from-indigo-800 via-violet-900 to-slate-900',
+                  'from-emerald-800 via-teal-900 to-slate-900',
+                  'from-rose-800 via-pink-900 to-slate-900',
+                  'from-blue-800 via-indigo-900 to-slate-900',
+                  'from-fuchsia-800 via-purple-900 to-slate-900',
                 ];
                 return (
-                  <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className={`relative isolate overflow-hidden text-left w-[174px] min-h-[94px] shrink-0 snap-start rounded-2xl p-3 flex items-center gap-3 bg-gradient-to-br ${palettes[index % palettes.length]} text-white border border-white/20 shadow-lg active:scale-[.97] transition-all duration-200`}>
+                  <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className={`relative isolate overflow-hidden text-left w-[160px] h-[72px] shrink-0 snap-start rounded-xl px-3 py-2 flex items-center gap-2.5 bg-gradient-to-br ${palettes[index % palettes.length]} !text-white border border-white/15 shadow-md active:scale-[.97] transition-all duration-200`}>
                     <span aria-hidden="true" className="absolute -right-6 -top-7 w-24 h-24 rounded-full border-[12px] border-white/10 pointer-events-none"/>
                     <span aria-hidden="true" className="absolute right-8 -bottom-8 w-20 h-20 rounded-full bg-white/10 blur-sm pointer-events-none"/>
-                    <span className="relative z-10 w-10 h-10 rounded-xl bg-white/20 border border-white/25 text-white flex items-center justify-center shrink-0 shadow-inner">{(() => { const Icon = loanCategoryIcon(id); return <Icon size={19}/>; })()}</span>
-                    <span className="relative z-10 min-w-0 flex-1"><span className="block text-xs font-extrabold text-white truncate">{label}</span><span className="block text-[9px] text-white/85 mt-1">{isBn?'আবেদন দেখুন':'View option'}</span></span>
-                    <ChevronRight size={15} className="relative z-10 text-white/85 shrink-0"/>
+                    <span className="relative z-10 w-8 h-8 rounded-lg bg-white/15 border border-white/20 !text-white flex items-center justify-center shrink-0 shadow-inner">{(() => { const Icon = loanCategoryIcon(id); return <Icon size={16} className="!text-white"/>; })()}</span>
+                    <span className="relative z-10 min-w-0 flex-1"><span className="block text-[11px] font-extrabold !text-white truncate">{label}</span><span className="block text-[9px] !text-white/80 mt-0.5">{isBn?'আবেদন দেখুন':'View option'}</span></span>
+                    <ChevronRight size={14} className="relative z-10 !text-white/80 shrink-0"/>
                   </button>
                 );
               })}
