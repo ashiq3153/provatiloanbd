@@ -331,15 +331,8 @@ export default function Home() {
             <Link to="/transactions" className="relative z-10 flex items-center gap-1 rounded-full bg-white/15 border border-white/20 px-3 py-2 text-[10px] font-extrabold text-white"><ReceiptText size={14}/>{isBn?"হিসাব":"Statement"}</Link>
           </div>
         </section>
-        <section className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#111827] p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3"><div><p className="text-[10px] font-black uppercase tracking-wider text-slate-400">{isBn?"এক নজরে হিসাব":"Account at a glance"}</p><h2 className="text-base font-black mt-1">{isBn?"সঞ্চয় ও ঋণের সারাংশ":"Savings & loan summary"}</h2></div><Link to="/transactions" className="text-xs font-black text-indigo-600">{isBn?"বিস্তারিত":"Details"}</Link></div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/25 p-3"><p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300">{isBn?"সঞ্চয় ব্যালেন্স":"Savings balance"}</p><p className="text-sm font-black mt-1">{balanceVisible?formatCurrency(stats?.savingsBalance||0,isBn):"৳••••••"}</p></div>
-            <div className="rounded-xl bg-indigo-50 dark:bg-indigo-950/25 p-3"><p className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300">{isBn?"মোট অনুমোদিত ঋণ":"Approved loan total"}</p><p className="text-sm font-black mt-1">{balanceVisible?formatCurrency(loans.filter(l=>["approved","active","completed"].includes(l.status)).reduce((sum,l)=>sum+Number(l.amount||0),0),isBn):"৳••••••"}</p></div>
-            <div className="rounded-xl bg-amber-50 dark:bg-amber-950/25 p-3"><p className="text-[10px] font-bold text-amber-700 dark:text-amber-300">{isBn?"ঋণ পরিশোধ":"Loan repaid"}</p><p className="text-sm font-black mt-1">{balanceVisible?formatCurrency(paidAmount,isBn):"৳••••••"}</p></div>
-            <div className="rounded-xl bg-rose-50 dark:bg-rose-950/25 p-3"><p className="text-[10px] font-bold text-rose-700 dark:text-rose-300">{isBn?"বকেয়া ঋণ":"Loan outstanding"}</p><p className="text-sm font-black mt-1">{balanceVisible?formatCurrency(stats?.totalOutstanding||outstanding,isBn):"৳••••••"}</p></div>
-          </div><div className="mt-3 flex gap-2"><Link to="/loans" className="flex-1 rounded-xl bg-indigo-600 text-white text-center py-3 text-xs font-black">{isBn?"আমার ঋণ":"My loans"}</Link><Link to="/pay" className="flex-1 rounded-xl bg-orange-500 text-white text-center py-3 text-xs font-black">{isBn?"EMI হিসাব":"EMI details"}</Link></div>
-        </section>
+        {/* Detailed savings, loan and repayment figures live in their dedicated screens.
+            Keep the home dashboard focused on the colorful single-balance card and key actions. */}
 
         {/* Next important action */}
         <Link to={nextAction.link} className="block bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm active:scale-[.99] transition">
