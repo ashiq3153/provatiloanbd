@@ -240,7 +240,7 @@ export default function Home() {
 
   return (
 
-    <main className="home-modern app-home-theme w-full min-w-0 bg-[#f6f8fc] dark:bg-[#0b1220] text-slate-900 dark:text-slate-100 pb-[calc(6rem+env(safe-area-inset-bottom))] transition-colors">
+    <main className="home-modern app-home-theme w-full min-w-0 bg-[#f6f8fc] dark:bg-[#0b1220] text-slate-900 dark:text-slate-100 pb-[calc(10rem+env(safe-area-inset-bottom))] transition-colors">
       <div className="px-3 sm:px-4 pt-0 space-y-4">
 
         {error && !loading && (
@@ -253,10 +253,11 @@ export default function Home() {
         )}
 
         {/* Header */}
-        <header className="home-dashboard-header relative overflow-hidden flex flex-col gap-4 rounded-b-[26px] px-3 py-3 -mx-3 sm:-mx-4 sm:px-5 shadow-md">
+        <header className="home-dashboard-header relative overflow-hidden flex flex-col gap-3 rounded-b-[26px] px-3 py-3 -mx-3 sm:-mx-4 sm:px-5 shadow-md">
           <div className="relative z-10 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <img src={logoImg} alt="PROVATI LOAN" className="h-9 w-auto max-w-[180px] object-contain" />
+            <div className="flex items-center gap-2.5 min-w-0 text-white">
+              <span className="text-[26px] leading-none font-black tracking-tight">❖</span>
+              <span className="min-w-0"><span className="block text-[17px] leading-tight font-black tracking-wide whitespace-nowrap">PROVATI LOAN</span><span className="block text-[8px] leading-tight tracking-[.12em] font-semibold text-white/85 whitespace-nowrap">PROVATI SOMOBAY SOMITI</span></span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <div className="relative">
@@ -470,7 +471,7 @@ export default function Home() {
             <div className="-mx-4 px-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
               <div className="flex gap-3 w-max">
                 {stories.slice(0,10).map((story, i) => (
-                  <article key={story.id} className="home-success-story w-[310px] shrink-0 snap-start rounded-[22px] p-4 border shadow-lg text-white relative overflow-hidden">
+                  <article key={story.id} className="home-success-story w-full min-w-[calc(100vw-3rem)] max-w-[620px] shrink-0 snap-start rounded-[22px] p-4 border shadow-lg text-white relative overflow-hidden">
                     <div className="absolute -right-10 -top-10 w-28 h-28 rounded-full bg-sky-500/10" />
                     <div className="relative flex items-center gap-3">
                       <img src={story.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(story.name)}&background=0ea5e9&color=fff&bold=true`} alt="" className="w-11 h-11 rounded-full object-cover border-2 border-white/20" />
