@@ -987,3 +987,68 @@ html:not(.dark) body .home-modern article.w-\[310px\] :where(button) {
     box-shadow:0 21px 42px rgba(48,52,145,.29),inset 0 1px 0 rgba(255,255,255,.2) !important;
   }
 }
+
+
+/* Success Stories v2 — premium jewel-gradient cards, distinct from balance
+   card. Rich emerald/teal + indigo with restrained champagne highlights. */
+html:not(.dark) body .home-modern article.w-\[310px\] {
+  background:
+    radial-gradient(ellipse at 92% 3%,rgba(250,204,105,.34) 0%,rgba(250,204,105,0) 31%),
+    radial-gradient(ellipse at 0% 100%,rgba(45,212,191,.32) 0%,rgba(45,212,191,0) 44%),
+    linear-gradient(142deg,#102b55 0%,#174b79 38%,#126b78 70%,#164e63 100%) !important;
+  border:1px solid rgba(206,250,242,.28) !important;
+  border-radius:24px !important;
+  box-shadow:0 18px 38px rgba(16,66,91,.24),inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+html:not(.dark) body .home-modern article.w-\[310px\]::before {
+  content:"";
+  position:absolute;z-index:-1;pointer-events:none;
+  width:205px;height:205px;right:-94px;top:-118px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.2);
+  box-shadow:0 0 0 15px rgba(255,255,255,.035),0 0 0 37px rgba(255,255,255,.025),0 0 0 61px rgba(255,255,255,.018);
+}
+html:not(.dark) body .home-modern article.w-\[310px\]::after {
+  content:"✦";
+  position:absolute;z-index:-1;pointer-events:none;
+  right:17px;bottom:45px;font-size:76px;line-height:1;
+  color:rgba(255,224,163,.12);-webkit-text-fill-color:rgba(255,224,163,.12);
+  text-shadow:0 0 28px rgba(255,224,163,.1);
+  transform:rotate(12deg);
+}
+html:not(.dark) body .home-modern article.w-\[310px\] :where(p,span,strong,div,button,svg) {
+  color:#f8fffe;-webkit-text-fill-color:currentColor;
+}
+html:not(.dark) body .home-modern article.w-\[310px\] :where(.text-sky-300) {
+  color:#a5f3fc !important;-webkit-text-fill-color:#a5f3fc !important;
+}
+html:not(.dark) body .home-modern article.w-\[310px\] :where(.text-emerald-300) {
+  color:#bbf7d0 !important;-webkit-text-fill-color:#bbf7d0 !important;
+}
+html:not(.dark) body .home-modern article.w-\[310px\] :where(.text-amber-400) {
+  color:#fcd34d !important;-webkit-text-fill-color:#fcd34d !important;
+}
+html:not(.dark) body .home-modern article.w-\[310px\] :where(.bg-white\/5) {
+  background:rgba(235,255,251,.09) !important;
+  border:1px solid rgba(225,255,250,.13) !important;
+  border-radius:12px !important;
+}
+html:not(.dark) body .home-modern article.w-\[310px\] :where(button) {
+  background:rgba(235,255,251,.1) !important;
+  border:1px solid rgba(225,255,250,.16) !important;
+  border-radius:11px !important;
+  backdrop-filter:blur(6px);
+}
+html:not(.dark) body .home-modern article.w-\[310px\] :where(img) {
+  border-color:rgba(255,255,255,.65) !important;
+  box-shadow:0 0 0 3px rgba(255,255,255,.08),0 5px 14px rgba(0,0,0,.2);
+}
+html:not(.dark) body .home-modern article.w-\[310px\] :where(.text-xl.font-black) {
+  color:#fff !important;
+  text-shadow:0 1px 12px rgba(0,0,0,.14);
+}
+@media (hover:hover) {
+  html:not(.dark) body .home-modern article.w-\[310px\]:hover {
+    transform:translateY(-4px) scale(1.005);
+    box-shadow:0 23px 44px rgba(16,66,91,.3),inset 0 1px 0 rgba(255,255,255,.22) !important;
+  }
+}
