@@ -372,41 +372,6 @@ export default function Home() {
           </section>
         )}
 
-        {/* Active loan portfolio */}
-        <section>
-          <div className="flex items-end justify-between mb-3">
-            <div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'ঋণ পোর্টফোলিও':'Loan portfolio'}</p><h2 className="text-lg font-black mt-1">{isBn?'চলমান ঋণ':'Active loan'}</h2></div>
-            <Link to="/loans" className="text-xs font-black text-sky-600 dark:text-sky-400"> {isBn?'সব দেখুন':'View all'} </Link>
-          </div>
-          {loading ? <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-5"><Skeleton className="h-5 w-40"/><Skeleton className="h-3 w-full mt-5"/></div> :
-          activeLoan ? (
-            <Link to={`/application/${activeLoan.id}`} className="home-loan-card block rounded-2xl p-5 shadow-sm">
-              <div className="flex justify-between gap-3">
-                <div><h3 className="font-black">{categoryName(activeLoan.loan_category)}</h3><p className="text-[10px] text-slate-400 mt-1 font-bold">LN-{activeLoan.id.slice(0,8).toUpperCase()}</p></div>
-                <span className="h-fit px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-[9px] font-black">{isBn?'সক্রিয়':'ACTIVE'}</span>
-              </div>
-              <div className="grid grid-cols-2 gap-4 mt-5">
-                <div><p className="text-[10px] text-slate-400">{isBn?'মূল ঋণ':'Loan amount'}</p><p className="font-black mt-1">{formatCurrency(activeLoan.amount,isBn)}</p></div>
-                <div><p className="text-[10px] text-slate-400">{isBn?'বকেয়া':'Outstanding'}</p><p className="font-black mt-1">{formatCurrency(outstanding,isBn)}</p></div>
-              </div>
-              <div className="mt-5">
-                <div className="flex justify-between text-[10px] font-black mb-2"><span>{isBn?'পরিশোধ অগ্রগতি':'Repayment progress'}</span><span className="text-sky-600">{convertDigits(loanProgress,isBn)}%</span></div>
-                <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="h-full bg-sky-500 rounded-full" style={{width:`${loanProgress}%`}}/></div>
-              </div>
-              <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                <div><p className="text-[10px] text-slate-400">{isBn?'পরবর্তী কিস্তি':'Next installment'}</p><p className="text-sm font-black mt-1">{formatCurrency(activeLoan.emi_amount,isBn)}</p></div>
-                <div className="text-right"><p className="text-[10px] text-slate-400">{isBn?'তারিখ':'Due date'}</p><p className="text-xs font-bold mt-1">{nextEmiDate || (isBn?'শিডিউল নেই':'Schedule unavailable')}</p></div>
-              </div>
-            </Link>
-          ) : (
-            <div className="home-empty-card rounded-2xl p-6 text-center">
-              <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 mx-auto flex items-center justify-center"><FileText size={20} className="text-slate-500"/></div>
-              <h3 className="font-black mt-3">{isBn?'কোনো সক্রিয় ঋণ নেই':'No active loan'}</h3>
-              <p className="text-xs text-slate-500 mt-1">{isBn?'আপনার প্রয়োজন অনুযায়ী ঋণ সেবা দেখুন।':'Explore loan services for your needs.'}</p>
-              <Link to="/apply" className="inline-flex mt-4 px-4 py-2.5 rounded-xl bg-sky-500 text-white text-xs font-black"> {isBn?'ঋণ আবেদন':'Apply for loan'} <ArrowRight size={14} className="ml-2"/></Link>
-            </div>
-          )}
-        </section>
 
         {/* Loan journey */}
         {activeLoan && (
@@ -430,14 +395,6 @@ export default function Home() {
           </section>
         )}
 
-        {/* Empty account state */}
-        {!loading && !activeLoan && !latestApplication && transactions.length === 0 && (
-          <section className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
-            <div className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center"><Wallet size={19} className="text-slate-500"/></div>
-            <h2 className="text-sm font-black mt-3">{isBn ? 'আপনার সদস্য হিসাব প্রস্তুত' : 'Your member account is ready'}</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-5">{isBn ? 'ঋণ আবেদন, সঞ্চয় বা লেনদেন শুরু করলে আপনার তথ্য এখানে দেখা যাবে।' : 'Your loan, savings and transaction information will appear here as you use the services.'}</p>
-          </section>
-        )}
 
         {/* Mobile-first responsive spacing */}
         <div className="h-px bg-transparent sm:hidden" aria-hidden="true" />
