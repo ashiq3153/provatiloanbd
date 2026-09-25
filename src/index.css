@@ -716,3 +716,53 @@ html.dark body .user-app-shell [class*="bottom-4"][class*="rounded"] {
   -webkit-backdrop-filter: none !important;
   border-color: #282b33 !important;
 }
+
+
+/* Home: colored financial balance and success-story cards always use white
+   typography in BOTH light and dark modes for strong contrast. */
+html:not(.dark) body .pv-home-financial-hero,
+html.dark body .pv-home-financial-hero,
+body.dark .pv-home-financial-hero {
+  background: linear-gradient(125deg, #2d5be8 0%, #1748d5 58%, #087fca 100%) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  box-shadow: 0 12px 28px rgba(45,91,232,.24) !important;
+}
+html:not(.dark) body .pv-home-financial-hero :where(*),
+html.dark body .pv-home-financial-hero :where(*),
+body.dark .pv-home-financial-hero :where(*) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+html:not(.dark) body .pv-home-financial-hero :where(button),
+html.dark body .pv-home-financial-hero :where(button),
+body.dark .pv-home-financial-hero :where(button) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background-color: rgba(255,255,255,.14) !important;
+  border-color: rgba(255,255,255,.22) !important;
+}
+
+/* Success story tiles stay dark/colored with white text regardless of theme. */
+html:not(.dark) body .home-modern article.w-\[310px\],
+html.dark body .home-modern article.w-\[310px\],
+body.dark .home-modern article.w-\[310px\] {
+  background: linear-gradient(135deg, #172b5d 0%, #123d72 55%, #087f91 100%) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border: 1px solid rgba(148,190,255,.28) !important;
+  box-shadow: 0 10px 24px rgba(18,61,114,.22) !important;
+}
+html:not(.dark) body .home-modern article.w-\[310px\] :where(*),
+html.dark body .home-modern article.w-\[310px\] :where(*),
+body.dark .home-modern article.w-\[310px\] :where(*) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+html:not(.dark) body .home-modern article.w-\[310px\] :where(button),
+html.dark body .home-modern article.w-\[310px\] :where(button),
+body.dark .home-modern article.w-\[310px\] :where(button) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
