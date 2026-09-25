@@ -209,13 +209,14 @@ export default function Profile() {
         <SectionTitle title={isBn ? 'পছন্দ ও অ্যাপ সেটিংস' : 'Preferences & app settings'} />
         <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800">
           <Row
-            icon={Sun}
-            title={isBn ? 'লাইট মোড' : 'Light mode'}
-            description={isBn ? 'রেফারেন্স ডিজাইন অনুযায়ী চালু আছে' : 'Reference-inspired light mode is active'}
+            icon={theme === 'dark' ? Moon : Sun}
+            title={isBn ? 'থিম পরিবর্তন' : 'Appearance'}
+            description={theme === 'dark' ? (isBn ? 'ডার্ক মোড চালু আছে' : 'Dark mode is active') : (isBn ? 'লাইট মোড চালু আছে' : 'Light mode is active')}
+            onClick={toggleTheme}
             right={
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#DDF6D5] px-3 py-1 text-[10px] font-black text-[#2F8F1F]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#3EB41D]" />
-                {isBn ? 'চালু' : 'ON'}
+              <span className={`profile-theme-switch inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[10px] font-extrabold ${theme === 'dark' ? 'is-dark' : 'is-light'}`}>
+                {theme === 'dark' ? <Moon size={13} /> : <Sun size={13} />}
+                {theme === 'dark' ? (isBn ? 'ডার্ক' : 'DARK') : (isBn ? 'লাইট' : 'LIGHT')}
               </span>
             }
           />
