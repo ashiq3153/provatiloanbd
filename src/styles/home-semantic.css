@@ -266,3 +266,116 @@
   .home-modern.app-home-theme .home-service-tile{width:154px}
   .home-modern.app-home-theme .home-category-tile{width:150px}
 }
+
+
+/* Reference-match correction: eliminate legacy sizing/decoration overrides that caused the oversized hero and orange bar. */
+.home-modern.app-home-theme{
+  width:100%!important;max-width:none!important;overflow-x:hidden!important;
+  padding-bottom:calc(9.5rem + env(safe-area-inset-bottom))!important;
+}
+.home-modern.app-home-theme > div{
+  width:100%!important;max-width:none!important;
+  padding-left:12px!important;padding-right:12px!important;
+  gap:16px!important;
+}
+.home-modern.app-home-theme .home-dashboard-header{
+  height:205px!important;min-height:0!important;max-height:205px!important;
+  padding:16px 18px 18px!important;margin-left:-12px!important;margin-right:-12px!important;
+  gap:18px!important;border-radius:0 0 28px 28px!important;
+  background:
+    radial-gradient(ellipse at 100% 0%,#ff8c2d 0%,#ff4b9c 21%,transparent 44%),
+    radial-gradient(ellipse at 95% 110%,#0fc7d5 0%,#168de8 32%,transparent 57%),
+    linear-gradient(118deg,#0754df 0%,#087bea 60%,#08b9d5 100%)!important;
+}
+.home-modern.app-home-theme .home-dashboard-header::before{
+  content:""!important;position:absolute!important;pointer-events:none!important;
+  right:-18%!important;top:-62%!important;left:auto!important;inset-inline-start:auto!important;
+  width:68%!important;height:165px!important;clip-path:ellipse(72% 64% at 70% 28%)!important;
+  background:linear-gradient(135deg,#a43df2 0%,#ef4ca7 36%,#ff7b20 72%,#ffc92c 100%)!important;
+}
+.home-modern.app-home-theme .home-dashboard-header::after{
+  top:105px!important;right:17%!important;width:58px!important;height:44px!important;
+}
+.home-modern.app-home-theme .home-dashboard-header > div:first-child{flex:0 0 auto!important}
+.home-modern.app-home-theme .home-dashboard-header > div:last-child{margin-top:0!important}
+.home-modern.app-home-theme .home-dashboard-header h1{font-size:22px!important;line-height:1.1!important;margin-top:3px!important}
+.home-modern.app-home-theme .home-dashboard-header p{line-height:1.25!important}
+.home-modern.app-home-theme .home-financial-card,
+.home-modern.app-home-theme .pv-home-financial-hero{
+  min-height:0!important;height:auto!important;max-height:none!important;
+  padding:18px!important;margin-top:0!important;
+  border-radius:24px!important;overflow:hidden!important;
+  background:linear-gradient(130deg,#1738dc 0%,#3024cf 52%,#4030df 100%)!important;
+}
+.home-modern.app-home-theme .home-balance-art::before{
+  content:""!important;display:block!important;position:absolute!important;
+  top:-37%!important;right:-12%!important;bottom:auto!important;left:auto!important;
+  width:70%!important;height:83%!important;
+  background:linear-gradient(135deg,#a43df2 0%,#ef4ba7 34%,#ff7a20 70%,#ffd02d 100%)!important;
+  clip-path:ellipse(72% 62% at 70% 28%)!important;
+}
+.home-modern.app-home-theme .home-balance-art-orb-one{display:none!important}
+.home-modern.app-home-theme .home-balance-art-orb-two{
+  display:block!important;position:absolute!important;right:-25%!important;bottom:-48%!important;top:auto!important;
+  width:78%!important;height:65%!important;border-radius:0!important;transform:none!important;
+  background:linear-gradient(135deg,#7538ee 0%,#4430e8 60%,#273be0 100%)!important;
+  clip-path:ellipse(74% 68% at 72% 52%)!important;
+}
+/* Remove the legacy pseudo ribbon responsible for the conspicuous yellow L-shaped stripe. */
+.home-modern.app-home-theme .home-balance-art::after{
+  content:""!important;position:absolute!important;right:8%!important;top:42%!important;bottom:auto!important;
+  width:56px!important;height:44px!important;opacity:.4!important;
+  background-image:radial-gradient(circle,rgba(255,255,255,.8) 1.3px,transparent 1.8px)!important;
+  background-size:13px 13px!important;clip-path:none!important;mask-image:linear-gradient(135deg,#000,transparent)!important;
+}
+.home-modern.app-home-theme .home-financial-card .relative.z-10.grid.grid-cols-5{
+  margin-top:14px!important;gap:4px!important;
+}
+.home-modern.app-home-theme .home-financial-card .balance-action-icon{
+  width:42px!important;height:42px!important;box-shadow:0 3px 8px rgba(0,0,0,.12)!important;
+}
+.home-modern.app-home-theme .home-financial-card .relative.z-10.mt-3{margin-top:12px!important}
+.home-modern.app-home-theme .home-service-tile{
+  width:calc((100vw - 54px)/4)!important;min-width:0!important;max-width:170px!important;
+  height:126px!important;flex-direction:column!important;align-items:flex-start!important;
+  justify-content:flex-start!important;gap:8px!important;padding:14px!important;border-radius:18px!important;
+}
+.home-modern.app-home-theme .home-service-tile .service-icon{
+  width:36px!important;height:36px!important;border-radius:12px!important;
+}
+.home-modern.app-home-theme .home-service-tile .service-title{font-size:13px!important;line-height:1.2!important;white-space:normal!important}
+.home-modern.app-home-theme .home-service-tile .service-subtitle{font-size:11px!important;line-height:1.2!important;white-space:normal!important}
+.home-modern.app-home-theme .home-category-tile{
+  width:calc((100vw - 54px)/4)!important;min-width:0!important;max-width:170px!important;
+  height:88px!important;flex-direction:column!important;align-items:flex-start!important;
+  justify-content:space-between!important;gap:5px!important;padding:12px!important;border-radius:16px!important;
+}
+.home-modern.app-home-theme .home-category-tile .category-icon{
+  width:34px!important;height:34px!important;border-radius:12px!important;
+}
+.home-modern.app-home-theme .home-category-tile .category-title{font-size:12px!important;line-height:1.15!important;white-space:normal!important}
+.home-modern.app-home-theme .home-category-tile .category-subtitle{display:none!important}
+.home-modern.app-home-theme .home-category-tile>svg{position:absolute!important;right:10px!important;top:12px!important}
+.home-modern.app-home-theme .home-success-story{
+  width:100%!important;min-width:calc(100vw - 48px)!important;max-width:none!important;
+  min-height:190px!important;padding:16px!important;border-radius:22px!important;
+}
+.home-modern.app-home-theme .home-success-story::before{
+  top:-37%!important;right:-18%!important;width:75%!important;height:80%!important;
+  background:linear-gradient(135deg,#a43df2 0%,#ef4ba7 34%,#ff7a20 70%,#ffd02d 100%)!important;
+  clip-path:ellipse(72% 62% at 70% 28%)!important;
+}
+.home-modern.app-home-theme .home-success-story::after{
+  bottom:8%!important;right:8%!important;
+}
+.home-modern.app-home-theme .home-success-story p{color:#fff!important}
+.home-modern.app-home-theme .home-success-story .text-slate-500,
+.home-modern.app-home-theme .home-success-story .text-slate-400{color:#e3e8ff!important}
+.home-modern.app-home-theme section .-mx-4.overflow-x-auto{
+  margin-left:-12px!important;margin-right:-12px!important;padding-left:12px!important;padding-right:12px!important;
+}
+@media(max-width:420px){
+ .home-modern.app-home-theme .home-dashboard-header{height:196px!important;max-height:196px!important;padding:14px 14px 16px!important}
+ .home-modern.app-home-theme .home-service-tile{width:calc((100vw - 48px)/2)!important;height:108px!important}
+ .home-modern.app-home-theme .home-category-tile{width:calc((100vw - 48px)/2)!important;height:82px!important}
+}
