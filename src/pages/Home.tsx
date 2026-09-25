@@ -1,4 +1,5 @@
 import '../styles/home-semantic.css';
+import logoImg from '../assets/logo.png';
 import {
   Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight,
   FileText, CreditCard, PiggyBank, ReceiptText, FolderOpen,
@@ -161,6 +162,14 @@ export default function Home() {
     { label: isBn ? 'আমার ঋণ' : 'My Loans', sub: isBn ? 'স্ট্যাটাস' : 'Status', icon: Wallet, link: '/loans' },
   ];
 
+
+  const balanceActions = [
+    { label: isBn ? 'জমা' : 'Deposit', icon: ArrowDownToLine, link: '/deposit' },
+    { label: isBn ? 'উত্তোলন' : 'Withdraw', icon: ArrowUpFromLine, link: '/transactions' },
+    { label: isBn ? 'লেনদেন' : 'Transactions', icon: ReceiptText, link: '/transactions' },
+    { label: isBn ? 'টপ আপ' : 'Top up', icon: Wallet, link: '/deposit' },
+    { label: isBn ? 'ইতিহাস' : 'History', icon: CalendarDays, link: '/transactions' },
+  ];
   const categories = [
     ['personal', isBn ? 'ব্যক্তিগত' : 'Personal'],
     ['business', isBn ? 'ব্যবসায়িক' : 'Business'],
@@ -230,7 +239,7 @@ export default function Home() {
   return (
 
     <main className="home-modern app-home-theme w-full min-w-0 bg-[#f6f8fc] dark:bg-[#0b1220] text-slate-900 dark:text-slate-100 pb-[calc(6rem+env(safe-area-inset-bottom))] transition-colors">
-      <div className="px-2.5 sm:px-4 pt-2 space-y-4">
+      <div className="px-3 sm:px-4 pt-0 space-y-4">
 
         {error && !loading && (
           <section className="bg-white dark:bg-[#111827] border border-rose-200 dark:border-rose-900 rounded-2xl p-5 shadow-sm">
@@ -242,60 +251,49 @@ export default function Home() {
         )}
 
         {/* Header */}
-        <header className="home-dashboard-header flex items-center justify-between gap-3 rounded-b-[24px] px-3 py-3 -mx-2.5 sm:-mx-4 sm:px-4 shadow-sm">
-          <Link to="/profile" className="flex items-center gap-3 min-w-0">
-            <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white dark:border-slate-700 bg-slate-200 dark:bg-slate-800 shadow-sm shrink-0">
-              <img
-                src={user.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.first_name)}&background=0ea5e9&color=fff&bold=true`}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
-              <span className="absolute right-0 bottom-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#0b1220]" />
+        <header className="home-dashboard-header relative overflow-hidden flex flex-col gap-4 rounded-b-[26px] px-3 py-3 -mx-3 sm:-mx-4 sm:px-5 shadow-md">
+          <div className="relative z-10 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <img src={logoImg} alt="PROVATI LOAN" className="h-9 w-auto max-w-[180px] object-contain" />
             </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                {isBn ? 'স্বাগতম' : 'Welcome back'}
-              </p>
-              <h1 className="font-black text-base truncate">{user.first_name} {user.last_name || ''}</h1>
-              <p className="text-[10px] font-bold text-slate-400">{isBn ? 'PROVATI সদস্য' : 'PROVATI Member'}</p>
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="relative">
+                <button type="button" onClick={() => setShowNotifications(v => !v)} className="w-10 h-10 rounded-full bg-white/15 border border-white/30 flex items-center justify-center text-white shadow-sm" aria-label="Notifications">
+                  <Bell size={19} />
+                  {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-white/80" />}
+                </button>
+                <AnimatePresence>
+                  {showNotifications && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
+                      <motion.div initial={{opacity:0,y:8,scale:.98}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:8,scale:.98}} className="absolute right-0 top-12 z-50 w-[calc(100vw-2rem)] max-w-sm bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden text-slate-900 dark:text-white">
+                        <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                          <strong>{isBn ? 'নোটিফিকেশন' : 'Notifications'}</strong>
+                          {unreadCount > 0 && <span className="text-[10px] font-black text-sky-600">{convertDigits(unreadCount,isBn)} {isBn?'নতুন':'new'}</span>}
+                        </div>
+                        <div className="max-h-72 overflow-y-auto">
+                          {notifications.length === 0 ? <div className="p-8 text-center text-sm text-slate-400">{isBn ? 'নতুন কোনো নোটিফিকেশন নেই' : 'No notifications'}</div> :
+                            notifications.slice(0,6).map((n:any) => (
+                              <button key={n.id} onClick={() => markReadAndOpen(n)} className="w-full text-left p-4 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60">
+                                <div className="flex gap-3"><span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${n.is_read?'bg-slate-300':'bg-sky-500'}`} /><div className="min-w-0"><p className="text-xs font-bold leading-5">{n.title}</p><p className="text-[10px] text-slate-400 mt-1">{n.created_at ? new Date(n.created_at).toLocaleString(isBn?'bn-BD':'en-US') : ''}</p></div></div>
+                              </button>
+                            ))}
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
+              <Link to="/profile" className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-white/85 bg-slate-200 shrink-0 shadow-sm">
+                <img src={user.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.first_name)}&background=0ea5e9&color=fff&bold=true`} alt="Profile" className="w-full h-full object-cover" />
+                <span className="absolute right-0 bottom-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white" />
+              </Link>
             </div>
-          </Link>
-
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShowNotifications(v => !v)}
-              className="w-11 h-11 rounded-full bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-sm active:scale-95 transition"
-              aria-label="Notifications"
-            >
-              <Bell size={19} />
-              {unreadCount > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-white dark:border-[#111827]" />}
-            </button>
-            <AnimatePresence>
-              {showNotifications && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
-                  <motion.div
-                    initial={{opacity:0,y:8,scale:.98}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:8,scale:.98}}
-                    className="absolute right-0 top-14 z-50 w-[calc(100vw-2rem)] max-w-sm bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden"
-                  >
-                    <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                      <strong>{isBn ? 'নোটিফিকেশন' : 'Notifications'}</strong>
-                      {unreadCount > 0 && <span className="text-[10px] font-black text-sky-600">{convertDigits(unreadCount,isBn)} {isBn?'নতুন':'new'}</span>}
-                    </div>
-                    <div className="max-h-72 overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <div className="p-8 text-center text-sm text-slate-400">{isBn ? 'নতুন কোনো নোটিফিকেশন নেই' : 'No notifications'}</div>
-                      ) : notifications.slice(0,6).map((n:any) => (
-                        <button key={n.id} onClick={() => markReadAndOpen(n)} className="w-full text-left p-4 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60">
-                          <div className="flex gap-3"><span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${n.is_read?'bg-slate-300':'bg-sky-500'}`} /><div className="min-w-0"><p className="text-xs font-bold leading-5">{n.title}</p><p className="text-[10px] text-slate-400 mt-1">{n.created_at ? new Date(n.created_at).toLocaleString(isBn?'bn-BD':'en-US') : ''}</p></div></div>
-                        </button>
-                      ))}
-                    </div>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
+          </div>
+          <div className="relative z-10">
+            <p className="text-[11px] font-bold text-white/80">{isBn ? 'স্বাগতম,' : 'Welcome back,'}</p>
+            <h1 className="font-black text-[22px] leading-tight text-white mt-1 truncate">{user.first_name} {user.last_name || ''}</h1>
+            <p className="text-[11px] font-bold text-white/80 mt-1">{isBn ? 'আপনার আর্থিক যাত্রায় আমরা আছি আপনার পাশে' : 'We are here beside you on your financial journey'}</p>
           </div>
         </header>
 
@@ -308,27 +306,35 @@ export default function Home() {
           </Link>
         )}
 
-        {/* Colorful account balance card — one balance at a time */}
-        <section className="pv-home-financial-hero home-financial-card home-balance-art rounded-[24px] p-4 text-white shadow-xl overflow-hidden relative border border-indigo-200/40">
+        {/* Approved reference balance card */}
+        <section className="pv-home-financial-hero home-financial-card home-balance-art rounded-[24px] p-4 sm:p-5 text-white shadow-[0_14px_34px_rgba(39,52,195,.20)] overflow-hidden relative border border-white/20">
           <div className="home-balance-art-orb home-balance-art-orb-one" />
           <div className="home-balance-art-orb home-balance-art-orb-two" />
-
           <div className="relative z-10 flex items-start justify-between gap-3">
             <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-[.14em] text-white/75">PROVATI • {isBn ? "আমার হিসাব" : "My account"}</p>
-              <p className="mt-3 text-xs font-bold text-white/85">{balanceView==="savings"?(isBn?"সঞ্চয় ব্যালেন্স":"Savings balance"):(isBn?"ঋণের বকেয়া":"Loan outstanding")}</p>
+              <p className="text-[10px] font-extrabold uppercase tracking-[.14em] text-white/75">PROVATI • {isBn ? 'আমার হিসাব' : 'My account'}</p>
+              <p className="mt-2 text-xs font-bold text-white/85">{balanceView==='savings'?(isBn?'বর্তমান ব্যালেন্স':'Current balance'):(isBn?'ঋণের বকেয়া':'Loan outstanding')}</p>
             </div>
-            <button type="button" onClick={()=>setBalanceVisible(v=>!v)} className="w-11 h-11 rounded-full bg-white/15 border border-white/25 flex items-center justify-center text-white shadow-inner" aria-label={balanceVisible?"Hide balance":"Show balance"}>{balanceVisible?<Eye size={18}/>:<EyeOff size={18}/>}</button>
+            <button type="button" onClick={()=>setBalanceVisible(v=>!v)} className="w-10 h-10 rounded-full bg-white/15 border border-white/30 flex items-center justify-center text-white" aria-label={balanceVisible?'Hide balance':'Show balance'}>{balanceVisible?<Eye size={18}/>:<EyeOff size={18}/>}</button>
           </div>
-          <div className="relative z-10 mt-2 min-h-[60px]">
-            <AnimatePresence mode="wait"><motion.p key={balanceView} initial={{opacity:0,y:9}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-6}} transition={{duration:.2}} className="text-3xl sm:text-4xl font-black tracking-tight text-white">{loading?<Skeleton className="h-9 w-40 bg-white/20"/>:balanceVisible?formatCurrency(balanceView==="savings"?(stats?.savingsBalance||0):(stats?.totalOutstanding||outstanding),isBn):"৳ • • • • • •"}</motion.p></AnimatePresence>
+          <div className="relative z-10 mt-1">
+            <AnimatePresence mode="wait"><motion.p key={balanceView} initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-5}} transition={{duration:.2}} className="text-3xl sm:text-[38px] leading-none font-black tracking-tight text-white">{loading?<Skeleton className="h-9 w-36 bg-white/20"/>:balanceVisible?formatCurrency(balanceView==='savings'?(stats?.savingsBalance||0):(stats?.totalOutstanding||outstanding),isBn):'৳ • • • • • •'}</motion.p></AnimatePresence>
           </div>
-          <div className="relative z-10 mt-5 flex items-center justify-between gap-3">
-            <div className="inline-flex rounded-full bg-slate-950/25 p-1 border border-white/20 backdrop-blur-sm" role="group" aria-label={isBn?"ব্যালেন্স নির্বাচন":"Select balance"}>
-              <button type="button" onClick={()=>setBalanceView("savings")} className={"rounded-full px-4 py-2 text-[11px] font-extrabold transition-all "+(balanceView==="savings"?"bg-white text-indigo-700 shadow-md":"text-white/85")}>{isBn?"সঞ্চয়":"Savings"}</button>
-              <button type="button" onClick={()=>setBalanceView("outstanding")} className={"rounded-full px-4 py-2 text-[11px] font-extrabold transition-all "+(balanceView==="outstanding"?"bg-white text-indigo-700 shadow-md":"text-white/85")}>{isBn?"ঋণ বকেয়া":"Loan due"}</button>
+          <p className="relative z-10 mt-2 text-[10px] font-semibold text-white/75">{isBn?'সদস্য আইডি':'Member ID'}: PSS-{String(user.id).padStart(6,'0').slice(-6)}</p>
+          <div className="relative z-10 mt-4 grid grid-cols-5 gap-1.5">
+            {balanceActions.map(({label,icon:Icon,link},i)=>(
+              <Link key={label} to={link} className="flex flex-col items-center justify-center gap-1.5 min-w-0 py-1.5 text-white">
+                <span className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center border border-white/30 shadow-sm balance-action-icon balance-action-${i}`}><Icon size={17}/></span>
+                <span className="text-[8px] sm:text-[9px] font-bold text-center text-white leading-tight truncate max-w-full">{label}</span>
+              </Link>
+            ))}
+          </div>
+          <div className="relative z-10 mt-3 flex items-center justify-between gap-2">
+            <div className="inline-flex rounded-full bg-black/15 p-1 border border-white/20" role="group" aria-label={isBn?'ব্যালেন্স নির্বাচন':'Select balance'}>
+              <button type="button" onClick={()=>setBalanceView('savings')} className={`rounded-full px-3.5 py-1.5 text-[10px] font-extrabold transition-all ${balanceView==='savings'?'bg-white text-indigo-700 shadow-md':'text-white/85'}`}>{isBn?'সঞ্চয়':'Savings'}</button>
+              <button type="button" onClick={()=>setBalanceView('outstanding')} className={`rounded-full px-3.5 py-1.5 text-[10px] font-extrabold transition-all ${balanceView==='outstanding'?'bg-white text-indigo-700 shadow-md':'text-white/85'}`}>{isBn?'ঋণ বকেয়া':'Loan due'}</button>
             </div>
-            <Link to="/transactions" className="relative z-10 flex items-center gap-1 rounded-full bg-white/15 border border-white/20 px-3 py-2 text-[10px] font-extrabold text-white"><ReceiptText size={14}/>{isBn?"হিসাব":"Statement"}</Link>
+            <Link to="/transactions" className="flex items-center gap-1 rounded-full bg-white/15 border border-white/25 px-3 py-1.5 text-[9px] font-extrabold text-white"><ReceiptText size={13}/>{isBn?'হিসাব':'Statement'}</Link>
           </div>
         </section>
         {/* Detailed savings, loan and repayment figures live in their dedicated screens.
