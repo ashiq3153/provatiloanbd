@@ -499,3 +499,40 @@ html.dark .home-modern .home-member-note p {
   color: #f1f5f9 !important;
   -webkit-text-fill-color: #f1f5f9 !important;
 }
+
+
+/* Balance-card WebView contrast fix.
+   Some global semantic/text utility overrides were winning over Tailwind
+   text-white on the balance heading, balance label, amount and member ID.
+   Scope the foreground rule to the entire balance card, not just the brand. */
+.home-modern .home-balance-art,
+.home-modern .home-balance-art p,
+.home-modern .home-balance-art h1,
+.home-modern .home-balance-art h2,
+.home-modern .home-balance-art h3,
+.home-modern .home-balance-art span,
+.home-modern .home-balance-art label,
+.home-modern .home-balance-art strong,
+.home-modern .home-balance-art small,
+.home-modern .home-balance-art div,
+.home-modern .home-balance-art button,
+.home-modern .home-balance-art button svg,
+.home-modern .home-balance-art > *:not(.home-balance-art-orb) {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+.home-modern .home-balance-art p,
+.home-modern .home-balance-art span {
+  opacity: 1;
+}
+.home-modern .home-balance-art .text-white\/75 { color: rgba(255,255,255,.82) !important; -webkit-text-fill-color: rgba(255,255,255,.82) !important; }
+.home-modern .home-balance-art .text-white\/85 { color: rgba(255,255,255,.9) !important; -webkit-text-fill-color: rgba(255,255,255,.9) !important; }
+.home-modern .home-balance-art .text-white\/20 { color: rgba(255,255,255,.2) !important; -webkit-text-fill-color: rgba(255,255,255,.2) !important; }
+.home-modern .home-balance-art button {
+  background-color: rgba(255,255,255,.15) !important;
+  border-color: rgba(255,255,255,.3) !important;
+}
+.home-modern .home-balance-art button svg {
+  stroke: #fff !important;
+  color: #fff !important;
+}
