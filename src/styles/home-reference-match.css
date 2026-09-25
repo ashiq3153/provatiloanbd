@@ -1,78 +1,311 @@
-/* Reference-matched mobile home dashboard — v1.1 phase1 */
-.home-modern.app-home-theme { background:#f3f6fc !important; color:#111827 !important; padding-bottom:calc(6.5rem + env(safe-area-inset-bottom)) !important; }
-.home-modern.app-home-theme > div { padding-left:20px !important; padding-right:20px !important; gap:22px !important; }
+/* ================================================================
+   PROVATI LOAN — Home dashboard (v1.1 phase1)
+   Single authoritative stylesheet for the Home screen, matching the
+   approved reference design. This file intentionally replaces every
+   older experimental layer (previously spread across index.css and
+   home-semantic.css) that caused conflicting colors/sizes.
+   ================================================================ */
+
+.home-modern.app-home-theme {
+  background: #f4f7fc !important;
+  padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)) !important;
+}
+.dark .home-modern.app-home-theme,
+html.dark .home-modern.app-home-theme {
+  background: #0b1220 !important;
+}
+.home-modern.app-home-theme > div.px-3 {
+  gap: 18px !important;
+}
+
+/* ---------------------------------------------------------------
+   Header
+   --------------------------------------------------------------- */
 .home-modern .home-dashboard-header {
-  margin-left:-20px !important; margin-right:-20px !important;
-  padding:30px 22px 28px !important; min-height:196px;
-  border-radius:0 0 32px 32px !important;
-  background:
-    radial-gradient(ellipse at 100% 0%,rgba(255,92,191,.9) 0%,rgba(255,92,191,0) 32%),
-    radial-gradient(ellipse at 4% 0%,rgba(0,208,255,.55) 0%,rgba(0,208,255,0) 28%),
-    linear-gradient(135deg,#0755d9 0%,#0877f9 48%,#0a49cf 100%) !important;
-  box-shadow:none !important;
+  position: relative !important;
+  isolation: isolate;
+  overflow: hidden;
+  margin-left: -12px !important;
+  margin-right: -12px !important;
+  padding: 18px 16px 26px !important;
+  border-radius: 0 0 28px 28px !important;
+  box-shadow: none !important;
+  background: linear-gradient(135deg, #0a56e0 0%, #0d7bf0 55%, #12b3e0 100%) !important;
 }
-.home-modern .home-dashboard-header:after {
-  content:""; position:absolute; width:230px;height:160px;right:-90px;bottom:-95px;
-  border-radius:50%;background:linear-gradient(135deg,#00d8e7,#00a4ff);opacity:.9;pointer-events:none;
+.home-modern .home-dashboard-header::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  width: 230px;
+  height: 190px;
+  right: -70px;
+  top: -90px;
+  border-radius: 0 0 0 100%;
+  background: linear-gradient(140deg, #ff9a3c 0%, #ff4f9e 45%, #8e5bff 100%);
+  opacity: 0.95;
 }
-.home-modern .home-dashboard-header > div:first-child > div:first-child > span:first-child { font-size:34px !important; }
-.home-modern .home-dashboard-header > div:first-child > div:first-child > span:last-child > span:first-child {font-size:20px!important;}
-.home-modern .home-dashboard-header > div:first-child > div:first-child > span:last-child > span:last-child {font-size:10px!important;}
-.home-modern .home-dashboard-header a[href="/profile"] {width:58px!important;height:58px!important;}
-.home-modern .home-dashboard-header button[aria-label="Notifications"] {width:48px!important;height:48px!important;background:rgba(255,255,255,.16)!important;border:1px solid rgba(255,255,255,.28)!important;}
-.home-modern .home-dashboard-header h1 {font-size:24px!important;margin-top:8px!important;}
-.home-modern .home-dashboard-header p {font-size:13px!important;}
+.home-modern .home-dashboard-header::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  right: 15%;
+  top: 58%;
+  width: 64px;
+  height: 50px;
+  opacity: 0.4;
+  background-image: radial-gradient(circle, rgba(255,255,255,.9) 1.4px, transparent 1.8px);
+  background-size: 14px 14px;
+}
+.home-modern .home-dashboard-header > * {
+  position: relative;
+  z-index: 1;
+}
+.home-modern .home-dashboard-header h1 {
+  color: #fff !important;
+  font-weight: 800 !important;
+  font-size: 22px !important;
+}
+.home-modern .home-dashboard-header p {
+  color: rgba(255,255,255,.86) !important;
+}
+.home-modern .home-dashboard-header button[aria-label="Notifications"] {
+  background: rgba(255,255,255,.16) !important;
+  border: 1px solid rgba(255,255,255,.3) !important;
+  color: #fff !important;
+}
+.home-modern .home-dashboard-header a[href="/profile"] {
+  border-color: rgba(255,255,255,.85) !important;
+}
+
+/* Logo mark: a real inline SVG instead of a unicode glyph, so it always
+   renders solid white instead of the platform's colour-emoji font. */
+.home-logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  color: #fff;
+}
+.home-logo-mark svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ---------------------------------------------------------------
+   Balance card
+   --------------------------------------------------------------- */
 .home-modern .pv-home-financial-hero.home-balance-art {
-  margin-top:-5px!important; border-radius:28px!important;padding:24px 22px 18px!important;
-  background:
-    radial-gradient(ellipse at 100% 0%,rgba(255,190,28,.98) 0%,rgba(255,125,58,.72) 22%,transparent 44%),
-    radial-gradient(ellipse at 100% 100%,rgba(108,36,255,.92) 0%,transparent 50%),
-    linear-gradient(125deg,#075ee7 0%,#173ce4 48%,#4b22e6 100%)!important;
-  box-shadow:0 14px 30px rgba(32,68,180,.2)!important;
+  position: relative !important;
+  isolation: isolate;
+  overflow: hidden;
+  margin-top: 0 !important;
+  padding: 20px 18px 16px !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  box-shadow: 0 16px 34px rgba(35,45,190,.22) !important;
+  background: linear-gradient(140deg, #1c33d6 0%, #2a2ad0 55%, #3d22c9 100%) !important;
 }
-.home-modern .home-balance-art-orb-one {width:250px!important;height:250px!important;right:-130px!important;top:-150px!important;opacity:.95;}
-.home-modern .home-balance-art-orb-two {width:180px!important;height:180px!important;left:-135px!important;bottom:-120px!important;}
-.home-modern .pv-home-financial-hero > div.relative.z-10:first-of-type p {font-size:14px!important;}
-.home-modern .pv-home-financial-hero .text-3xl {font-size:36px!important;letter-spacing:.04em!important;margin-top:8px!important;}
-.home-modern .pv-home-financial-hero > p {font-size:13px!important;margin-top:14px!important;}
-.home-modern .pv-home-financial-hero .grid.grid-cols-5 {gap:4px!important;margin-top:18px!important;}
-.home-modern .balance-action-icon {width:56px!important;height:56px!important;border-radius:50%!important;border:0!important;box-shadow:0 5px 14px rgba(0,0,0,.12)!important;}
-.home-modern .balance-action-0 {background:#eef4ff!important;color:#075bdc!important;}
-.home-modern .balance-action-1 {background:#00bde5!important;color:white!important;}
-.home-modern .balance-action-2 {background:#f7b900!important;color:white!important;}
-.home-modern .balance-action-3 {background:#a62bfa!important;color:white!important;}
-.home-modern .balance-action-4 {background:#f32b91!important;color:white!important;}
-.home-modern .pv-home-financial-hero .grid.grid-cols-5 a > span:last-child {font-size:12px!important;font-weight:700!important;}
-.home-modern .pv-home-financial-hero > div.relative.z-10.mt-3 {margin-top:18px!important;}
-.home-modern .home-next-action {background:#e8f3ff!important;border:1px solid #d8e9ff!important;border-radius:24px!important;padding:18px!important;box-shadow:0 8px 24px rgba(31,77,150,.06)!important;}
-.home-modern .home-next-action > div > div:first-child {width:54px!important;height:54px!important;border-radius:16px!important;background:#d9eaff!important;color:#075bdc!important;}
-.home-modern .home-next-action p:first-child {font-size:11px!important;}
-.home-modern .home-next-action p:nth-child(2) {font-size:18px!important;line-height:1.25!important;}
-.home-modern .home-next-action p:nth-child(3) {font-size:14px!important;}
-.home-modern section:has(> div.grid.grid-cols-2.sm\:grid-cols-4) {margin-top:0!important;}
-.home-modern section > div.flex.justify-between.items-end.mb-3 h2 {font-size:25px!important;line-height:1.2!important;margin-top:7px!important;}
-.home-modern section > div.flex.justify-between.items-end.mb-3 p {font-size:12px!important;color:#334155!important;letter-spacing:.03em!important;}
-/* Four colorful service cards across the mobile viewport, as in the supplied reference. */
-.home-modern .grid.grid-cols-2.sm\:grid-cols-4 {grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important;}
-.home-modern .home-service-tile {min-height:126px!important;border-radius:19px!important;padding:14px 12px!important;box-shadow:0 6px 15px rgba(23,45,88,.12)!important;}
-.home-modern .home-service-tile .service-icon {width:40px!important;height:40px!important;border-radius:50%!important;background:rgba(0,40,160,.22)!important;color:white!important;border:1px solid rgba(255,255,255,.16)!important;}
-.home-modern .home-service-tile .service-title {font-size:15px!important;white-space:normal!important;}
-.home-modern .home-service-tile .service-subtitle {font-size:11px!important;white-space:normal!important;}
-.home-modern .home-category-tile {min-height:94px!important;border-radius:18px!important;padding:12px!important;box-shadow:0 5px 14px rgba(23,45,88,.1)!important;}
-.home-modern .home-category-tile .category-icon {width:38px!important;height:38px!important;border-radius:50%!important;background:rgba(0,40,160,.22)!important;color:white!important;}
-.home-modern .home-category-tile .category-title {font-size:13px!important;white-space:normal!important;}
-.home-modern .home-success-story {min-width:calc(100vw - 40px)!important;border-radius:24px!important;padding:20px!important;}
-.home-modern .home-activity-card {background:#fff!important;border:1px solid #e5eaf2!important;box-shadow:0 5px 18px rgba(20,39,80,.05)!important;}
-@media(max-width:390px){
- .home-modern.app-home-theme > div{padding-left:16px!important;padding-right:16px!important;}
- .home-modern .home-dashboard-header{margin-left:-16px!important;margin-right:-16px!important;padding-left:18px!important;padding-right:18px!important;}
- .home-modern .home-service-tile{padding:11px 9px!important;min-height:118px!important;}
- .home-modern .home-service-tile .service-title{font-size:13px!important;}
- .home-modern .home-service-tile .service-subtitle{font-size:10px!important;}
- .home-modern .balance-action-icon{width:48px!important;height:48px!important;}
- .home-modern .pv-home-financial-hero .text-3xl{font-size:31px!important;}
+.home-modern .home-balance-art-orb-one {
+  position: absolute !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  width: 190px !important;
+  height: 190px !important;
+  right: -70px !important;
+  top: -95px !important;
+  left: auto !important;
+  bottom: auto !important;
+  border-radius: 0 0 0 100% !important;
+  transform: none !important;
+  clip-path: none !important;
+  opacity: .95 !important;
+  background: linear-gradient(140deg, #ffcf3d 0%, #ff8a3c 45%, #ff4f8f 100%) !important;
 }
-@media(min-width:640px){
- .home-modern.app-home-theme > div{max-width:760px;margin-left:auto;margin-right:auto;}
- .home-modern .home-dashboard-header{margin-left:calc((760px - 100vw)/2)!important;margin-right:calc((760px - 100vw)/2)!important;padding-left:max(24px,calc((100vw - 720px)/2))!important;padding-right:max(24px,calc((100vw - 720px)/2))!important;}
+.home-modern .home-balance-art-orb-two {
+  display: none !important;
+}
+.home-modern .home-balance-art-ribbon {
+  display: none !important;
+}
+.home-modern .pv-home-financial-hero.home-balance-art::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  right: 11%;
+  top: 32%;
+  width: 58px;
+  height: 44px;
+  opacity: .32;
+  background-image: radial-gradient(circle, rgba(255,255,255,.9) 1.4px, transparent 1.8px);
+  background-size: 13px 13px;
+}
+.home-modern .pv-home-financial-hero.home-balance-art > * {
+  position: relative;
+  z-index: 1;
+}
+.home-modern .pv-home-financial-hero p,
+.home-modern .pv-home-financial-hero h1,
+.home-modern .pv-home-financial-hero strong {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+
+.home-modern .balance-action-icon {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,.16) !important;
+  border: 1px solid rgba(255,255,255,.32) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.home-modern .balance-action-0,
+.home-modern .balance-action-1,
+.home-modern .balance-action-2,
+.home-modern .balance-action-3,
+.home-modern .balance-action-4 {
+  background: rgba(255,255,255,.16) !important;
+  color: #fff !important;
+}
+.home-modern .pv-home-financial-hero .grid.grid-cols-5 a span:last-child {
+  color: #fff !important;
+}
+.home-modern .pv-home-financial-hero button[aria-label] {
+  background: rgba(255,255,255,.16) !important;
+  border: 1px solid rgba(255,255,255,.3) !important;
+  color: #fff !important;
+}
+.home-modern .pv-home-financial-hero a[href="/transactions"] {
+  background: rgba(255,255,255,.16) !important;
+  border-color: rgba(255,255,255,.28) !important;
+  color: #fff !important;
+}
+
+/* ---------------------------------------------------------------
+   Next important action
+   --------------------------------------------------------------- */
+.home-modern .home-next-action {
+  background: #e9f1ff !important;
+  border: 1px solid #d9e8ff !important;
+  border-radius: 20px !important;
+}
+.dark .home-modern .home-next-action,
+html.dark .home-modern .home-next-action {
+  background: #101a2e !important;
+  border-color: #1c2c4a !important;
+}
+
+/* ---------------------------------------------------------------
+   Quick services
+   --------------------------------------------------------------- */
+.home-modern .home-service-tile {
+  border: 0 !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(20,45,90,.14) !important;
+}
+.home-modern .home-service-tile .service-icon {
+  background: rgba(255,255,255,.22) !important;
+  border: 1px solid rgba(255,255,255,.3) !important;
+  color: #fff !important;
+}
+.home-modern .home-service-tile .service-title,
+.home-modern .home-service-tile .service-subtitle {
+  color: #fff !important;
+}
+.home-modern .home-service-tile svg {
+  color: #fff !important;
+}
+.home-modern .service-tone-0 { background: linear-gradient(160deg, #3aa0ff 0%, #1f7ae0 100%) !important; }
+.home-modern .service-tone-1 { background: linear-gradient(160deg, #34d399 0%, #12a374 100%) !important; }
+.home-modern .service-tone-2 { background: linear-gradient(160deg, #ffb648 0%, #f4841b 100%) !important; }
+.home-modern .service-tone-3 { background: linear-gradient(160deg, #ff6aa0 0%, #e63577 100%) !important; }
+
+/* ---------------------------------------------------------------
+   Loan categories — colour mapped by category id so it never
+   depends on array order (fixes colours shifting when a category
+   is reordered or added).
+   --------------------------------------------------------------- */
+.home-modern .home-category-tile {
+  border: 0 !important;
+  color: #fff !important;
+  box-shadow: 0 6px 15px rgba(20,45,90,.12) !important;
+}
+.home-modern .home-category-tile .category-icon {
+  background: rgba(255,255,255,.22) !important;
+  border: 0 !important;
+  color: #fff !important;
+}
+.home-modern .home-category-tile .category-title {
+  color: #fff !important;
+}
+.home-modern .home-category-tile svg {
+  color: #fff !important;
+}
+.home-modern .category-personal { background: linear-gradient(160deg, #3aa0ff 0%, #1f7ae0 100%) !important; }
+.home-modern .category-business { background: linear-gradient(160deg, #a884ff 0%, #7c4dff 100%) !important; }
+.home-modern .category-home     { background: linear-gradient(160deg, #34d3b0 0%, #0f9e86 100%) !important; }
+.home-modern .category-car      { background: linear-gradient(160deg, #ffb648 0%, #f4841b 100%) !important; }
+.home-modern .category-medical  { background: linear-gradient(160deg, #ff6a8a 0%, #e63562 100%) !important; }
+.home-modern .category-student  { background: linear-gradient(160deg, #4db3ff 0%, #1f8ff0 100%) !important; }
+.home-modern .category-probashi { background: linear-gradient(160deg, #c398ff 0%, #9a5cf5 100%) !important; }
+.home-modern .category-women    { background: linear-gradient(160deg, #ff7fb0 0%, #ec4c8c 100%) !important; }
+
+/* ---------------------------------------------------------------
+   Success stories
+   --------------------------------------------------------------- */
+.home-modern .home-success-story {
+  position: relative !important;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  color: #fff !important;
+  background: linear-gradient(140deg, #2130c9 0%, #2b28c0 55%, #3d20bd 100%) !important;
+}
+.home-modern .home-success-story::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  width: 170px;
+  height: 150px;
+  right: -55px;
+  top: -70px;
+  border-radius: 0 0 0 100%;
+  opacity: .95;
+  background: linear-gradient(140deg, #ffcf3d 0%, #ff8a3c 45%, #ff4f8f 100%);
+}
+.home-modern .home-success-story > * {
+  position: relative;
+  z-index: 1;
+}
+.home-modern .home-success-story p,
+.home-modern .home-success-story span,
+.home-modern .home-success-story strong {
+  color: #fff;
+}
+.home-modern .home-success-story .text-sky-300 { color: #a5f3fc !important; }
+
+/* ---------------------------------------------------------------
+   Recent activity
+   --------------------------------------------------------------- */
+.home-modern .home-activity-card {
+  background: #fff !important;
+  border: 1px solid #e7edf6 !important;
+}
+.dark .home-modern .home-activity-card,
+html.dark .home-modern .home-activity-card {
+  background: #101828 !important;
+  border-color: #1e293b !important;
+}
+
+@media (max-width: 390px) {
+  .home-modern .home-dashboard-header { padding: 16px 14px 22px !important; }
+  .home-modern .pv-home-financial-hero.home-balance-art { padding: 18px 14px 14px !important; }
+  .home-modern .balance-action-icon { width: 44px !important; height: 44px !important; }
 }
