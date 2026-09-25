@@ -161,13 +161,6 @@ export default function Home() {
     { label: isBn ? 'সাপোর্ট' : 'Support', sub: isBn ? 'সহায়তা নিন' : 'Get help', icon: Headphones, link: '/support' },
   ];
 
-  const balanceActions = [
-    { label: isBn ? 'জমা' : 'Deposit', icon: ArrowDownToLine, link: '/deposit' },
-    { label: isBn ? 'উত্তোলন' : 'Withdraw', icon: ArrowUpFromLine, link: '/transactions' },
-    { label: isBn ? 'লেনদেন' : 'Transactions', icon: ReceiptText, link: '/transactions' },
-    { label: isBn ? 'টপ আপ' : 'Top up', icon: Wallet, link: '/deposit' },
-    { label: isBn ? 'ইতিহাস' : 'History', icon: CalendarDays, link: '/transactions' },
-  ];
   const categories = [
     ['personal', isBn ? 'ব্যক্তিগত' : 'Personal'],
     ['business', isBn ? 'ব্যবসায়িক' : 'Business'],
@@ -324,21 +317,7 @@ export default function Home() {
             <AnimatePresence mode="wait"><motion.p key={balanceView} initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-5}} transition={{duration:.2}} className="text-3xl sm:text-[38px] leading-none font-black tracking-tight text-white">{loading?<Skeleton className="h-9 w-36 bg-white/20"/>:balanceVisible?formatCurrency(balanceView==='savings'?(stats?.savingsBalance||0):(stats?.totalOutstanding||outstanding),isBn):'৳ • • • • • •'}</motion.p></AnimatePresence>
           </div>
           <p className="relative z-10 mt-2 text-[10px] font-semibold text-white/75">{isBn?'সদস্য আইডি':'Member ID'}: PSS-{String(user.id).padStart(6,'0').slice(-6)}</p>
-          <div className="relative z-10 mt-4 grid grid-cols-5 gap-1.5">
-            {balanceActions.map(({label,icon:Icon,link},i)=>(
-              <Link key={label} to={link} className="flex flex-col items-center justify-center gap-1.5 min-w-0 py-1.5 text-white">
-                <span className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center border border-white/30 shadow-sm balance-action-icon balance-action-${i}`}><Icon size={17}/></span>
-                <span className="text-[8px] sm:text-[9px] font-bold text-center text-white leading-tight truncate max-w-full">{label}</span>
-              </Link>
-            ))}
-          </div>
-          <div className="relative z-10 mt-3 flex items-center justify-between gap-2">
-            <div className="inline-flex rounded-full bg-black/15 p-1 border border-white/20" role="group" aria-label={isBn?'ব্যালেন্স নির্বাচন':'Select balance'}>
-              <button type="button" onClick={()=>setBalanceView('savings')} className={`rounded-full px-3.5 py-1.5 text-[10px] font-extrabold transition-all ${balanceView==='savings'?'bg-white text-indigo-700 shadow-md':'text-white/85'}`}>{isBn?'সঞ্চয়':'Savings'}</button>
-              <button type="button" onClick={()=>setBalanceView('outstanding')} className={`rounded-full px-3.5 py-1.5 text-[10px] font-extrabold transition-all ${balanceView==='outstanding'?'bg-white text-indigo-700 shadow-md':'text-white/85'}`}>{isBn?'ঋণ বকেয়া':'Loan due'}</button>
-            </div>
-            <Link to="/transactions" className="flex items-center gap-1 rounded-full bg-white/15 border border-white/25 px-3 py-1.5 text-[9px] font-extrabold text-white"><ReceiptText size={13}/>{isBn?'হিসাব':'Statement'}</Link>
-          </div>
+          {/* Balance card intentionally shows balance and member ID only. All account actions are grouped in Quick services below. */}
         </section>
         {/* Detailed savings, loan and repayment figures live in their dedicated screens.
             Keep the home dashboard focused on the colorful single-balance card and key actions. */}
@@ -425,9 +404,9 @@ export default function Home() {
         {/* Loan services */}
         <section>
           <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-500">{isBn?'ঋণ সেবা':'LOAN SERVICES'}</p><h2 className="text-xl font-extrabold mt-1 text-slate-900 dark:text-white">{isBn?'আপনার প্রয়োজন অনুযায়ী':'Choose a service'}</h2></div><Link to="/apply" className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 dark:text-sky-300">{isBn?'সব দেখুন':'View all'} <ChevronRight size={16}/></Link></div>
-          <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
+          <div className="home-category-carousel grid grid-flow-col auto-cols-[calc((100%-30px)/4)] gap-2.5 overflow-x-auto overscroll-x-contain snap-x snap-mandatory hide-scrollbar pb-2">
             {categories.map(([id,label])=>(
-              <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className={`home-category-tile category-${id} relative isolate overflow-hidden text-left min-w-0 h-[88px] sm:h-[98px] rounded-[16px] p-2.5 sm:p-3 flex flex-col items-start justify-between active:scale-[.97] transition-transform`}>
+              <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className={`home-category-tile category-${id} relative isolate overflow-hidden text-left min-w-0 h-[88px] sm:h-[98px] rounded-[16px] p-2.5 sm:p-3 flex flex-col items-start justify-between snap-start active:scale-[.97] transition-transform`}>
                 <span aria-hidden="true" className="home-tile-orb absolute -right-5 -top-5 w-16 h-16 rounded-full pointer-events-none"/>
                 <span className="relative z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full category-icon flex items-center justify-center">{(()=>{const Icon=loanCategoryIcon(id);return <Icon size={17}/>;})()}</span>
                 <span className="relative z-10 block text-[10px] sm:text-xs font-extrabold category-title truncate max-w-full">{label}</span>
