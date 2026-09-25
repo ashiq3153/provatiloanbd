@@ -4,7 +4,7 @@ import {
   Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight,
   FileText, CreditCard, PiggyBank, ReceiptText, FolderOpen,
   ChevronRight, CalendarDays, CheckCircle2, Clock3, AlertCircle,
-  ShieldCheck, Eye, EyeOff, UserRound, Star, BriefcaseBusiness, House, HeartPulse, Plane, UsersRound
+  ShieldCheck, Eye, EyeOff, UserRound, Star, BriefcaseBusiness, House, HeartPulse, Plane, UsersRound, CarFront, GraduationCap, Headphones
 } from 'lucide-react';
 import { getTelegramUser } from '../lib/telegram';
 import { motion, AnimatePresence } from 'motion/react';
@@ -155,13 +155,11 @@ export default function Home() {
   })();
 
   const quickActions = [
-    { label: isBn ? 'ঋণ আবেদন' : 'Apply Loan', sub: isBn ? 'নতুন আবেদন' : 'New application', icon: FileText, link: '/apply' },
     { label: isBn ? 'কিস্তি' : 'EMI', sub: isBn ? 'পরিশোধ করুন' : 'Make payment', icon: CreditCard, link: '/pay' },
     { label: isBn ? 'সঞ্চয়' : 'Savings', sub: isBn ? 'জমা দিন' : 'Deposit', icon: PiggyBank, link: '/deposit' },
     { label: isBn ? 'ডকুমেন্ট' : 'Documents', sub: isBn ? 'নথি দেখুন' : 'View files', icon: FolderOpen, link: '/profile' },
-    { label: isBn ? 'আমার ঋণ' : 'My Loans', sub: isBn ? 'স্ট্যাটাস' : 'Status', icon: Wallet, link: '/loans' },
+    { label: isBn ? 'সাপোর্ট' : 'Support', sub: isBn ? 'সহায়তা নিন' : 'Get help', icon: Headphones, link: '/support' },
   ];
-
 
   const balanceActions = [
     { label: isBn ? 'জমা' : 'Deposit', icon: ArrowDownToLine, link: '/deposit' },
@@ -175,6 +173,8 @@ export default function Home() {
     ['business', isBn ? 'ব্যবসায়িক' : 'Business'],
     ['home', isBn ? 'বাড়ি' : 'Home'],
     ['medical', isBn ? 'চিকিৎসা' : 'Medical'],
+    ['car', isBn ? 'গাড়ি' : 'Car'],
+    ['student', isBn ? 'শিক্ষার্থী' : 'Student'],
     ['probashi', isBn ? 'প্রবাসী' : 'Probashi'],
     ['women', isBn ? 'নারী উদ্যোক্তা' : 'Women'],
   ];
@@ -206,6 +206,8 @@ export default function Home() {
       medical: HeartPulse,
       probashi: Plane,
       women: UsersRound,
+      car: CarFront,
+      student: GraduationCap,
     };
     return icons[category] || ShieldCheck;
   };
