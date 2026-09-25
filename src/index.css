@@ -548,3 +548,40 @@ body :where(button,input,select,textarea):disabled {
   opacity:1 !important;
   -webkit-text-fill-color: currentColor;
 }
+
+
+/* Final cascade guard: !important is intentional to defeat legacy utility
+   classes; semantic status/action rules below it are equally explicit. */
+html:not(.dark) body :where(p,span,label,small,h1,h2,h3,h4,h5,h6,strong,b,em,i,li,dt,dd,th,td,caption,summary,legend,a,button,input,textarea,select,option,[role="button"],[role="tab"],[role="alert"],[role="status"]) {
+ color:#000000 !important; -webkit-text-fill-color:#000000 !important; text-shadow:none !important;
+}
+html.dark body :where(p,span,label,small,h1,h2,h3,h4,h5,h6,strong,b,em,i,li,dt,dd,th,td,caption,summary,legend,a,button,input,textarea,select,option,[role="button"],[role="tab"],[role="alert"],[role="status"]),
+body.dark :where(p,span,label,small,h1,h2,h3,h4,h5,h6,strong,b,em,i,li,dt,dd,th,td,caption,summary,legend,a,button,input,textarea,select,option,[role="button"],[role="tab"],[role="alert"],[role="status"]) {
+ color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; text-shadow:none !important;
+}
+html:not(.dark) body :is(button,a,[role="button"]).neu-btn-primary,
+html:not(.dark) body :is(button,a,[role="button"])[class*="bg-primary"],
+html:not(.dark) body :is(button,a,[role="button"])[class*="bg-blue-"],
+html:not(.dark) body :is(button,a,[role="button"])[class*="bg-sky-"],
+html:not(.dark) body :is(button,a,[role="button"])[class*="bg-emerald-"],
+html:not(.dark) body :is(button,a,[role="button"])[class*="bg-green-"],
+html:not(.dark) body :is(button,a,[role="button"])[class*="bg-red-"],
+html:not(.dark) body :is(button,a,[role="button"])[class*="bg-rose-"],
+html.dark body :is(button,a,[role="button"]).neu-btn-primary,
+html.dark body :is(button,a,[role="button"])[class*="bg-primary"],
+html.dark body :is(button,a,[role="button"])[class*="bg-blue-"],
+html.dark body :is(button,a,[role="button"])[class*="bg-sky-"],
+html.dark body :is(button,a,[role="button"])[class*="bg-emerald-"],
+html.dark body :is(button,a,[role="button"])[class*="bg-green-"],
+html.dark body :is(button,a,[role="button"])[class*="bg-red-"],
+html.dark body :is(button,a,[role="button"])[class*="bg-rose-"] {
+ color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;
+}
+html:not(.dark) body :is([class*="bg-amber-"],[class*="bg-yellow-"],[class*="bg-orange-"]) :where(*),
+html:not(.dark) body :is([class*="bg-amber-"],[class*="bg-yellow-"],[class*="bg-orange-"]) {color:#713f12!important;-webkit-text-fill-color:#713f12!important}
+html:not(.dark) body :is([class*="bg-emerald-"],[class*="bg-green-"]) :where(*),
+html:not(.dark) body :is([class*="bg-emerald-"],[class*="bg-green-"]) {color:#14532d!important;-webkit-text-fill-color:#14532d!important}
+html:not(.dark) body :is([class*="bg-red-"],[class*="bg-rose-"]) :where(*),
+html:not(.dark) body :is([class*="bg-red-"],[class*="bg-rose-"]) {color:#7f1d1d!important;-webkit-text-fill-color:#7f1d1d!important}
+html:not(.dark) body :is([class*="bg-blue-"],[class*="bg-sky-"],[class*="bg-indigo-"]) :where(*),
+html:not(.dark) body :is([class*="bg-blue-"],[class*="bg-sky-"],[class*="bg-indigo-"]) {color:#1e3a8a!important;-webkit-text-fill-color:#1e3a8a!important}
