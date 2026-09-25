@@ -157,7 +157,6 @@ export default function Home() {
     { label: isBn ? 'ঋণ আবেদন' : 'Apply Loan', sub: isBn ? 'নতুন আবেদন' : 'New application', icon: FileText, link: '/apply' },
     { label: isBn ? 'কিস্তি' : 'EMI', sub: isBn ? 'পরিশোধ করুন' : 'Make payment', icon: CreditCard, link: '/pay' },
     { label: isBn ? 'সঞ্চয়' : 'Savings', sub: isBn ? 'জমা দিন' : 'Deposit', icon: PiggyBank, link: '/deposit' },
-    { label: isBn ? 'লেনদেন' : 'Activity', sub: isBn ? 'হিসাব দেখুন' : 'View history', icon: ReceiptText, link: '/transactions' },
     { label: isBn ? 'ডকুমেন্ট' : 'Documents', sub: isBn ? 'নথি দেখুন' : 'View files', icon: FolderOpen, link: '/profile' },
     { label: isBn ? 'আমার ঋণ' : 'My Loans', sub: isBn ? 'স্ট্যাটাস' : 'Status', icon: Wallet, link: '/loans' },
   ];
