@@ -456,7 +456,7 @@ export default function Home() {
                     <div className="relative z-10 mt-4 flex items-center gap-3 sm:gap-4">
                       <img src={story.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(story.name)}&background=0ea5e9&color=fff&bold=true`} alt="" className="w-[68px] h-[68px] sm:w-[78px] sm:h-[78px] rounded-full object-cover border-2 border-white/80 bg-white/20 shrink-0"/>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm sm:text-base font-bold leading-snug line-clamp-3">{story.testimonial || story.story || (isBn?'প্রভাতী লোনের মাধ্যমে আমি আমার লক্ষ্য পূরণে এগিয়ে যেতে পেরেছি।':'With Provati Loan, I was able to move closer to my goals.')}</p>
+                        <p className="text-sm sm:text-base font-bold leading-snug line-clamp-3">{(isBn?'প্রভাতী লোনের সদস্যের অভিজ্ঞতা':'A member’s journey with Provati Loan')}</p>
                         <p className="text-xs sm:text-sm font-extrabold mt-2 truncate">{story.name}</p>
                         <p className="text-[10px] sm:text-xs text-white/75 mt-0.5 truncate">{story.loan_type || story.profession || (isBn?'সদস্য':'Member')} {story.amount ? ` • ${formatCurrency(story.amount,isBn)}` : ''}</p>
                       </div>
