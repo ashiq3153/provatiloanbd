@@ -428,3 +428,123 @@ a.dark\:bg-gray-800:active,
 }
 
 
+
+
+/* ================================================================
+   V1.1 TEXT LEGIBILITY BASELINE — appended last to win CSS cascade.
+   Default text: pure black in light mode, pure white in dark mode.
+   Semantic/status/action surfaces retain explicit high-contrast colors.
+   ================================================================ */
+:root {
+  --app-text-primary: #000000;
+  --app-text-muted: #000000;
+  --app-text-on-accent: #ffffff;
+  --app-text-warning: #713f12;
+  --app-text-success: #14532d;
+  --app-text-danger: #7f1d1d;
+  --app-text-info: #1e3a8a;
+}
+html.dark, body.dark, .dark {
+  --app-text-primary: #ffffff;
+  --app-text-muted: #ffffff;
+  --app-text-on-accent: #ffffff;
+  --app-text-warning: #fef3c7;
+  --app-text-success: #dcfce7;
+  --app-text-danger: #fee2e2;
+  --app-text-info: #dbeafe;
+}
+
+/* Apply legible foreground across all screens and nested components. */
+html:not(.dark) body,
+html:not(.dark) body :where(p, span, label, small, h1, h2, h3, h4, h5, h6,
+strong, b, em, i, li, dt, dd, th, td, caption, summary, legend,
+a, button, input, textarea, select, option, [role="button"], [role="tab"],
+[role="alert"], [role="status"], [aria-label]) {
+  color: #000000;
+  -webkit-text-fill-color: #000000;
+  text-shadow: none;
+}
+html.dark body,
+html.dark body :where(p, span, label, small, h1, h2, h3, h4, h5, h6,
+strong, b, em, i, li, dt, dd, th, td, caption, summary, legend,
+a, button, input, textarea, select, option, [role="button"], [role="tab"],
+[role="alert"], [role="status"], [aria-label]),
+body.dark,
+body.dark :where(p, span, label, small, h1, h2, h3, h4, h5, h6,
+strong, b, em, i, li, dt, dd, th, td, caption, summary, legend,
+a, button, input, textarea, select, option, [role="button"], [role="tab"],
+[role="alert"], [role="status"], [aria-label]) {
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
+  text-shadow: none;
+}
+
+/* Financial/balance hero: ensure every nested amount, label and icon caption
+   has explicit contrast regardless of gradient or prior utility classes. */
+html:not(.dark) body :is(.home-financial-card,.home-balance-card,.pv-home-financial-hero,[class*="financial-hero"],[class*="balance-card"]) *,
+html:not(.dark) body :is(.home-financial-card,.home-balance-card,.pv-home-financial-hero,[class*="financial-hero"],[class*="balance-card"]) {
+  color:#000000 !important;
+  -webkit-text-fill-color:#000000 !important;
+  text-shadow:none !important;
+}
+html.dark body :is(.home-financial-card,.home-balance-card,.pv-home-financial-hero,[class*="financial-hero"],[class*="balance-card"]) *,
+html.dark body :is(.home-financial-card,.home-balance-card,.pv-home-financial-hero,[class*="financial-hero"],[class*="balance-card"]),
+body.dark :is(.home-financial-card,.home-balance-card,.pv-home-financial-hero,[class*="financial-hero"],[class*="balance-card"]) *,
+body.dark :is(.home-financial-card,.home-balance-card,.pv-home-financial-hero,[class*="financial-hero"],[class*="balance-card"]) {
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+  text-shadow:none !important;
+}
+
+/* Keep action labels readable on solid/gradient buttons. */
+body :is(button,a,[role="button"]).neu-btn-primary,
+body :is(button,a,[role="button"])[class*="bg-primary"],
+body :is(button,a,[role="button"])[class*="bg-blue-"],
+body :is(button,a,[role="button"])[class*="bg-sky-"],
+body :is(button,a,[role="button"])[class*="bg-emerald-"],
+body :is(button,a,[role="button"])[class*="bg-green-"],
+body :is(button,a,[role="button"])[class*="bg-red-"],
+body :is(button,a,[role="button"])[class*="bg-rose-"] {
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+}
+
+/* Status badges/alerts: semantic contrast overrides default mode text. */
+body :is([class*="bg-amber-"],[class*="bg-yellow-"],[class*="bg-orange-"],.neu-badge-orange) :where(*),
+body :is([class*="bg-amber-"],[class*="bg-yellow-"],[class*="bg-orange-"],.neu-badge-orange) {
+  color:#713f12;
+  -webkit-text-fill-color:#713f12;
+}
+body :is([class*="bg-emerald-"],[class*="bg-green-"],.neu-badge-green) :where(*),
+body :is([class*="bg-emerald-"],[class*="bg-green-"],.neu-badge-green) {
+  color:#14532d;
+  -webkit-text-fill-color:#14532d;
+}
+body :is([class*="bg-red-"],[class*="bg-rose-"],.neu-badge-red) :where(*),
+body :is([class*="bg-red-"],[class*="bg-rose-"],.neu-badge-red) {
+  color:#7f1d1d;
+  -webkit-text-fill-color:#7f1d1d;
+}
+body :is([class*="bg-blue-"],[class*="bg-sky-"],[class*="bg-indigo-"],.neu-badge-purple) :where(*),
+body :is([class*="bg-blue-"],[class*="bg-sky-"],[class*="bg-indigo-"],.neu-badge-purple) {
+  color:#1e3a8a;
+  -webkit-text-fill-color:#1e3a8a;
+}
+
+/* Inputs and placeholders remain visible and editable in both themes. */
+html:not(.dark) body :where(input,textarea,select,option) {
+  color:#000000 !important; -webkit-text-fill-color:#000000 !important;
+}
+html.dark body :where(input,textarea,select,option),
+body.dark :where(input,textarea,select,option) {
+  color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;
+}
+html:not(.dark) body :where(input,textarea)::placeholder {color:#000000 !important;opacity:1!important;-webkit-text-fill-color:#000000!important}
+html.dark body :where(input,textarea)::placeholder,
+body.dark :where(input,textarea)::placeholder {color:#ffffff !important;opacity:1!important;-webkit-text-fill-color:#ffffff!important}
+
+/* Disabled controls stay muted but readable, rather than disappearing. */
+body :where(button,input,select,textarea):disabled {
+  opacity:1 !important;
+  -webkit-text-fill-color: currentColor;
+}
