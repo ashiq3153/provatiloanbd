@@ -18,14 +18,13 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
-      theme: 'light',
+      theme: 'dark',
       language: 'bn', // Defaulting to Bangla as requested context implies Bangla might be preferred, or English
       systemSettings: null,
       soundEnabled: true,
       userProfile: null,
-      // Light Mode only for v1.1 phase1. Kept as a no-op for backward compatibility
-      // with existing screens that still reference toggleTheme.
-      toggleTheme: () => set({ theme: 'light' }),
+      // Dark mode is the default; preserve user choice across sessions.
+      toggleTheme: () => set(state => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
       setLanguage: (lang) => set({ language: lang }),
       setSystemSettings: (settings) => set({ systemSettings: settings }),
       setSoundEnabled: (enabled) => set({ soundEnabled: enabled }),
