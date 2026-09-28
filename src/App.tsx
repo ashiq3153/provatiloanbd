@@ -55,10 +55,10 @@ export default function App() {
     };
   }, []);
 
-  // v1.1 phase1 uses the reference-inspired Light Mode palette only.
-  // Keep the legacy theme state for compatibility, but never activate the dark class.
+  // Apply the saved theme immediately; dark mode is the default in v1.1 phase1.
   useEffect(() => {
-    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.style.colorScheme = theme;
   }, [theme]);
 
   useEffect(() => {
