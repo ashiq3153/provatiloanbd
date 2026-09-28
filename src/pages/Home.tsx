@@ -1,4 +1,3 @@
-import '../styles/home-semantic.css';
 import '../styles/home-reference-match.css';
 import {
   Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight,
