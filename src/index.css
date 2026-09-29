@@ -1093,3 +1093,56 @@ html:not(.dark) body .pv-home-financial-hero.home-balance-art :where(p.text-whit
 html:not(.dark) body .pv-home-financial-hero.home-balance-art :where(button) {
   color:#fff !important;
 }
+
+
+/* V1.1 SOLID-SURFACE OVERRIDE — remove glassmorphism and backdrop blur.
+   Keep intentional colorful/gradient hero artwork, but cards, fields and
+   navigation use opaque surfaces for reliable contrast and performance. */
+*, *::before, *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body::before, .dark body::before {
+  filter: none !important;
+  opacity: 0 !important;
+  background-image: none !important;
+}
+.bg-white.rounded-2xl,
+.bg-white.rounded-3xl,
+.bg-white.rounded-\\[20px\\],
+.bg-white.rounded-\\[23px\\],
+.bg-white.rounded-\\[24px\\],
+.bg-white.rounded-\\[28px\\],
+.bg-white.rounded-\\[32px\\] {
+  background-color: #ffffff !important;
+  border: 1px solid #e5eaf2 !important;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06) !important;
+}
+.dark .dark\\:bg-gray-800.rounded-2xl,
+.dark .dark\\:bg-gray-800.rounded-3xl,
+.dark .dark\\:bg-gray-800.rounded-\\[20px\\],
+.dark .dark\\:bg-gray-800.rounded-\\[23px\\],
+.dark .dark\\:bg-gray-800.rounded-\\[24px\\],
+.dark .dark\\:bg-gray-800.rounded-\\[28px\\],
+.dark .dark\\:bg-gray-800.rounded-\\[32px\\],
+.dark .dark\\:bg-gray-850.rounded-2xl,
+.dark .dark\\:bg-gray-850.rounded-3xl {
+  background-color: #111318 !important;
+  border: 1px solid #282b33 !important;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.22) !important;
+}
+.neu-bg, .dark .neu-bg { background-color: transparent !important; }
+.neu-raised, .neu-raised-sm, .neu-sunken, .neu-input, .neu-btn,
+.dark .neu-raised, .dark .neu-raised-sm, .dark .neu-sunken,
+.dark .neu-input, .dark .neu-btn {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  background-color: #ffffff !important;
+  border: 1px solid #dbe3ed !important;
+}
+.dark .neu-raised, .dark .neu-raised-sm, .dark .neu-sunken,
+.dark .neu-input, .dark .neu-btn {
+  background-color: #111318 !important;
+  border-color: #303541 !important;
+}
