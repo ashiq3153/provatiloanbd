@@ -312,8 +312,8 @@ a.dark\:bg-gray-800:active,
 /* Neumorphic Buttons */
 .neu-btn {
   background-color: rgba(241, 245, 249, 0.25) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   box-shadow: var(--neu-raised-sm-shadow-light);
   border: 1px solid rgba(255, 255, 255, 0.4) !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -329,8 +329,8 @@ a.dark\:bg-gray-800:active,
 }
 .dark .neu-btn {
   background-color: rgba(0, 24, 33, 0.12) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   box-shadow: var(--neu-raised-sm-shadow-dark);
   border: 1px solid rgba(19, 188, 255, 0.25) !important;
 }
@@ -857,7 +857,7 @@ body.dark .profile-theme {
 }
 .profile-stat {
   min-width:0;border:1px solid rgba(255,255,255,.2);background:rgba(7,25,92,.2);
-  border-radius:14px;padding:11px 12px;backdrop-filter:blur(8px);
+  border-radius:14px;padding:11px 12px;backdrop-filter:none;-webkit-backdrop-filter:none;
 }
 .profile-stat span { display:block;color:rgba(255,255,255,.72) !important;font-size:9px;font-weight:800;letter-spacing:.08em; }
 .profile-stat strong { display:block;margin-top:4px;overflow-wrap:anywhere;color:#fff !important;font-size:13px;font-weight:900; }
@@ -1036,7 +1036,8 @@ html:not(.dark) body .home-modern article.w-\[310px\] :where(button) {
   background:rgba(235,255,251,.1) !important;
   border:1px solid rgba(225,255,250,.16) !important;
   border-radius:11px !important;
-  backdrop-filter:blur(6px);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
 }
 html:not(.dark) body .home-modern article.w-\[310px\] :where(img) {
   border-color:rgba(255,255,255,.65) !important;
