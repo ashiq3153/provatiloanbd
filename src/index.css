@@ -102,7 +102,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   Premium Glassmorphic Card Styling & Animations
+   Solid card styling — glassmorphism removed from non-popup UI
    ══════════════════════════════════════════════════════════════ */
 
 /* Force very rounded cards everywhere in the app */
@@ -133,10 +133,10 @@
 .bg-white.rounded-\[24px\], 
 .bg-white.rounded-\[28px\], 
 .bg-white.rounded-\[32px\] {
-  background-color: rgba(255, 255, 255, 0.35) !important;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  background-color: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid #e5eaf2 !important;
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.03), 
               0 1px 3px -1px rgba(0, 0, 0, 0.02) !important;
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -152,10 +152,10 @@
 .dark .dark\:bg-gray-800.rounded-\[32px\],
 .dark .dark\:bg-gray-850.rounded-2xl,
 .dark .dark\:bg-gray-850.rounded-3xl {
-  background-color: rgba(0, 24, 33, 0.12) !important;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(19, 188, 255, 0.3) !important;
+  background-color: #111318 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid #282b33 !important;
   box-shadow: 0 12px 35px -12px rgba(0, 0, 0, 0.55) !important;
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
@@ -240,57 +240,57 @@ a.dark\:bg-gray-800:active,
 }
 
 .neu-raised {
-  background-color: rgba(255, 255, 255, 0.22) !important;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: var(--neu-raised-shadow-light);
-  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  background-color: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  border: 1px solid #e5eaf2 !important;
 }
 .dark .neu-raised {
-  background-color: rgba(0, 24, 33, 0.12) !important;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: var(--neu-raised-shadow-dark);
-  border: 1px solid rgba(19, 188, 255, 0.3) !important;
+  background-color: #111318 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.22);
+  border: 1px solid #282b33 !important;
 }
 
 .neu-raised-sm {
-  background-color: rgba(255, 255, 255, 0.22) !important;
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  box-shadow: var(--neu-raised-sm-shadow-light);
-  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  background-color: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+  border: 1px solid #e5eaf2 !important;
 }
 .dark .neu-raised-sm {
-  background-color: rgba(0, 24, 33, 0.12) !important;
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  box-shadow: var(--neu-raised-sm-shadow-dark);
-  border: 1px solid rgba(19, 188, 255, 0.3) !important;
+  background-color: #111318 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid #282b33 !important;
 }
 
 .neu-sunken {
-  background-color: rgba(226, 232, 240, 0.18) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: var(--neu-sunken-shadow-light);
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  background-color: #f1f5f9 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none;
+  border: 1px solid #cbd5e1 !important;
 }
 .dark .neu-sunken {
-  background-color: rgba(0, 16, 23, 0.08) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: var(--neu-sunken-shadow-dark);
-  border: 1px solid rgba(19, 188, 255, 0.2) !important;
+  background-color: #1c2028 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none;
+  border: 1px solid #303541 !important;
 }
 
 /* Form inputs */
 .neu-input {
-  background-color: rgba(237, 242, 247, 0.18) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: var(--neu-sunken-shadow-light);
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  background-color: #f8fafc !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none;
+  border: 1px solid #cbd5e1 !important;
   transition: all 0.2s ease;
 }
 .neu-input:focus {
@@ -298,11 +298,11 @@ a.dark\:bg-gray-800:active,
   box-shadow: inset 2px 2px 5px rgba(163, 177, 198, 0.3), inset -2px -2px 5px rgba(255, 255, 255, 0.8), 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 .dark .neu-input {
-  background-color: rgba(0, 16, 23, 0.08) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: var(--neu-sunken-shadow-dark);
-  border: 1px solid rgba(19, 188, 255, 0.25) !important;
+  background-color: #1c2028 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none;
+  border: 1px solid #303541 !important;
 }
 .dark .neu-input:focus {
   border-color: rgba(19, 188, 255, 0.6) !important;
