@@ -1,5 +1,7 @@
 import '../styles/home.css';
 import { HomeHeader } from '../components/home/HomeHeader';
+import { BalanceCard } from '../components/home/BalanceCard';
+import { LoanStatusCard } from '../components/home/LoanStatusCard';
 import {
   Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight,
   FileText, CreditCard, PiggyBank, ReceiptText, FolderOpen,
@@ -267,81 +269,10 @@ export default function Home() {
         )}
 
         {/* Approved reference balance card */}
-        <section className="pv-home-financial-hero home-financial-card home-balance-art rounded-[24px] p-4 sm:p-5 text-white shadow-[0_14px_34px_rgba(39,52,195,.20)] overflow-hidden relative border border-white/20">
-          <div className="home-balance-art-orb home-balance-art-orb-one" />
-          <div className="home-balance-art-orb home-balance-art-orb-two" />
-          <div className="relative z-10 flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-[.14em] text-white/75">PROVATI • {isBn ? 'আমার হিসাব' : 'My account'}</p>
-              <p className="mt-2 text-xs font-bold text-white/85">{balanceView==='savings'?(isBn?'বর্তমান ব্যালেন্স':'Current balance'):(isBn?'ঋণের বকেয়া':'Loan outstanding')}</p>
-            </div>
-            <button type="button" onClick={()=>setBalanceVisible(v=>!v)} className="w-10 h-10 rounded-full bg-white/15 border border-white/30 flex items-center justify-center text-white" aria-label={balanceVisible?'Hide balance':'Show balance'}>{balanceVisible?<Eye size={18}/>:<EyeOff size={18}/>}</button>
-          </div>
-          <div className="relative z-10 mt-1">
-            <AnimatePresence mode="wait"><motion.p key={balanceView} initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-5}} transition={{duration:.2}} className="text-3xl sm:text-[38px] leading-none font-black tracking-tight text-white">{loading?<Skeleton className="h-9 w-36 bg-white/20"/>:balanceVisible?formatCurrency(balanceView==='savings'?(stats?.savingsBalance||0):(stats?.totalOutstanding||outstanding),isBn):'৳ • • • • • •'}</motion.p></AnimatePresence>
-          </div>
-          <p className="relative z-10 mt-2 text-[10px] font-semibold text-white/75">{isBn?'সদস্য আইডি':'Member ID'}: PSS-{String(user.id).padStart(6,'0').slice(-6)}</p>
-          {/* Balance card intentionally shows balance and member ID only. All account actions are grouped in Quick services below. */}
-        </section>
-        {/* Detailed savings, loan and repayment figures live in their dedicated screens.
-            Keep the home dashboard focused on the colorful single-balance card and key actions. */}
-
-
+        <BalanceCard isBn={isBn} balanceView={balanceView} balanceVisible={balanceVisible} setBalanceVisible={setBalanceVisible} loading={loading} stats={stats} outstanding={outstanding} userId={user.id} />
 
         {/* Smart loan status — one source of truth for application/active loan */}
-        {(latestApplication || activeLoan) && (
-          <section className="home-loan-status-card bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-sm">
-            {activeLoan ? (
-              <>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn ? 'ঋণের অবস্থা' : 'LOAN STATUS'}</p>
-                    <h2 className="text-base font-black mt-1 truncate">{categoryName(activeLoan.loan_category)}</h2>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-full text-[9px] font-black shrink-0 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
-                    {isBn ? 'ঋণ চলমান' : 'Active'}
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                  <div><p className="text-[10px] text-slate-400">{isBn ? 'বকেয়া' : 'Outstanding'}</p><p className="text-base font-black mt-1">{formatCurrency(outstanding,isBn)}</p></div>
-                  <div className="text-right"><p className="text-[10px] text-slate-400">{isBn ? 'পরবর্তী কিস্তি' : 'Next EMI'}</p><p className="text-base font-black mt-1">{nextInstallment ? formatCurrency(nextInstallment.total_due,isBn) : '—'}</p></div>
-                </div>
-                <div className="mt-3 flex items-center justify-between gap-3">
-                  <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">{nextEmiDate ? (isBn ? `দেয় তারিখ: ${nextEmiDate}` : `Due: ${nextEmiDate}`) : ''}</p>
-                  <Link to="/pay" className="ml-auto inline-flex items-center gap-1 rounded-xl bg-sky-500 text-white px-3.5 py-2 text-[10px] font-black">
-                    {isBn ? 'কিস্তি পরিশোধ করুন' : 'Make payment'} <ChevronRight size={13}/>
-                  </Link>
-                </div>
-              </>
-            ) : latestApplication ? (
-              <>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn ? 'ঋণের অবস্থা' : 'LOAN STATUS'}</p>
-                    <h2 className="text-base font-black mt-1 truncate">{categoryName(latestApplication.loan_category)}</h2>
-                  </div>
-                  {(() => {
-                    const s = applicationStatus(latestApplication.status);
-                    return <span className={`px-2.5 py-1 rounded-full text-[9px] font-black shrink-0 ${s.tone === 'green' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : s.tone === 'amber' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300' : s.tone === 'red' ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300' : s.tone === 'sky' ? 'bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}">${isBn ? s.bn : s.en}</span>;
-                  })()}
-                </div>
-                <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-end justify-between gap-3">
-                  <div><p className="text-[10px] text-slate-400">{isBn ? 'আবেদনের পরিমাণ' : 'Requested amount'}</p><p className="text-lg font-black mt-1">{formatCurrency(latestApplication.amount,isBn)}</p></div>
-                  <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 text-right">{isBn ? 'আবেদন' : 'Applied'}: {new Date(latestApplication.applied_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-GB', {day:'2-digit', month:'short', year:'numeric'})}</p>
-                </div>
-                {latestApplication.admin_feedback && (
-                  <div className="mt-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40 p-3">
-                    <p className="text-[9px] font-black text-amber-700 dark:text-amber-300">{isBn ? 'অ্যাডমিন বার্তা' : 'Admin message'}</p>
-                    <p className="text-xs font-semibold text-amber-900 dark:text-amber-100 mt-1 leading-5">{latestApplication.admin_feedback}</p>
-                  </div>
-                )}
-                <Link to={latestApplication.status === 'action_required' ? `/apply?edit=${latestApplication.id}` : `/application/${latestApplication.id}`} className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-sky-500 text-white py-2.5 text-xs font-black">
-                  {latestApplication.status === 'action_required' ? (isBn ? 'আবেদন আপডেট করুন' : 'Update application') : (isBn ? 'আবেদনের বিস্তারিত' : 'View application')} <ChevronRight size={14}/>
-                </Link>
-              </>
-            ) : null}
-          </section>
-        )}
+        <LoanStatusCard activeLoan={activeLoan} latestApplication={latestApplication} isBn={isBn} outstanding={outstanding} nextInstallment={nextInstallment} nextEmiDate={nextEmiDate} categoryName={categoryName} applicationStatus={applicationStatus} />
 
         {/* Mobile-first responsive spacing */}
         <div className="h-px bg-transparent sm:hidden" aria-hidden="true" />
