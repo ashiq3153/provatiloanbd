@@ -490,17 +490,19 @@ html.dark .home-modern .home-member-note p {
   overflow:hidden !important;
   margin-left:-12px !important;
   margin-right:-12px !important;
+  /* Match the approved 1536x520 artwork ratio so the source is never
+     cropped, zoomed, or stretched. The header scales to the viewport width. */
+  height:clamp(190px,33.854vw,232px) !important;
   min-height:190px !important;
   padding:10px 14px 14px !important;
   border-radius:0 0 22px 22px !important;
   box-shadow:0 8px 20px rgba(8,31,115,.20) !important;
 
-  /* Preserve source proportions: 1536x520. */
   background-color:#071a68 !important;
-  background-image:url('../assets/provati-home-hero-bg-wide.svg') !important;
+  background-image:url('../assets/provati-home-hero-bg.jpg') !important;
   background-repeat:no-repeat !important;
   background-position:center center !important;
-  background-size:100% 100% !important;
+  background-size:100% auto !important;
 }
 
 .home-modern .home-dashboard-header::before,
