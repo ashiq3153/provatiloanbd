@@ -27,7 +27,12 @@ export default function Home() {
   const isBn = language === 'bn';
 
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [staleNotice, setStaleNotice] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
   const [balanceVisible, setBalanceVisible] = useState(true);
   const [balanceView, setBalanceView] = useState<'savings' | 'outstanding'>('savings');
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -42,8 +47,10 @@ export default function Home() {
 
   useEffect(() => {
     let mounted = true;
+    const isRefresh = refreshKey > 0;
     (async () => {
-      setLoading(true);
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
       setError(null);
       try {
         const [s, active, tx, allLoans, notices] = await Promise.all([
@@ -59,22 +66,50 @@ export default function Home() {
         setTransactions(tx || []);
         setLoans(allLoans || []);
         setNotifications(notices || []);
-        setStories(await getSuccessStories());
-        if (active[0]?.id) setEmiSchedule(await getLoanEmiSchedule(active[0].id));
+        setStaleNotice(false);
+        setLastUpdated(new Date());
+
+        // Core dashboard renders first; secondary content loads afterward.
+        setLoading(false);
+        setRefreshing(false);
+
+        const [nextStories, nextEmi] = await Promise.all([
+          getSuccessStories().catch(() => []),
+          active[0]?.id ? getLoanEmiSchedule(active[0].id).catch(() => []) : Promise.resolve([])
+        ]);
+        if (!mounted) return;
+        setStories(nextStories || []);
+        setEmiSchedule(nextEmi || []);
       } catch (e) {
         console.error('Home dashboard error:', e);
-        if (mounted) setError(isBn ? 'ড্যাশবোর্ডের তথ্য লোড করা যায়নি।' : 'Could not load dashboard data.');
-      } finally {
-        if (mounted) setLoading(false);
+        if (!mounted) return;
+        setStaleNotice(true);
+        setError(isBn ? 'নতুন তথ্য আনা যায়নি।' : 'Could not refresh the latest data.');
+        setLoading(false);
+        setRefreshing(false);
       }
     })();
     return () => { mounted = false; };
-  }, [user.id]);
+  }, [user.id, refreshKey, isBn]);
 
-  const retryDashboard = () => { window.location.reload(); };
+  const refreshDashboard = () => {
+    if (!refreshing) setRefreshKey(v => v + 1);
+  };
+
+  const retryDashboard = refreshDashboard;
+
+  const handleHomeTouchStart = (event: React.TouchEvent<HTMLElement>) => {
+    if (window.scrollY <= 4) setTouchStartY(event.touches[0]?.clientY ?? null);
+  };
+
+  const handleHomeTouchEnd = (event: React.TouchEvent<HTMLElement>) => {
+    if (touchStartY === null || refreshing) return;
+    const endY = event.changedTouches[0]?.clientY ?? touchStartY;
+    if (endY - touchStartY > 72 && window.scrollY <= 4) refreshDashboard();
+    setTouchStartY(null);
+  };
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
-  const completedEmis = emiSchedule.filter(e => e.status === 'paid').length;
   const scheduledRepayment = emiSchedule.length
     ? emiSchedule.reduce((sum, e) => sum + Number(e.total_due || 0), 0)
     : Number(activeLoan?.total_payable || 0);
@@ -83,9 +118,6 @@ export default function Home() {
     : transactions
         .filter(t => t.type === 'emi_payment' && t.loan_id === activeLoan?.id && t.status === 'completed')
         .reduce((sum, t) => sum + Number(t.amount || 0), 0);
-  const loanProgress = activeLoan
-    ? Math.min(100, Math.round((paidAmount / Math.max(scheduledRepayment, 1)) * 100))
-    : 0;
   const outstanding = activeLoan
     ? Math.max(0, scheduledRepayment - paidAmount)
     : 0;
@@ -197,8 +229,21 @@ export default function Home() {
 
   return (
 
-    <main className="home-modern app-home-theme w-full min-w-0 bg-[#f6f8fc] dark:bg-[#0b1220] text-slate-900 dark:text-slate-100 pb-[calc(10rem+env(safe-area-inset-bottom))] transition-colors">
+    <main className="home-modern app-home-theme w-full min-w-0 bg-[#f6f8fc] dark:bg-[#0b1220] text-slate-900 dark:text-slate-100 pb-[calc(10rem+env(safe-area-inset-bottom))] transition-colors" onTouchStart={handleHomeTouchStart} onTouchEnd={handleHomeTouchEnd}>
       <div className="px-3 sm:px-4 pt-0 space-y-4">
+
+        {staleNotice && !loading && (
+          <section className="mx-0 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
+            <AlertCircle size={17} className="shrink-0 text-amber-600 dark:text-amber-300" />
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-black">{isBn ? 'সর্বশেষ তথ্য দেখানো হচ্ছে' : 'Showing the latest available data'}</p>
+              <p className="text-[9px] font-semibold mt-0.5 opacity-80">
+                {lastUpdated ? ((isBn ? 'সর্বশেষ আপডেট: ' : 'Last updated: ') + lastUpdated.toLocaleTimeString(isBn ? 'bn-BD' : 'en-US', { hour: 'numeric', minute: '2-digit' })) : (isBn ? 'ইন্টারনেট সংযোগ দুর্বল' : 'Network connection is unstable')}
+              </p>
+            </div>
+            <button onClick={refreshDashboard} className="shrink-0 rounded-lg bg-amber-100 px-2.5 py-1.5 text-[9px] font-black text-amber-800 dark:bg-amber-900/40 dark:text-amber-100">{isBn ? 'আবার চেষ্টা' : 'Retry'}</button>
+          </section>
+        )}
 
         {error && !loading && (
           <section className="bg-white dark:bg-[#111827] border border-rose-200 dark:border-rose-900 rounded-2xl p-5 shadow-sm">
