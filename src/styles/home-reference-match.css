@@ -497,10 +497,10 @@ html.dark .home-modern .home-member-note p {
 
   /* Preserve source proportions: 1536x520. */
   background-color:#071a68 !important;
-  background-image:url('../assets/provati-home-hero-bg.jpg') !important;
+  background-image:url('../assets/provati-home-hero-bg-wide.svg') !important;
   background-repeat:no-repeat !important;
   background-position:center center !important;
-  background-size:100% auto !important;
+  background-size:100% 100% !important;
 }
 
 .home-modern .home-dashboard-header::before,
