@@ -3,9 +3,9 @@ import { HomeHeader } from '../components/home/HomeHeader';
 import { BalanceCard } from '../components/home/BalanceCard';
 import { LoanStatusCard } from '../components/home/LoanStatusCard';
 import {
-  Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight,
-  FileText, CreditCard, PiggyBank, ReceiptText, FolderOpen,
-  ChevronRight, CalendarDays, CheckCircle2, Clock3, AlertCircle,
+  Bell, ArrowDownToLine, ArrowUpFromLine, Wallet,
+  CreditCard, PiggyBank, FolderOpen,
+  ChevronRight, AlertCircle,
   ShieldCheck, Eye, EyeOff, UserRound, Star, BriefcaseBusiness, House, HeartPulse, Plane, UsersRound, CarFront, GraduationCap, Headphones
 } from 'lucide-react';
 import { getTelegramUser } from '../lib/telegram';
@@ -14,7 +14,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
 import { formatCurrency, convertDigits } from '../lib/translation';
 import { useState, useEffect } from 'react';
-import { Skeleton } from '../components/Skeleton';
 import { toast } from 'sonner';
 import {
   getDashboardStats, getActiveLoans, getTransactions,
