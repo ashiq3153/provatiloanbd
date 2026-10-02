@@ -1,4 +1,4 @@
-import '../styles/home-reference-match.css';
+import '../styles/home.css';
 import {
   Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight,
   FileText, CreditCard, PiggyBank, ReceiptText, FolderOpen,
