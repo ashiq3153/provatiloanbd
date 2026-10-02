@@ -340,25 +340,7 @@ export default function Home() {
         {/* Detailed savings, loan and repayment figures live in their dedicated screens.
             Keep the home dashboard focused on the colorful single-balance card and key actions. */}
 
-        {/* Contextual next action */}
-        <Link to={nextAction.link} className={`home-next-action block border rounded-2xl p-3 shadow-sm active:scale-[.99] transition ${nextAction.tone==='amber' ? 'home-next-action-amber' : nextAction.tone==='green' ? 'home-next-action-green' : 'home-next-action-blue'}`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${nextAction.tone==='amber'?'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400':nextAction.tone==='green'?'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400':'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400'}`}>
-              <nextAction.icon size={20}/>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[9px] uppercase tracking-wider font-black text-slate-400">{nextAction.eyebrow}</p>
-              <p className="font-black text-sm mt-0.5 leading-snug">{nextAction.title}</p>
-              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{nextAction.detail}</span>
-                {nextAction.amount && <><span className="text-slate-300 dark:text-slate-600">•</span><span className="text-sm font-black">{nextAction.amount}</span></>}
-              </div>
-              <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-black text-sky-600 dark:text-sky-400">
-                {nextAction.cta}<ChevronRight size={14}/>
-              </div>
-            </div>
-          </div>
-        </Link>
+
 
         {/* Unified loan status — application + journey in one compact card */}
         {(latestApplication || activeLoan) && (
@@ -510,6 +492,26 @@ export default function Home() {
             </div>
           </section>
         )}
+
+        {/* Contextual next action */}
+        <Link to={nextAction.link} className={`home-next-action block border rounded-2xl p-3 shadow-sm active:scale-[.99] transition ${nextAction.tone==='amber' ? 'home-next-action-amber' : nextAction.tone==='green' ? 'home-next-action-green' : 'home-next-action-blue'}`}>
+          <div className="flex items-center gap-3">
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${nextAction.tone==='amber'?'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400':nextAction.tone==='green'?'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400':'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400'}`}>
+              <nextAction.icon size={20}/>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[9px] uppercase tracking-wider font-black text-slate-400">{nextAction.eyebrow}</p>
+              <p className="font-black text-sm mt-0.5 leading-snug">{nextAction.title}</p>
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{nextAction.detail}</span>
+                {nextAction.amount && <><span className="text-slate-300 dark:text-slate-600">•</span><span className="text-sm font-black">{nextAction.amount}</span></>}
+              </div>
+              <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-black text-sky-600 dark:text-sky-400">
+                {nextAction.cta}<ChevronRight size={14}/>
+              </div>
+            </div>
+          </div>
+        </Link>
 
         {/* Recent activity */}
         <section>
