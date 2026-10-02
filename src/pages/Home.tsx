@@ -343,15 +343,15 @@ export default function Home() {
                 </h2>
                 <p className="text-[10px] text-slate-400 mt-1 font-bold">
                   {activeLoan
-                    ? \`APP-\${activeLoan.id.slice(0,8).toUpperCase()}\`
+                    ? `APP-${activeLoan.id.slice(0,8).toUpperCase()}`
                     : latestApplication
-                      ? \`APP-\${latestApplication.id.slice(0,8).toUpperCase()}\`
+                      ? `APP-${latestApplication.id.slice(0,8).toUpperCase()}`
                       : ''}
                 </p>
               </div>
               {(() => {
                 const s = applicationStatus((activeLoan || latestApplication)?.status);
-                return <span className={\`px-2.5 py-1 rounded-full text-[9px] font-black shrink-0 \${s.tone === 'green' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : s.tone === 'amber' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300' : s.tone === 'red' ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300' : s.tone === 'sky' ? 'bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}\`}>{isBn ? s.bn : s.en}</span>;
+                return <span className={`px-2.5 py-1 rounded-full text-[9px] font-black shrink-0 ${s.tone === 'green' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : s.tone === 'amber' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300' : s.tone === 'red' ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300' : s.tone === 'sky' ? 'bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>{isBn ? s.bn : s.en}</span>;
               })()}
             </div>
 
@@ -373,7 +373,7 @@ export default function Home() {
                     <span>{convertDigits(loanProgress,isBn)}%</span>
                   </div>
                   <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                    <div className="h-full rounded-full bg-sky-500 transition-all" style={{width:\`\${loanProgress}%\`}} />
+                    <div className="h-full rounded-full bg-sky-500 transition-all" style={{width:`${loanProgress}%`}} />
                   </div>
                 </div>
                 <div className="mt-4 flex items-center justify-between gap-3">
@@ -401,7 +401,7 @@ export default function Home() {
                     <p className="text-xs font-semibold text-amber-900 dark:text-amber-100 mt-1 leading-5">{latestApplication.admin_feedback}</p>
                   </div>
                 )}
-                <Link to={latestApplication.status === 'action_required' ? \`/apply?edit=\${latestApplication.id}\` : \`/application/\${latestApplication.id}\`} className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-sky-500 text-white py-2.5 text-xs font-black">
+                <Link to={latestApplication.status === 'action_required' ? `/apply?edit=${latestApplication.id}` : `/application/${latestApplication.id}`} className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-sky-500 text-white py-2.5 text-xs font-black">
                   {latestApplication.status === 'action_required' ? (isBn ? 'আবেদন আপডেট করুন' : 'Update application') : (isBn ? 'আবেদনের বিস্তারিত' : 'View application')} <ChevronRight size={14}/>
                 </Link>
               </>
