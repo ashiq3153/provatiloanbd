@@ -332,56 +332,82 @@ export default function Home() {
           </div>
         </Link>
 
-        {/* Latest application status */}
-        {!activeLoan && latestApplication && (
-          <section className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+        {/* Unified loan status — application + journey in one compact card */}
+        {(latestApplication || activeLoan) && (
+          <section className="home-loan-status-card bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-sm">
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn ? 'লোন আবেদন' : 'Loan application'}</p>
-                <h2 className="text-base font-black mt-1">{categoryName(latestApplication.loan_category)}</h2>
-                <p className="text-[10px] text-slate-400 mt-1 font-bold">APP-{latestApplication.id.slice(0,8).toUpperCase()}</p>
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn ? 'ঋণের অবস্থা' : 'Loan status'}</p>
+                <h2 className="text-base font-black mt-1 truncate">
+                  {categoryName((activeLoan || latestApplication)?.loan_category)}
+                </h2>
+                <p className="text-[10px] text-slate-400 mt-1 font-bold">
+                  {activeLoan
+                    ? \`APP-\${activeLoan.id.slice(0,8).toUpperCase()}\`
+                    : latestApplication
+                      ? \`APP-\${latestApplication.id.slice(0,8).toUpperCase()}\`
+                      : ''}
+                </p>
               </div>
-              {(() => { const s = applicationStatus(latestApplication.status); return <span className={`px-2.5 py-1 rounded-full text-[9px] font-black ${s.tone === 'green' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : s.tone === 'amber' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300' : s.tone === 'red' ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300' : s.tone === 'sky' ? 'bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>{isBn ? s.bn : s.en}</span>; })()}
+              {(() => {
+                const s = applicationStatus((activeLoan || latestApplication)?.status);
+                return <span className={\`px-2.5 py-1 rounded-full text-[9px] font-black shrink-0 \${s.tone === 'green' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : s.tone === 'amber' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300' : s.tone === 'red' ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300' : s.tone === 'sky' ? 'bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}\`}>{isBn ? s.bn : s.en}</span>;
+              })()}
             </div>
-            <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-              <div><p className="text-[10px] text-slate-400">{isBn ? 'আবেদনের পরিমাণ' : 'Requested amount'}</p><p className="text-sm font-black mt-1">{formatCurrency(latestApplication.amount, isBn)}</p></div>
-              <div className="text-right"><p className="text-[10px] text-slate-400">{isBn ? 'আবেদনের তারিখ' : 'Applied on'}</p><p className="text-xs font-bold mt-1">{new Date(latestApplication.applied_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-GB')}</p></div>
-            </div>
-            {latestApplication.admin_feedback && (
-              <div className="mt-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40 p-3">
-                <p className="text-[9px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-wider">{isBn ? 'অ্যাডমিন বার্তা' : 'Admin message'}</p>
-                <p className="text-xs font-semibold text-amber-900 dark:text-amber-100 mt-1 leading-5">{latestApplication.admin_feedback}</p>
-              </div>
-            )}
-            <Link to={latestApplication.status === 'action_required' ? `/apply?edit=${latestApplication.id}` : `/application/${latestApplication.id}`} className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-sky-500 text-white py-2.5 text-xs font-black">
-              {latestApplication.status === 'action_required' ? (isBn ? 'আবেদন আপডেট করুন' : 'Update application') : (isBn ? 'আবেদনের বিস্তারিত' : 'View application')} <ChevronRight size={14}/>
-            </Link>
-          </section>
-        )}
 
-
-        {/* Loan journey */}
-        {activeLoan && (
-          <section className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
-            <p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'ঋণের যাত্রা':'Loan journey'}</p>
-            <div className="flex items-start mt-5">
-              {[
-                [true,isBn?'আবেদন':'Applied'],
-                [true,isBn?'যাচাই':'Review'],
-                [activeLoan.status==='approved'||activeLoan.status==='active'||activeLoan.status==='completed',isBn?'অনুমোদন':'Approved'],
-                [activeLoan.status==='active'||activeLoan.status==='completed',isBn?'বিতরণ':'Disbursed'],
-                [activeLoan.status==='completed',isBn?'সম্পন্ন':'Completed']
-              ].map(([done,label],i,arr)=>(
-                <div key={String(label)} className="flex-1 relative text-center">
-                  {i<arr.length-1 && <div className={`absolute top-3 left-1/2 w-full h-px ${done&&arr[i+1][0]?'bg-sky-500':'bg-slate-200 dark:bg-slate-700'}`}/>}
-                  <div className={`relative mx-auto w-7 h-7 rounded-full flex items-center justify-center border-2 ${done?'bg-sky-500 border-sky-500 text-white':'bg-white dark:bg-[#111827] border-slate-300 dark:border-slate-600 text-slate-400'}`}>{done?<CheckCircle2 size={14}/>:<span className="w-1.5 h-1.5 rounded-full bg-current"/>}</div>
-                  <p className="text-[8px] font-bold mt-2 text-slate-500 dark:text-slate-400">{label}</p>
+            {activeLoan ? (
+              <>
+                <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <div>
+                    <p className="text-[10px] text-slate-400">{isBn ? 'বকেয়া' : 'Outstanding'}</p>
+                    <p className="text-sm font-black mt-1">{formatCurrency(outstanding,isBn)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] text-slate-400">{isBn ? 'পরবর্তী কিস্তি' : 'Next installment'}</p>
+                    <p className="text-sm font-black mt-1">{nextInstallment ? formatCurrency(nextInstallment.total_due,isBn) : '—'}</p>
+                  </div>
                 </div>
-              ))}
-            </div>
+                <div className="mt-4">
+                  <div className="flex items-center justify-between text-[9px] font-bold text-slate-400 mb-1.5">
+                    <span>{isBn ? 'পরিশোধের অগ্রগতি' : 'Repayment progress'}</span>
+                    <span>{convertDigits(loanProgress,isBn)}%</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                    <div className="h-full rounded-full bg-sky-500 transition-all" style={{width:\`\${loanProgress}%\`}} />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  {nextEmiDate && <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">{isBn ? 'পরবর্তী তারিখ' : 'Due'}: {nextEmiDate}</p>}
+                  <Link to={nextAction.link} className="ml-auto inline-flex items-center gap-1 rounded-xl bg-sky-500 text-white px-3.5 py-2 text-[10px] font-black">
+                    {isBn ? 'বিস্তারিত' : 'View details'} <ChevronRight size={13}/>
+                  </Link>
+                </div>
+              </>
+            ) : latestApplication ? (
+              <>
+                <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <div>
+                    <p className="text-[10px] text-slate-400">{isBn ? 'আবেদনের পরিমাণ' : 'Requested amount'}</p>
+                    <p className="text-sm font-black mt-1">{formatCurrency(latestApplication.amount,isBn)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] text-slate-400">{isBn ? 'আবেদনের তারিখ' : 'Applied on'}</p>
+                    <p className="text-xs font-bold mt-1">{new Date(latestApplication.applied_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-GB')}</p>
+                  </div>
+                </div>
+                {latestApplication.admin_feedback && (
+                  <div className="mt-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40 p-3">
+                    <p className="text-[9px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-wider">{isBn ? 'অ্যাডমিন বার্তা' : 'Admin message'}</p>
+                    <p className="text-xs font-semibold text-amber-900 dark:text-amber-100 mt-1 leading-5">{latestApplication.admin_feedback}</p>
+                  </div>
+                )}
+                <Link to={latestApplication.status === 'action_required' ? \`/apply?edit=\${latestApplication.id}\` : \`/application/\${latestApplication.id}\`} className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-sky-500 text-white py-2.5 text-xs font-black">
+                  {latestApplication.status === 'action_required' ? (isBn ? 'আবেদন আপডেট করুন' : 'Update application') : (isBn ? 'আবেদনের বিস্তারিত' : 'View application')} <ChevronRight size={14}/>
+                </Link>
+              </>
+            ) : null}
           </section>
         )}
-
 
         {/* Mobile-first responsive spacing */}
         <div className="h-px bg-transparent sm:hidden" aria-hidden="true" />
