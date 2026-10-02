@@ -546,73 +546,110 @@ html.dark .home-modern .home-member-note p {
 }
 
 
-/* Cleaner fintech header using the new transparent Provati emblem. */
+
+/* ===============================================================
+   AUTHORITATIVE HOME HERO HEADER
+   Keep the approved hero artwork at its natural aspect ratio.
+   Do not crop/zoom the credit card or logo. Do not stretch the image.
+   This is the single header background rule for the Home page.
+   =============================================================== */
 .home-modern .home-dashboard-header{
-  background:linear-gradient(135deg,#082f49 0%,#0f766e 58%,#0b8f87 100%) !important;
-  padding:14px 16px 20px !important;
-  border-radius:0 0 24px 24px !important;
-  box-shadow:0 8px 22px rgba(15,118,110,.16) !important;
+  position:relative !important;
+  isolation:isolate !important;
+  overflow:hidden !important;
+  margin-left:-12px !important;
+  margin-right:-12px !important;
+  min-height:190px !important;
+  padding:10px 14px 14px !important;
+  border-radius:0 0 22px 22px !important;
+  box-shadow:0 8px 20px rgba(8,31,115,.20) !important;
+
+  /* Preserve source proportions: 1536x520. */
+  background-color:#071a68 !important;
+  background-image:url('../assets/provati-home-hero-bg.jpg') !important;
+  background-repeat:no-repeat !important;
+  background-position:center center !important;
+  background-size:100% auto !important;
 }
-.home-modern .home-dashboard-header::before{
-  width:190px !important;height:190px !important;right:-88px !important;top:-108px !important;
-  border-radius:50% !important;background:rgba(255,255,255,.10) !important;opacity:1 !important;
-  border:1px solid rgba(255,255,255,.10) !important;
-}
+
+.home-modern .home-dashboard-header::before,
 .home-modern .home-dashboard-header::after{
-  right:16% !important;top:56% !important;width:54px !important;height:40px !important;
-  opacity:.18 !important;background-size:12px 12px !important;
+  display:none !important;
+  content:none !important;
 }
+
+.home-modern .home-dashboard-header > *{
+  position:relative !important;
+  z-index:1 !important;
+}
+
+.home-modern .home-dashboard-header h1,
+.home-modern .home-dashboard-header p,
+.home-modern .home-dashboard-header .home-brand-title,
+.home-modern .home-dashboard-header .home-brand-subtitle{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  text-shadow:0 1px 4px rgba(0,0,0,.42) !important;
+}
+
 .home-modern .home-dashboard-header .home-logo-mark{
-  width:42px !important;height:42px !important;border-radius:12px !important;
-  background:#fff !important;padding:3px !important;box-shadow:0 4px 12px rgba(0,0,0,.14) !important;
+  width:40px !important;
+  height:40px !important;
+  border-radius:50% !important;
+  background:#fff url('../assets/provati-logo.svg') center/contain no-repeat !important;
+  padding:2px !important;
+  box-shadow:0 3px 10px rgba(0,0,0,.20) !important;
   overflow:hidden !important;
 }
-.home-modern .home-dashboard-header .home-logo-mark svg{display:none !important;}
-.home-modern .home-dashboard-header .home-logo-mark{
-  background-image:url('../assets/provati-logo.svg') !important;
-  background-size:contain !important;background-position:center !important;background-repeat:no-repeat !important;
+.home-modern .home-dashboard-header .home-logo-mark svg{
+  display:none !important;
 }
-.home-modern .home-dashboard-header .home-brand-subtitle{font-size:8px !important;letter-spacing:.11em !important;}
-.home-modern .home-dashboard-header h1{font-size:20px !important;letter-spacing:-.02em !important;}
-.home-modern .home-dashboard-header .home-brand-title{font-size:17px !important;}
-.home-modern .home-dashboard-header > .relative.z-10:last-child{margin-top:2px !important;}
-.home-modern .home-dashboard-header .w-10.h-10{width:38px !important;height:38px !important;}
-.home-modern .home-dashboard-header a[href="/profile"]{width:40px !important;height:40px !important;}
 
-/* Make the first screenful tighter: header -> balance -> next action. */
-.home-modern.app-home-theme > div.px-3{gap:14px !important;}
-.home-modern .pv-home-financial-hero.home-balance-art{border-radius:20px !important;padding:18px 16px 16px !important;}
-.home-modern .home-next-action{border-radius:18px !important;padding:13px !important;}
+.home-modern .home-dashboard-header button[aria-label="Notifications"]{
+  width:36px !important;
+  height:36px !important;
+  background:rgba(255,255,255,.14) !important;
+  border:1px solid rgba(255,255,255,.34) !important;
+  color:#fff !important;
+  backdrop-filter:blur(5px) !important;
+}
+
+.home-modern .home-dashboard-header a[href="/profile"]{
+  width:38px !important;
+  height:38px !important;
+  border-color:rgba(255,255,255,.92) !important;
+  box-shadow:0 3px 10px rgba(0,0,0,.18) !important;
+}
+
+.home-modern .home-dashboard-header .home-brand-title{
+  font-size:16px !important;
+  line-height:1 !important;
+}
+.home-modern .home-dashboard-header .home-brand-subtitle{
+  font-size:7px !important;
+  line-height:1 !important;
+  letter-spacing:.11em !important;
+}
+.home-modern .home-dashboard-header h1{
+  font-size:19px !important;
+  line-height:1.08 !important;
+  margin-top:0 !important;
+}
+.home-modern .home-dashboard-header p{
+  line-height:1.15 !important;
+}
+
 @media(max-width:390px){
-  .home-modern .home-dashboard-header{padding:12px 14px 18px !important;}
-  .home-modern .home-dashboard-header .home-logo-mark{width:38px !important;height:38px !important;}
-  .home-modern .home-dashboard-header h1{font-size:19px !important;}
+  .home-modern .home-dashboard-header{
+    min-height:184px !important;
+    padding:9px 12px 12px !important;
+    gap:5px !important;
+  }
+  .home-modern .home-dashboard-header .home-logo-mark{
+    width:34px !important;
+    height:34px !important;
+  }
+  .home-modern .home-dashboard-header h1{
+    font-size:18px !important;
+  }
 }
-
-
-/* Compact the top hero so the balance card moves upward on mobile. */
-.home-modern .home-dashboard-header{
-  padding:10px 14px 14px !important;
-  gap:6px !important;
-  min-height:0 !important;
-  border-radius:0 0 20px 20px !important;
-  box-shadow:0 6px 16px rgba(15,118,110,.12) !important;
-}
-.home-modern .home-dashboard-header > .relative.z-10:first-child{min-height:38px !important;}
-.home-modern .home-dashboard-header > .relative.z-10:last-child{margin-top:0 !important;}
-.home-modern .home-dashboard-header h1{margin-top:0 !important;font-size:19px !important;line-height:1.08 !important;}
-.home-modern .home-dashboard-header p{line-height:1.15 !important;}
-.home-modern .home-dashboard-header .home-brand-title{font-size:16px !important;line-height:1 !important;}
-.home-modern .home-dashboard-header .home-brand-subtitle{font-size:7px !important;line-height:1 !important;}
-.home-modern .home-dashboard-header .home-logo-mark{width:36px !important;height:36px !important;border-radius:10px !important;}
-.home-modern .home-dashboard-header button[aria-label="Notifications"]{width:36px !important;height:36px !important;}
-.home-modern .home-dashboard-header a[href="/profile"]{width:38px !important;height:38px !important;}
-.home-modern.app-home-theme > div.px-3{gap:11px !important;}
-.home-modern .pv-home-financial-hero.home-balance-art{margin-top:0 !important;}
-@media(max-width:390px){
-  .home-modern .home-dashboard-header{padding:9px 12px 12px !important;gap:5px !important;}
-  .home-modern .home-dashboard-header h1{font-size:18px !important;}
-  .home-modern .home-dashboard-header .home-logo-mark{width:34px !important;height:34px !important;}
-}
-
-
