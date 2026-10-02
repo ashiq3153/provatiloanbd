@@ -612,7 +612,7 @@ html.dark .home-modern .home-member-note p {
 
 /* PREMIUM WORLD MAP HERO V4 */
 .home-modern .home-dashboard-header{
-  background:#071a68 url('../assets/provati-home-hero-bg.svg') center center/cover no-repeat !important;
+  background:#071a68 url('../assets/provati-home-hero-bg.jpg') center center/cover no-repeat !important;
   padding:10px 14px 14px !important;
   gap:7px !important;
   border-radius:0 0 22px 22px !important;
@@ -640,3 +640,19 @@ html.dark .home-modern .home-member-note p {
 }
 .home-modern .home-dashboard-header > .relative.z-10:last-child{margin-top:0 !important;}
 @media(max-width:390px){.home-modern .home-dashboard-header{padding:8px 12px 12px !important;gap:5px !important;}.home-modern .home-dashboard-header .home-logo-mark{width:36px !important;height:36px !important;}}
+
+
+/* ORIGINAL CREDIT CARD HERO ASSET V5 */
+.home-modern .home-dashboard-header{
+  background-position:center 48% !important;
+  background-size:cover !important;
+  background-repeat:no-repeat !important;
+  overflow:hidden !important;
+}
+.home-modern .home-dashboard-header::before{display:none !important;}
+.home-modern .home-dashboard-header::after{display:none !important;}
+.home-modern .home-dashboard-header h1,
+.home-modern .home-dashboard-header p,
+.home-modern .home-dashboard-header .home-brand-title,
+.home-modern .home-dashboard-header .home-brand-subtitle{color:#fff !important;text-shadow:0 1px 4px rgba(0,0,0,.42) !important;}
+.home-modern .home-dashboard-header .home-logo-mark{background-color:#fff !important;}
