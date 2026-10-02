@@ -2,14 +2,14 @@ import '../styles/home.css';
 import { HomeHeader } from '../components/home/HomeHeader';
 import { BalanceCard } from '../components/home/BalanceCard';
 import { LoanStatusCard } from '../components/home/LoanStatusCard';
+import { QuickServices } from '../components/home/QuickServices';
+import { LoanServices } from '../components/home/LoanServices';
 import {
   Bell, ArrowDownToLine, ArrowUpFromLine, Wallet,
-  CreditCard, PiggyBank, FolderOpen,
-  ChevronRight, AlertCircle,
-  ShieldCheck, Eye, EyeOff, UserRound, Star, BriefcaseBusiness, House, HeartPulse, Plane, UsersRound, CarFront, GraduationCap, Headphones
+  CreditCard, ChevronRight, AlertCircle,
+  ShieldCheck, Star
 } from 'lucide-react';
 import { getTelegramUser } from '../lib/telegram';
-import { motion, AnimatePresence } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
 import { formatCurrency, convertDigits } from '../lib/translation';
@@ -275,39 +275,9 @@ export default function Home() {
 
         {/* Mobile-first responsive spacing */}
         <div className="h-px bg-transparent sm:hidden" aria-hidden="true" />
-        {/* Member services */}
-        <section>
-          <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-500">{isBn?'সদস্য সেবা':'MEMBER SERVICES'}</p><h2 className="text-xl font-extrabold mt-1 text-slate-900 dark:text-white">{isBn?'দ্রুত সেবা':'Quick services'}</h2></div><Link to="/support" className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 dark:text-sky-300">{isBn?'সব দেখুন':'View all'} <ChevronRight size={16}/></Link></div>
-          <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
-            {quickActions.map(({label,sub,icon:Icon,link}, index)=>(
-              <Link key={link} to={link} className={`home-service-tile service-tone-${index} relative isolate overflow-hidden min-w-0 h-[112px] sm:h-[126px] rounded-[18px] p-2.5 sm:p-3 flex flex-col items-start justify-between active:scale-[.97] transition-transform`}>
-                <span aria-hidden="true" className="home-tile-orb absolute -right-5 -top-5 w-16 h-16 rounded-full pointer-events-none"/>
-                <span className="relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full service-icon flex items-center justify-center"><Icon size={18}/></span>
-                <span className="relative z-10 min-w-0 w-full"><span className="block text-[11px] sm:text-sm font-extrabold service-title truncate">{label}</span><span className="block text-[9px] sm:text-[11px] service-subtitle mt-0.5 leading-tight truncate">{sub}</span></span>
-                <ChevronRight size={16} className="absolute right-2 top-2 z-10 text-white/90"/>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <QuickServices isBn={isBn} />
 
-        {/* Loan services */}
-        <section>
-          <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-500">{isBn?'ঋণ সেবা':'LOAN SERVICES'}</p><h2 className="text-xl font-extrabold mt-1 text-slate-900 dark:text-white">{isBn?'আপনার প্রয়োজন অনুযায়ী':'Choose a service'}</h2></div><Link to="/apply" className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 dark:text-sky-300">{isBn?'সব দেখুন':'View all'} <ChevronRight size={16}/></Link></div>
-          <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
-            {(['personal','business','education','emergency'] as const).map((id)=> {
-              const found = categories.find(([category]) => category === id);
-              const label = found?.[1] || categoryName(id);
-              return (
-                <button key={id} onClick={()=>navigate(`/apply?category=${id}`)} className={`home-category-tile category-${id} relative isolate overflow-hidden text-left min-w-0 h-[88px] sm:h-[98px] rounded-[16px] p-2.5 sm:p-3 flex flex-col items-start justify-between active:scale-[.97] transition-transform`}>
-                  <span aria-hidden="true" className="home-tile-orb absolute -right-5 -top-5 w-16 h-16 rounded-full pointer-events-none"/>
-                  <span className="relative z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full category-icon flex items-center justify-center">{(()=>{const Icon=loanCategoryIcon(id);return <Icon size={17}/>;})()}</span>
-                  <span className="relative z-10 block text-[10px] sm:text-xs font-extrabold category-title truncate max-w-full">{label}</span>
-                  <ChevronRight size={15} className="absolute right-2 top-2 z-10 text-white/90"/>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+        <LoanServices isBn={isBn} categoryName={categoryName} />
 
         {/* Success stories — compact reference-inspired testimonial card */}
         {stories.length > 0 && (
