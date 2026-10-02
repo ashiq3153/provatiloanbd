@@ -111,66 +111,6 @@ export default function Home() {
     return names[category || ''] || (isBn ? 'ঋণ' : 'Loan');
   };
 
-  const nextAction = (() => {
-    if (!activeLoan) {
-      const actionRequired = loans.find(l => l.status === 'action_required');
-      if (actionRequired) return {
-        eyebrow: isBn ? 'আপনার পদক্ষেপ প্রয়োজন' : 'Action required',
-        title: isBn ? 'লোন আবেদনে সংশোধন প্রয়োজন' : 'Loan application needs action',
-        detail: categoryName(actionRequired.loan_category),
-        amount: actionRequired.amount ? formatCurrency(actionRequired.amount, isBn) : null,
-        cta: isBn ? 'আবেদন আপডেট করুন' : 'Update application',
-        link: `/apply?edit=${actionRequired.id}`,
-        icon: AlertCircle,
-        tone: 'amber'
-      };
-      const pending = loans.find(l => ['pending', 'under_review'].includes(l.status));
-      if (pending) return {
-        eyebrow: isBn ? 'আবেদন যাচাই' : 'Application review',
-        title: isBn ? 'আপনার আবেদন যাচাই চলছে' : 'Your application is under review',
-        detail: categoryName(pending.loan_category),
-        amount: pending.amount ? formatCurrency(pending.amount, isBn) : null,
-        cta: isBn ? 'আবেদনের অবস্থা দেখুন' : 'View application status',
-        link: `/application/${pending.id}`,
-        icon: Clock3,
-        tone: 'amber'
-      };
-      return {
-        eyebrow: isBn ? 'শুরু করুন' : 'Get started',
-        title: isBn ? 'আপনার প্রথম লোন আবেদন শুরু করুন' : 'Start your first loan application',
-        detail: isBn ? 'আপনার প্রয়োজন অনুযায়ী ঋণ সেবা নির্বাচন করুন।' : 'Choose a loan service that matches your need.',
-        amount: null,
-        cta: isBn ? 'লোন আবেদন করুন' : 'Apply for a loan',
-        link: '/apply',
-        icon: FileText,
-        tone: 'blue'
-      };
-    }
-    if (completedEmis < activeLoan.tenure_months) return {
-      eyebrow: isBn ? 'পরবর্তী কিস্তি' : 'Next installment',
-      title: nextInstallment
-        ? (isBn ? 'আপনার পরবর্তী কিস্তি' : 'Your next installment')
-        : (isBn ? 'পরবর্তী কিস্তি প্রস্তুত' : 'Next installment ready'),
-      detail: nextInstallment
-        ? (isBn ? `পরিশোধের শেষ তারিখ: ${nextEmiDate}` : `Due ${nextEmiDate}`)
-        : (isBn ? 'পরবর্তী কিস্তির পরিমাণ' : 'Next installment amount'),
-      amount: nextInstallment ? formatCurrency(nextInstallment.total_due, isBn) : formatCurrency(activeLoan.emi_amount, isBn),
-      cta: isBn ? 'কিস্তি পরিশোধ করুন' : 'Make payment',
-      link: '/pay',
-      icon: CalendarDays,
-      tone: 'blue'
-    };
-    return {
-      eyebrow: isBn ? 'ঋণ হিসাব' : 'Loan account',
-      title: isBn ? 'ঋণ পরিশোধ সম্পন্ন' : 'Loan repayment completed',
-      detail: isBn ? 'আপনার ঋণ হিসাব দেখুন।' : 'Review your completed loan account.',
-      amount: null,
-      cta: isBn ? 'ঋণের বিস্তারিত দেখুন' : 'View loan details',
-      link: `/application/${activeLoan.id}`,
-      icon: CheckCircle2,
-      tone: 'green'
-    };
-  })();
 
   const quickActions = [
     { label: isBn ? 'কিস্তি' : 'EMI', sub: isBn ? 'পরিশোধ করুন' : 'Make payment', icon: CreditCard, link: '/pay' },
@@ -342,87 +282,54 @@ export default function Home() {
 
 
 
-        {/* Unified loan status — application + journey in one compact card */}
+        {/* Smart loan status — one source of truth for application/active loan */}
         {(latestApplication || activeLoan) && (
           <section className="home-loan-status-card bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn ? 'ঋণের অবস্থা' : 'Loan status'}</p>
-                <h2 className="text-base font-black mt-1 truncate">
-                  {categoryName((activeLoan || latestApplication)?.loan_category)}
-                </h2>
-                <p className="text-[10px] text-slate-400 mt-1 font-bold">
-                  {activeLoan
-                    ? `APP-${activeLoan.id.slice(0,8).toUpperCase()}`
-                    : latestApplication
-                      ? `APP-${latestApplication.id.slice(0,8).toUpperCase()}`
-                      : ''}
-                </p>
-              </div>
-              {(() => {
-                const s = applicationStatus((activeLoan || latestApplication)?.status);
-                return <span className={`px-2.5 py-1 rounded-full text-[9px] font-black shrink-0 ${s.tone === 'green' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : s.tone === 'amber' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300' : s.tone === 'red' ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300' : s.tone === 'sky' ? 'bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>{isBn ? s.bn : s.en}</span>;
-              })()}
-            </div>
-
             {activeLoan ? (
               <>
-                <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                  <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar pb-1">
-                    {[
-                      { label: isBn ? 'আবেদন' : 'Applied' },
-                      { label: isBn ? 'যাচাই' : 'Review' },
-                      { label: isBn ? 'অনুমোদিত' : 'Approved' },
-                      { label: isBn ? 'বিতরণ' : 'Disbursed' },
-                      { label: isBn ? 'সম্পন্ন' : 'Completed' },
-                    ].map((stage, index) => {
-                      const journeyIndex = completedEmis >= activeLoan.tenure_months ? 4 : 3;
-                      const isDone = index <= journeyIndex;
-                      const isCurrent = index === journeyIndex;
-                      return (
-                        <div key={stage.label} className="flex items-center gap-1.5 shrink-0">
-                          <span className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-black whitespace-nowrap ${isDone ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`}>
-                            <span className={`w-4 h-4 rounded-full flex items-center justify-center ${isDone ? 'bg-emerald-100 dark:bg-emerald-950/50' : 'bg-slate-100 dark:bg-slate-800'}`}>
-                              {isDone ? <CheckCircle2 size={10}/> : <span className="w-1.5 h-1.5 rounded-full bg-current" />}
-                            </span>
-                            {stage.label}
-                          </span>
-                          {index < 4 && <span className={`w-3 h-px ${index < journeyIndex ? 'bg-emerald-300 dark:bg-emerald-700' : 'bg-slate-200 dark:bg-slate-700'}`} />}
-                        </div>
-                      );
-                    })}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn ? 'ঋণের অবস্থা' : 'LOAN STATUS'}</p>
+                    <h2 className="text-base font-black mt-1 truncate">{categoryName(activeLoan.loan_category)}</h2>
                   </div>
+                  <span className="px-2.5 py-1 rounded-full text-[9px] font-black shrink-0 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                    {isBn ? 'ঋণ চলমান' : 'Active'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <div><p className="text-[10px] text-slate-400">{isBn ? 'বকেয়া' : 'Outstanding'}</p><p className="text-base font-black mt-1">{formatCurrency(outstanding,isBn)}</p></div>
+                  <div className="text-right"><p className="text-[10px] text-slate-400">{isBn ? 'পরবর্তী কিস্তি' : 'Next EMI'}</p><p className="text-base font-black mt-1">{nextInstallment ? formatCurrency(nextInstallment.total_due,isBn) : '—'}</p></div>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-3">
-                  <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
-                    {nextInstallment
-                      ? (isBn ? `পরবর্তী কিস্তি: ${formatCurrency(nextInstallment.total_due,isBn)}` : `Next installment: ${formatCurrency(nextInstallment.total_due,isBn)}`)
-                      : (isBn ? `বকেয়া: ${formatCurrency(outstanding,isBn)}` : `Outstanding: ${formatCurrency(outstanding,isBn)}`)}
-                  </p>
-                  <Link to={`/application/${activeLoan.id}`} className="ml-auto inline-flex items-center gap-1 text-[10px] font-black text-sky-600 dark:text-sky-400 whitespace-nowrap">
-                    {isBn ? 'বিস্তারিত দেখুন' : 'View details'} <ChevronRight size={13}/>
+                  <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">{nextEmiDate ? (isBn ? `দেয় তারিখ: ${nextEmiDate}` : `Due: ${nextEmiDate}`) : ''}</p>
+                  <Link to="/pay" className="ml-auto inline-flex items-center gap-1 rounded-xl bg-sky-500 text-white px-3.5 py-2 text-[10px] font-black">
+                    {isBn ? 'কিস্তি পরিশোধ করুন' : 'Make payment'} <ChevronRight size={13}/>
                   </Link>
                 </div>
               </>
             ) : latestApplication ? (
               <>
-                <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                  <div>
-                    <p className="text-[10px] text-slate-400">{isBn ? 'আবেদনের পরিমাণ' : 'Requested amount'}</p>
-                    <p className="text-sm font-black mt-1">{formatCurrency(latestApplication.amount,isBn)}</p>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn ? 'ঋণের অবস্থা' : 'LOAN STATUS'}</p>
+                    <h2 className="text-base font-black mt-1 truncate">{categoryName(latestApplication.loan_category)}</h2>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[10px] text-slate-400">{isBn ? 'আবেদনের তারিখ' : 'Applied on'}</p>
-                    <p className="text-xs font-bold mt-1">{new Date(latestApplication.applied_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-GB')}</p>
-                  </div>
+                  {(() => {
+                    const s = applicationStatus(latestApplication.status);
+                    return <span className={`px-2.5 py-1 rounded-full text-[9px] font-black shrink-0 ${s.tone === 'green' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : s.tone === 'amber' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300' : s.tone === 'red' ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300' : s.tone === 'sky' ? 'bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}">${isBn ? s.bn : s.en}</span>;
+                  })()}
+                </div>
+                <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-end justify-between gap-3">
+                  <div><p className="text-[10px] text-slate-400">{isBn ? 'আবেদনের পরিমাণ' : 'Requested amount'}</p><p className="text-lg font-black mt-1">{formatCurrency(latestApplication.amount,isBn)}</p></div>
+                  <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 text-right">{isBn ? 'আবেদন' : 'Applied'}: {new Date(latestApplication.applied_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-GB', {day:'2-digit', month:'short', year:'numeric'})}</p>
                 </div>
                 {latestApplication.admin_feedback && (
                   <div className="mt-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40 p-3">
-                    <p className="text-[9px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-wider">{isBn ? 'অ্যাডমিন বার্তা' : 'Admin message'}</p>
+                    <p className="text-[9px] font-black text-amber-700 dark:text-amber-300">{isBn ? 'অ্যাডমিন বার্তা' : 'Admin message'}</p>
                     <p className="text-xs font-semibold text-amber-900 dark:text-amber-100 mt-1 leading-5">{latestApplication.admin_feedback}</p>
                   </div>
                 )}
-                <Link to={latestApplication.status === 'action_required' ? `/apply?edit=${latestApplication.id}` : `/application/${latestApplication.id}`} className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-sky-500 text-white py-2.5 text-xs font-black">
+                <Link to={latestApplication.status === 'action_required' ? `/apply?edit=${latestApplication.id}` : `/application/${latestApplication.id}`} className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-sky-500 text-white py-2.5 text-xs font-black">
                   {latestApplication.status === 'action_required' ? (isBn ? 'আবেদন আপডেট করুন' : 'Update application') : (isBn ? 'আবেদনের বিস্তারিত' : 'View application')} <ChevronRight size={14}/>
                 </Link>
               </>
