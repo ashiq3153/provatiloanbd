@@ -536,3 +536,48 @@ html.dark .home-modern .home-member-note p {
   stroke: #fff !important;
   color: #fff !important;
 }
+
+
+/* PROFESSIONAL HOME HEADER V2 */
+/* Cleaner fintech header using the new transparent Provati emblem. */
+.home-modern .home-dashboard-header{
+  background:linear-gradient(135deg,#082f49 0%,#0f766e 58%,#0b8f87 100%) !important;
+  padding:14px 16px 20px !important;
+  border-radius:0 0 24px 24px !important;
+  box-shadow:0 8px 22px rgba(15,118,110,.16) !important;
+}
+.home-modern .home-dashboard-header::before{
+  width:190px !important;height:190px !important;right:-88px !important;top:-108px !important;
+  border-radius:50% !important;background:rgba(255,255,255,.10) !important;opacity:1 !important;
+  border:1px solid rgba(255,255,255,.10) !important;
+}
+.home-modern .home-dashboard-header::after{
+  right:16% !important;top:56% !important;width:54px !important;height:40px !important;
+  opacity:.18 !important;background-size:12px 12px !important;
+}
+.home-modern .home-dashboard-header .home-logo-mark{
+  width:42px !important;height:42px !important;border-radius:12px !important;
+  background:#fff !important;padding:3px !important;box-shadow:0 4px 12px rgba(0,0,0,.14) !important;
+  overflow:hidden !important;
+}
+.home-modern .home-dashboard-header .home-logo-mark svg{display:none !important;}
+.home-modern .home-dashboard-header .home-logo-mark{
+  background-image:url('../assets/provati-logo.svg') !important;
+  background-size:contain !important;background-position:center !important;background-repeat:no-repeat !important;
+}
+.home-modern .home-dashboard-header .home-brand-subtitle{font-size:8px !important;letter-spacing:.11em !important;}
+.home-modern .home-dashboard-header h1{font-size:20px !important;letter-spacing:-.02em !important;}
+.home-modern .home-dashboard-header .home-brand-title{font-size:17px !important;}
+.home-modern .home-dashboard-header > .relative.z-10:last-child{margin-top:2px !important;}
+.home-modern .home-dashboard-header .w-10.h-10{width:38px !important;height:38px !important;}
+.home-modern .home-dashboard-header a[href="/profile"]{width:40px !important;height:40px !important;}
+
+/* Make the first screenful tighter: header -> balance -> next action. */
+.home-modern.app-home-theme > div.px-3{gap:14px !important;}
+.home-modern .pv-home-financial-hero.home-balance-art{border-radius:20px !important;padding:18px 16px 16px !important;}
+.home-modern .home-next-action{border-radius:18px !important;padding:13px !important;}
+@media(max-width:390px){
+  .home-modern .home-dashboard-header{padding:12px 14px 18px !important;}
+  .home-modern .home-dashboard-header .home-logo-mark{width:38px !important;height:38px !important;}
+  .home-modern .home-dashboard-header h1{font-size:19px !important;}
+}
