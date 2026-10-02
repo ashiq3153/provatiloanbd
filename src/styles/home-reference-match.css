@@ -19,66 +19,74 @@ html.dark .home-modern.app-home-theme {
 }
 
 /* ---------------------------------------------------------------
-   Header
+   Header — single authoritative rule
+   The approved asset is the actual background. No earlier gradient/
+   pseudo-element/header override is allowed to compete with it.
    --------------------------------------------------------------- */
-.home-modern .home-dashboard-header {
-  position: relative !important;
-  isolation: isolate;
-  overflow: hidden;
-  margin-left: -12px !important;
-  margin-right: -12px !important;
-  padding: 18px 16px 26px !important;
-  border-radius: 0 0 28px 28px !important;
-  box-shadow: none !important;
-  background: linear-gradient(135deg, #0a56e0 0%, #0d7bf0 55%, #12b3e0 100%) !important;
+.home-modern .home-dashboard-header{
+  position:relative !important;
+  isolation:isolate !important;
+  overflow:hidden !important;
+  margin-left:-12px !important;
+  margin-right:-12px !important;
+  min-height:0 !important;
+  padding:10px 14px 14px !important;
+  border-radius:0 0 22px 22px !important;
+  box-shadow:0 8px 20px rgba(8,31,115,.20) !important;
+  background-color:#071a68 !important;
+  background-image:url('../assets/provati-home-hero-bg.jpg') !important;
+  background-repeat:no-repeat !important;
+  background-position:center center !important;
+  background-size:100% 100% !important;
 }
-.home-modern .home-dashboard-header::before {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  pointer-events: none;
-  width: 230px;
-  height: 190px;
-  right: -70px;
-  top: -90px;
-  border-radius: 0 0 0 100%;
-  background: linear-gradient(140deg, #ff9a3c 0%, #ff4f9e 45%, #8e5bff 100%);
-  opacity: 0.95;
+.home-modern .home-dashboard-header::before,
+.home-modern .home-dashboard-header::after{
+  display:none !important;
+  content:none !important;
 }
-.home-modern .home-dashboard-header::after {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  pointer-events: none;
-  right: 15%;
-  top: 58%;
-  width: 64px;
-  height: 50px;
-  opacity: 0.4;
-  background-image: radial-gradient(circle, rgba(255,255,255,.9) 1.4px, transparent 1.8px);
-  background-size: 14px 14px;
+.home-modern .home-dashboard-header > *{
+  position:relative !important;
+  z-index:1 !important;
 }
-.home-modern .home-dashboard-header > * {
-  position: relative;
-  z-index: 1;
+.home-modern .home-dashboard-header h1,
+.home-modern .home-dashboard-header p,
+.home-modern .home-dashboard-header .home-brand-title,
+.home-modern .home-dashboard-header .home-brand-subtitle{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  text-shadow:0 1px 4px rgba(0,0,0,.42) !important;
 }
-.home-modern .home-dashboard-header h1 {
-  color: #fff !important;
-  font-weight: 800 !important;
-  font-size: 22px !important;
+.home-modern .home-dashboard-header .home-logo-mark{
+  width:40px !important;
+  height:40px !important;
+  border-radius:50% !important;
+  background:#fff url('../assets/provati-logo.svg') center/contain no-repeat !important;
+  padding:2px !important;
+  box-shadow:0 3px 10px rgba(0,0,0,.20) !important;
+  overflow:hidden !important;
 }
-.home-modern .home-dashboard-header p {
-  color: rgba(255,255,255,.86) !important;
+.home-modern .home-dashboard-header .home-logo-mark svg{display:none !important;}
+.home-modern .home-dashboard-header .home-brand-title{font-size:16px !important;line-height:1 !important;}
+.home-modern .home-dashboard-header .home-brand-subtitle{font-size:7px !important;line-height:1 !important;letter-spacing:.11em !important;}
+.home-modern .home-dashboard-header h1{font-size:19px !important;line-height:1.08 !important;margin-top:0 !important;}
+.home-modern .home-dashboard-header button[aria-label="Notifications"]{
+  width:36px !important;height:36px !important;
+  background:rgba(255,255,255,.14) !important;
+  border:1px solid rgba(255,255,255,.34) !important;
+  color:#fff !important;
+  backdrop-filter:blur(5px) !important;
 }
-.home-modern .home-dashboard-header button[aria-label="Notifications"] {
-  background: rgba(255,255,255,.16) !important;
-  border: 1px solid rgba(255,255,255,.3) !important;
-  color: #fff !important;
+.home-modern .home-dashboard-header a[href="/profile"]{
+  width:38px !important;height:38px !important;
+  border-color:rgba(255,255,255,.92) !important;
+  box-shadow:0 3px 10px rgba(0,0,0,.18) !important;
 }
-.home-modern .home-dashboard-header a[href="/profile"] {
-  border-color: rgba(255,255,255,.85) !important;
+@media(max-width:390px){
+  .home-modern .home-dashboard-header{padding:8px 12px 12px !important;}
+  .home-modern .home-dashboard-header .home-logo-mark{width:36px !important;height:36px !important;}
+  .home-modern .home-dashboard-header h1{font-size:18px !important;}
 }
-
+ 
 /* Logo mark: a real inline SVG instead of a unicode glyph, so it always
    renders solid white instead of the platform's colour-emoji font. */
 .home-logo-mark {
@@ -538,7 +546,6 @@ html.dark .home-modern .home-member-note p {
 }
 
 
-/* PROFESSIONAL HOME HEADER V2 */
 /* Cleaner fintech header using the new transparent Provati emblem. */
 .home-modern .home-dashboard-header{
   background:linear-gradient(135deg,#082f49 0%,#0f766e 58%,#0b8f87 100%) !important;
@@ -583,7 +590,6 @@ html.dark .home-modern .home-member-note p {
 }
 
 
-/* COMPACT MOBILE HERO V3 */
 /* Compact the top hero so the balance card moves upward on mobile. */
 .home-modern .home-dashboard-header{
   padding:10px 14px 14px !important;
@@ -610,49 +616,3 @@ html.dark .home-modern .home-member-note p {
 }
 
 
-/* PREMIUM WORLD MAP HERO V4 */
-.home-modern .home-dashboard-header{
-  background:#071a68 url('../assets/provati-home-hero-bg.jpg') center center/cover no-repeat !important;
-  padding:10px 14px 14px !important;
-  gap:7px !important;
-  border-radius:0 0 22px 22px !important;
-  box-shadow:0 8px 20px rgba(8,31,115,.20) !important;
-  min-height:0 !important;
-}
-.home-modern .home-dashboard-header::before{display:none !important;}
-.home-modern .home-dashboard-header::after{display:none !important;}
-.home-modern .home-dashboard-header .home-logo-mark{
-  width:40px !important;height:40px !important;border-radius:50% !important;
-  background:#fff url('../assets/provati-logo.svg') center/contain no-repeat !important;
-  padding:2px !important;box-shadow:0 3px 10px rgba(0,0,0,.20) !important;
-}
-.home-modern .home-dashboard-header .home-logo-mark svg{display:none !important;}
-.home-modern .home-dashboard-header .home-brand-subtitle{color:rgba(255,255,255,.88) !important;}
-.home-modern .home-dashboard-header h1,
-.home-modern .home-dashboard-header p,
-.home-modern .home-dashboard-header .home-brand-title{color:#fff !important;text-shadow:0 1px 3px rgba(0,0,0,.18) !important;}
-.home-modern .home-dashboard-header button[aria-label="Notifications"]{
-  background:rgba(255,255,255,.14) !important;border-color:rgba(255,255,255,.34) !important;
-  backdrop-filter:blur(5px) !important;
-}
-.home-modern .home-dashboard-header a[href="/profile"]{
-  border-color:rgba(255,255,255,.92) !important;box-shadow:0 3px 10px rgba(0,0,0,.18) !important;
-}
-.home-modern .home-dashboard-header > .relative.z-10:last-child{margin-top:0 !important;}
-@media(max-width:390px){.home-modern .home-dashboard-header{padding:8px 12px 12px !important;gap:5px !important;}.home-modern .home-dashboard-header .home-logo-mark{width:36px !important;height:36px !important;}}
-
-
-/* ORIGINAL CREDIT CARD HERO ASSET V5 */
-.home-modern .home-dashboard-header{
-  background-position:center 48% !important;
-  background-size:cover !important;
-  background-repeat:no-repeat !important;
-  overflow:hidden !important;
-}
-.home-modern .home-dashboard-header::before{display:none !important;}
-.home-modern .home-dashboard-header::after{display:none !important;}
-.home-modern .home-dashboard-header h1,
-.home-modern .home-dashboard-header p,
-.home-modern .home-dashboard-header .home-brand-title,
-.home-modern .home-dashboard-header .home-brand-subtitle{color:#fff !important;text-shadow:0 1px 4px rgba(0,0,0,.42) !important;}
-.home-modern .home-dashboard-header .home-logo-mark{background-color:#fff !important;}
