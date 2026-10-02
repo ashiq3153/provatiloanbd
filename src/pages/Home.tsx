@@ -13,7 +13,6 @@ import {
 import { getTelegramUser } from '../lib/telegram';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
-import { formatCurrency } from '../lib/translation';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import {
@@ -161,6 +160,23 @@ export default function Home() {
       action_required: { bn: 'আপনার পদক্ষেপ প্রয়োজন', en: 'Action required', tone: 'amber' },
     };
     return map[status || ''] || { bn: 'স্ট্যাটাস আপডেট', en: 'Status update', tone: 'slate' };
+  };
+
+  const handleStoryReaction = async (story: SuccessStory, type: 'like' | 'love' | 'wow') => {
+    const ok = await reactToSuccessStory(story.id, type);
+    if (!ok) {
+      toast.error(isBn ? 'রিঅ্যাকশন দেওয়া যায়নি' : 'Could not add reaction');
+      return;
+    }
+    setStoryReactions(prev => ({
+      ...prev,
+      [story.id]: {
+        like: prev[story.id]?.like ?? Number(story.like_count || 0),
+        love: prev[story.id]?.love ?? Number(story.love_count || 0),
+        wow: prev[story.id]?.wow ?? Number(story.wow_count || 0),
+        [type]: (prev[story.id]?.[type] ?? Number((story as any)[type + '_count'] || 0)) + 1,
+      }
+    }));
   };
 
   const markReadAndOpen = async (n: any) => {
