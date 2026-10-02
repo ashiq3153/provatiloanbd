@@ -115,38 +115,57 @@ export default function Home() {
     if (!activeLoan) {
       const actionRequired = loans.find(l => l.status === 'action_required');
       if (actionRequired) return {
+        eyebrow: isBn ? 'আপনার পদক্ষেপ প্রয়োজন' : 'Action required',
         title: isBn ? 'লোন আবেদনে সংশোধন প্রয়োজন' : 'Loan application needs action',
-        description: isBn ? 'আপনার আবেদনের কিছু তথ্য আপডেট করতে হবে।' : 'Some information needs to be updated.',
+        detail: categoryName(actionRequired.loan_category),
+        amount: actionRequired.amount ? formatCurrency(actionRequired.amount, isBn) : null,
+        cta: isBn ? 'আবেদন আপডেট করুন' : 'Update application',
         link: `/apply?edit=${actionRequired.id}`,
         icon: AlertCircle,
         tone: 'amber'
       };
       const pending = loans.find(l => ['pending', 'under_review'].includes(l.status));
       if (pending) return {
-        title: isBn ? 'আপনার লোন আবেদন পর্যালোচনায় আছে' : 'Your loan application is under review',
-        description: categoryName(pending.loan_category),
+        eyebrow: isBn ? 'আবেদন যাচাই' : 'Application review',
+        title: isBn ? 'আপনার আবেদন যাচাই চলছে' : 'Your application is under review',
+        detail: categoryName(pending.loan_category),
+        amount: pending.amount ? formatCurrency(pending.amount, isBn) : null,
+        cta: isBn ? 'আবেদনের অবস্থা দেখুন' : 'View application status',
         link: `/application/${pending.id}`,
         icon: Clock3,
-        tone: 'blue'
+        tone: 'amber'
       };
       return {
+        eyebrow: isBn ? 'শুরু করুন' : 'Get started',
         title: isBn ? 'আপনার প্রথম লোন আবেদন শুরু করুন' : 'Start your first loan application',
-        description: isBn ? 'আপনার প্রয়োজন অনুযায়ী ঋণ সেবা নির্বাচন করুন।' : 'Choose a loan service that matches your need.',
+        detail: isBn ? 'আপনার প্রয়োজন অনুযায়ী ঋণ সেবা নির্বাচন করুন।' : 'Choose a loan service that matches your need.',
+        amount: null,
+        cta: isBn ? 'লোন আবেদন করুন' : 'Apply for a loan',
         link: '/apply',
         icon: FileText,
         tone: 'blue'
       };
     }
     if (completedEmis < activeLoan.tenure_months) return {
-      title: isBn ? 'পরবর্তী কিস্তি প্রস্তুত' : 'Next installment',
-      description: nextInstallment ? `${formatCurrency(nextInstallment.total_due, isBn)} • ${nextEmiDate}` : (isBn ? `পরবর্তী কিস্তি ${formatCurrency(activeLoan.emi_amount, isBn)}` : `Next installment ${formatCurrency(activeLoan.emi_amount, isBn)}`),
+      eyebrow: isBn ? 'পরবর্তী কিস্তি' : 'Next installment',
+      title: nextInstallment
+        ? (isBn ? 'আপনার পরবর্তী কিস্তি' : 'Your next installment')
+        : (isBn ? 'পরবর্তী কিস্তি প্রস্তুত' : 'Next installment ready'),
+      detail: nextInstallment
+        ? (isBn ? `পরিশোধের শেষ তারিখ: ${nextEmiDate}` : `Due ${nextEmiDate}`)
+        : (isBn ? 'পরবর্তী কিস্তির পরিমাণ' : 'Next installment amount'),
+      amount: nextInstallment ? formatCurrency(nextInstallment.total_due, isBn) : formatCurrency(activeLoan.emi_amount, isBn),
+      cta: isBn ? 'কিস্তি পরিশোধ করুন' : 'Make payment',
       link: '/pay',
       icon: CalendarDays,
       tone: 'blue'
     };
     return {
+      eyebrow: isBn ? 'ঋণ হিসাব' : 'Loan account',
       title: isBn ? 'ঋণ পরিশোধ সম্পন্ন' : 'Loan repayment completed',
-      description: isBn ? 'আপনার ঋণ হিসাব দেখুন।' : 'Review your completed loan account.',
+      detail: isBn ? 'আপনার ঋণ হিসাব দেখুন।' : 'Review your completed loan account.',
+      amount: null,
+      cta: isBn ? 'ঋণের বিস্তারিত দেখুন' : 'View loan details',
       link: `/application/${activeLoan.id}`,
       icon: CheckCircle2,
       tone: 'green'
@@ -321,14 +340,23 @@ export default function Home() {
         {/* Detailed savings, loan and repayment figures live in their dedicated screens.
             Keep the home dashboard focused on the colorful single-balance card and key actions. */}
 
-        {/* Next important action */}
-        <Link to={nextAction.link} className="home-next-action block border rounded-2xl p-3.5 shadow-sm active:scale-[.99] transition">
-          <div className="flex items-center gap-3">
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${nextAction.tone==='amber'?'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400':'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400'}`}>
+        {/* Contextual next action */}
+        <Link to={nextAction.link} className={`home-next-action block border rounded-2xl p-4 shadow-sm active:scale-[.99] transition ${nextAction.tone==='amber' ? 'home-next-action-amber' : nextAction.tone==='green' ? 'home-next-action-green' : 'home-next-action-blue'}`}>
+          <div className="flex items-start gap-3">
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${nextAction.tone==='amber'?'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400':nextAction.tone==='green'?'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400':'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400'}`}>
               <nextAction.icon size={20}/>
             </div>
-            <div className="flex-1 min-w-0"><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'পরবর্তী গুরুত্বপূর্ণ কাজ':'Next important action'}</p><p className="font-black text-sm mt-1 truncate">{nextAction.title}</p><p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate">{nextAction.description}</p></div>
-            <ChevronRight size={18} className="text-slate-400 shrink-0"/>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{nextAction.eyebrow}</p>
+              <p className="font-black text-sm mt-1 leading-snug">{nextAction.title}</p>
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{nextAction.detail}</span>
+                {nextAction.amount && <><span className="text-slate-300 dark:text-slate-600">•</span><span className="text-sm font-black">{nextAction.amount}</span></>}
+              </div>
+              <div className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-black text-sky-600 dark:text-sky-400">
+                {nextAction.cta}<ChevronRight size={14}/>
+              </div>
+            </div>
           </div>
         </Link>
 
