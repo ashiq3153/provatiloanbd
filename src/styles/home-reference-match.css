@@ -499,10 +499,10 @@ html.dark .home-modern .home-member-note p {
   box-shadow:0 8px 20px rgba(8,31,115,.20) !important;
 
   background-color:#071a68 !important;
-  background-image:url('../assets/provati-home-hero-bg.jpg') !important;
+  background-image:url('../assets/provati-home-hero-background.svg') !important;
   background-repeat:no-repeat !important;
-  background-position:center center !important;
-  background-size:100% auto !important;
+  background-position:center 42% !important;
+  background-size:cover !important;
 }
 
 .home-modern .home-dashboard-header::before,
