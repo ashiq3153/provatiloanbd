@@ -1,4 +1,5 @@
 import '../styles/home-reference-match.css';
+import heroBg from '../assets/provati-home-hero-bg.jpg';
 import {
   Bell, ArrowDownToLine, ArrowUpFromLine, Wallet, ArrowRight,
   FileText, CreditCard, PiggyBank, ReceiptText, FolderOpen,
@@ -246,6 +247,12 @@ export default function Home() {
 
         {/* Header */}
         <header className="home-dashboard-header relative overflow-hidden flex flex-col gap-3 rounded-b-[26px] px-3 py-3 -mx-3 sm:-mx-4 sm:px-5 shadow-md">
+          <img
+            src={heroBg}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 z-0 w-full h-full object-contain object-center pointer-events-none select-none"
+          />
           <div className="relative z-10 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0 text-white">
               <span className="home-logo-mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 8C14 10 20 16 22 25L22 43C12 37 7 29 5 20V8Z" fill="currentColor"/><path d="M43 8C34 10 28 16 26 25L26 43C36 37 41 29 43 20V8Z" fill="currentColor"/><path d="M10 4C17 5 22 10 24 17C26 10 31 5 38 4V13C32 15 28 19 26 25H22C20 19 16 15 10 13V4Z" fill="currentColor"/></svg></span>
