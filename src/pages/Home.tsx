@@ -176,7 +176,7 @@ export default function Home() {
     { label: isBn ? 'কিস্তি' : 'EMI', sub: isBn ? 'পরিশোধ করুন' : 'Make payment', icon: CreditCard, link: '/pay' },
     { label: isBn ? 'সঞ্চয়' : 'Savings', sub: isBn ? 'জমা দিন' : 'Deposit', icon: PiggyBank, link: '/deposit' },
     { label: isBn ? 'ডকুমেন্ট' : 'Documents', sub: isBn ? 'নথি দেখুন' : 'View files', icon: FolderOpen, link: '/profile' },
-    { label: isBn ? 'সাপোর্ট' : 'Support', sub: isBn ? 'সহায়তা নিন' : 'Get help', icon: Headphones, link: '/support' },
+    { label: isBn ? 'আরও' : 'More', sub: isBn ? 'সাপোর্ট ও সহায়তা' : 'Support & help', icon: Headphones, link: '/support' },
   ];
 
   const categories = [
