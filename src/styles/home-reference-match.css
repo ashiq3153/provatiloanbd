@@ -501,8 +501,9 @@ html.dark .home-modern .home-member-note p {
   background-color:#071a68 !important;
   background-image:url('../assets/provati-home-hero-background.svg') !important;
   background-repeat:no-repeat !important;
-  background-position:center 42% !important;
-  background-size:cover !important;
+  background-position:center center !important;
+  background-size:100% auto !important;
+  background-repeat:no-repeat !important;
 }
 
 .home-modern .home-dashboard-header::before,
