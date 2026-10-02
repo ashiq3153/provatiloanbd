@@ -581,3 +581,30 @@ html.dark .home-modern .home-member-note p {
   .home-modern .home-dashboard-header .home-logo-mark{width:38px !important;height:38px !important;}
   .home-modern .home-dashboard-header h1{font-size:19px !important;}
 }
+
+
+/* COMPACT MOBILE HERO V3 */
+/* Compact the top hero so the balance card moves upward on mobile. */
+.home-modern .home-dashboard-header{
+  padding:10px 14px 14px !important;
+  gap:6px !important;
+  min-height:0 !important;
+  border-radius:0 0 20px 20px !important;
+  box-shadow:0 6px 16px rgba(15,118,110,.12) !important;
+}
+.home-modern .home-dashboard-header > .relative.z-10:first-child{min-height:38px !important;}
+.home-modern .home-dashboard-header > .relative.z-10:last-child{margin-top:0 !important;}
+.home-modern .home-dashboard-header h1{margin-top:0 !important;font-size:19px !important;line-height:1.08 !important;}
+.home-modern .home-dashboard-header p{line-height:1.15 !important;}
+.home-modern .home-dashboard-header .home-brand-title{font-size:16px !important;line-height:1 !important;}
+.home-modern .home-dashboard-header .home-brand-subtitle{font-size:7px !important;line-height:1 !important;}
+.home-modern .home-dashboard-header .home-logo-mark{width:36px !important;height:36px !important;border-radius:10px !important;}
+.home-modern .home-dashboard-header button[aria-label="Notifications"]{width:36px !important;height:36px !important;}
+.home-modern .home-dashboard-header a[href="/profile"]{width:38px !important;height:38px !important;}
+.home-modern.app-home-theme > div.px-3{gap:11px !important;}
+.home-modern .pv-home-financial-hero.home-balance-art{margin-top:0 !important;}
+@media(max-width:390px){
+  .home-modern .home-dashboard-header{padding:9px 12px 12px !important;gap:5px !important;}
+  .home-modern .home-dashboard-header h1{font-size:18px !important;}
+  .home-modern .home-dashboard-header .home-logo-mark{width:34px !important;height:34px !important;}
+}
