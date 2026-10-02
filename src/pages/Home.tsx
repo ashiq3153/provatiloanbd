@@ -367,29 +367,40 @@ export default function Home() {
 
             {activeLoan ? (
               <>
-                <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                  <div>
-                    <p className="text-[10px] text-slate-400">{isBn ? 'বকেয়া' : 'Outstanding'}</p>
-                    <p className="text-sm font-black mt-1">{formatCurrency(outstanding,isBn)}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] text-slate-400">{isBn ? 'পরবর্তী কিস্তি' : 'Next installment'}</p>
-                    <p className="text-sm font-black mt-1">{nextInstallment ? formatCurrency(nextInstallment.total_due,isBn) : '—'}</p>
+                <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar pb-1">
+                    {[
+                      { label: isBn ? 'আবেদন' : 'Applied' },
+                      { label: isBn ? 'যাচাই' : 'Review' },
+                      { label: isBn ? 'অনুমোদিত' : 'Approved' },
+                      { label: isBn ? 'বিতরণ' : 'Disbursed' },
+                      { label: isBn ? 'সম্পন্ন' : 'Completed' },
+                    ].map((stage, index) => {
+                      const journeyIndex = completedEmis >= activeLoan.tenure_months ? 4 : 3;
+                      const isDone = index <= journeyIndex;
+                      const isCurrent = index === journeyIndex;
+                      return (
+                        <div key={stage.label} className="flex items-center gap-1.5 shrink-0">
+                          <span className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-black whitespace-nowrap ${isDone ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`}>
+                            <span className={`w-4 h-4 rounded-full flex items-center justify-center ${isDone ? 'bg-emerald-100 dark:bg-emerald-950/50' : 'bg-slate-100 dark:bg-slate-800'}`}>
+                              {isDone ? <CheckCircle2 size={10}/> : <span className="w-1.5 h-1.5 rounded-full bg-current" />}
+                            </span>
+                            {stage.label}
+                          </span>
+                          {index < 4 && <span className={`w-3 h-px ${index < journeyIndex ? 'bg-emerald-300 dark:bg-emerald-700' : 'bg-slate-200 dark:bg-slate-700'}`} />}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-                <div className="mt-4">
-                  <div className="flex items-center justify-between text-[9px] font-bold text-slate-400 mb-1.5">
-                    <span>{isBn ? 'পরিশোধের অগ্রগতি' : 'Repayment progress'}</span>
-                    <span>{convertDigits(loanProgress,isBn)}%</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                    <div className="h-full rounded-full bg-sky-500 transition-all" style={{width:`${loanProgress}%`}} />
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center justify-between gap-3">
-                  {nextEmiDate && <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">{isBn ? 'পরবর্তী তারিখ' : 'Due'}: {nextEmiDate}</p>}
-                  <Link to={nextAction.link} className="ml-auto inline-flex items-center gap-1 rounded-xl bg-sky-500 text-white px-3.5 py-2 text-[10px] font-black">
-                    {isBn ? 'বিস্তারিত' : 'View details'} <ChevronRight size={13}/>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                    {nextInstallment
+                      ? (isBn ? `পরবর্তী কিস্তি: ${formatCurrency(nextInstallment.total_due,isBn)}` : `Next installment: ${formatCurrency(nextInstallment.total_due,isBn)}`)
+                      : (isBn ? `বকেয়া: ${formatCurrency(outstanding,isBn)}` : `Outstanding: ${formatCurrency(outstanding,isBn)}`)}
+                  </p>
+                  <Link to={`/application/${activeLoan.id}`} className="ml-auto inline-flex items-center gap-1 text-[10px] font-black text-sky-600 dark:text-sky-400 whitespace-nowrap">
+                    {isBn ? 'বিস্তারিত দেখুন' : 'View details'} <ChevronRight size={13}/>
                   </Link>
                 </div>
               </>
