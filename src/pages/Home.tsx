@@ -133,6 +133,12 @@ export default function Home() {
   const recentTransactions = transactions.slice(0, 4);
   const formatActivityStatus = (status: string) => status === 'completed' ? (isBn ? 'সম্পন্ন' : 'Completed') : status === 'pending' ? (isBn ? 'অপেক্ষমাণ' : 'Pending') : status === 'failed' ? (isBn ? 'ব্যর্থ' : 'Failed') : status;
   const activityLabel = (type: string) => type === 'deposit' ? (isBn ? 'সঞ্চয়/ডিপোজিট' : 'Deposit') : type === 'emi_payment' ? (isBn ? 'কিস্তি পরিশোধ' : 'EMI payment') : type === 'disbursement' ? (isBn ? 'ঋণ বিতরণ' : 'Loan disbursement') : (isBn ? 'উত্তোলন' : 'Withdrawal');
+  const activityMeta = (type: Transaction['type']) => {
+    if (type === 'deposit') return { sign: '+', amountClass: 'text-emerald-600 dark:text-emerald-400', iconClass: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' };
+    if (type === 'emi_payment') return { sign: '−', amountClass: 'text-sky-600 dark:text-sky-400', iconClass: 'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400' };
+    if (type === 'disbursement') return { sign: '+', amountClass: 'text-violet-600 dark:text-violet-400', iconClass: 'bg-violet-50 text-violet-600 dark:bg-violet-950/40 dark:text-violet-400' };
+    return { sign: '−', amountClass: 'text-rose-600 dark:text-rose-400', iconClass: 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400' };
+  };
   const latestApplication = [...loans].sort((a, b) => new Date(b.applied_at).getTime() - new Date(a.applied_at).getTime())[0] || null;
 
   const applicationStatus = (status?: string) => {
@@ -415,37 +421,17 @@ export default function Home() {
           </section>
         )}
 
-        {/* Contextual next action */}
-        <Link to={nextAction.link} className={`home-next-action block border rounded-2xl p-3 shadow-sm active:scale-[.99] transition ${nextAction.tone==='amber' ? 'home-next-action-amber' : nextAction.tone==='green' ? 'home-next-action-green' : 'home-next-action-blue'}`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${nextAction.tone==='amber'?'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400':nextAction.tone==='green'?'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400':'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400'}`}>
-              <nextAction.icon size={20}/>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[9px] uppercase tracking-wider font-black text-slate-400">{nextAction.eyebrow}</p>
-              <p className="font-black text-sm mt-0.5 leading-snug">{nextAction.title}</p>
-              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{nextAction.detail}</span>
-                {nextAction.amount && <><span className="text-slate-300 dark:text-slate-600">•</span><span className="text-sm font-black">{nextAction.amount}</span></>}
-              </div>
-              <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-black text-sky-600 dark:text-sky-400">
-                {nextAction.cta}<ChevronRight size={14}/>
-              </div>
-            </div>
-          </div>
-        </Link>
-
         {/* Recent activity */}
         <section>
           <div className="flex justify-between items-end mb-3"><div><p className="text-[10px] uppercase tracking-wider font-black text-slate-400">{isBn?'লেনদেন':'Activity'}</p><h2 className="text-lg font-black mt-1">{isBn?'সাম্প্রতিক কার্যক্রম':'Recent activity'}</h2></div><Link to="/transactions" className="text-xs font-black text-sky-600 dark:text-sky-400">{isBn?'সব দেখুন':'View all'}</Link></div>
           <div className="home-activity-card rounded-2xl overflow-hidden">
             {recentTransactions.length ? recentTransactions.map((tx,i)=>(
               <div key={tx.id} className={`p-4 flex items-center gap-3 ${i<recentTransactions.length-1?'border-b border-slate-100 dark:border-slate-800':''}`}>
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tx.type==='deposit'?'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400':tx.type==='emi_payment'?'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400':'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
-                  {tx.type==='deposit'?<ArrowDownToLine size={17}/>:tx.type==='emi_payment'?<CreditCard size={17}/>:<Wallet size={17}/>}
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${activityMeta(tx.type).iconClass}`}>
+                  {tx.type==='deposit'?<ArrowDownToLine size={17}/>:tx.type==='emi_payment'?<CreditCard size={17}/>:tx.type==='disbursement'?<ArrowUpFromLine size={17}/>:<Wallet size={17}/>}
                 </div>
                 <div className="flex-1 min-w-0"><p className="text-xs font-black">{activityLabel(tx.type)}</p><p className="text-[10px] text-slate-400 mt-1">{new Date(tx.created_at).toLocaleDateString(isBn?'bn-BD':'en-GB')} • {formatActivityStatus(tx.status)}</p></div>
-                <div className="text-right"><p className="text-xs font-black">{formatCurrency(tx.amount,isBn)}</p><p className={`text-[9px] font-bold mt-1 ${tx.status==='completed'?'text-emerald-600 dark:text-emerald-400':tx.status==='failed'?'text-rose-600 dark:text-rose-400':'text-amber-600 dark:text-amber-400'}`}>{formatActivityStatus(tx.status)}</p></div>
+                <div className="text-right"><p className={`text-xs font-black ${activityMeta(tx.type).amountClass}`}>{activityMeta(tx.type).sign} {formatCurrency(tx.amount,isBn)}</p><p className={`text-[9px] font-bold mt-1 ${tx.status==='completed'?'text-emerald-600 dark:text-emerald-400':tx.status==='failed'?'text-rose-600 dark:text-rose-400':'text-amber-600 dark:text-amber-400'}`}>{formatActivityStatus(tx.status)}</p></div>
               </div>
             )) : <div className="p-8 text-center text-xs font-bold text-slate-400">{isBn?'সাম্প্রতিক কোনো কার্যক্রম নেই':'No recent activity'}</div>}
           </div>
