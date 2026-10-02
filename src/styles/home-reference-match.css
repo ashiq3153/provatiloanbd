@@ -565,11 +565,30 @@ html.dark .home-modern .home-member-note p {
 }
 .home-modern .home-dashboard-header h1{
   font-size:19px !important;
-  line-height:1.08 !important;
+  line-height:1.05 !important;
   margin-top:0 !important;
+  white-space:normal !important;
 }
-.home-modern .home-dashboard-header p{
-  line-height:1.15 !important;
+.home-modern .home-dashboard-header > div:nth-of-type(2){
+  position:absolute !important;
+  left:14px !important;
+  bottom:16px !important;
+  width:42% !important;
+  max-width:260px !important;
+  z-index:2 !important;
+}
+.home-modern .home-dashboard-header > div:nth-of-type(2) p{
+  line-height:1.25 !important;
+  margin:0 !important;
+  white-space:normal !important;
+}
+.home-modern .home-dashboard-header > div:nth-of-type(2) h1{
+  margin-top:2px !important;
+}
+.home-modern .home-dashboard-header > div:nth-of-type(2) p:last-child{
+  margin-top:4px !important;
+  font-size:10px !important;
+  line-height:1.25 !important;
 }
 
 @media(max-width:390px){
