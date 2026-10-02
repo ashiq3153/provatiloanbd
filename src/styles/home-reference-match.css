@@ -606,3 +606,60 @@ html.dark .home-modern .home-member-note p {
     font-size:18px !important;
   }
 }
+
+
+/* Quick Services — compact premium alignment */
+.home-modern .home-service-tile{
+  height:104px !important;
+  padding:10px !important;
+  border-radius:17px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-start !important;
+  justify-content:space-between !important;
+  gap:6px !important;
+}
+.home-modern .home-service-tile .service-icon{
+  width:36px !important;
+  height:36px !important;
+  flex:0 0 36px !important;
+}
+.home-modern .home-service-tile .service-icon svg{
+  width:18px !important;
+  height:18px !important;
+}
+.home-modern .home-service-tile > span:last-of-type{
+  width:100% !important;
+  min-width:0 !important;
+  margin-top:auto !important;
+  padding-right:4px !important;
+}
+.home-modern .home-service-tile .service-title{
+  font-size:11px !important;
+  line-height:1.25 !important;
+  margin:0 !important;
+}
+.home-modern .home-service-tile .service-subtitle{
+  font-size:9px !important;
+  line-height:1.25 !important;
+  margin-top:2px !important;
+}
+.home-modern .home-service-tile > svg{
+  right:8px !important;
+  top:8px !important;
+  width:15px !important;
+  height:15px !important;
+}
+@media (min-width:640px){
+  .home-modern .home-service-tile{
+    height:116px !important;
+    padding:11px !important;
+  }
+  .home-modern .home-service-tile .service-icon{
+    width:40px !important;
+    height:40px !important;
+    flex-basis:40px !important;
+  }
+  .home-modern .home-service-tile .service-title{font-size:13px !important;}
+  .home-modern .home-service-tile .service-subtitle{font-size:10px !important;}
+}
