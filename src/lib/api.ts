@@ -252,16 +252,26 @@ export async function createTransaction(txn: Omit<Transaction, 'id' | 'created_a
 // ── Success Stories API ──────────────────────────────────
 
 export async function getSuccessStories(): Promise<SuccessStory[]> {
+  try {
+    const response = await fetch('/api/success-stories', { method: 'GET', headers: { Accept: 'application/json' } });
+    const result = await response.json().catch(() => null);
+    if (response.ok && result?.ok) return (result.data || []) as SuccessStory[];
+  } catch (error) {
+    console.error('getSuccessStories API error:', error);
+  }
+
+  // Fallback to the public Supabase policy if the server route is temporarily unavailable.
   const { data, error } = await supabase
     .from('success_stories')
     .select('*')
-    .order('rating', { ascending: false });
+    .order('rating', { ascending: false })
+    .limit(10);
 
   if (error) {
-    console.error('getSuccessStories error:', error);
+    console.error('getSuccessStories fallback error:', error);
     return [];
   }
-  return data || [];
+  return (data || []) as SuccessStory[];
 }
 
 export async function reactToSuccessStory(storyId: string, reactionType: string): Promise<boolean> {
