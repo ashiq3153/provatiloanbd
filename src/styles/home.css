@@ -924,3 +924,54 @@ html.dark .home-modern .home-member-note p {
 html.dark .home-modern.app-home-theme{
   background:#08111f !important;
 }
+
+/* HOME REDESIGN V4 */
+.home-modern.app-home-theme,.home-modern.app-home-theme.bg-white{background:#f7f9fc!important}
+.dark .home-modern.app-home-theme,html.dark .home-modern.app-home-theme{background:#07111f!important}
+.home-modern .home-balance-art{min-height:176px!important;padding:15px 16px 12px!important;border-radius:22px!important;background:linear-gradient(135deg,#1729c7 0%,#283bdc 45%,#4a2bd4 74%,#5d24c8 100%)!important;border:1px solid rgba(255,255,255,.25)!important;box-shadow:0 16px 32px rgba(31,43,180,.25),inset 0 1px 0 rgba(255,255,255,.22)!important}
+.home-modern .home-balance-art:before{background:linear-gradient(120deg,transparent 0 55%,rgba(255,255,255,.055) 55.2%,transparent 55.8%),radial-gradient(circle at 82% 30%,rgba(255,255,255,.08) 0 2px,transparent 2.5px)!important;background-size:auto,20px 20px!important;opacity:.55!important}
+.home-modern .balance-art-grid{width:156px!important;height:156px!important;right:-35px!important;top:-31px!important;border:1px solid rgba(255,255,255,.13)!important;box-shadow:0 0 0 20px rgba(255,255,255,.025),0 0 0 40px rgba(255,255,255,.018)!important}
+.home-modern .balance-art-orb-a{width:70px!important;height:70px!important;right:12px!important;top:8px!important;background:rgba(255,255,255,.06)!important;border:1px solid rgba(255,255,255,.12)!important}
+.home-modern .balance-art-orb-b{width:34px!important;height:34px!important;right:30px!important;top:26px!important;background:rgba(255,170,86,.22)!important}
+.home-modern .balance-art-accent{width:112px!important;height:112px!important;right:-54px!important;top:-61px!important;background:linear-gradient(145deg,#ffb13b 0%,#ff7052 52%,#ed4e91 100%)!important}
+.home-modern .balance-card-top{min-height:31px!important}
+.home-modern .balance-brand{gap:8px!important;align-items:center!important}
+.home-modern .balance-brand-dot{width:31px!important;height:31px!important;border-radius:10px!important;background:rgba(255,255,255,.13)!important;border:1px solid rgba(255,255,255,.25)!important}
+.home-modern .balance-brand-copy{display:flex!important;flex-direction:column!important;gap:1px!important}
+.home-modern .balance-brand-copy small{color:rgba(255,255,255,.62)!important;font-size:7px!important;font-weight:800!important;letter-spacing:.16em!important;line-height:1!important}
+.home-modern .balance-brand-copy strong{color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:11px!important;font-weight:900!important;line-height:1.1!important}
+.home-modern .balance-visibility{width:39px!important;height:39px!important;border-radius:12px!important;background:rgba(255,255,255,.11)!important;border:1px solid rgba(255,255,255,.30)!important;box-shadow:none!important}
+.home-modern .balance-main{margin-top:11px!important;align-items:flex-end!important;gap:10px!important}
+.home-modern .balance-kicker{font-size:9px!important;color:rgba(255,255,255,.70)!important;font-weight:800!important}
+.home-modern .balance-amount{font-size:35px!important;line-height:1!important;letter-spacing:-.055em!important;font-weight:950!important;margin-top:3px!important}
+.home-modern .balance-side-stat{display:inline-flex!important;align-items:center!important;gap:5px!important;padding:6px 8px!important;border-radius:999px!important;background:rgba(8,18,100,.20)!important;border:1px solid rgba(255,255,255,.16)!important;color:rgba(255,255,255,.86)!important;-webkit-text-fill-color:rgba(255,255,255,.86)!important;font-size:7px!important;font-weight:900!important;letter-spacing:.04em!important}
+.home-modern .balance-side-stat svg{color:#fff!important;stroke:#fff!important}
+.home-modern .balance-switch{width:170px!important;margin-top:9px!important;padding:3px!important;gap:2px!important;border-radius:10px!important;background:rgba(8,18,104,.68)!important;border:1px solid rgba(255,255,255,.18)!important}
+.home-modern .balance-switch button,.home-modern .balance-switch button.is-active{min-width:0!important;width:50%!important;min-height:26px!important;padding:5px 8px!important;border-radius:8px!important;font-size:8px!important;font-weight:900!important}
+.home-modern .balance-footer{margin-top:7px!important;padding-top:7px!important;font-size:7px!important;border-top:1px solid rgba(255,255,255,.13)!important}
+.home-modern .loan-status-empty{min-height:0!important;padding:13px!important;border-radius:19px!important;background:linear-gradient(145deg,#101b31 0%,#101b2e 65%,#122443 100%)!important;border:1px solid rgba(102,143,207,.18)!important;box-shadow:0 12px 26px rgba(2,10,26,.16)!important}
+.home-modern .loan-status-empty .loan-status-glow{width:120px!important;height:120px!important;right:-48px!important;top:-42px!important;background:radial-gradient(circle,#1e4d91 0 16%,rgba(30,77,145,.20) 17%,transparent 62%)!important}
+.home-modern .loan-status-empty .loan-status-content{gap:10px!important}
+.home-modern .loan-status-empty .loan-status-icon{width:40px!important;height:40px!important;flex-basis:40px!important;border-radius:13px!important;background:rgba(39,113,224,.20)!important;border:1px solid rgba(74,144,239,.28)!important;color:#71b5ff!important}
+.home-modern .loan-status-empty .loan-status-eyebrow{font-size:8px!important;color:#7f9abb!important;-webkit-text-fill-color:#7f9abb!important;letter-spacing:.08em!important}
+.home-modern .loan-status-empty .loan-status-title{margin-top:2px!important;font-size:16px!important;line-height:1.25!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+.home-modern .loan-status-empty .loan-status-copy{margin-top:4px!important;font-size:9px!important;line-height:1.45!important;color:#9cafc9!important;-webkit-text-fill-color:#9cafc9!important}
+.home-modern .loan-status-empty .loan-status-pills{margin-top:6px!important}
+.home-modern .loan-status-empty .loan-status-pills span{padding:4px 7px!important;background:rgba(255,255,255,.07)!important;border:1px solid rgba(255,255,255,.07)!important;color:#b9c8dd!important}
+.home-modern .loan-status-empty .loan-status-cta{margin-top:10px!important;padding:9px 11px!important;border-radius:11px!important;font-size:9px!important;box-shadow:0 6px 14px rgba(10,119,219,.18)!important}
+.home-modern .home-category-tile{height:88px!important;border-radius:17px!important;box-shadow:0 10px 22px rgba(15,23,42,.14),inset 0 1px 0 rgba(255,255,255,.20)!important}
+.home-modern .home-category-tile .category-icon{width:36px!important;height:36px!important;border-radius:50%!important}
+.home-modern .home-category-tile .category-title{font-size:11px!important;font-weight:900!important}
+.home-modern .home-success-story{min-height:160px!important;padding:14px!important;border-radius:20px!important;background:linear-gradient(135deg,#1837d8 0%,#2930df 46%,#5123d1 100%)!important;box-shadow:0 13px 28px rgba(32,44,191,.20)!important}
+.home-modern .home-success-story:before{opacity:.45!important}
+.home-modern .home-success-story img{width:54px!important;height:54px!important}
+.home-modern .home-success-story .home-story-verified{background:rgba(255,255,255,.13)!important;border:1px solid rgba(255,255,255,.24)!important}
+.user-app-shell > div.absolute.bottom-4.left-4.right-4{left:12px!important;right:12px!important;bottom:12px!important;padding:6px 10px!important;min-height:64px!important;border-radius:22px!important;background:rgba(8,12,22,.96)!important;border:1px solid rgba(255,255,255,.10)!important;box-shadow:0 12px 28px rgba(0,0,0,.30)!important;backdrop-filter:none!important}
+.user-app-shell > div.absolute.bottom-4.left-4.right-4 > div{min-height:52px!important}
+.user-app-shell > div.absolute.bottom-4.left-4.right-4 a{min-width:48px!important;color:#cbd5e1!important}
+.user-app-shell > div.absolute.bottom-4.left-4.right-4 a span{font-size:8px!important}
+.user-app-shell > div.absolute.bottom-4.left-4.right-4 a.relative.-top-5{top:-17px!important}
+.user-app-shell > div.absolute.bottom-4.left-4.right-4 a.relative.-top-5 > div{width:46px!important;height:46px!important;padding:0!important;border:4px solid #07111f!important;box-shadow:0 7px 16px rgba(20,55,220,.34)!important}
+.user-app-shell .chat-fab{width:54px!important;height:54px!important;right:13px!important;bottom:82px!important;animation:none!important;filter:drop-shadow(0 8px 12px rgba(0,0,0,.20))!important}
+.user-app-shell .chat-fab .live-dot{animation:none!important}
+@media(max-width:390px){.home-modern .home-balance-art{min-height:172px!important;padding:14px!important}.home-modern .balance-amount{font-size:32px!important}.home-modern .balance-switch{width:160px!important}.user-app-shell > div.absolute.bottom-4.left-4.right-4{left:10px!important;right:10px!important;bottom:10px!important;min-height:62px!important;border-radius:21px!important}}
