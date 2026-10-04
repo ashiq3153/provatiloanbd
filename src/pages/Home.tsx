@@ -2,13 +2,11 @@ import '../styles/home.css';
 import { HomeHeader } from '../components/home/HomeHeader';
 import { BalanceCard } from '../components/home/BalanceCard';
 import { LoanStatusCard } from '../components/home/LoanStatusCard';
-import { QuickServices } from '../components/home/QuickServices';
 import { LoanServices } from '../components/home/LoanServices';
 import { SuccessStories } from '../components/home/SuccessStories';
 import { RecentActivity } from '../components/home/RecentActivity';
 import {
   Bell, ChevronRight, AlertCircle,
-  ShieldCheck
 } from 'lucide-react';
 import { getTelegramUser } from '../lib/telegram';
 import { Link, useNavigate } from 'react-router-dom';
@@ -231,20 +229,12 @@ export default function Home() {
         {/* Smart loan status — one source of truth for application/active loan */}
         <LoanStatusCard activeLoan={activeLoan} latestApplication={latestApplication} isBn={isBn} outstanding={outstanding} nextInstallment={nextInstallment} nextEmiDate={nextEmiDate} categoryName={categoryName} applicationStatus={applicationStatus} />
 
-        {/* Mobile-first responsive spacing */}
-        <div className="h-px bg-transparent sm:hidden" aria-hidden="true" />
-        <QuickServices isBn={isBn} />
-
         <LoanServices isBn={isBn} categoryName={categoryName} />
 
         <SuccessStories isBn={isBn} stories={stories} storyReactions={storyReactions} onReact={handleStoryReaction} />
 
         <RecentActivity isBn={isBn} transactions={transactions} />
 
-        {/* Trust / member note */}
-        <section className="home-member-note rounded-2xl p-5">
-          <div className="flex gap-3"><ShieldCheck className="text-sky-400 shrink-0" size={21}/><div><p className="font-black text-sm">{isBn?'সদস্য তথ্য ও হিসাব':'Member account & records'}</p><p className="text-[11px] text-slate-400 leading-5 mt-1">{isBn?'আপনার সঞ্চয়, ঋণ, কিস্তি, লেনদেন ও নথির তথ্য এক জায়গা থেকে দেখুন।':'View your savings, loans, installments, transactions and documents in one place.'}</p></div></div>
-        </section>
       </div>
     </main>
   );
