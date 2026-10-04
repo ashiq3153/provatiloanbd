@@ -224,7 +224,7 @@ export default function Home() {
         )}
 
         {/* Approved reference balance card */}
-        <BalanceCard isBn={isBn} balanceView={balanceView} balanceVisible={balanceVisible} setBalanceVisible={setBalanceVisible} loading={loading} stats={stats} outstanding={outstanding} userId={user.id} />
+        <BalanceCard isBn={isBn} balanceView={balanceView} setBalanceView={setBalanceView} balanceVisible={balanceVisible} setBalanceVisible={setBalanceVisible} loading={loading} stats={stats} outstanding={outstanding} userId={user.id} />
 
         {/* Smart loan status — one source of truth for application/active loan */}
         <LoanStatusCard activeLoan={activeLoan} latestApplication={latestApplication} isBn={isBn} outstanding={outstanding} nextInstallment={nextInstallment} nextEmiDate={nextEmiDate} categoryName={categoryName} applicationStatus={applicationStatus} />
