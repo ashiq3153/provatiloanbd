@@ -1,8 +1,96 @@
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, ArrowUpRight, WalletCards, CircleDollarSign } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Skeleton } from '../Skeleton';
 import { formatCurrency } from '../../lib/translation';
-type BalanceCardProps={isBn:boolean;balanceView:'savings'|'outstanding';balanceVisible:boolean;setBalanceVisible:(v:boolean|((v:boolean)=>boolean))=>void;loading:boolean;stats:any;outstanding:number;userId:string|number};
-export function BalanceCard({isBn,balanceView,balanceVisible,setBalanceVisible,loading,stats,outstanding,userId}:BalanceCardProps){
-return <section className="pv-home-financial-hero home-financial-card home-balance-art rounded-[24px] p-4 sm:p-5 text-white shadow-[0_14px_34px_rgba(39,52,195,.20)] overflow-hidden relative border border-white/20"><div className="home-balance-art-orb home-balance-art-orb-one"/><div className="home-balance-art-orb home-balance-art-orb-two"/><div className="relative z-10 flex items-start justify-between gap-3"><div><p className="text-[10px] font-extrabold uppercase tracking-[.14em] text-white/75">PROVATI • {isBn?'আমার হিসাব':'My account'}</p><p className="mt-2 text-xs font-bold text-white/85">{balanceView==='savings'?(isBn?'বর্তমান ব্যালেন্স':'Current balance'):(isBn?'ঋণের বকেয়া':'Loan outstanding')}</p></div><button type="button" onClick={()=>setBalanceVisible(v=>!v)} className="w-10 h-10 rounded-full bg-white/15 border border-white/30 flex items-center justify-center text-white">{balanceVisible?<Eye size={18}/>:<EyeOff size={18}/>}</button></div><div className="relative z-10 mt-1"><AnimatePresence mode="wait"><motion.p key={balanceView} initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-5}} transition={{duration:.2}} className="text-3xl sm:text-[38px] leading-none font-black tracking-tight text-white">{loading?<Skeleton className="h-9 w-36 bg-white/20"/>:balanceVisible?formatCurrency(balanceView==='savings'?(stats?.savingsBalance||0):(stats?.totalOutstanding||outstanding),isBn):'৳ • • • • • •'}</motion.p></AnimatePresence></div><p className="relative z-10 mt-2 text-[10px] font-semibold text-white/75">{isBn?'সদস্য আইডি':'Member ID'}: PSS-{String(userId).padStart(6,'0').slice(-6)}</p></section>;
+
+type BalanceCardProps = {
+  isBn:boolean;
+  balanceView:'savings'|'outstanding';
+  setBalanceView:(v:'savings'|'outstanding')=>void;
+  balanceVisible:boolean;
+  setBalanceVisible:(v:boolean|((v:boolean)=>boolean))=>void;
+  loading:boolean;
+  stats:any;
+  outstanding:number;
+  userId:string|number;
+};
+
+export function BalanceCard({
+  isBn,balanceView,setBalanceView,balanceVisible,setBalanceVisible,loading,stats,outstanding,userId
+}:BalanceCardProps){
+  const amount = balanceView==='savings'
+    ? Number(stats?.savingsBalance||0)
+    : Number(stats?.totalOutstanding||outstanding);
+
+  return (
+    <section className="pv-home-financial-hero home-financial-card home-balance-art">
+      <div className="balance-art-grid" aria-hidden="true"/>
+      <div className="balance-art-orb balance-art-orb-a" aria-hidden="true"/>
+      <div className="balance-art-orb balance-art-orb-b" aria-hidden="true"/>
+      <div className="balance-art-accent" aria-hidden="true"/>
+
+      <div className="balance-card-top">
+        <div className="balance-brand">
+          <span className="balance-brand-dot"><WalletCards size={13}/></span>
+          <span>PROVATI • {isBn?'আমার হিসাব':'MY ACCOUNT'}</span>
+        </div>
+        <button
+          type="button"
+          onClick={()=>setBalanceVisible(v=>!v)}
+          className="balance-visibility"
+          aria-label={balanceVisible ? (isBn?'ব্যালেন্স লুকান':'Hide balance') : (isBn?'ব্যালেন্স দেখান':'Show balance')}
+        >
+          {balanceVisible?<Eye size={18}/>:<EyeOff size={18}/>}
+        </button>
+      </div>
+
+      <div className="balance-main">
+        <div>
+          <p className="balance-kicker">{balanceView==='savings' ? (isBn?'সঞ্চয় ব্যালেন্স':'Savings balance') : (isBn?'ঋণের বকেয়া':'Loan outstanding')}</p>
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={balanceView+'-'+balanceVisible}
+              initial={{opacity:0,y:7}}
+              animate={{opacity:1,y:0}}
+              exit={{opacity:0,y:-5}}
+              transition={{duration:.18}}
+              className="balance-amount"
+            >
+              {loading ? <Skeleton className="h-10 w-36 bg-white/15"/> : balanceVisible ? formatCurrency(amount,isBn) : '৳ • • • • • •'}
+            </motion.p>
+          </AnimatePresence>
+        </div>
+        <div className="balance-side-stat">
+          <CircleDollarSign size={18}/>
+          <span>{isBn?'নিরাপদ হিসাব':'Secure account'}</span>
+        </div>
+      </div>
+
+      <div className="balance-switch" role="tablist" aria-label={isBn?'হিসাব নির্বাচন':'Account view'}>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={balanceView==='savings'}
+          onClick={()=>setBalanceView('savings')}
+          className={balanceView==='savings'?'is-active':''}
+        >
+          {isBn?'সঞ্চয়':'Savings'}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={balanceView==='outstanding'}
+          onClick={()=>setBalanceView('outstanding')}
+          className={balanceView==='outstanding'?'is-active':''}
+        >
+          {isBn?'বকেয়া':'Outstanding'}
+        </button>
+      </div>
+
+      <div className="balance-footer">
+        <span>{isBn?'সদস্য আইডি':'Member ID'} <strong>PSS-{String(userId).padStart(6,'0').slice(-6)}</strong></span>
+        <span className="balance-live"><i/> {isBn?'সক্রিয়':'Active'}</span>
+      </div>
+    </section>
+  );
 }
