@@ -1,7 +1,8 @@
-import { Eye, EyeOff, WalletCards, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, WalletCards, ArrowUpRight } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Skeleton } from '../Skeleton';
 import { formatCurrency } from '../../lib/translation';
+import { Link } from 'react-router-dom';
 
 type BalanceCardProps = {
   isBn:boolean;
@@ -24,75 +25,38 @@ export function BalanceCard({
 
   return (
     <section className="pv-home-financial-hero home-financial-card home-balance-art">
-      <div className="balance-art-grid" aria-hidden="true"/>
-      <div className="balance-art-orb balance-art-orb-a" aria-hidden="true"/>
-      <div className="balance-art-orb balance-art-orb-b" aria-hidden="true"/>
-      <div className="balance-art-accent" aria-hidden="true"/>
-
+      <div className="balance-structure" aria-hidden="true">
+        <span className="balance-line balance-line-one"/>
+        <span className="balance-line balance-line-two"/>
+        <span className="balance-glow"/>
+      </div>
       <div className="balance-card-top">
         <div className="balance-brand">
-          <span className="balance-brand-dot"><WalletCards size={14}/></span>
-          <span className="balance-brand-copy">
-            <small>PROVATI</small>
-            <strong>{isBn?'আমার হিসাব':'MY ACCOUNT'}</strong>
-          </span>
+          <span className="balance-brand-mark"><WalletCards size={17}/></span>
+          <span className="balance-brand-copy"><small>PROVATI FINANCE</small><strong>{isBn?'আমার হিসাব':'MY ACCOUNT'}</strong></span>
         </div>
-        <button
-          type="button"
-          onClick={()=>setBalanceVisible(v=>!v)}
-          className="balance-visibility"
-          aria-label={balanceVisible ? (isBn?'ব্যালেন্স লুকান':'Hide balance') : (isBn?'ব্যালেন্স দেখান':'Show balance')}
-        >
-          {balanceVisible?<Eye size={18}/>:<EyeOff size={18}/>}
+        <button type="button" onClick={()=>setBalanceVisible(v=>!v)} className="balance-visibility" aria-label={balanceVisible ? (isBn?'ব্যালেন্স লুকান':'Hide balance') : (isBn?'ব্যালেন্স দেখান':'Show balance')}>
+          {balanceVisible?<Eye size={16}/>:<EyeOff size={16}/>}<span>{balanceVisible?(isBn?'লুকান':'Hide'):(isBn?'দেখুন':'Show')}</span>
         </button>
       </div>
-
       <div className="balance-main">
-        <div>
+        <div className="balance-amount-block">
           <p className="balance-kicker">{balanceView==='savings' ? (isBn?'সঞ্চয় ব্যালেন্স':'Savings balance') : (isBn?'ঋণের বকেয়া':'Loan outstanding')}</p>
           <AnimatePresence mode="wait">
-            <motion.p
-              key={balanceView+'-'+balanceVisible}
-              initial={{opacity:0,y:7}}
-              animate={{opacity:1,y:0}}
-              exit={{opacity:0,y:-5}}
-              transition={{duration:.18}}
-              className="balance-amount"
-            >
+            <motion.p key={balanceView+'-'+balanceVisible} initial={{opacity:0,y:6}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-4}} transition={{duration:.16}} className="balance-amount">
               {loading ? <Skeleton className="h-10 w-36 bg-white/15"/> : balanceVisible ? formatCurrency(amount,isBn) : '৳ • • • • • •'}
             </motion.p>
           </AnimatePresence>
         </div>
-        <span className="balance-side-stat">
-          <ShieldCheck size={15}/>
-          <span>{isBn?'নিরাপদ':'SECURE'}</span>
-        </span>
+        <div className="balance-status-block"><span className="balance-status-dot"/><div><small>{isBn?'হিসাবের অবস্থা':'ACCOUNT STATUS'}</small><strong>{isBn?'সক্রিয়':'ACTIVE'}</strong></div></div>
       </div>
-
+      <div className="balance-detail-row">
+        <div><span>{isBn?'সদস্য আইডি':'Member ID'}</span><strong>PSS-{String(userId).padStart(6,'0').slice(-6)}</strong></div>
+        <Link to="/transactions" className="balance-history-link">{isBn?'লেনদেন দেখুন':'Transactions'} <ArrowUpRight size={14}/></Link>
+      </div>
       <div className="balance-switch" role="tablist" aria-label={isBn?'হিসাব নির্বাচন':'Account view'}>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={balanceView==='savings'}
-          onClick={()=>setBalanceView('savings')}
-          className={balanceView==='savings'?'is-active':''}
-        >
-          {isBn?'সঞ্চয়':'Savings'}
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={balanceView==='outstanding'}
-          onClick={()=>setBalanceView('outstanding')}
-          className={balanceView==='outstanding'?'is-active':''}
-        >
-          {isBn?'বকেয়া':'Outstanding'}
-        </button>
-      </div>
-
-      <div className="balance-footer">
-        <span>{isBn?'সদস্য আইডি':'Member ID'} <strong>PSS-{String(userId).padStart(6,'0').slice(-6)}</strong></span>
-        <span className="balance-live"><i/> {isBn?'সক্রিয়':'Active'}</span>
+        <button type="button" role="tab" aria-selected={balanceView==='savings'} onClick={()=>setBalanceView('savings')} className={balanceView==='savings'?'is-active':''}>{isBn?'সঞ্চয়':'Savings'}</button>
+        <button type="button" role="tab" aria-selected={balanceView==='outstanding'} onClick={()=>setBalanceView('outstanding')} className={balanceView==='outstanding'?'is-active':''}>{isBn?'বকেয়া':'Outstanding'}</button>
       </div>
     </section>
   );
