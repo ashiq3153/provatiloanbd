@@ -9,7 +9,7 @@
 /* HEADER */
 .home-dashboard-header{
  position:relative;isolation:isolate;overflow:hidden;margin:0 -12px 0 !important;
- height:188px;min-height:188px;padding:14px 18px 16px !important;border-radius:0 0 24px 24px !important;
+ height:154px;min-height:154px;padding:12px 18px 12px !important;border-radius:0 0 20px 20px !important;
  background:#0a2745 !important;color:#fff !important;box-shadow:0 8px 20px rgba(5,25,45,.18) !important
 }
 .home-hero-art{position:absolute;inset:0;z-index:-1;pointer-events:none}
@@ -31,17 +31,17 @@
 .home-profile-avatar{position:relative;width:37px;height:37px;border-radius:11px;overflow:hidden;border:1px solid #6b8499;background:#173b5b}
 .home-profile-avatar img{width:100%;height:100%;object-fit:cover}
 .home-profile-avatar>span{position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;border-radius:50%;background:#35c9a8;border:2px solid #0a2745}
-.home-header-content{position:relative;z-index:2;display:block;margin-top:28px}
+.home-header-content{position:relative;z-index:2;display:block;margin-top:18px}
 .home-header-copy{min-width:0}
 .home-eyebrow{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border-radius:7px;color:#9fe8dc;background:#103b55;border:1px solid #24536c;font-size:6.5px;font-weight:900;letter-spacing:.08em}
-.home-header-copy h1{margin:9px 0 0;color:#fff;font-size:24px;line-height:1.02;font-weight:700;letter-spacing:-.04em}
+.home-header-copy h1{margin:7px 0 0;color:#fff;font-size:21px;line-height:1.02;font-weight:800;letter-spacing:-.035em}
 .home-header-copy h1 strong{font-weight:950}
-.home-header-copy p{margin:6px 0 0;color:#b5c7d7;font-size:9px;line-height:1.35;font-weight:600;max-width:310px}
+.home-header-copy p{margin:5px 0 0;color:#b5c7d7;font-size:8px;line-height:1.25;font-weight:600;max-width:300px}
 
 /* BALANCE — institutional bank card */
 .home-modern .home-balance-art{
- position:relative;isolation:isolate;overflow:hidden;margin-top:0 !important;padding:15px !important;
- min-height:182px;height:182px;border-radius:19px !important;background:#0d2a47 !important;
+ position:relative;isolation:isolate;overflow:hidden;margin-top:0 !important;padding:13px !important;
+ min-height:164px;height:164px;border-radius:16px !important;background:#0d2a47 !important;
  border:1px solid #244965 !important;box-shadow:0 9px 20px rgba(5,24,43,.18) !important
 }
 .home-modern .home-balance-art:before{
@@ -59,18 +59,18 @@
 .balance-brand-copy small{display:block;font-size:6px;letter-spacing:.14em;font-weight:900;color:#7896ae}
 .balance-brand-copy strong{display:block;margin-top:3px;font-size:10px;line-height:1;font-weight:900;color:#fff}
 .balance-visibility{height:30px;padding:0 9px;border-radius:9px;display:inline-flex;align-items:center;gap:5px;color:#dbe8f2 !important;background:#143752 !important;border:1px solid #2b536e !important;font-size:8px;font-weight:900;box-shadow:none !important}
-.balance-main{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:16px}
+.balance-main{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:12px}
 .balance-kicker{margin:0;color:#86a2b9 !important;font-size:8px;font-weight:800}
 .balance-amount{margin:3px 0 0;color:#fff !important;font-size:31px;line-height:.95;font-weight:950;letter-spacing:-.055em}
 .balance-status-block{display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:8px;background:#0a2138;border:1px solid #23435d;min-width:82px}
 .balance-status-dot{width:6px;height:6px;border-radius:50%;background:#32c8a6}
 .balance-status-block small{display:block;color:#7592aa;font-size:5.5px;font-weight:900;letter-spacing:.06em}
 .balance-status-block strong{display:block;color:#d8f7ef;font-size:7.5px;margin-top:2px;font-weight:900}
-.balance-detail-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:13px;padding-top:8px;border-top:1px solid #23425d}
+.balance-detail-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px;padding-top:7px;border-top:1px solid #23425d}
 .balance-detail-row>div span{display:block;color:#7793ab;font-size:6.5px;font-weight:800}
 .balance-detail-row>div strong{display:block;color:#dbe7f0;font-size:8px;margin-top:2px;font-weight:900;letter-spacing:.04em}
 .balance-history-link{display:inline-flex;align-items:center;gap:3px;color:#8fe0d2 !important;font-size:7.5px;font-weight:900}
-.balance-switch{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:8px;padding:3px;border-radius:9px;background:#081c31;border:1px solid #24435d}
+.balance-switch{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:6px;padding:3px;border-radius:9px;background:#081c31;border:1px solid #24435d}
 .balance-switch button{height:25px;border:0;border-radius:6px;color:#718da5;background:transparent;font-size:8px;font-weight:900}
 .balance-switch button.is-active{background:#fff;color:#102b46;box-shadow:none}
 .dark .home-modern .home-balance-art{background:#0d2a47 !important}
@@ -110,7 +110,7 @@
 .dark .loan-all-link{color:#62b0e9}
 .loan-category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
 .premium-loan-tile{
- position:relative;display:flex;align-items:center;gap:8px;min-height:82px;height:82px;padding:10px !important;
+ position:relative;display:flex;align-items:center;gap:8px;min-height:74px;height:74px;padding:8px !important;
  overflow:hidden;border:1px solid transparent !important;border-radius:13px !important;text-align:left;color:#fff !important;
  box-shadow:none !important;transition:transform .15s ease
 }
@@ -122,7 +122,7 @@
 .loan-tone-slate{background:#31506a !important}
 .loan-tile-icon{width:31px;height:31px;flex:0 0 31px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);color:#fff}
 .loan-tile-copy{min-width:0;flex:1}
-.loan-tile-name{display:block;color:#fff !important;font-size:11px;font-weight:950;line-height:1.1;letter-spacing:-.01em}
+.loan-tile-name{display:block;color:#fff !important;font-size:10.5px;font-weight:950;line-height:1.1;letter-spacing:-.01em}
 .loan-tile-meta{display:flex;align-items:center;gap:6px;margin-top:5px}
 .loan-tile-meta span{display:inline-flex;align-items:center;gap:2px;color:#d6e7f1;font-size:6.5px;font-weight:900;white-space:nowrap}
 .loan-tile-arrow{flex:0 0 auto;color:#a9d8e6}
@@ -178,3 +178,35 @@ html:not(.dark) .home-modern.app-home-theme section>div>p{color:#718399}
  .loan-tile-meta span{font-size:6px}
 }
 @media(min-width:640px){.home-dashboard-header{margin-left:-16px !important;margin-right:-16px !important;padding-left:22px !important;padding-right:22px !important}.loan-category-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+
+/* FINAL MOBILE PROPORTION PASS */
+@media (max-width: 480px){
+  .home-modern.app-home-theme>div.px-3{gap:9px !important}
+  .home-dashboard-header{height:154px !important;min-height:154px !important}
+  .home-header-top{gap:6px}
+  .home-brand-lockup b{font-size:14px}
+  .home-brand-lockup small{font-size:6.5px}
+  .home-header-icon,.home-profile-avatar{width:34px;height:34px}
+  .home-header-content{margin-top:17px}
+  .home-eyebrow{font-size:6px;padding:3px 6px}
+  .home-header-copy h1{font-size:20px}
+  .home-header-copy p{font-size:7.5px}
+  .home-modern .home-balance-art{height:164px !important;min-height:164px !important;padding:12px !important}
+  .balance-brand-mark{width:29px;height:29px}
+  .balance-brand-copy small{font-size:5.5px}
+  .balance-brand-copy strong{font-size:9px}
+  .balance-visibility{height:28px;padding:0 8px}
+  .balance-main{margin-top:11px}
+  .balance-amount{font-size:28px}
+  .balance-status-block{padding:6px 7px;min-width:76px}
+  .balance-detail-row{margin-top:8px;padding-top:6px}
+  .balance-switch{margin-top:5px}
+  .premium-loan-tile{height:74px !important;min-height:74px !important}
+  .loan-tile-icon{width:28px;height:28px;flex-basis:28px}
+  .loan-tile-meta{margin-top:3px}
+  .loan-tile-meta span{font-size:6px}
+  .home-success-story{min-height:118px !important}
+  .home-success-story img{width:42px !important;height:42px !important;max-width:42px !important;max-height:42px !important;min-width:42px !important;min-height:42px !important;object-fit:cover !important}
+}
+.home-modern .home-success-story img{width:42px !important;height:42px !important;max-width:42px !important;max-height:42px !important;min-width:42px !important;min-height:42px !important;object-fit:cover !important;border-radius:50% !important}
