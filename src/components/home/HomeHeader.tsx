@@ -1,4 +1,4 @@
-import { Bell, ArrowUpRight, ShieldCheck, BarChart3 } from 'lucide-react';
+import { Bell, ShieldCheck } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { convertDigits } from '../../lib/translation';
@@ -50,7 +50,6 @@ export function HomeHeader({ user, isBn, unreadCount, notifications, showNotific
           <h1>{isBn ? 'স্বাগতম,' : 'Welcome,'} <strong>{user.first_name}</strong></h1>
           <p>{isBn ? 'আপনার প্রয়োজনের ঋণ, সঞ্চয় ও লেনদেন এক জায়গায়।' : 'Loans, savings and transactions — all in one place.'}</p>
         </div>
-        <div className="home-hero-mini"><div className="hero-mini-icon"><BarChart3 size={17}/></div><div><small>{isBn?'আর্থিক নিয়ন্ত্রণ':'FINANCIAL CONTROL'}</small><strong>{isBn?'সহজ ও স্বচ্ছ':'Simple & clear'}</strong></div><ArrowUpRight size={15}/></div>
       </div>
     </header>
   );
