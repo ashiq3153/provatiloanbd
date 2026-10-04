@@ -98,7 +98,6 @@ export default function Home() {
     if (!refreshing) setRefreshKey(v => v + 1);
   };
 
-  const retryDashboard = refreshDashboard;
 
   const handleHomeTouchStart = (event: React.TouchEvent<HTMLElement>) => {
     if (window.scrollY <= 4) setTouchStartY(event.touches[0]?.clientY ?? null);
@@ -174,7 +173,7 @@ export default function Home() {
         like: prev[story.id]?.like ?? Number(story.like_count || 0),
         love: prev[story.id]?.love ?? Number(story.love_count || 0),
         wow: prev[story.id]?.wow ?? Number(story.wow_count || 0),
-        [type]: (prev[story.id]?.[type] ?? Number((story as any)[type + '_count'] || 0)) + 1,
+        [type]: (prev[story.id]?.[type] ?? Number(story[`${type}_count` as 'like_count' | 'love_count' | 'wow_count'] || 0)) + 1,
       }
     }));
   };
@@ -211,7 +210,7 @@ export default function Home() {
             <div className="w-11 h-11 rounded-xl bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center"><AlertCircle size={19} className="text-rose-600"/></div>
             <h2 className="text-sm font-black mt-3">{isBn ? 'তথ্য লোড হয়নি' : 'Data could not be loaded'}</h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{error}</p>
-            <button onClick={retryDashboard} className="mt-4 px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black">{isBn ? 'আবার চেষ্টা করুন' : 'Try again'}</button>
+            <button onClick={refreshDashboard} className="mt-4 px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black">{isBn ? 'আবার চেষ্টা করুন' : 'Try again'}</button>
           </section>
         )}
 
