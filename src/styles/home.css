@@ -1,375 +1,180 @@
-/* PROVATI LOAN — Home premium design system
-   v1.2 visual redesign on v1.1-home-premium.
-   Structure first: hierarchy, shape, spacing and function — not decorative patches.
+/* PROVATI LOAN — compact banking UI
+   Visual system: bank navy + institutional blue + teal.
+   No purple cards, no oversized decorative circles, no low-information whitespace.
 */
+.home-modern.app-home-theme{background:#f3f6f9 !important;color:#172033 !important;padding-bottom:112px !important}
+.dark .home-modern.app-home-theme,html.dark .home-modern.app-home-theme{background:#07131f !important;color:#f5f8fc !important}
+.home-modern.app-home-theme>div.px-3{gap:11px !important}
 
-.home-modern.app-home-theme{
-  background:#f5f7fb !important;
-  color:#0f172a !important;
-  padding-bottom:calc(7.8rem + env(safe-area-inset-bottom)) !important;
-}
-.dark .home-modern.app-home-theme,
-html.dark .home-modern.app-home-theme{
-  background:#07111f !important;
-  color:#f8fafc !important;
-}
-.home-modern.app-home-theme > div.px-3{
-  gap:16px !important;
-}
-
-/* ===== HERO / HEADER ===== */
+/* HEADER */
 .home-dashboard-header{
-  position:relative !important;
-  isolation:isolate;
-  overflow:hidden;
-  margin:0 -12px 2px !important;
-  padding:17px 18px 20px !important;
-  min-height:226px;
-  border-radius:0 0 30px 30px !important;
-  background:#0b1f45 !important;
-  color:#fff !important;
-  box-shadow:0 12px 30px rgba(7,31,69,.22) !important;
+ position:relative;isolation:isolate;overflow:hidden;margin:0 -12px 0 !important;
+ height:188px;min-height:188px;padding:14px 18px 16px !important;border-radius:0 0 24px 24px !important;
+ background:#0a2745 !important;color:#fff !important;box-shadow:0 8px 20px rgba(5,25,45,.18) !important
 }
-.home-hero-art{
-  position:absolute;
-  inset:0;
-  z-index:-1;
-  pointer-events:none;
-  opacity:1;
-}
+.home-hero-art{position:absolute;inset:0;z-index:-1;pointer-events:none}
 .home-hero-art svg{width:100%;height:100%;display:block}
-.home-dashboard-header::before{
-  content:"";
-  position:absolute;
-  z-index:-1;
-  width:210px;height:210px;
-  right:-92px;bottom:-118px;
-  border-radius:50%;
-  border:1px solid rgba(104,221,207,.18);
-  box-shadow:0 0 0 22px rgba(104,221,207,.035),0 0 0 48px rgba(104,221,207,.025);
+.home-hero-art svg path:first-of-type{opacity:.88}
+.home-dashboard-header:after{
+ content:"";position:absolute;z-index:-1;right:-70px;bottom:-70px;width:190px;height:130px;
+ border:1px solid rgba(58,205,184,.2);border-radius:50%;transform:rotate(-12deg)
 }
-.home-dashboard-header::after{
-  content:"";
-  position:absolute;
-  z-index:-1;
-  left:-80px;top:92px;
-  width:190px;height:190px;
-  border-radius:50%;
-  background:rgba(46,122,255,.12);
-  filter:blur(1px);
-}
-.home-header-top{
-  position:relative;
-  z-index:5;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-.home-brand-lockup{display:flex;align-items:center;gap:9px;min-width:0;color:#fff}
-.home-brand-lockup .home-logo-mark{
-  width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;
-}
-.home-brand-lockup .home-logo-mark svg{width:100%;height:100%;display:block}
-.home-brand-lockup b{display:block;font-size:16px;line-height:1;font-weight:900;letter-spacing:.035em;white-space:nowrap}
-.home-brand-lockup small{display:block;margin-top:4px;font-size:7.5px;line-height:1;letter-spacing:.14em;font-weight:700;color:rgba(255,255,255,.68);white-space:nowrap}
-.home-header-actions{display:flex;align-items:center;gap:8px}
-.home-header-icon{
-  width:39px;height:39px;border-radius:12px;
-  display:flex;align-items:center;justify-content:center;
-  color:#fff;background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.18);
-  box-shadow:none;
-}
-.home-header-icon:active{transform:scale(.96)}
-.home-header-icon{position:relative}
-.home-header-icon i{
-  position:absolute;right:7px;top:6px;width:7px;height:7px;border-radius:50%;
-  background:#ff647c;border:1.5px solid #0b1f45;
-}
-.home-profile-avatar{
-  position:relative;width:40px;height:40px;border-radius:12px;overflow:hidden;
-  border:1.5px solid rgba(255,255,255,.65);background:#17335f;box-shadow:0 4px 12px rgba(0,0,0,.16);
-}
+.home-header-top{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.home-brand-lockup{display:flex;align-items:center;gap:8px;min-width:0;color:#fff}
+.home-brand-lockup .home-logo-mark{width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
+.home-brand-lockup .home-logo-mark svg{width:100%;height:100%}
+.home-brand-lockup b{display:block;font-size:15px;line-height:1;font-weight:900;letter-spacing:.025em;white-space:nowrap}
+.home-brand-lockup small{display:block;margin-top:4px;font-size:7px;line-height:1;letter-spacing:.13em;font-weight:700;color:#9db4ca;white-space:nowrap}
+.home-header-actions{display:flex;align-items:center;gap:7px}
+.home-header-icon{position:relative;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;background:#123653;border:1px solid #2b4b67}
+.home-header-icon i{position:absolute;right:6px;top:5px;width:6px;height:6px;border-radius:50%;background:#36d2b0;border:1px solid #0a2745}
+.home-profile-avatar{position:relative;width:37px;height:37px;border-radius:11px;overflow:hidden;border:1px solid #6b8499;background:#173b5b}
 .home-profile-avatar img{width:100%;height:100%;object-fit:cover}
-.home-profile-avatar>span{position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;background:#2ed6a1;border:2px solid #0b1f45}
-.home-header-content{
-  position:relative;z-index:2;
-  display:flex;align-items:flex-end;justify-content:space-between;gap:14px;
-  margin-top:30px;
-}
+.home-profile-avatar>span{position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;border-radius:50%;background:#35c9a8;border:2px solid #0a2745}
+.home-header-content{position:relative;z-index:2;display:block;margin-top:28px}
 .home-header-copy{min-width:0}
-.home-eyebrow{
-  display:inline-flex;align-items:center;gap:5px;
-  padding:5px 8px;border-radius:8px;
-  color:#b9f5ee;background:rgba(52,215,195,.09);
-  border:1px solid rgba(52,215,195,.18);
-  font-size:7px;font-weight:900;letter-spacing:.08em;
-}
-.home-header-copy h1{
-  margin:10px 0 0;color:#fff;font-size:25px;line-height:1.08;font-weight:700;letter-spacing:-.035em;
-}
+.home-eyebrow{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border-radius:7px;color:#9fe8dc;background:#103b55;border:1px solid #24536c;font-size:6.5px;font-weight:900;letter-spacing:.08em}
+.home-header-copy h1{margin:9px 0 0;color:#fff;font-size:24px;line-height:1.02;font-weight:700;letter-spacing:-.04em}
 .home-header-copy h1 strong{font-weight:950}
-.home-header-copy p{
-  margin:7px 0 0;color:rgba(255,255,255,.7);font-size:10px;line-height:1.5;font-weight:600;max-width:245px;
-}
-.home-hero-mini{
-  flex:0 0 126px;
-  display:flex;align-items:center;gap:8px;
-  padding:10px;border-radius:14px;
-  background:rgba(6,22,50,.46);
-  border:1px solid rgba(255,255,255,.13);
-  backdrop-filter:blur(4px);
-}
-.hero-mini-icon{
-  width:31px;height:31px;border-radius:9px;display:flex;align-items:center;justify-content:center;
-  background:#173f82;color:#8fe9dd;border:1px solid rgba(143,233,221,.2);
-}
-.home-hero-mini small{display:block;color:rgba(255,255,255,.48);font-size:6px;font-weight:900;letter-spacing:.08em}
-.home-hero-mini strong{display:block;color:#fff;font-size:9px;margin-top:3px;font-weight:900}
-.home-hero-mini>svg{margin-left:auto;color:#7edfd3}
+.home-header-copy p{margin:6px 0 0;color:#b5c7d7;font-size:9px;line-height:1.35;font-weight:600;max-width:310px}
 
-/* ===== BALANCE CARD ===== */
+/* BALANCE — institutional bank card */
 .home-modern .home-balance-art{
-  position:relative !important;
-  isolation:isolate;
-  overflow:hidden;
-  margin-top:0 !important;
-  padding:18px !important;
-  min-height:224px;
-  border-radius:25px !important;
-  background:#102247 !important;
-  border:1px solid #223b69 !important;
-  box-shadow:0 13px 28px rgba(5,20,48,.20) !important;
+ position:relative;isolation:isolate;overflow:hidden;margin-top:0 !important;padding:15px !important;
+ min-height:182px;height:182px;border-radius:19px !important;background:#0d2a47 !important;
+ border:1px solid #244965 !important;box-shadow:0 9px 20px rgba(5,24,43,.18) !important
 }
-.home-modern .home-balance-art::before{
-  content:"";
-  position:absolute;z-index:0;right:-65px;top:-70px;
-  width:190px;height:190px;border-radius:50%;
-  border:1px solid rgba(82,220,204,.20);
-  box-shadow:0 0 0 18px rgba(82,220,204,.035),0 0 0 42px rgba(82,220,204,.025);
+.home-modern .home-balance-art:before{
+ content:"";position:absolute;right:-50px;top:-55px;width:150px;height:150px;border-radius:50%;
+ border:1px solid rgba(56,198,177,.15)
 }
-.home-modern .home-balance-art::after{
-  content:"";
-  position:absolute;z-index:0;right:-12px;bottom:-38px;
-  width:155px;height:92px;
-  background:linear-gradient(135deg,transparent 0 46%,rgba(91,107,255,.17) 47% 62%,transparent 63%);
-  transform:rotate(-7deg);
+.home-modern .home-balance-art:after{
+ content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:#16a992;opacity:.85
 }
-.balance-structure{position:absolute;inset:0;z-index:0;pointer-events:none}
-.balance-line{position:absolute;display:block;height:1px;background:linear-gradient(90deg,transparent,rgba(111,145,213,.34),transparent);transform:rotate(-17deg)}
-.balance-line-one{width:260px;right:-38px;top:83px}
-.balance-line-two{width:205px;right:-30px;top:105px;opacity:.55}
-.balance-glow{position:absolute;right:18px;top:52px;width:8px;height:8px;border-radius:50%;background:#55dec9;box-shadow:0 0 0 7px rgba(85,222,201,.08)}
+.balance-bank-accent{position:absolute;right:17px;bottom:34px;width:72px;height:1px;background:#2c5572;transform:rotate(-18deg);opacity:.8}
 .balance-card-top,.balance-main,.balance-detail-row,.balance-switch{position:relative;z-index:2}
-.balance-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.balance-brand{display:flex;align-items:center;gap:9px}
-.balance-brand-mark{
-  width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;
-  color:#8deee0;background:#173762;border:1px solid rgba(141,238,224,.18)
-}
-.balance-brand-copy small{display:block;font-size:7px;letter-spacing:.16em;font-weight:900;color:#7390bd}
-.balance-brand-copy strong{display:block;margin-top:3px;font-size:11px;line-height:1;font-weight:900;color:#fff}
-.balance-visibility{
-  height:34px;padding:0 10px;border-radius:10px;display:inline-flex;align-items:center;gap:6px;
-  color:#dce8ff !important;background:#162f59 !important;border:1px solid #2a4774 !important;
-  font-size:9px;font-weight:900;box-shadow:none !important;
-}
-.balance-main{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:23px}
-.balance-kicker{margin:0;color:#86a0c8 !important;font-size:9px;font-weight:800}
-.balance-amount{margin:4px 0 0;color:#fff !important;font-size:35px;line-height:1;font-weight:950;letter-spacing:-.055em}
-.balance-status-block{
-  display:flex;align-items:center;gap:7px;padding:8px 9px;border-radius:10px;
-  background:#0c1b37;border:1px solid #20395f;min-width:92px
-}
-.balance-status-dot{width:7px;height:7px;border-radius:50%;background:#35d6a4;box-shadow:0 0 0 4px rgba(53,214,164,.08)}
-.balance-status-block small{display:block;color:#708bb4;font-size:6px;font-weight:900;letter-spacing:.07em}
-.balance-status-block strong{display:block;color:#dffcf5;font-size:8px;margin-top:2px;font-weight:900}
-.balance-detail-row{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  margin-top:20px;padding-top:12px;border-top:1px solid rgba(139,164,207,.15)
-}
-.balance-detail-row>div span{display:block;color:#6f89b2;font-size:7px;font-weight:800}
-.balance-detail-row>div strong{display:block;color:#dbe7fa;font-size:9px;margin-top:3px;font-weight:900;letter-spacing:.05em}
-.balance-history-link{display:inline-flex;align-items:center;gap:4px;color:#9ae9df !important;font-size:8px;font-weight:900}
-.balance-switch{
-  display:grid;grid-template-columns:1fr 1fr;gap:4px;
-  margin-top:12px;padding:4px;border-radius:11px;background:#09182f;border:1px solid #20395f
-}
-.balance-switch button{
-  height:31px;border:0;border-radius:8px;color:#7189b1;background:transparent;font-size:9px;font-weight:900
-}
-.balance-switch button.is-active{background:#fff;color:#102247;box-shadow:0 3px 8px rgba(0,0,0,.14)}
-.dark .home-modern .home-balance-art{background:#102247 !important}
-.home-modern .home-balance-art p,.home-modern .home-balance-art h1,.home-modern .home-balance-art strong{color:#fff}
+.balance-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.balance-brand{display:flex;align-items:center;gap:8px}
+.balance-brand-mark{width:31px;height:31px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#9fe9dc;background:#143b59;border:1px solid #2b5770}
+.balance-brand-copy small{display:block;font-size:6px;letter-spacing:.14em;font-weight:900;color:#7896ae}
+.balance-brand-copy strong{display:block;margin-top:3px;font-size:10px;line-height:1;font-weight:900;color:#fff}
+.balance-visibility{height:30px;padding:0 9px;border-radius:9px;display:inline-flex;align-items:center;gap:5px;color:#dbe8f2 !important;background:#143752 !important;border:1px solid #2b536e !important;font-size:8px;font-weight:900;box-shadow:none !important}
+.balance-main{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:16px}
+.balance-kicker{margin:0;color:#86a2b9 !important;font-size:8px;font-weight:800}
+.balance-amount{margin:3px 0 0;color:#fff !important;font-size:31px;line-height:.95;font-weight:950;letter-spacing:-.055em}
+.balance-status-block{display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:8px;background:#0a2138;border:1px solid #23435d;min-width:82px}
+.balance-status-dot{width:6px;height:6px;border-radius:50%;background:#32c8a6}
+.balance-status-block small{display:block;color:#7592aa;font-size:5.5px;font-weight:900;letter-spacing:.06em}
+.balance-status-block strong{display:block;color:#d8f7ef;font-size:7.5px;margin-top:2px;font-weight:900}
+.balance-detail-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:13px;padding-top:8px;border-top:1px solid #23425d}
+.balance-detail-row>div span{display:block;color:#7793ab;font-size:6.5px;font-weight:800}
+.balance-detail-row>div strong{display:block;color:#dbe7f0;font-size:8px;margin-top:2px;font-weight:900;letter-spacing:.04em}
+.balance-history-link{display:inline-flex;align-items:center;gap:3px;color:#8fe0d2 !important;font-size:7.5px;font-weight:900}
+.balance-switch{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:8px;padding:3px;border-radius:9px;background:#081c31;border:1px solid #24435d}
+.balance-switch button{height:25px;border:0;border-radius:6px;color:#718da5;background:transparent;font-size:8px;font-weight:900}
+.balance-switch button.is-active{background:#fff;color:#102b46;box-shadow:none}
+.dark .home-modern .home-balance-art{background:#0d2a47 !important}
 
-/* ===== SMART LOAN STATUS ===== */
-.home-loan-status-card{
-  position:relative;overflow:hidden;
-  border-radius:21px !important;
-  background:#fff !important;
-  border:1px solid #e2e8f2 !important;
-  box-shadow:0 8px 22px rgba(15,31,58,.07) !important;
-  padding:16px !important;
-}
-.dark .home-loan-status-card,.html.dark .home-loan-status-card{
-  background:#0d1a2f !important;border-color:#1d3458 !important;box-shadow:0 9px 24px rgba(0,0,0,.16) !important
-}
-.loan-status-empty{border-left:4px solid #2b78e8 !important}
-.loan-status-empty::after{
-  content:"";position:absolute;right:-50px;top:-56px;width:145px;height:145px;border-radius:50%;
-  border:1px solid rgba(43,120,232,.14);box-shadow:0 0 0 20px rgba(43,120,232,.04)
-}
-.loan-status-content,.loan-status-row{position:relative;z-index:1;display:flex;align-items:flex-start;gap:11px}
-.loan-status-icon{
-  width:39px;height:39px;flex:0 0 39px;border-radius:11px;display:flex;align-items:center;justify-content:center;
-  background:#eaf2ff !important;color:#1267d8 !important;border:1px solid #d8e7ff !important
-}
-.dark .loan-status-icon{background:#132c4e !important;color:#6bb0ff !important;border-color:#24456e !important}
-.loan-status-icon.active{background:#e8fbf5 !important;color:#0c9b70 !important;border-color:#c9f1e4 !important}
-.loan-status-eyebrow{margin:0;color:#7890ae !important;font-size:7px;font-weight:950;letter-spacing:.1em}
-.loan-status-title{margin:4px 0 0;color:#12213b !important;font-size:16px;line-height:1.15;font-weight:950;letter-spacing:-.025em}
-.dark .loan-status-title{color:#f7fbff !important}
-.loan-status-copy{margin:5px 0 0;color:#708198 !important;font-size:9px;line-height:1.45;font-weight:600;max-width:285px}
-.loan-status-pills{display:flex;gap:5px;margin-top:9px}
-.loan-status-pills span{padding:5px 7px;border-radius:7px;background:#f1f5f9;color:#52657f;font-size:7px;font-weight:900}
-.dark .loan-status-pills span{background:#14243d;color:#a9bbd5}
-.loan-status-cta{
-  margin-top:13px;min-height:39px;border-radius:10px !important;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  background:#0f78e8 !important;color:#fff !important;border:0 !important;
-  font-size:10px;font-weight:950;box-shadow:0 7px 14px rgba(15,120,232,.18) !important
-}
-.loan-status-cta:active{transform:scale(.99)}
-.loan-status-badge{align-self:flex-start;padding:6px 8px;border-radius:8px;font-size:7px;font-weight:950;white-space:nowrap}
-.loan-status-badge.green{background:#e8fbf3;color:#07845e}.loan-status-badge.amber{background:#fff5df;color:#a15e00}.loan-status-badge.red{background:#ffedf0;color:#c52d45}.loan-status-badge.sky{background:#eaf4ff;color:#166acb}.loan-status-badge.slate{background:#eef2f7;color:#56677f}
-.dark .loan-status-badge.green{background:#0d3a2d;color:#6be1ba}.dark .loan-status-badge.amber{background:#3d2d0d;color:#ffd37b}.dark .loan-status-badge.red{background:#421522;color:#ff9bab}.dark .loan-status-badge.sky{background:#0d3155;color:#83c2ff}.dark .loan-status-badge.slate{background:#1a2a40;color:#afbed3}
-.loan-status-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
-.loan-status-metrics>div{padding:9px 10px;border-radius:10px;background:#f6f8fb;border:1px solid #e8edf4}
-.dark .loan-status-metrics>div{background:#101f36;border-color:#203a60}
-.loan-status-metrics span{display:block;color:#7d8da4;font-size:7px;font-weight:800}.loan-status-metrics strong{display:block;margin-top:4px;color:#17243b;font-size:11px;font-weight:950}.dark .loan-status-metrics strong{color:#f5f9ff}
-.loan-status-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:11px;color:#7c8ca2;font-size:8px;font-weight:800}
-.loan-status-footer span{display:inline-flex;align-items:center;gap:4px}.loan-status-footer a{display:inline-flex;align-items:center;gap:2px;color:#1475df;font-weight:950}
-.loan-status-feedback{margin-top:11px;padding:9px 10px;border-radius:10px;background:#f8fafc;border:1px solid #e7edf5}.loan-status-feedback b{display:block;font-size:7px;color:#7b8ca3}.loan-status-feedback span{display:block;margin-top:3px;font-size:9px;font-weight:800;color:#26364f}.dark .loan-status-feedback{background:#102039;border-color:#223b5d}.dark .loan-status-feedback span{color:#dce7f5}
+/* STATUS */
+.home-loan-status-card{position:relative;overflow:hidden;border-radius:17px !important;background:#fff !important;border:1px solid #dbe4ec !important;box-shadow:0 5px 14px rgba(12,32,52,.055) !important;padding:12px !important}
+.dark .home-loan-status-card,.html.dark .home-loan-status-card{background:#0d1b2b !important;border-color:#20384d !important;box-shadow:none !important}
+.loan-status-empty{border-left:3px solid #126fd1 !important}
+.loan-status-empty:after{content:"";position:absolute;right:-55px;top:-70px;width:145px;height:145px;border-radius:50%;border:1px solid rgba(18,111,209,.10)}
+.loan-status-content,.loan-status-row{position:relative;z-index:1;display:flex;align-items:flex-start;gap:9px}
+.loan-status-icon{width:34px;height:34px;flex:0 0 34px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:#eaf3fb !important;color:#126fd1 !important;border:1px solid #d8e8f5 !important}
+.dark .loan-status-icon{background:#12304a !important;color:#69b8ef !important;border-color:#234b67 !important}
+.loan-status-eyebrow{margin:0;color:#71869a !important;font-size:6.5px;font-weight:950;letter-spacing:.09em}
+.loan-status-title{margin:3px 0 0;color:#132238 !important;font-size:14px;line-height:1.15;font-weight:950;letter-spacing:-.025em}
+.dark .loan-status-title{color:#f4f8fb !important}
+.loan-status-copy{margin:4px 0 0;color:#708297 !important;font-size:8px;line-height:1.35;font-weight:600;max-width:300px}
+.loan-status-pills{display:flex;gap:4px;margin-top:7px}
+.loan-status-pills span{padding:4px 6px;border-radius:6px;background:#f0f4f7;color:#53677b;font-size:6.5px;font-weight:900}
+.dark .loan-status-pills span{background:#14283c;color:#a9bdcd}
+.loan-status-cta{margin-top:9px;min-height:34px;border-radius:8px !important;display:flex;align-items:center;justify-content:center;gap:7px;background:#126fd1 !important;color:#fff !important;border:0 !important;font-size:8.5px;font-weight:950;box-shadow:none !important}
+.loan-status-metrics{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px}
+.loan-status-metrics>div{padding:7px 8px;border-radius:8px;background:#f5f8fa;border:1px solid #e5ebf0}
+.dark .loan-status-metrics>div{background:#102438;border-color:#203b51}
+.loan-status-metrics span{display:block;color:#7a8ea1;font-size:6.5px;font-weight:800}
+.loan-status-metrics strong{display:block;margin-top:3px;color:#17283c;font-size:9.5px;font-weight:950}
+.dark .loan-status-metrics strong{color:#f4f8fb}
+.loan-status-footer{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:8px;color:#7a8da0;font-size:7px;font-weight:800}
+.loan-status-footer a{display:inline-flex;align-items:center;gap:2px;color:#126fd1;font-weight:950}
+.loan-status-badge{align-self:flex-start;padding:5px 7px;border-radius:7px;font-size:6.5px;font-weight:950}
 
-/* ===== LOAN CATEGORY CARDS ===== */
-.loan-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:10px}
-.loan-section-head>div p{margin:0;color:#73839a;font-size:8px;font-weight:950;letter-spacing:.11em}
-.loan-section-head h2{margin:4px 0 0;color:#111f35 !important;font-size:20px !important;line-height:1.1;font-weight:950 !important;letter-spacing:-.04em}
-.dark .loan-section-head h2{color:#f7fbff !important}
-.loan-all-link{display:inline-flex;align-items:center;gap:2px;color:#1475df;font-size:9px;font-weight:950;padding:5px 0}
-.dark .loan-all-link{color:#79b9ff}
-.loan-category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+/* LOAN SERVICES — compact data cards */
+.loan-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-bottom:7px}
+.loan-section-head>div p{margin:0;color:#718399;font-size:6.5px;font-weight:950;letter-spacing:.1em}
+.loan-section-head h2{margin:3px 0 0;color:#132238 !important;font-size:18px !important;line-height:1.05;font-weight:950 !important;letter-spacing:-.04em}
+.dark .loan-section-head h2{color:#f5f8fb !important}
+.loan-all-link{display:inline-flex;align-items:center;gap:1px;color:#126fd1;font-size:8px;font-weight:950;padding:4px 0}
+.dark .loan-all-link{color:#62b0e9}
+.loan-category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
 .premium-loan-tile{
-  position:relative;isolation:isolate;overflow:hidden;
-  min-height:126px;padding:12px !important;border:0 !important;border-radius:19px !important;
-  text-align:left;color:#fff !important;box-shadow:0 9px 20px rgba(10,25,50,.13) !important;
-  transition:transform .18s ease,box-shadow .18s ease;
+ position:relative;display:flex;align-items:center;gap:8px;min-height:82px;height:82px;padding:10px !important;
+ overflow:hidden;border:1px solid transparent !important;border-radius:13px !important;text-align:left;color:#fff !important;
+ box-shadow:none !important;transition:transform .15s ease
 }
-.premium-loan-tile:active{transform:scale(.975);box-shadow:0 5px 12px rgba(10,25,50,.12) !important}
-.premium-loan-tile::before{
-  content:"";position:absolute;z-index:-1;right:-31px;top:-34px;width:105px;height:105px;border-radius:50%;
-  border:1px solid rgba(255,255,255,.18);box-shadow:0 0 0 17px rgba(255,255,255,.035)
-}
-.premium-loan-tile::after{
-  content:"";position:absolute;z-index:-1;left:-28px;bottom:-42px;width:120px;height:76px;border-radius:50%;
-  border:1px solid rgba(255,255,255,.12)
-}
-.loan-tone-blue{background:linear-gradient(145deg,#0f7fd6,#0751a7) !important}
-.loan-tone-violet{background:linear-gradient(145deg,#6842df,#3e229f) !important}
-.loan-tone-indigo{background:linear-gradient(145deg,#3e54cf,#25348f) !important}
-.loan-tone-emerald{background:linear-gradient(145deg,#079b86,#056457) !important}
-.loan-tile-top{display:flex;align-items:center;justify-content:space-between}
-.loan-tile-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:rgba(7,22,45,.24);border:1px solid rgba(255,255,255,.19);color:#fff}
-.loan-tile-arrow{width:27px;height:27px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14);color:#fff}
-.loan-tile-name{display:block;margin-top:16px;color:#fff !important;font-size:13px;font-weight:950;letter-spacing:-.02em}
-.loan-tile-meta{display:flex;align-items:center;gap:7px;margin-top:7px}
-.loan-tile-meta span{display:inline-flex;align-items:center;gap:3px;color:rgba(255,255,255,.78);font-size:7px;font-weight:900;white-space:nowrap}
+.premium-loan-tile:active{transform:scale(.98)}
+.premium-loan-tile:before{content:"";position:absolute;right:-42px;top:-55px;width:120px;height:120px;border-radius:50%;border:1px solid rgba(255,255,255,.09)}
+.loan-tone-blue{background:#116fc4 !important}
+.loan-tone-navy{background:#173b5a !important}
+.loan-tone-teal{background:#087f75 !important}
+.loan-tone-slate{background:#31506a !important}
+.loan-tile-icon{width:31px;height:31px;flex:0 0 31px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);color:#fff}
+.loan-tile-copy{min-width:0;flex:1}
+.loan-tile-name{display:block;color:#fff !important;font-size:11px;font-weight:950;line-height:1.1;letter-spacing:-.01em}
+.loan-tile-meta{display:flex;align-items:center;gap:6px;margin-top:5px}
+.loan-tile-meta span{display:inline-flex;align-items:center;gap:2px;color:#d6e7f1;font-size:6.5px;font-weight:900;white-space:nowrap}
+.loan-tile-arrow{flex:0 0 auto;color:#a9d8e6}
 
-/* ===== SUCCESS STORIES ===== */
-.home-success-story{
-  min-height:176px !important;
-  padding:15px !important;
-  border-radius:20px !important;
-  border:1px solid #dfe7f2 !important;
-  color:#13223a !important;
-  background:#fff !important;
-  box-shadow:0 8px 20px rgba(15,31,58,.07) !important;
-}
-.home-success-story::before{
-  content:"";position:absolute;z-index:0;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#1477e8,#34c8b3)
-}
-.home-success-story::after{display:none !important}
-.home-success-story p,.home-success-story span,.home-success-story strong{color:inherit}
-.home-success-story .text-white/75{color:#73849b !important}
-.home-success-story .bg-white/15{background:#f0f5fb !important}
-.home-success-story .border-white/20{border-color:#dfe7f2 !important}
-.home-success-story .border-white/80{border-color:#cbd9ea !important}
-.home-success-story .text-amber-300{color:#f2a900 !important}
-.home-story-verified{background:#e8f7f3;color:#087c61 !important;border:1px solid #cbeee5}
-.dark .home-success-story{background:#0d1a2f !important;border-color:#1d3458 !important;color:#f3f7ff !important}
-.dark .home-success-story .text-white\/75{color:#91a6c2 !important}
-.dark .home-success-story .bg-white\/15{background:#172b48 !important}
-.dark .home-success-story .border-white\/20{border-color:#284261 !important}
-.dark .home-success-story .border-white\/80{border-color:#476182 !important}
-.dark .home-story-verified{background:#0d3b31;color:#6de0bd !important;border-color:#1d6252}
+/* SUCCESS + ACTIVITY */
+.home-success-story{min-height:145px !important;padding:12px !important;border-radius:16px !important;border:1px solid #dbe4ec !important;color:#17283b !important;background:#fff !important;box-shadow:0 5px 14px rgba(12,32,52,.05) !important}
+.home-success-story:before{content:"";position:absolute;z-index:0;left:0;top:0;bottom:0;width:3px;background:#16a992}
+.home-success-story:after{display:none !important}
+.home-success-story .text-white\/75{color:#73869a !important}
+.home-success-story .bg-white\/15{background:#eef4f7 !important}
+.home-success-story .border-white\/20{border-color:#dbe5ec !important}
+.home-success-story .text-amber-300{color:#b17c19 !important}
+.dark .home-success-story{background:#0d1b2b !important;border-color:#20384d !important;color:#f1f6fa !important}
+.dark .home-success-story .text-white\/75{color:#90a7b9 !important}
+.dark .home-success-story .bg-white\/15{background:#152b3f !important}
+.home-activity-card{background:#fff !important;border:1px solid #dbe4ec !important;box-shadow:0 5px 14px rgba(12,32,52,.05) !important}
+.dark .home-activity-card,.html.dark .home-activity-card{background:#0d1b2b !important;border-color:#20384d !important;box-shadow:none !important}
+.home-activity-card>div{padding:10px 11px !important}
+.home-activity-card .w-10.h-10{width:33px !important;height:33px !important;border-radius:9px !important}
 
-/* ===== ACTIVITY ===== */
-.home-activity-card{
-  background:#fff !important;border:1px solid #e1e8f1 !important;
-  box-shadow:0 8px 20px rgba(15,31,58,.06) !important
-}
-.dark .home-activity-card,.html.dark .home-activity-card{background:#0d1a2f !important;border-color:#1d3458 !important}
-.home-activity-card>div{padding:12px 13px !important}
-.home-activity-card .w-10.h-10{width:36px !important;height:36px !important;border-radius:10px !important}
-.home-modern.app-home-theme section h2{color:#111f35}
-.dark .home-modern.app-home-theme section h2,.html.dark .home-modern.app-home-theme section h2{color:#f7fbff}
-
-/* ===== BOTTOM NAV + CHAT ===== */
-.home-bottom-nav{
-  left:12px !important;right:12px !important;bottom:12px !important;
-  padding:6px 8px 7px !important;border-radius:20px !important;
-  background:rgba(6,16,31,.96) !important;border:1px solid #203552 !important;
-  box-shadow:0 12px 30px rgba(0,0,0,.28) !important;
-}
-.home-bottom-nav>div{min-height:49px}
-.home-bottom-nav a{color:#778aa5 !important}
-.home-bottom-nav a span{font-size:8px !important;font-weight:900 !important}
-.home-bottom-nav a .neu-btn-primary{
-  background:#173d7c !important;color:#8ec2ff !important;box-shadow:none !important
-}
-.home-bottom-nav a:first-child{color:#70b7ff !important}
-.home-bottom-nav a.relative.-top-5{top:-15px !important}
-.home-bottom-nav a.relative.-top-5>div{
-  width:50px;height:50px;padding:0 !important;border-radius:16px !important;
-  background:#1678eb !important;border:4px solid #07111f;box-shadow:0 8px 18px rgba(22,120,235,.28) !important
-}
-.home-bottom-nav a.relative.-top-5 span{color:#a9c9ef !important;margin-top:4px !important}
-.home-chat-fab{
-  right:15px !important;bottom:91px !important;width:53px !important;height:53px !important;
-  animation:none !important;
-}
+/* NAV */
+.home-bottom-nav{left:12px !important;right:12px !important;bottom:10px !important;padding:5px 7px 6px !important;border-radius:18px !important;background:#071522 !important;border:1px solid #20384d !important;box-shadow:0 9px 24px rgba(0,0,0,.28) !important}
+.home-bottom-nav>div{min-height:46px}
+.home-bottom-nav a{color:#8296a8 !important}
+.home-bottom-nav a span{font-size:7px !important;font-weight:900 !important}
+.home-bottom-nav a:first-child{color:#6eb5e8 !important}
+.home-bottom-nav a.relative.-top-5{top:-13px !important}
+.home-bottom-nav a.relative.-top-5>div{width:48px;height:48px;padding:0 !important;border-radius:14px !important;background:#1176d5 !important;border:3px solid #071522;box-shadow:0 7px 15px rgba(17,118,213,.28) !important}
+.home-bottom-nav a.relative.-top-5 span{color:#b3cde0 !important;margin-top:3px !important}
+.home-chat-fab{right:14px !important;bottom:82px !important;width:48px !important;height:48px !important;animation:none !important}
 .home-chat-fab svg{width:100%;height:100%}
 .home-chat-fab .live-dot{animation:none !important}
 
-/* ===== LIGHT MODE ===== */
-html:not(.dark) .home-modern.app-home-theme{background:#f5f7fb !important}
-html:not(.dark) .home-modern .home-balance-art{background:#102247 !important}
-html:not(.dark) .home-modern .home-next-action{background:#fff !important;border-color:#e2e8f0 !important}
-html:not(.dark) .home-modern.app-home-theme section>div>p{color:#73839a}
+/* LIGHT MODE */
+html:not(.dark) .home-modern.app-home-theme{background:#f3f6f9 !important}
+html:not(.dark) .home-modern .home-balance-art{background:#0d2a47 !important}
+html:not(.dark) .home-modern .home-next-action{background:#fff !important;border-color:#dbe4ec !important}
+html:not(.dark) .home-modern.app-home-theme section>div>p{color:#718399}
 
-/* ===== MOBILE FIT ===== */
-@media (max-width:390px){
-  .home-dashboard-header{min-height:218px;padding:15px 14px 18px !important}
-  .home-header-copy h1{font-size:23px}
-  .home-hero-mini{flex-basis:112px;padding:8px}
-  .home-modern .home-balance-art{padding:16px !important;min-height:218px}
-  .balance-main{margin-top:19px}
-  .balance-amount{font-size:32px}
-  .premium-loan-tile{min-height:120px}
-  .loan-tile-name{font-size:12px}
+/* MOBILE */
+@media(max-width:390px){
+ .home-dashboard-header{height:178px;min-height:178px;padding:12px 14px 14px !important}
+ .home-header-copy h1{font-size:22px}
+ .home-header-content{margin-top:22px}
+ .home-modern .home-balance-art{height:176px;min-height:176px;padding:13px !important}
+ .balance-main{margin-top:13px}
+ .balance-amount{font-size:29px}
+ .loan-category-grid{gap:6px}
+ .premium-loan-tile{min-height:78px;height:78px;padding:8px !important}
+ .loan-tile-icon{width:29px;height:29px;flex-basis:29px}
+ .loan-tile-name{font-size:10.5px}
+ .loan-tile-meta{margin-top:4px}
+ .loan-tile-meta span{font-size:6px}
 }
-@media (min-width:640px){
-  .home-dashboard-header{margin-left:-16px !important;margin-right:-16px !important;padding-left:22px !important;padding-right:22px !important}
-  .loan-category-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-}
+@media(min-width:640px){.home-dashboard-header{margin-left:-16px !important;margin-right:-16px !important;padding-left:22px !important;padding-right:22px !important}.loan-category-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
