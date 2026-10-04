@@ -250,6 +250,8 @@ export async function createTransaction(txn: Omit<Transaction, 'id' | 'created_a
 }
 
 // ── Success Stories API ──────────────────────────────────
+// Public stories are loaded through the Vercel API so preview and production
+// use the same safe, read-only data path.
 
 export async function getSuccessStories(): Promise<SuccessStory[]> {
   try {
