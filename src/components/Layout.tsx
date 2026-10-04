@@ -137,7 +137,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           <Link
             to="/support"
-            className="absolute bottom-28 right-5 w-16 h-16 z-40 cursor-pointer chat-fab"
+            className="home-chat-fab absolute z-40 cursor-pointer"
             style={{ background: 'none', position: 'absolute' }}
           >
             {/* Live dot indicator — green=online, red=offline, gray=loading */}
@@ -200,7 +200,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
 
       {!isSupportPage && !userProfile?.is_locked && (
-        <div className="absolute bottom-4 left-4 right-4 neu-raised px-4 py-2 rounded-[24px] transition-colors z-50">
+        <div className="home-bottom-nav absolute z-50">
           <div className="flex justify-between items-center relative">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
