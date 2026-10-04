@@ -1,4 +1,4 @@
-import { Eye, EyeOff, ArrowUpRight, WalletCards, CircleDollarSign } from 'lucide-react';
+import { Eye, EyeOff, WalletCards, ShieldCheck } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Skeleton } from '../Skeleton';
 import { formatCurrency } from '../../lib/translation';
@@ -31,8 +31,11 @@ export function BalanceCard({
 
       <div className="balance-card-top">
         <div className="balance-brand">
-          <span className="balance-brand-dot"><WalletCards size={13}/></span>
-          <span>PROVATI • {isBn?'আমার হিসাব':'MY ACCOUNT'}</span>
+          <span className="balance-brand-dot"><WalletCards size={14}/></span>
+          <span className="balance-brand-copy">
+            <small>PROVATI</small>
+            <strong>{isBn?'আমার হিসাব':'MY ACCOUNT'}</strong>
+          </span>
         </div>
         <button
           type="button"
@@ -60,10 +63,10 @@ export function BalanceCard({
             </motion.p>
           </AnimatePresence>
         </div>
-        <div className="balance-side-stat">
-          <CircleDollarSign size={18}/>
-          <span>{isBn?'নিরাপদ হিসাব':'Secure account'}</span>
-        </div>
+        <span className="balance-side-stat">
+          <ShieldCheck size={15}/>
+          <span>{isBn?'নিরাপদ':'SECURE'}</span>
+        </span>
       </div>
 
       <div className="balance-switch" role="tablist" aria-label={isBn?'হিসাব নির্বাচন':'Account view'}>
