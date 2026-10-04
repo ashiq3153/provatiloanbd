@@ -210,3 +210,53 @@ html:not(.dark) .home-modern.app-home-theme section>div>p{color:#718399}
   .home-success-story img{width:42px !important;height:42px !important;max-width:42px !important;max-height:42px !important;min-width:42px !important;min-height:42px !important;object-fit:cover !important}
 }
 .home-modern .home-success-story img{width:42px !important;height:42px !important;max-width:42px !important;max-height:42px !important;min-width:42px !important;min-height:42px !important;object-fit:cover !important;border-radius:50% !important}
+
+
+/* FINAL BANKING COMPOSITION — reduce decorative hero, restore full balance controls */
+.home-dashboard-header{
+  height:142px !important;
+  min-height:142px !important;
+  background:#092b4a !important;
+  border-radius:0 0 18px 18px !important;
+}
+.home-hero-art{display:none !important}
+.home-dashboard-header:before{
+  content:"";
+  position:absolute;
+  left:-8%;
+  right:-8%;
+  bottom:-30px;
+  height:82px;
+  background:linear-gradient(110deg,#0f5db8 0%,#176ed0 48%,#0d4ea6 100%);
+  border-radius:50% 50% 0 0 / 48% 48% 0 0;
+  z-index:-1;
+}
+.home-dashboard-header:after{
+  right:-34px !important;
+  bottom:-44px !important;
+  width:135px !important;
+  height:82px !important;
+  border-color:rgba(92,218,195,.12) !important;
+}
+.home-header-content{margin-top:14px !important}
+.home-header-copy h1{font-size:20px !important}
+.home-header-copy p{max-width:290px !important}
+
+.home-modern .home-balance-art{
+  height:176px !important;
+  min-height:176px !important;
+  padding:12px !important;
+  border-radius:16px !important;
+}
+.home-modern .home-balance-art:before{right:-42px;top:-62px;width:132px;height:132px}
+.balance-main{margin-top:10px !important}
+.balance-amount{font-size:29px !important}
+.balance-detail-row{margin-top:7px !important;padding-top:6px !important}
+.balance-switch{margin-top:5px !important}
+.balance-switch button{height:23px !important}
+
+@media(max-width:390px){
+  .home-dashboard-header{height:138px !important;min-height:138px !important}
+  .home-header-content{margin-top:12px !important}
+  .home-modern .home-balance-art{height:174px !important;min-height:174px !important}
+}
