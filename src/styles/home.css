@@ -7,7 +7,7 @@
    ================================================================ */
 
 .home-modern.app-home-theme {
-  background: #f4f7fc !important;
+  background: #ffffff !important;
   padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)) !important;
 }
 .dark .home-modern.app-home-theme,
@@ -43,10 +43,10 @@ html.dark .home-modern.app-home-theme {
   isolation: isolate;
   overflow: hidden;
   margin-top: 0 !important;
-  padding: 20px 18px 16px !important;
+  padding: 15px 16px 14px !important;
   border-radius: 24px !important;
   border: 1px solid rgba(255,255,255,.18) !important;
-  box-shadow: 0 16px 34px rgba(35,45,190,.22) !important;
+  box-shadow: 0 10px 26px rgba(35,45,190,.18) !important;
   background: linear-gradient(140deg, #1c33d6 0%, #2a2ad0 55%, #3d22c9 100%) !important;
 }
 .home-modern .home-balance-art-orb-one {
@@ -367,7 +367,7 @@ html.dark .home-modern.app-home-theme section h2 {
 /* Balance card is intentionally informational: remove the action row and
    savings/loan-due/statement controls from its layout. */
 .home-modern .pv-home-financial-hero.home-balance-art {
-  padding-bottom: 20px !important;
+  padding-bottom: 15px !important;
 }
 .home-modern .home-category-carousel {
   display: grid !important;
@@ -662,4 +662,25 @@ html.dark .home-modern .home-member-note p {
   }
   .home-modern .home-service-tile .service-title{font-size:13px !important;}
   .home-modern .home-service-tile .service-subtitle{font-size:10px !important;}
+}
+
+
+/* Final mobile fintech polish — compact hierarchy and true white light canvas. */
+.home-modern.app-home-theme > div.px-3 { gap: 14px !important; }
+.home-modern .home-loan-status-card {
+  border-radius: 18px !important;
+  padding: 14px !important;
+  box-shadow: 0 4px 14px rgba(15,23,42,.05) !important;
+}
+.home-modern .home-success-story {
+  min-height: 170px !important;
+  border-radius: 20px !important;
+}
+.home-modern .home-category-tile {
+  height: 88px !important;
+  border-radius: 16px !important;
+}
+@media (max-width: 390px) {
+  .home-modern .pv-home-financial-hero.home-balance-art { padding: 14px 13px 13px !important; }
+  .home-modern .home-category-tile { height: 82px !important; }
 }
