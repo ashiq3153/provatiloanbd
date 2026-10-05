@@ -278,7 +278,7 @@ export default function ApplyLoan() {
 
   // Form State
   const [category, setCategory] = useState<ReturnType<typeof getCategories>[0] | null>(null);
-  const [amount, setAmount] = useState(100000);
+  const [amount, setAmount] = useState(500000);
   const [tenure, setTenure] = useState(24);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -3014,12 +3014,21 @@ export default function ApplyLoan() {
               <button type="button" onClick={prevStep} disabled={step === 1} className="w-11 h-11 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 flex items-center justify-center disabled:opacity-60">
                 <ChevronLeft size={22} />
               </button>
-              <div className="px-4 h-9 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center">
-                <span className="text-[11px] font-black text-blue-800 dark:text-blue-200">{isBn ? `ধাপ ${convertDigits(step, true)} / ৮` : `Step ${step} / 8`}</span>
+              <div className="flex items-center gap-2">
+                <div className="px-4 h-9 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center">
+                  <span className="text-[11px] font-black text-blue-800 dark:text-blue-200">
+                    {isBn ? `আবেদন • ${step === 2 ? "Loan Amount And Tenure" : "Loan Application"}` : `Apply • ${step === 2 ? "Loan Amount And Tenure" : "Loan Application"}`}
+                  </span>
+                </div>
               </div>
-              <button type="button" onClick={() => {}} className="w-11 h-11 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-200" aria-label={isBn ? "সহায়তা" : "Help"}>
-                <span className="w-5 h-5 rounded-full border-2 border-current flex items-center justify-center text-[11px] font-black">?</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => {}} className="w-10 h-10 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-200" aria-label={isBn ? "সহায়তা" : "Help"}>
+                  <span className="w-5 h-5 rounded-full border-2 border-current flex items-center justify-center text-[11px] font-black">?</span>
+                </button>
+                <button type="button" onClick={() => navigate('/profile')} className="w-10 h-10 rounded-full bg-blue-800 dark:bg-blue-700 text-white flex items-center justify-center shadow-sm" aria-label={isBn ? "প্রোফাইল" : "Profile"}>
+                  <User size={19} />
+                </button>
+              </div>
             </div>
             <div className="mt-3 h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
               <motion.div className="h-full rounded-full bg-gradient-to-r from-blue-700 to-blue-500" initial={{ width: 0 }} animate={{ width: `${Math.min(step / 8, 1) * 100}%` }} transition={{ duration: 0.3 }} />
