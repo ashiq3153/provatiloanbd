@@ -753,3 +753,28 @@ html.dark .home-modern .home-member-note p {
     max-width:200px !important;
   }
 }
+
+
+/* Education + Emergency cards — explicit banking palette */
+.home-modern .category-education {
+  background: linear-gradient(145deg, #14b8a6 0%, #087f73 100%) !important;
+}
+.home-modern .category-emergency {
+  background: linear-gradient(145deg, #f97316 0%, #dc2626 100%) !important;
+}
+.home-modern .category-education::after,
+.home-modern .category-emergency::after {
+  content: "" !important;
+  position: absolute !important;
+  width: 82px !important;
+  height: 82px !important;
+  right: -28px !important;
+  top: -30px !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,.10) !important;
+  pointer-events: none !important;
+}
+.home-modern .category-education .category-icon,
+.home-modern .category-emergency .category-icon {
+  background: rgba(255,255,255,.18) !important;
+}
