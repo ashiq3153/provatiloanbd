@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { ArrowLeft, Search, UserRound, Building2, Plane, GraduationCap, Siren, ShieldCheck, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
-import { convertDigits } from '../lib/translation';
 import { getCategories } from './apply-loan-utils';
 
 const accent = {
