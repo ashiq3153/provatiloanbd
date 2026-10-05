@@ -1,0 +1,76 @@
+/* PROVATI LOAN — Global Mobile Typography System
+   Reference: compact Figma My Profile screen.
+   Goal: smaller, cleaner type across the entire app without flattening hierarchy.
+*/
+:root {
+  --app-font-body: 12px;
+  --app-font-xs: 10px;
+  --app-font-sm: 11px;
+  --app-font-base: 12px;
+  --app-font-lg: 14px;
+  --app-font-xl: 16px;
+  --app-font-2xl: 18px;
+  --app-font-3xl: 20px;
+  --app-font-4xl: 22px;
+  --app-font-5xl: 26px;
+}
+
+html, body {
+  font-size: var(--app-font-body) !important;
+}
+
+body {
+  line-height: 1.4;
+}
+
+/* Base semantic hierarchy for screens/components that don't use a Tailwind size utility. */
+body :where(h1) { font-size: 18px !important; line-height: 1.2 !important; }
+body :where(h2) { font-size: 15px !important; line-height: 1.25 !important; }
+body :where(h3) { font-size: 13px !important; line-height: 1.3 !important; }
+body :where(h4, h5, h6) { font-size: 12px !important; line-height: 1.3 !important; }
+body :where(p, li, dt, dd, td, th, label) { font-size: 11.5px !important; line-height: 1.4 !important; }
+body :where(small) { font-size: 10px !important; line-height: 1.35 !important; }
+body :where(button, input, textarea, select, option) { font-size: 12px !important; line-height: 1.35 !important; }
+
+/* Normalize Tailwind's common text utilities for compact mobile UI. */
+body .text-xs { font-size: 10px !important; line-height: 1.35 !important; }
+body .text-sm { font-size: 11px !important; line-height: 1.4 !important; }
+body .text-base { font-size: 12px !important; line-height: 1.4 !important; }
+body .text-lg { font-size: 14px !important; line-height: 1.3 !important; }
+body .text-xl { font-size: 16px !important; line-height: 1.25 !important; }
+body .text-2xl { font-size: 18px !important; line-height: 1.2 !important; }
+body .text-3xl { font-size: 20px !important; line-height: 1.18 !important; }
+body .text-4xl { font-size: 22px !important; line-height: 1.15 !important; }
+body .text-5xl { font-size: 26px !important; line-height: 1.1 !important; }
+body .text-6xl { font-size: 30px !important; line-height: 1.05 !important; }
+
+/* Arbitrary Tailwind text sizes are intentionally brought back into the
+   same compact scale; component-specific CSS can still override them. */
+body :where([class*="text-\\["]) {
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+}
+
+/* Keep intentionally strong numeric/financial values readable, but compact. */
+body :where(.font-black, .font-extrabold) {
+  letter-spacing: -0.01em;
+}
+
+/* Buttons and navigation should never look oversized on a phone. */
+body :where(button, [role="button"], nav a) {
+  letter-spacing: -0.005em;
+}
+
+/* Do not shrink icon glyphs/SVGs just because their parent text is small. */
+body svg {
+  flex-shrink: 0;
+}
+
+/* Larger screens get a small breathing adjustment, not desktop-sized typography. */
+@media (min-width: 640px) {
+  html, body { font-size: 13px !important; }
+  body .text-base { font-size: 13px !important; }
+  body .text-lg { font-size: 15px !important; }
+  body .text-xl { font-size: 17px !important; }
+  body .text-2xl { font-size: 19px !important; }
+}
