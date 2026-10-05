@@ -778,3 +778,78 @@ html.dark .home-modern .home-member-note p {
 .home-modern .category-emergency .category-icon {
   background: rgba(255,255,255,.18) !important;
 }
+
+
+/* ===============================================================
+   SUPPORT — compact branded contact cards + reliable light/dark FAQ
+   =============================================================== */
+.support-screen .support-contact-card.whatsappSupport {
+  background:linear-gradient(135deg,#e9fff2 0%,#d7f9e7 100%) !important;
+  border-color:#b7efd0 !important;
+}
+.dark .support-screen .support-contact-card.whatsappSupport,
+html.dark .support-screen .support-contact-card.whatsappSupport {
+  background:linear-gradient(135deg,#092c22 0%,#0b3b2b 100%) !important;
+  border-color:#145c43 !important;
+}
+.support-screen .support-contact-card.telegramSupport {
+  background:linear-gradient(135deg,#e9f7ff 0%,#d7efff 100%) !important;
+  border-color:#b8def5 !important;
+}
+.dark .support-screen .support-contact-card.telegramSupport,
+html.dark .support-screen .support-contact-card.telegramSupport {
+  background:linear-gradient(135deg,#0a253a 0%,#0b3150 100%) !important;
+  border-color:#164c70 !important;
+}
+.support-screen .support-contact-card.imoSupport {
+  background:linear-gradient(135deg,#edf6ff 0%,#dceeff 100%) !important;
+  border-color:#c5e0ff !important;
+}
+.dark .support-screen .support-contact-card.imoSupport,
+html.dark .support-screen .support-contact-card.imoSupport {
+  background:linear-gradient(135deg,#0a2440 0%,#0c3157 100%) !important;
+  border-color:#174c78 !important;
+}
+.support-screen .support-contact-card.messengerSupport {
+  background:linear-gradient(135deg,#eef4ff 0%,#e0eaff 100%) !important;
+  border-color:#c7d7ff !important;
+}
+.dark .support-screen .support-contact-card.messengerSupport,
+html.dark .support-screen .support-contact-card.messengerSupport {
+  background:linear-gradient(135deg,#101f43 0%,#142c5a 100%) !important;
+  border-color:#284a87 !important;
+}
+.support-screen .support-contact-card.emailSupport {
+  background:linear-gradient(135deg,#f5f7fa 0%,#e9edf3 100%) !important;
+  border-color:#d9e0e8 !important;
+}
+.dark .support-screen .support-contact-card.emailSupport,
+html.dark .support-screen .support-contact-card.emailSupport {
+  background:linear-gradient(135deg,#172131 0%,#1b283a 100%) !important;
+  border-color:#334155 !important;
+}
+.support-screen .support-contact-icon {
+  background:rgba(255,255,255,.72) !important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.38),0 3px 10px rgba(15,23,42,.08) !important;
+}
+.dark .support-screen .support-contact-icon,
+html.dark .support-screen .support-contact-icon {
+  background:rgba(255,255,255,.09) !important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.10) !important;
+}
+.support-screen .whatsappSupport .support-contact-icon { color:#25D366 !important; }
+.support-screen .telegramSupport .support-contact-icon { color:#229ED9 !important; }
+.support-screen .imoSupport .support-contact-icon { color:#168CFF !important; }
+.support-screen .messengerSupport .support-contact-icon { color:#0084FF !important; }
+.support-screen .emailSupport .support-contact-icon { color:#64748B !important; }
+.dark .support-screen .emailSupport .support-contact-icon,
+html.dark .support-screen .emailSupport .support-contact-icon { color:#94A3B8 !important; }
+
+.support-screen .support-faq-card,
+.support-screen .support-faq-card button,
+.support-screen .support-faq-card div {
+  color-scheme:light dark;
+}
+.support-screen .support-faq-card button {
+  -webkit-tap-highlight-color:transparent;
+}
