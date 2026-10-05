@@ -1,150 +1,101 @@
 
-/* PROVATI LOAN — Premium Loan Category Selection
-   Scoped to the Apply Loan category cards already rendered by ApplyLoan.tsx.
-*/
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]){
-  min-height:118px !important;
-  height:118px !important;
-  display:grid !important;
-  grid-template-columns:minmax(0,1fr) 96px !important;
-  align-items:stretch !important;
-  gap:0 !important;
-  padding:0 !important;
-  border:1px solid #dfeae7 !important;
-  border-radius:16px !important;
-  background:#ffffff !important;
-  box-shadow:0 5px 18px rgba(25,73,66,.075) !important;
+/* PROVATI LOAN — V1.1 Phase 1 premium Loan Category screen */
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer{
+  border-radius:18px !important;
+  background:#fff !important;
+  border:1px solid #e2ebe9 !important;
+  box-shadow:0 4px 16px rgba(15,73,65,.065) !important;
   transform:none !important;
-}
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]):hover{
-  border-color:#a9d8d0 !important;
-  transform:translateY(-1px) !important;
-  box-shadow:0 8px 22px rgba(25,73,66,.10) !important;
-}
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]):active{
-  transform:scale(.992) !important;
-}
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt])[class*="border-primary-500"]{
-  border-color:#269889 !important;
-  box-shadow:0 7px 22px rgba(38,152,137,.14), inset 0 0 0 1px rgba(38,152,137,.10) !important;
-}
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) > div:first-child{
-  padding:11px 10px 10px 12px !important;
-  min-width:0 !important;
-  display:flex !important;
-  flex-direction:column !important;
-  justify-content:center !important;
-  gap:7px !important;
-}
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) > div:first-child > div.flex.items-start.justify-between{
-  margin:0 !important;
-  gap:8px !important;
-}
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) .w-10.h-10.rounded-xl{
-  width:36px !important;
-  height:36px !important;
-  min-width:36px !important;
-  border-radius:10px !important;
-  background:#edf8f5 !important;
-  color:#238c7d !important;
-  box-shadow:none !important;
-}
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) .w-10.h-10.rounded-xl svg{
-  width:17px !important;
-  height:17px !important;
-}
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) h3.font-extrabold.text-gray-900.dark\:text-white.text-lg{
-  margin:0 !important;
-  font-size:13px !important;
-  line-height:1.2 !important;
-  letter-spacing:-.01em !important;
-  font-weight:800 !important;
-}
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) p.text-xs.font-bold{
-  margin:2px 0 0 !important;
-  font-size:8px !important;
-  line-height:1.2 !important;
-  letter-spacing:.02em !important;
-}
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) .flex.flex-wrap.gap-1\.5{
-  gap:4px !important;
-  margin-top:1px !important;
-}
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) .flex.flex-wrap.gap-1\.5 > span{
-  padding:3px 6px !important;
-  border-radius:999px !important;
-  font-size:7px !important;
-  line-height:1 !important;
-  font-weight:800 !important;
-  border-color:#d8eae6 !important;
-  background:#f4faf8 !important;
-  color:#5d7975 !important;
-}
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) > div:last-child{
-  position:relative !important;
-  width:96px !important;
-  height:100% !important;
-  min-height:118px !important;
   overflow:hidden !important;
-  border-left:1px solid #e4eeec !important;
 }
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) > div:last-child > div.absolute.inset-0{
-  background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.18) 46%,rgba(255,255,255,0) 100%) !important;
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:hover{
+  border-color:#a8d6cf !important;
+  transform:translateY(-1px) !important;
+  box-shadow:0 8px 22px rgba(15,73,65,.09) !important;
 }
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) > div:last-child img{
-  width:100% !important;
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer > .flex.flex-col.sm\:flex-row{
+  min-height:0 !important;
+  height:128px !important;
+  flex-direction:row !important;
+}
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer > .flex.flex-col.sm\:flex-row > .flex-1.p-5{
+  min-width:0 !important;
+  padding:11px 10px 10px 13px !important;
+  gap:6px !important;
+  justify-content:flex-start !important;
+}
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer h3.font-extrabold.text-gray-900.dark\:text-white.text-lg{
+  font-size:14px !important;
+  line-height:1.15 !important;
+  letter-spacing:-.01em !important;
+  margin:0 !important;
+}
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .relative.w-full.sm\:w-\[190px\].h-\[200px\]{
+  width:92px !important;
   height:100% !important;
-  object-fit:cover !important;
-  object-position:center !important;
-  opacity:.72 !important;
-  filter:saturate(.82) contrast(.98) !important;
-  transition:transform .35s ease,opacity .35s ease !important;
+  min-height:0 !important;
+  border-left:1px solid #e7efed !important;
 }
-button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]):hover > div:last-child img{
-  transform:scale(1.045) !important;
-  opacity:.82 !important;
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .relative.w-full.sm\:w-\[190px\].h-\[200px\] > img{
+  width:100% !important;height:100% !important;
+  object-fit:cover !important;object-position:center !important;
+  opacity:.68 !important;filter:saturate(.78) contrast(.98) !important;
 }
-html.dark button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]),
-body.dark button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]){
-  background:#0d1f1d !important;
-  border-color:#203b37 !important;
-  box-shadow:0 5px 18px rgba(0,0,0,.22) !important;
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .relative.w-full.sm\:w-\[190px\].h-\[200px\] > .absolute.inset-0{
+  background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.28) 48%,rgba(255,255,255,0) 100%) !important;
 }
-html.dark button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt])[class*="border-primary-500"],
-body.dark button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt])[class*="border-primary-500"]{
-  border-color:#3bb5a2 !important;
-  box-shadow:0 7px 22px rgba(38,152,137,.16),inset 0 0 0 1px rgba(59,181,162,.12) !important;
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .w-10.h-10.rounded-xl{
+  width:34px !important;height:34px !important;min-width:34px !important;border-radius:10px !important;
 }
-html.dark button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) .w-10.h-10.rounded-xl,
-body.dark button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) .w-10.h-10.rounded-xl{
-  background:#102d29 !important;
-  color:#63cbb9 !important;
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .w-10.h-10.rounded-xl svg{
+  width:17px !important;height:17px !important;
 }
-html.dark button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) p.text-xs.font-bold,
-body.dark button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) p.text-xs.font-bold{
-  color:#91a9a5 !important;
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .flex.items-start.justify-between{
+  gap:6px !important;align-items:center !important;
 }
-html.dark button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) .flex.flex-wrap.gap-1\.5 > span,
-body.dark button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) .flex.flex-wrap.gap-1\.5 > span{
-  background:#102b27 !important;
-  border-color:#254640 !important;
-  color:#91b8b1 !important;
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .text-xs.font-bold{
+  font-size:9px !important;line-height:1.15 !important;
 }
-html.dark button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) > div:last-child,
-body.dark button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) > div:last-child{
-  border-left-color:#1d3632 !important;
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .flex.flex-wrap.gap-1\.5.mt-1{
+  gap:4px !important;margin-top:4px !important;
 }
-html.dark button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) > div:last-child > div.absolute.inset-0,
-body.dark button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) > div:last-child > div.absolute.inset-0{
-  background:linear-gradient(90deg,#0d1f1d 0%,rgba(13,31,29,.20) 46%,rgba(13,31,29,0) 100%) !important;
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .flex.flex-wrap.gap-1\.5.mt-1 > span{
+  font-size:8px !important;line-height:1 !important;padding:4px 6px !important;border-radius:7px !important;
 }
-@media (max-width:380px){
-  button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]){
-    grid-template-columns:minmax(0,1fr) 82px !important;
-    min-height:112px !important;
-    height:112px !important;
-  }
-  button.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer:has(img[alt]) > div:last-child{
-    width:82px !important;min-height:112px !important;
-  }
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .mt-3{
+  margin-top:7px !important;
+}
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .mt-3 > p{
+  font-size:8px !important;line-height:1.1 !important;margin-bottom:4px !important;
+}
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .mt-3 .flex.flex-wrap{
+  gap:3px !important;max-height:21px !important;overflow:hidden !important;
+}
+.group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .mt-3 .flex.flex-wrap > span{
+  font-size:7px !important;line-height:1 !important;padding:4px 5px !important;border-radius:6px !important;white-space:nowrap !important;
+}
+html.dark .group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer,
+body.dark .group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer{
+  background:#0d1d1b !important;border-color:#203b37 !important;box-shadow:0 5px 18px rgba(0,0,0,.22) !important;
+}
+html.dark .group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .relative.w-full.sm\:w-\[190px\].h-\[200px\],
+body.dark .group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .relative.w-full.sm\:w-\[190px\].h-\[200px\]{
+  border-left-color:#203934 !important;
+}
+html.dark .group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .relative.w-full.sm\:w-\[190px\].h-\[200px\] > .absolute.inset-0,
+body.dark .group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .relative.w-full.sm\:w-\[190px\].h-\[200px\] > .absolute.inset-0{
+  background:linear-gradient(90deg,#0d1d1b 0%,rgba(13,29,27,.22) 48%,rgba(13,29,27,0) 100%) !important;
+}
+html.dark .group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .flex.flex-wrap.gap-1\.5.mt-1 > span,
+body.dark .group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .flex.flex-wrap.gap-1\.5.mt-1 > span{
+  background:#102a26 !important;border-color:#25463f !important;color:#9bc2bb !important;
+}
+@media(max-width:420px){
+  .group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer > .flex.flex-col.sm\:flex-row{height:122px !important}
+  .group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .relative.w-full.sm\:w-\[190px\].h-\[200px\]{width:84px !important}
+  .group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer > .flex.flex-col.sm\:flex-row > .flex-1.p-5{padding:10px 8px 9px 12px !important}
+}
+@media(max-width:360px){
+  .group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer > .flex.flex-col.sm\:flex-row{height:116px !important}
+  .group.w-full.rounded-\[24px\].text-left.relative.overflow-hidden.transition-all.duration-300.border.cursor-pointer .relative.w-full.sm\:w-\[190px\].h-\[200px\]{width:76px !important}
 }
