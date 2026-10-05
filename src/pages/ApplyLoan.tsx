@@ -3006,30 +3006,31 @@ export default function ApplyLoan() {
   return (
     <FormProvider {...methods}>
     <div className="apply-loan-screen app-apply-theme min-h-full bg-slate-50 dark:bg-[#0b1220] transition-colors flex flex-col relative">
-      {/* Dynamic Header */}
+      {/* Easy-style application header — visual language follows the supplied reference screens. */}
       {step < 5 && (
-        <div className="px-5 pt-6 pb-4 sticky top-0 z-30 flex items-center justify-between border-b border-gray-200/30 dark:border-gray-800/50">
-           {step > 1 ? (
-             <button onClick={prevStep} className="p-2 -ml-2 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
-               <ChevronLeft size={20} />
-             </button>
-           ) : (
-             <div className="w-8"></div>
-           )}
-           
-           <div className="flex flex-col items-center">
-             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Step {step} of 4</p>
-             <div className="flex gap-1 h-2 w-32 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full overflow-hidden border-none">
-               <motion.div 
-                 className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full"
-                 initial={{ width: 0 }}
-                 animate={{ width: `${(step / 4) * 100}%` }}
-                 transition={{ duration: 0.3 }}
-               />
-             </div>
-           </div>
-
-           <div className="w-8"></div>
+        <div className="loan-easy-font sticky top-0 z-30 bg-slate-50/95 dark:bg-[#0b1220]/95 backdrop-blur border-b border-slate-200/60 dark:border-slate-800/60">
+          <div className="px-4 pt-4 pb-3">
+            <div className="flex items-center justify-between">
+              <button type="button" onClick={prevStep} disabled={step === 1} className="w-11 h-11 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 flex items-center justify-center disabled:opacity-60">
+                <ChevronLeft size={22} />
+              </button>
+              <div className="px-4 h-9 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center">
+                <span className="text-[11px] font-black text-blue-800 dark:text-blue-200">{isBn ? `ধাপ ${convertDigits(step, true)} / ৮` : `Step ${step} / 8`}</span>
+              </div>
+              <button type="button" onClick={() => {}} className="w-11 h-11 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-200" aria-label={isBn ? "সহায়তা" : "Help"}>
+                <span className="w-5 h-5 rounded-full border-2 border-current flex items-center justify-center text-[11px] font-black">?</span>
+              </button>
+            </div>
+            <div className="mt-3 h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+              <motion.div className="h-full rounded-full bg-gradient-to-r from-blue-700 to-blue-500" initial={{ width: 0 }} animate={{ width: `${Math.min(step / 8, 1) * 100}%` }} transition={{ duration: 0.3 }} />
+            </div>
+            {step >= 2 && category && (
+              <div className="mt-3 flex items-center gap-2 overflow-x-auto no-scrollbar">
+                <span className="shrink-0 px-3 py-1.5 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 text-[10px] font-black text-slate-700 dark:text-slate-200">{isBn ? `ধাপ ${convertDigits(step, true)} / ৮ • ${step === 2 ? "পরিমাণ ও মেয়াদ" : step === 3 ? "ব্যক্তিগত তথ্য" : "ডকুমেন্ট"}` : `Step ${step} / 8 • ${step === 2 ? "Amount & Tenure" : step === 3 ? "Personal Information" : "Documents"}`}</span>
+                <span className="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 text-[10px] font-black text-blue-800 dark:text-blue-200">{category.title} {isBn ? "লোন" : "Loan"}</span>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
