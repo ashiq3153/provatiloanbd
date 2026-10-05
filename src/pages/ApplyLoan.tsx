@@ -278,6 +278,7 @@ export default function ApplyLoan() {
 
   // Form State
   const [category, setCategory] = useState<ReturnType<typeof getCategories>[0] | null>(null);
+  const [selectedProfession, setSelectedProfession] = useState<string>("চাকরিজীবী");
   const [amount, setAmount] = useState(500000);
   const [tenure, setTenure] = useState(24);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -1239,99 +1240,198 @@ export default function ApplyLoan() {
 
   // --- Step Components ---
 
-  const Step1Category = () => (
-    <div className="loan-easy-font space-y-5">
-      <div>
-        <h2 className="text-[24px] leading-tight font-black text-slate-950 dark:text-white">
-          {isBn ? "লোনের ধরন বেছে নিন" : "Choose your loan type"}
-        </h2>
-        <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-          {isBn ? "আপনার প্রয়োজন অনুযায়ী সঠিক লোন নির্বাচন করুন" : "Select the loan that best matches your need"}
-        </p>
-      </div>
+  const Step1Category = () => {
+    const visibleCategories = categories.filter(cat =>
+      ['personal','business','expat','student','emergency'].includes(cat.id)
+    );
 
-      <div className="h-12 rounded-2xl bg-white dark:bg-[#0f1b2d] border border-slate-200 dark:border-slate-800 flex items-center gap-2 px-4 shadow-sm">
-        <Search size={18} className="text-slate-400" />
-        <span className="text-sm font-semibold text-slate-400">
-          {isBn ? "ক্যাটাগরি বা প্রয়োজন সার্চ করুন..." : "Search category or purpose..."}
-        </span>
-      </div>
+    const professionOptions = [
+      { id: 'job', label: isBn ? 'চাকরিজীবী' : 'Salaried', icon: Briefcase },
+      { id: 'business', label: isBn ? 'ব্যবসায়ী' : 'Business', icon: Store },
+      { id: 'expat', label: isBn ? 'প্রবাসী' : 'Expatriate', icon: Plane },
+      { id: 'student', label: isBn ? 'শিক্ষার্থী' : 'Student', icon: GraduationCap },
+    ];
 
-      <div className="grid grid-cols-2 gap-3">
-        {categories.filter(cat => ['personal','business','expat','student'].includes(cat.id)).map((cat) => {
-          const isActive = category?.id === cat.id;
-          return (
-            <button
-              type="button"
-              key={cat.id}
-              onClick={() => {
-                const rawAllowed = getAllowedTenure(amount);
-                const minAllowed = Math.max(rawAllowed[0], cat.minTenure ?? 12);
-                setCategory(cat);
-                setTenure(minAllowed);
-                setStep(2);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`text-left rounded-[22px] border p-4 transition-all active:scale-[.98] ${
-                isActive
-                  ? "bg-blue-50 dark:bg-blue-950/30 border-blue-500 ring-2 ring-blue-500/15"
-                  : "bg-white dark:bg-[#0f1b2d] border-slate-200 dark:border-slate-800 shadow-sm"
-              }`}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${getIconColor(cat.color)}`}>
-                  <cat.icon size={22} />
-                </div>
-                <span className="text-[9px] font-black px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                  {cat.limit}
-                </span>
-              </div>
-              <h3 className="mt-4 text-[16px] font-black leading-tight text-slate-950 dark:text-white">
-                {cat.title} {isBn ? "লোন" : "Loan"}
-              </h3>
-              <p className="mt-1 text-[9px] uppercase tracking-wide font-semibold text-slate-400">
-                {cat.id === 'expat' ? 'PROBASHI LOAN' : cat.id === 'personal' ? 'PERSONAL LOAN' : cat.id === 'business' ? 'BUSINESS LOAN' : 'STUDENT LOAN'}
-              </p>
-              <div className="mt-3 space-y-1.5 text-[10px] text-slate-600 dark:text-slate-300">
-                <p>✓ {cat.features[0]}</p>
-                <p>✓ {cat.procTime} {isBn ? "অনুমোদন" : "approval"}</p>
-              </div>
-              <div className="mt-4 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center gap-1 text-xs font-black text-slate-800 dark:text-white">
-                {isBn ? "বাছাই করুন" : "Choose"} <ChevronRight size={14} />
-              </div>
-            </button>
-          );
-        })}
-      </div>
+    const selectCategory = (cat: ReturnType<typeof getCategories>[0]) => {
+      const rawAllowed = getAllowedTenure(amount);
+      const minAllowed = Math.max(rawAllowed[0], cat.minTenure ?? 12);
+      setCategory(cat);
+      setTenure(minAllowed);
+      setStep(2);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
-      {categories.find(cat => cat.id === 'emergency') && (
-        <button
-          type="button"
-          onClick={() => {
-            const emergency = categories.find(cat => cat.id === 'emergency')!;
-            setCategory(emergency);
-            setTenure(Math.max(getAllowedTenure(amount)[0], emergency.minTenure ?? 6));
-            setStep(2);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          className="w-full rounded-[22px] bg-gradient-to-r from-rose-500 to-pink-500 text-white p-5 text-left shadow-lg shadow-rose-500/15 active:scale-[.99]"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <span className="inline-flex rounded-full bg-white/15 px-2.5 py-1 text-[9px] font-black">
-                {isBn ? "দ্রুততম লোন সার্ভিস" : "FAST LOAN SERVICE"}
+    return (
+      <div className="loan-category-reference-screen loan-easy-font space-y-3 pb-5">
+        {/* Intro / profession selector */}
+        <section className="rounded-[18px] bg-white dark:bg-[#0f2925] border border-slate-200 dark:border-emerald-900/40 shadow-sm overflow-hidden">
+          <div className="px-3.5 pt-3 pb-2.5">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h2 className="text-[15px] leading-tight font-black text-slate-900 dark:text-white">
+                  {isBn ? "আপনার পেশা নির্বাচন করুন" : "Choose your profession"}
+                </h2>
+                <p className="mt-0.5 text-[8px] leading-3.5 text-slate-500 dark:text-slate-400">
+                  {isBn ? "আপনার পেশা ও চাহিদার সাথে সবচেয়ে উপযুক্ত লোন নির্বাচন করুন" : "Choose the loan that best matches your profession and need"}
+                </p>
+              </div>
+              <span className="shrink-0 text-[8px] font-black text-emerald-600 dark:text-emerald-300">
+                {isBn ? "সঠিক পছন্দ" : "Best match"}
               </span>
-              <h3 className="mt-2 text-[19px] font-black">{isBn ? "জরুরি লোন" : "Emergency Loan"}</h3>
-              <p className="mt-1 text-[10px] text-white/90">{isBn ? "জরুরি চিকিৎসা বা পারিবারিক প্রয়োজনে" : "For urgent medical or family needs"}</p>
             </div>
-            <span className="bg-white text-rose-600 rounded-full px-3 py-1 text-[10px] font-black">
-              {categories.find(cat => cat.id === 'emergency')?.limit}
-            </span>
+
+            <div className="mt-2.5 grid grid-cols-4 gap-1.5">
+              {professionOptions.map(item => {
+                const active = selectedProfession === item.label;
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setSelectedProfession(item.label)}
+                    className={`h-[52px] rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
+                      active
+                        ? "bg-amber-50 dark:bg-amber-950/20 border-amber-400 text-slate-900 dark:text-white shadow-sm"
+                        : "bg-slate-50/80 dark:bg-[#10221f] border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300"
+                    }`}
+                  >
+                    <span className={`w-6 h-6 rounded-lg flex items-center justify-center ${
+                      active ? "bg-amber-100 dark:bg-amber-900/30 text-emerald-800 dark:text-emerald-300" : "bg-white dark:bg-[#16302b] text-slate-500 dark:text-slate-300"
+                    }`}>
+                      <Icon size={13} />
+                    </span>
+                    <span className="text-[8px] font-black leading-none">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </button>
-      )}
-    </div>
-  );
+        </section>
+
+        {/* Category heading */}
+        <div className="flex items-center justify-between px-1 pt-1">
+          <h3 className="text-[12px] font-black text-slate-800 dark:text-white">
+            {isBn ? "উপযুক্ত ক্যাটাগরির সমূহ" : "Available loan categories"}
+          </h3>
+          <span className="text-[8px] font-semibold text-slate-400">
+            {isBn ? "আরও ক্যাটাগরি" : "More categories"}
+          </span>
+        </div>
+
+        {/* Premium vertical cards */}
+        <div className="space-y-2.5">
+          {visibleCategories.map(cat => {
+            const isActive = category?.id === cat.id;
+            const accent =
+              cat.id === 'personal' ? 'emerald' :
+              cat.id === 'business' ? 'amber' :
+              cat.id === 'expat' ? 'sky' :
+              cat.id === 'student' ? 'emerald' : 'rose';
+
+            return (
+              <article
+                key={cat.id}
+                className={`relative overflow-hidden rounded-[16px] border bg-white dark:bg-[#10211f] shadow-sm transition-all ${
+                  isActive
+                    ? "border-amber-400 ring-1 ring-amber-300/70 dark:ring-amber-800/60"
+                    : "border-slate-200 dark:border-slate-700"
+                }`}
+              >
+                {isActive && (
+                  <div className="absolute right-0 top-0 bg-amber-400 text-[7px] font-black text-white px-2 py-1 rounded-bl-lg">
+                    {isBn ? "আপনার জন্য সুপারিশকৃত" : "RECOMMENDED"}
+                  </div>
+                )}
+
+                <div className="px-3 pt-2.5 pb-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                        cat.id === 'personal' ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" :
+                        cat.id === 'business' ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300" :
+                        cat.id === 'expat' ? "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-300" :
+                        cat.id === 'student' ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300" :
+                        "bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-300"
+                      }`}>
+                        <cat.icon size={16} />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-[12px] font-black leading-[1.1] text-slate-900 dark:text-white">
+                          {cat.title} {isBn ? "লোন" : "Loan"} <span className="font-semibold text-slate-400">({cat.id === 'expat' ? 'Probashi' : cat.id === 'business' ? 'SME' : cat.id === 'student' ? 'Student' : cat.id === 'personal' ? 'Personal' : 'Emergency'})</span>
+                        </h4>
+                        <p className={`mt-0.5 text-[8px] font-bold ${
+                          cat.id === 'emergency' ? "text-rose-500" : "text-emerald-600 dark:text-emerald-300"
+                        }`}>
+                          {isBn ? `সর্বোচ্চ ${cat.limit} পর্যন্ত` : `Up to ${cat.limit}`}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-slate-50 dark:bg-slate-800 px-2 py-1 text-[8px] font-black text-slate-600 dark:text-slate-300">
+                      {cat.id === 'emergency' ? (isBn ? 'জরুরি সেবা' : 'Urgent') : (isBn ? 'সাধারণ' : 'Standard')}
+                    </span>
+                  </div>
+
+                  <div className="mt-2 grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-700 rounded-xl bg-slate-50/80 dark:bg-[#0d1b1a] border border-slate-100 dark:border-slate-800 py-1.5">
+                    <div className="px-2 text-center">
+                      <p className="text-[7px] text-slate-400 font-semibold">{isBn ? "সুদের হার" : "Interest"}</p>
+                      <p className="mt-0.5 text-[8px] font-black text-slate-800 dark:text-white">{cat.intRates}<span className="text-[6px] text-slate-400">/মাস</span></p>
+                    </div>
+                    <div className="px-2 text-center">
+                      <p className="text-[7px] text-slate-400 font-semibold">{isBn ? "পরিশোধের সময়" : "Tenure"}</p>
+                      <p className="mt-0.5 text-[8px] font-black text-slate-800 dark:text-white">{cat.tenureRange}</p>
+                    </div>
+                    <div className="px-2 text-center">
+                      <p className="text-[7px] text-slate-400 font-semibold">{isBn ? "প্রসেসিং সময়" : "Processing"}</p>
+                      <p className={`mt-0.5 text-[8px] font-black ${
+                        cat.id === 'emergency' ? "text-rose-500" : "text-slate-800 dark:text-white"
+                      }`}>{cat.procTime}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-1.5 space-y-1">
+                    <div className="flex items-center justify-between gap-2 text-[7px]">
+                      <span className="text-slate-400">{isBn ? "প্রসেসিং ফি:" : "Processing fee:"}</span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-200">{convertDigits(`${(cat.procFee * 100).toFixed(2)}% (লোনের উপর নির্ভরশীল)`, isBn)}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 text-[7px]">
+                      <span className="text-slate-400">{isBn ? "প্রয়োজনীয় নথি:" : "Required documents:"}</span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-200 text-right max-w-[68%]">{cat.reqDocs.slice(0, 2).join(" • ")}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-2 grid grid-cols-2 gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {}}
+                      className="h-7 rounded-full border border-slate-400 dark:border-slate-600 bg-white dark:bg-transparent text-[8px] font-black text-slate-700 dark:text-slate-200"
+                    >
+                      {isBn ? "লোনের বিস্তারিত" : "Loan details"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => selectCategory(cat)}
+                      className={`h-7 rounded-full text-[8px] font-black text-white shadow-sm flex items-center justify-center gap-1 ${
+                        cat.id === 'emergency' ? "bg-rose-600" : "bg-[#075f50] hover:bg-[#064c40]"
+                      }`}
+                    >
+                      {isBn ? "আবেদন করুন" : "Apply now"} <ChevronRight size={11} />
+                    </button>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-[#10211f] px-3 py-2 flex items-center gap-2">
+          <Lock size={12} className="text-amber-500 shrink-0" />
+          <p className="text-[7px] leading-3.5 text-slate-500 dark:text-slate-400">
+            {isBn ? "আপনার সকল তথ্য নিরাপদ ও গোপনীয়। আবেদন করার আগে সঠিক ক্যাটাগরি নির্বাচন করুন।" : "Your information is secure and confidential. Choose the correct category before applying."}
+          </p>
+        </div>
+      </div>
+    );
+  };
 
   const Step2Calculator = () => {
     if (!category) return null;
