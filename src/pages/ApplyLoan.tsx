@@ -3108,30 +3108,52 @@ export default function ApplyLoan() {
     <div className="apply-loan-screen app-apply-theme min-h-full bg-slate-50 dark:bg-[#0b1220] transition-colors flex flex-col relative">
       {/* Easy-style application header — visual language follows the supplied reference screens. */}
       {step < 5 && (
-        <div className="loan-easy-font sticky top-0 z-30 bg-slate-50/95 dark:bg-[#0b1220]/95 backdrop-blur border-b border-slate-200/60 dark:border-slate-800/60">
-          <div className="px-4 pt-4 pb-3">
+        <div className={`loan-easy-font sticky top-0 z-30 backdrop-blur border-b ${
+        step === 1
+          ? "bg-[#063d34] dark:bg-[#052f29] border-emerald-900/50 text-white"
+          : "bg-slate-50/95 dark:bg-[#0b1220]/95 border-slate-200/60 dark:border-slate-800/60"
+      }`}>
+          <div className="px-3 pt-2.5 pb-2.5">
             <div className="flex items-center justify-between">
-              <button type="button" onClick={prevStep} disabled={step === 1} className="w-11 h-11 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 flex items-center justify-center disabled:opacity-60">
-                <ChevronLeft size={22} />
+              <button type="button" onClick={prevStep} disabled={step === 1} className={`w-9 h-9 rounded-full border flex items-center justify-center disabled:opacity-60 ${
+                step === 1
+                  ? "bg-white/10 border-white/15 text-white"
+                  : "bg-white dark:bg-[#111c2e] border-slate-200 dark:border-slate-800"
+              }`}>
+                <ChevronLeft size={19} />
               </button>
               <div className="flex items-center gap-2">
-                <div className="px-4 h-9 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center">
-                  <span className="text-[11px] font-black text-blue-800 dark:text-blue-200">
+                <div className={`px-3.5 h-8 rounded-full border flex items-center justify-center ${
+                    step === 1
+                      ? "bg-white/10 border-white/15"
+                      : "bg-blue-50 dark:bg-blue-950/40 border-blue-100 dark:border-blue-900/50"
+                  }`}>
+                  <span className={`text-[10px] font-black ${
+                    step === 1 ? "text-white" : "text-blue-800 dark:text-blue-200"
+                  }`}>
                     {isBn ? `আবেদন • ${step === 2 ? "Loan Amount And Tenure" : "Loan Application"}` : `Apply • ${step === 2 ? "Loan Amount And Tenure" : "Loan Application"}`}
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button type="button" onClick={() => {}} className="w-10 h-10 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-200" aria-label={isBn ? "সহায়তা" : "Help"}>
-                  <span className="w-5 h-5 rounded-full border-2 border-current flex items-center justify-center text-[11px] font-black">?</span>
+                <button type="button" onClick={() => {}} className={`w-9 h-9 rounded-full border flex items-center justify-center ${
+                  step === 1
+                    ? "bg-white/10 border-white/15 text-white"
+                    : "bg-white dark:bg-[#111c2e] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-200"
+                }`} aria-label={isBn ? "সহায়তা" : "Help"}>
+                  <span className="w-5 h-5 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-black">?</span>
                 </button>
-                <button type="button" onClick={() => navigate('/profile')} className="w-10 h-10 rounded-full bg-blue-800 dark:bg-blue-700 text-white flex items-center justify-center shadow-sm" aria-label={isBn ? "প্রোফাইল" : "Profile"}>
-                  <User size={19} />
-                </button>
+                {step === 1 ? (
+                  <span className="w-9 h-9 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-[10px] font-black">↻</span>
+                ) : (
+                  <button type="button" onClick={() => navigate('/profile')} className="w-10 h-10 rounded-full bg-blue-800 dark:bg-blue-700 text-white flex items-center justify-center shadow-sm" aria-label={isBn ? "প্রোফাইল" : "Profile"}>
+                    <User size={19} />
+                  </button>
+                )}
               </div>
             </div>
-            <div className="mt-3 h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-              <motion.div className="h-full rounded-full bg-gradient-to-r from-blue-700 to-blue-500" initial={{ width: 0 }} animate={{ width: `${Math.min(step / 8, 1) * 100}%` }} transition={{ duration: 0.3 }} />
+            <div className={`mt-2 h-1 rounded-full overflow-hidden ${step === 1 ? "bg-white/15" : "bg-slate-200 dark:bg-slate-800"}`}>
+              <motion.div className={`h-full rounded-full ${step === 1 ? "bg-amber-400" : "bg-gradient-to-r from-blue-700 to-blue-500"}`} initial={{ width: 0 }} animate={{ width: `${Math.min(step / 8, 1) * 100}%` }} transition={{ duration: 0.3 }} />
             </div>
             {step >= 2 && category && (
               <div className="mt-3 flex items-center gap-2 overflow-x-auto no-scrollbar">
