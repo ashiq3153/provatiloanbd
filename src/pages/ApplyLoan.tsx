@@ -22,7 +22,8 @@ import {
   Landmark,
   X,
   Lock,
-  ShieldAlert
+  ShieldAlert,
+  Search
 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from 'sonner';
@@ -1239,13 +1240,25 @@ export default function ApplyLoan() {
   // --- Step Components ---
 
   const Step1Category = () => (
-    <div className="space-y-4">
-      <div className="mb-6">
-        <h2 className="text-xl font-extrabold text-gray-900 dark:text-white transition-colors tracking-tight">{isBn ? "লোনের ধরন নির্বাচন করুন" : "Select Loan Type"}</h2>
-        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 transition-colors mt-0.5">{isBn ? "আপনার পেশা অনুযায়ী সঠিক লোন নির্বাচন করুন" : "Select the right loan based on your profession"}</p>
+    <div className="loan-easy-font space-y-5">
+      <div>
+        <h2 className="text-[24px] leading-tight font-black text-slate-950 dark:text-white">
+          {isBn ? "লোনের ধরন বেছে নিন" : "Choose your loan type"}
+        </h2>
+        <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+          {isBn ? "আপনার প্রয়োজন অনুযায়ী সঠিক লোন নির্বাচন করুন" : "Select the loan that best matches your need"}
+        </p>
       </div>
-      <div className="grid grid-cols-1 gap-4">
-        {categories.map((cat) => {
+
+      <div className="h-12 rounded-2xl bg-white dark:bg-[#0f1b2d] border border-slate-200 dark:border-slate-800 flex items-center gap-2 px-4 shadow-sm">
+        <Search size={18} className="text-slate-400" />
+        <span className="text-sm font-semibold text-slate-400">
+          {isBn ? "ক্যাটাগরি বা প্রয়োজন সার্চ করুন..." : "Search category or purpose..."}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        {categories.filter(cat => ['personal','business','expat','student'].includes(cat.id)).map((cat) => {
           const isActive = category?.id === cat.id;
           return (
             <button
@@ -1257,236 +1270,227 @@ export default function ApplyLoan() {
                 setCategory(cat);
                 setTenure(minAllowed);
                 setStep(2);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className={`group w-full rounded-[24px] text-left relative overflow-hidden transition-all duration-300 border cursor-pointer ${
-                isActive 
-                  ? "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-primary-500 dark:border-primary-500/80 ring-2 ring-primary-500/20 shadow-[inset_0_0_8px_rgba(59,130,246,0.1)] text-primary-905 dark:text-primary-100"
-                  : "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800 hover:border-gray-200 dark:hover:border-gray-700 hover:scale-[1.01]"
+              className={`text-left rounded-[22px] border p-4 transition-all active:scale-[.98] ${
+                isActive
+                  ? "bg-blue-50 dark:bg-blue-950/30 border-blue-500 ring-2 ring-blue-500/15"
+                  : "bg-white dark:bg-[#0f1b2d] border-slate-200 dark:border-slate-800 shadow-sm"
               }`}
             >
-              <div className="flex flex-col sm:flex-row min-h-[160px]">
-                {/* Text Content */}
-                <div className="flex-1 p-5 relative z-10 flex flex-col justify-between min-w-0">
-                  <div>
-                    <div className="flex items-start justify-between mb-2 gap-2">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 ${getIconColor(cat.color)}`}>
-                          <cat.icon size={20} />
-                        </div>
-                        <div>
-                          <h3 className="font-extrabold text-gray-900 dark:text-white text-lg transition-colors group-hover:text-primary-600 dark:group-hover:text-primary-400 leading-tight">
-                            {cat.title}
-                          </h3>
-                          <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mt-0.5">
-                            {isBn ? "সর্বোচ্চঃ" : "Up to"} {cat.limit} {isBn ? "টাকা" : ""}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="shrink-0 px-3 py-1.5 rounded-full bg-primary-600 hover:bg-primary-700 text-white shadow-sm text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-md hover:scale-105 active:scale-95 transition-all">
-                        {isBn ? "নির্বাচন করুন" : "Select"}
-                        <ChevronRight size={12} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Highlights Grid */}
-                  <div className="grid grid-cols-3 gap-2 py-3 border-t border-b border-gray-200/50 dark:border-gray-700/60 my-3">
-                    <div>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "মেয়াদ" : "Tenure"}</p>
-                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.tenureRange}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "সুদ" : "Int. Rate"}</p>
-                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.intRates}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">{isBn ? "প্রসেস" : "Processing"}</p>
-                      <p className="text-xs font-extrabold text-gray-800 dark:text-gray-200">{cat.procTime}</p>
-                    </div>
-                  </div>
-
-                  {/* Features Tag */}
-                  <div className="flex flex-wrap gap-1.5 mt-1">
-                    {cat.features.map((feature, i) => (
-                      <span key={i} className={`px-2 py-0.5 text-[10px] rounded-[6px] border font-bold ${
-                        isActive 
-                          ? 'bg-primary-500/10 border-primary-500/20 text-primary-600 dark:text-primary-400 font-bold shadow-sm' 
-                          : 'bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-slate-200 dark:border-slate-8000 dark:border-slate-200 dark:border-slate-800 text-gray-500 dark:text-gray-400 shadow-sm'
-                      }`}>
-                        {feature}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Required Documents */}
-                  {(cat as any).reqDocs && (
-                    <div className="mt-3">
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                        <FileText size={10} />
-                        {isBn ? "প্রয়োজনীয় কাগজপত্র:" : "Required Documents:"}
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {(cat as any).reqDocs.map((doc: string, i: number) => (
-                          <span key={`doc-${i}`} className="px-2 py-0.5 text-[9px] rounded bg-gray-100 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold shadow-sm">
-                            {doc}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+              <div className="flex items-start justify-between gap-2">
+                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${getIconColor(cat.color)}`}>
+                  <cat.icon size={22} />
                 </div>
-
-                {/* Right side Image wrapper with fade mask */}
-                <div className="relative w-full sm:w-[190px] h-[200px] sm:h-auto overflow-hidden shrink-0 self-stretch">
-                  {/* Fade Gradient Overlay (Bottom-to-top on mobile, left-to-right on desktop) */}
-                  <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-[#f1f3f6] dark:from-[#151a24] via-[#f1f3f6]/40 dark:via-[#151a24]/40 to-transparent z-10 pointer-events-none" />
-                  
-                  {/* Category Image */}
-                  <img 
-                    src={cat.image} 
-                    alt={cat.title} 
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
+                <span className="text-[9px] font-black px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  {cat.limit}
+                </span>
+              </div>
+              <h3 className="mt-4 text-[16px] font-black leading-tight text-slate-950 dark:text-white">
+                {cat.title} {isBn ? "লোন" : "Loan"}
+              </h3>
+              <p className="mt-1 text-[9px] uppercase tracking-wide font-semibold text-slate-400">
+                {cat.id === 'expat' ? 'PROBASHI LOAN' : cat.id === 'personal' ? 'PERSONAL LOAN' : cat.id === 'business' ? 'BUSINESS LOAN' : 'STUDENT LOAN'}
+              </p>
+              <div className="mt-3 space-y-1.5 text-[10px] text-slate-600 dark:text-slate-300">
+                <p>✓ {cat.features[0]}</p>
+                <p>✓ {cat.procTime} {isBn ? "অনুমোদন" : "approval"}</p>
+              </div>
+              <div className="mt-4 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center gap-1 text-xs font-black text-slate-800 dark:text-white">
+                {isBn ? "বাছাই করুন" : "Choose"} <ChevronRight size={14} />
               </div>
             </button>
           );
         })}
       </div>
+
+      {categories.find(cat => cat.id === 'emergency') && (
+        <button
+          type="button"
+          onClick={() => {
+            const emergency = categories.find(cat => cat.id === 'emergency')!;
+            setCategory(emergency);
+            setTenure(Math.max(getAllowedTenure(amount)[0], emergency.minTenure ?? 6));
+            setStep(2);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className="w-full rounded-[22px] bg-gradient-to-r from-rose-500 to-pink-500 text-white p-5 text-left shadow-lg shadow-rose-500/15 active:scale-[.99]"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <span className="inline-flex rounded-full bg-white/15 px-2.5 py-1 text-[9px] font-black">
+                {isBn ? "দ্রুততম লোন সার্ভিস" : "FAST LOAN SERVICE"}
+              </span>
+              <h3 className="mt-2 text-[19px] font-black">{isBn ? "জরুরি লোন" : "Emergency Loan"}</h3>
+              <p className="mt-1 text-[10px] text-white/90">{isBn ? "জরুরি চিকিৎসা বা পারিবারিক প্রয়োজনে" : "For urgent medical or family needs"}</p>
+            </div>
+            <span className="bg-white text-rose-600 rounded-full px-3 py-1 text-[10px] font-black">
+              {categories.find(cat => cat.id === 'emergency')?.limit}
+            </span>
+          </div>
+        </button>
+      )}
     </div>
   );
 
   const Step2Calculator = () => {
     if (!category) return null;
+    const calc = getLoanCalculation();
+    const rawAllowed = getAllowedTenure(amount);
+    const minAllowed = Math.max(rawAllowed[0], category.minTenure ?? 12);
+    const maxAllowed = Math.min(rawAllowed[1], category.maxTenure ?? 60);
+    const tenureOptions = [12, 24, 36, 48, 60, 72, 84, 96, 120, 144, 180].filter(m => m >= minAllowed && m <= maxAllowed);
+
     return (
-      <div className="space-y-6">
-        <div className="mb-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors">{isBn ? "লোন ক্যালকুলেটর" : "Loan Calculator"}</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors">{isBn ? "আপনার প্রয়োজনের উপর ভিত্তি করে হিসাব করুন" : "Calculate based on your needs"}</p>
+      <div className="loan-easy-font space-y-5">
+        <div>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-[24px] leading-tight font-black text-slate-950 dark:text-white">
+                {isBn ? "কত টাকা লোন নিতে চান?" : "How much do you need?"}
+              </h2>
+              <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                {isBn ? "প্রয়োজনীয় অর্থ ও সুবিধাজনক পরিশোধের মেয়াদ বেছে নিন" : "Choose the amount and a comfortable repayment period"}
+              </p>
+            </div>
+            <span className="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-[10px] font-black">
+              {category.title}
+            </span>
+          </div>
         </div>
 
-        {/* Amount Chips */}
-        <div className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm p-5 rounded-3xl">
-          <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-4 transition-colors">{isBn ? "লোনের পরিমাণ" : "Loan Amount"}</label>
-          <div className="flex flex-wrap gap-2">
-             {amountPackages.filter(amt => amt <= (category?.maxAmount || 5000000)).map(pkg => (
+        <section className="rounded-[24px] bg-white dark:bg-[#0f1b2d] border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-2">
+            <label className="text-sm font-black text-slate-700 dark:text-slate-200">
+              {isBn ? "ঋণের পরিমাণ (Loan Amount)" : "Loan Amount"}
+            </label>
+            <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300">
+              {isBn ? "সর্বোচ্চ" : "Max"} {category.limit}
+            </span>
+          </div>
+
+          <div className="mt-5 flex items-end justify-between gap-3">
+            <div>
+              <div className="text-[31px] leading-none font-black text-blue-700 dark:text-blue-300 tracking-tight">
+                {formatCurrency(amount, isBn)}
+              </div>
+              <div className="mt-2 text-[10px] font-semibold text-slate-400">
+                {isBn ? "ন্যূনতম" : "Min"} {formatCurrency(50000, isBn)} • {isBn ? "সর্বোচ্চ" : "Max"} {formatCurrency(category.maxAmount, isBn)}
+              </div>
+            </div>
+            <span className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-black text-slate-600 dark:text-slate-300">
+              BDT
+            </span>
+          </div>
+
+          <input
+            aria-label={isBn ? "ঋণের পরিমাণ" : "Loan amount"}
+            type="range"
+            min={50000}
+            max={category.maxAmount}
+            step={10000}
+            value={Math.min(Math.max(amount, 50000), category.maxAmount)}
+            onChange={e => handleAmountChange(Number(e.target.value))}
+            className="mt-6 w-full accent-blue-600"
+          />
+
+          <div className="mt-2 flex justify-between text-[10px] font-semibold text-slate-400">
+            <span>{formatCurrency(50000, isBn)}</span>
+            <span>{formatCurrency(Math.round(category.maxAmount / 2), isBn)}</span>
+            <span>{formatCurrency(category.maxAmount, isBn)}</span>
+          </div>
+
+          <div className="mt-5 grid grid-cols-4 gap-2">
+            {[100000, 200000, 500000, 1000000].filter(v => v <= category.maxAmount).map(v => (
               <button
-                key={pkg}
-                onClick={() => handleAmountChange(pkg)}
-                className={`py-2.5 px-3 rounded-xl font-bold text-sm transition-all border flex-grow text-center ${
-                  amount === pkg 
-                    ? "bg-primary-600 hover:bg-primary-700 text-white shadow-sm" 
-                    : "bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-605 dark:text-gray-300"
+                key={v}
+                type="button"
+                onClick={() => handleAmountChange(v)}
+                className={`h-9 rounded-xl text-[10px] font-black border transition-all ${
+                  amount === v
+                    ? "bg-blue-600 border-blue-600 text-white"
+                    : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
                 }`}
               >
-                {formatAmount(pkg, isBn)}
+                {formatAmount(v, isBn)}
               </button>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Tenure Snap Slider */}
-        <div className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm p-5 rounded-3xl">
-          <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-4 transition-colors">{isBn ? "সময়কাল (মাস)" : "Tenure (Months)"}</label>
-          
-          <div className="flex flex-wrap gap-2">
-            {snapPoints.map(months => {
-              const rawAllowed = getAllowedTenure(amount);
-              const minAllowed = Math.max(rawAllowed[0], category?.minTenure ?? 12);
-              const maxAllowed = Math.min(rawAllowed[1], category?.maxTenure ?? 60);
-              const isAllowed = months >= minAllowed && months <= maxAllowed;
-              const isSelected = tenure === months;
-              
-              let btnClass = "py-3 px-4 rounded-xl font-bold text-sm transition-all flex-grow text-center ";
-              if (isSelected) {
-                btnClass += "bg-primary-600 hover:bg-primary-700 text-white shadow-sm";
-              } else if (isAllowed) {
-                btnClass += "bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-gray-700 dark:text-gray-400";
-              } else {
-                btnClass += "bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 opacity-40 cursor-not-allowed shadow-none text-gray-400 dark:text-gray-600";
-              }
-
-              return (
-                <button
-                  key={months}
-                  disabled={!isAllowed}
-                  onClick={() => setTenure(months)}
-                  className={btnClass}
-                >
-                  {convertDigits(months, isBn)}
-                </button>
-              );
-            })}
+        <section className="rounded-[24px] bg-white dark:bg-[#0f1b2d] border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">{isBn ? "পরিশোধের মেয়াদকাল" : "Repayment Tenure"}</h3>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{isBn ? "মাসিক কিস্তি আপনার আয়ের সাথে মিলিয়ে নিন" : "Pick a tenure that fits your monthly budget"}</p>
+            </div>
+            <span className="px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-[10px] font-black">
+              {convertDigits(tenure, isBn)} {isBn ? "মাস নির্বাচিত" : "months selected"}
+            </span>
           </div>
-          <p className="text-xs text-gray-400 mt-3 font-medium text-center">
-            {formatCurrency(amount, isBn)} {isBn ? "টাকার জন্য" : "Taka allows"} {convertDigits(getAllowedTenure(amount)[0], isBn)} - {convertDigits(getAllowedTenure(amount)[1], isBn)} {isBn ? "মাস অনুমোদিত" : "months"}
+
+          <div className="mt-4 grid grid-cols-4 gap-2">
+            {tenureOptions.map(months => (
+              <button
+                key={months}
+                type="button"
+                onClick={() => setTenure(months)}
+                className={`h-14 rounded-xl text-xs font-black transition-all ${
+                  tenure === months
+                    ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                    : "bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                }`}
+              >
+                {convertDigits(months, isBn)}
+                <span className="block text-[9px] font-semibold opacity-75">{isBn ? "মাস" : "months"}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-[24px] bg-blue-50 dark:bg-[#102044] border border-blue-100 dark:border-blue-900/60 p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-black text-blue-800 dark:text-blue-200">{isBn ? "আনুমানিক মাসিক কিস্তি (Estimated EMI)" : "Estimated Monthly EMI"}</p>
+              <p className="mt-1 text-[30px] leading-none font-black text-blue-800 dark:text-blue-100">
+                {formatCurrency(calc.emi, isBn)} <span className="text-sm font-bold">/ {isBn ? "মাস" : "month"}</span>
+              </p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#162a4b] flex items-center justify-center text-blue-700 dark:text-blue-300 shadow-sm">
+              <FileText size={22} />
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-white dark:bg-[#0d1a2c] border border-blue-100 dark:border-blue-900/50 p-3">
+            <div>
+              <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400">{isBn ? "সুদের হার" : "Rate"}</p>
+              <p className="mt-1 text-xs font-black text-slate-900 dark:text-white">{convertDigits(`${(category.minRate * 100).toFixed(2)}% / ${isBn ? "মাস" : "mo"}`, isBn)}</p>
+            </div>
+            <div className="border-x border-slate-200 dark:border-slate-800 px-2">
+              <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400">{isBn ? "মোট পরিশোধ" : "Total"}</p>
+              <p className="mt-1 text-xs font-black text-blue-700 dark:text-blue-300">{formatCurrency(calc.totalPayable, isBn)}</p>
+            </div>
+            <div>
+              <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400">{isBn ? "প্রসেসিং ফি" : "Fee"}</p>
+              <p className="mt-1 text-xs font-black text-slate-900 dark:text-white">{formatCurrency(calc.processingFee, isBn)}</p>
+            </div>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
+            <span>{isBn ? "সিকিউরিটি ডিপোজিট" : "Security Deposit"}</span>
+            <strong className="text-emerald-600 dark:text-emerald-400">{formatCurrency(calc.securityDeposit, isBn)}</strong>
+          </div>
+        </section>
+
+        <div className="rounded-2xl bg-white dark:bg-[#0f1b2d] border border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center gap-2.5">
+          <ShieldAlert size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+          <p className="text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+            {isBn ? "আপনার তথ্য নিরাপদ থাকবে। আবেদন জমা দেওয়ার আগে হিসাবগুলো আবার যাচাই করুন।" : "Your information stays protected. Review the figures before continuing."}
           </p>
-        </div>
-
-        {/* Breakdown */}
-        <div className="bg-gradient-to-br from-[#1b2330] via-[#0f131a] to-[#0b0c10] border border-white/10 dark:border-slate-200 dark:border-slate-800 rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden mt-2">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 dark:bg-slate-900 rounded-bl-[100px] -mr-8 -mt-8"></div>
-          
-          <div className="relative z-10 flex flex-col gap-4">
-            {/* Selected Loan Summary */}
-            <div className="grid grid-cols-3 gap-2 pb-4 border-b border-white/10 text-center">
-              <div>
-                <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">{isBn ? "ক্যাটাগরি" : "Category"}</p>
-                <div className="flex items-center justify-center gap-1.5">
-                  <category.icon size={12} className="text-primary-400" />
-                  <p className="font-bold text-sm text-gray-100">{category?.title}</p>
-                </div>
-              </div>
-              <div className="border-x border-white/10">
-                <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">{isBn ? "পরিমাণ" : "Amount"}</p>
-                <p className="font-bold text-sm text-primary-400">{formatCurrency(amount, isBn)}</p>
-              </div>
-              <div>
-                <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">{isBn ? "সময়কাল" : "Tenure"}</p>
-                <p className="font-bold text-sm text-gray-100">{convertDigits(tenure, isBn)} {isBn ? "মাস" : "Months"}</p>
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center pb-4 border-b border-white/10">
-               <div>
-                 <p className="text-gray-400 text-xs font-medium mb-1 uppercase tracking-wider">{isBn ? "মাসিক কিস্তি" : "Monthly EMI"}</p>
-                 <p className="text-3xl font-black">{formatCurrency(calculateEMI(), isBn)}</p>
-               </div>
-               <div className="text-right">
-                 <p className="text-gray-400 text-xs font-medium mb-1 uppercase tracking-wider">{isBn ? "মোট পরিশোধ" : "Total Payable"}</p>
-                 <p className="text-xl font-bold text-emerald-450">{formatCurrency(calculateEMI() * tenure, isBn)}</p>
-               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{isBn ? "মাসিক সুদ হার" : "Monthly Interest Rate"}</p>
-                <p className="font-semibold text-sm">{convertDigits(`${(category.minRate * 100).toFixed(2)}%`, isBn)}</p>
-              </div>
-              <div>
-                <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{isBn ? "মাসিক সুদ" : "Monthly Interest"}</p>
-                <p className="font-semibold text-sm text-amber-400">{formatCurrency(Math.round(amount * category.minRate), isBn)}</p>
-              </div>
-              <div>
-                <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{isBn ? "মোট সুদ" : "Total Interest"}</p>
-                <p className="font-semibold text-sm text-rose-400">{formatCurrency(Math.round(amount * category.minRate * tenure), isBn)}</p>
-              </div>
-              <div>
-                <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{isBn ? "প্রসেসিং ফি" : "Processing Fee"}</p>
-                <p className="font-semibold text-sm">{formatCurrency(amount * category.procFee, isBn)}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{isBn ? "সিকিউরিটি মানি (১০%)" : "Security Deposit (10%)"}</p>
-                <p className="font-semibold text-sm">{formatCurrency(amount * category.secDeposit, isBn)}</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     );
   };
-
-
 
   const Step3CombinedInfo = () => {
     const personalFields: (keyof LoanFormData)[] = ['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'mobile', 'whatsapp', 'email', 'currentAddress', 'permanentAddress', 'nidNumber', 'eTin', 'bloodGroup', 'maritalStatus', 'spouseProfession', 'spouseIncome'];
