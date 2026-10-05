@@ -19,7 +19,7 @@ export function QuickServices({ isBn }: QuickServicesProps) {
           <p className="text-[10px] uppercase tracking-wider font-black text-slate-500">{isBn ? 'সদস্য সেবা' : 'MEMBER SERVICES'}</p>
           <h2 className="text-xl font-extrabold mt-1 text-slate-900 dark:text-white">{isBn ? 'দ্রুত সেবা' : 'Quick services'}</h2>
         </div>
-        <Link to="/support" className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 dark:text-sky-300">{isBn ? 'সব দেখুন' : 'View all'} <ChevronRight size={16}/></Link>
+        <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">{isBn ? '৪টি সেবা' : '4 services'}</span>
       </div>
       <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
         {quickActions.map(({label,sub,icon:Icon,link}, index) => (
