@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Inter", "Noto Sans Bengali", system-ui, sans-serif;
   
   --color-primary-50: #e0f7ff;
   --color-primary-100: #b3ebff;
@@ -1526,4 +1526,30 @@ body.dark .profile-theme .profile-primary-action svg{color:#163b78 !important}
    the actual lower section layout. */
 .profile-theme .profile-hero + *{
   margin-top:10px !important;
+}
+
+
+/* Easy loan flow typography: clean Bengali shaping + the app's existing scale. */
+.loan-easy-font {
+  font-family: "Noto Sans Bengali", "Inter", system-ui, sans-serif;
+}
+.loan-easy-font input,
+.loan-easy-font button,
+.loan-easy-font textarea,
+.loan-easy-font select {
+  font-family: inherit;
+}
+.loan-easy-font input[type="range"] {
+  height: 6px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.loan-easy-font input[type="range"]::-webkit-slider-thumb {
+  width: 22px;
+  height: 22px;
+}
+.loan-easy-font input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border: 0;
 }
