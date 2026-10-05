@@ -39,10 +39,10 @@ export function LoanServices({ isBn, categoryName }: LoanServicesProps) {
           <p className="text-[10px] uppercase tracking-wider font-black text-slate-500">{isBn ? 'ঋণ সেবা' : 'LOAN SERVICES'}</p>
           <h2 className="text-xl font-extrabold mt-1 text-slate-900 dark:text-white">{isBn ? 'আপনার প্রয়োজন অনুযায়ী' : 'Choose a service'}</h2>
         </div>
-        <a href="/apply" className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 dark:text-sky-300">{isBn ? 'সব দেখুন' : 'View all'} <ChevronRight size={16}/></a>
+        <button onClick={() => navigate("/loan-categories")} className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 dark:text-sky-300">{isBn ? 'সব দেখুন' : 'View all'} <ChevronRight size={16}/></button>
       </div>
       <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
-        {(['personal','business','education','emergency'] as const).map((id) => {
+        {(['personal','business','student','emergency'] as const).map((id) => {
           const found = categories.find(([category]) => category === id);
           const label = found?.[1] || categoryName(id);
           return (
