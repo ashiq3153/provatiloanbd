@@ -138,9 +138,11 @@ export default function Profile() {
 
             <div className="profile-hero-name">
               <h1>{memberName}</h1>
-              <span className="profile-verified"><ShieldCheck size={15} /> {accountState}</span>
             </div>
             <p className="profile-hero-username">@{user.username || 'telegram-user'}</p>
+            <div className="profile-hero-status">
+              <span className="profile-verified"><ShieldCheck size={14} /> {accountState}</span>
+            </div>
 
             <div className="profile-stat-grid">
               <div className="profile-stat">
