@@ -1276,3 +1276,167 @@ body.dark .profile-theme .profile-primary-action svg{color:#5eead4 !important}
 .profile-theme .profile-primary-action span{
   -webkit-text-fill-color:currentColor !important;
 }
+
+
+/* ===============================================================
+   PROFILE HERO V2 — restrained bank-grade palette
+   Structure: title -> logo/avatar -> name -> username -> status ->
+   identifiers -> account status -> single primary action.
+   No neon gradients, no glass effect.
+   =============================================================== */
+.profile-theme .profile-hero-wrap{padding:12px 16px 0 !important}
+.profile-theme .profile-hero{
+  border-radius:22px !important;
+  background:#0f2f63 !important;
+  border:1px solid rgba(148,163,184,.24) !important;
+  box-shadow:0 10px 24px rgba(15,47,99,.16) !important;
+}
+.profile-theme .profile-hero-bg{
+  min-height:54px !important;
+  padding:15px 18px 8px !important;
+  background:#163b78 !important;
+}
+.profile-theme .profile-hero-title{
+  font-size:14px !important;
+  font-weight:800 !important;
+  letter-spacing:-.01em !important;
+  color:#fff !important;
+}
+.profile-theme .profile-hero-orb-a,
+.profile-theme .profile-hero-orb-b{
+  background:transparent !important;
+  border-color:rgba(255,255,255,.10) !important;
+}
+.profile-theme .profile-hero-orb-a{width:145px !important;height:145px !important;right:-65px !important;top:-105px !important}
+.profile-theme .profile-hero-orb-b{width:100px !important;height:100px !important;right:20px !important;top:-68px !important}
+.profile-theme .profile-hero-content{
+  padding:0 18px 16px !important;
+  margin-top:-9px !important;
+}
+.profile-theme .profile-avatar-wrap{
+  width:74px !important;height:74px !important;margin:0 auto 8px !important;
+}
+.profile-theme .profile-avatar-ring{
+  width:74px !important;height:74px !important;padding:3px !important;
+  background:#e2e8f0 !important;
+  box-shadow:0 5px 14px rgba(0,0,0,.18) !important;
+}
+.profile-theme .profile-avatar{
+  border:2px solid #163b78 !important;
+  background:#dbeafe !important;
+}
+.profile-theme .profile-online-dot{
+  width:14px !important;height:14px !important;right:1px !important;bottom:3px !important;
+  border:3px solid #0f2f63 !important;background:#16a34a !important;
+}
+.profile-theme .profile-hero-name{
+  display:flex !important;justify-content:center !important;text-align:center !important;
+}
+.profile-theme .profile-hero-name h1{
+  font-size:20px !important;line-height:1.2 !important;
+  font-weight:800 !important;letter-spacing:-.02em !important;color:#fff !important;
+}
+.profile-theme .profile-hero-username{
+  margin-top:4px !important;text-align:center !important;
+  font-size:11px !important;font-weight:600 !important;
+  color:rgba(255,255,255,.68) !important;
+}
+.profile-theme .profile-hero-status{
+  display:flex !important;justify-content:center !important;margin-top:7px !important;
+}
+.profile-theme .profile-verified{
+  padding:4px 9px !important;
+  background:#183f7c !important;
+  border:1px solid rgba(255,255,255,.18) !important;
+  color:#e8f0ff !important;
+  font-size:9px !important;font-weight:700 !important;
+}
+.profile-theme .profile-stat-grid{
+  gap:8px !important;margin-top:14px !important;
+}
+.profile-theme .profile-stat{
+  min-height:56px !important;padding:9px 11px !important;
+  border-radius:12px !important;
+  background:#12366d !important;
+  border:1px solid rgba(255,255,255,.13) !important;
+}
+.profile-theme .profile-stat span{
+  font-size:8px !important;font-weight:700 !important;
+  letter-spacing:.06em !important;color:#aebed7 !important;
+}
+.profile-theme .profile-stat strong{
+  margin-top:4px !important;font-size:12px !important;font-weight:800 !important;
+  color:#fff !important;
+}
+.profile-theme .profile-stat-action{
+  min-height:48px !important;background:#153d78 !important;
+}
+.profile-theme .profile-stat-action strong{font-size:12px !important;color:#e8f0ff !important}
+.profile-theme .profile-primary-action{
+  min-height:42px !important;margin-top:10px !important;padding:9px 12px !important;
+  border-radius:11px !important;
+  background:#eaf1f8 !important;border:1px solid #d6e0eb !important;
+  color:#163b78 !important;
+  font-size:11px !important;font-weight:800 !important;
+  box-shadow:none !important;
+}
+.profile-theme .profile-primary-action svg{color:#163b78 !important}
+.profile-theme .profile-primary-action:active{transform:scale(.985) !important}
+
+/* Light mode: neutral application surface + blue/teal bank accent, no neon. */
+html:not(.dark) body .profile-theme{
+  background:#f5f7fa !important;color:#172033 !important;
+}
+html:not(.dark) body .profile-theme .profile-hero{
+  background:#ffffff !important;
+  border-color:#d8e0ea !important;
+  box-shadow:0 10px 26px rgba(20,45,80,.10) !important;
+}
+html:not(.dark) body .profile-theme .profile-hero-bg{
+  background:#173f7a !important;
+}
+html:not(.dark) body .profile-theme .profile-stat{
+  background:#f7f9fc !important;border-color:#dbe3ec !important;
+}
+html:not(.dark) body .profile-theme .profile-stat span{color:#64748b !important}
+html:not(.dark) body .profile-theme .profile-stat strong{color:#172033 !important}
+html:not(.dark) body .profile-theme .profile-stat-action{
+  background:#eef4f8 !important;border-color:#d6e2ea !important;
+}
+html:not(.dark) body .profile-theme .profile-stat-action strong{color:#166534 !important}
+html:not(.dark) body .profile-theme .profile-primary-action{
+  background:#173f7a !important;border-color:#173f7a !important;color:#fff !important;
+}
+html:not(.dark) body .profile-theme .profile-primary-action svg{color:#fff !important}
+
+/* Dark mode: one consistent navy surface, no black/white clash. */
+html.dark body .profile-theme,
+body.dark .profile-theme{
+  background:#080f1a !important;color:#f1f5f9 !important;
+}
+html.dark body .profile-theme .profile-hero,
+body.dark .profile-theme .profile-hero{
+  background:#0d2347 !important;
+  border-color:#213b60 !important;
+  box-shadow:0 12px 28px rgba(0,0,0,.28) !important;
+}
+html.dark body .profile-theme .profile-hero-bg,
+body.dark .profile-theme .profile-hero-bg{background:#102e5c !important}
+html.dark body .profile-theme .profile-stat,
+body.dark .profile-theme .profile-stat{
+  background:#112b52 !important;border-color:#274568 !important;
+}
+html.dark body .profile-theme .profile-stat span,
+body.dark .profile-theme .profile-stat span{color:#9fb2cc !important}
+html.dark body .profile-theme .profile-stat strong,
+body.dark .profile-theme .profile-stat strong{color:#f8fafc !important}
+html.dark body .profile-theme .profile-stat-action,
+body.dark .profile-theme .profile-stat-action{background:#15345f !important}
+html.dark body .profile-theme .profile-stat-action strong,
+body.dark .profile-theme .profile-stat-action strong{color:#9ed7b0 !important}
+html.dark body .profile-theme .profile-primary-action,
+body.dark .profile-theme .profile-primary-action{
+  background:#e8eef5 !important;border-color:#e8eef5 !important;color:#163b78 !important;
+}
+html.dark body .profile-theme .profile-primary-action svg,
+body.dark .profile-theme .profile-primary-action svg{color:#163b78 !important}
