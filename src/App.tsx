@@ -12,6 +12,7 @@ import Deposit from './pages/Deposit';
 import Withdraw from './pages/Withdraw';
 import Transactions from './pages/Transactions';
 import Loans from './pages/Loans';
+import LoanCategories from './pages/LoanCategories';
 import PayEMI from './pages/PayEMI';
 import ApplicationDetails from './pages/ApplicationDetails';
 import Profile from './pages/Profile';
@@ -167,6 +168,7 @@ export default function App() {
               <Route path="/deposit" element={<Deposit />} />
               <Route path="/withdraw" element={<Withdraw />} />
               <Route path="/loans" element={<Loans />} />
+              <Route path="/loan-categories" element={<LoanCategories />} />
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/application/:id" element={<ApplicationDetails />} />
               <Route path="/profile" element={<Profile />} />
