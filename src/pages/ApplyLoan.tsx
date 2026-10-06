@@ -278,7 +278,7 @@ export default function ApplyLoan() {
 
   // Form State
   const [category, setCategory] = useState<ReturnType<typeof getCategories>[0] | null>(null);
-  const [selectedProfession, setSelectedProfession] = useState<string>("চাকরিজীবী");
+  const [selectedProfession, setSelectedProfession] = useState<string>("");
   const [amount, setAmount] = useState(500000);
   const [tenure, setTenure] = useState(24);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -1359,9 +1359,7 @@ export default function ApplyLoan() {
                   {isBn ? "আপনার পেশা অনুযায়ী শুধু প্রযোজ্য লোন দেখানো হবে" : "Only applicable loans will be shown for your profession"}
                 </p>
               </div>
-              <span className="shrink-0 text-[8px] font-black text-emerald-600 dark:text-emerald-300">
-                {isBn ? "সঠিক পছন্দ" : "Best match"}
-              </span>
+              
             </div>
 
             <div className="mt-2.5 flex gap-1.5 overflow-x-auto pb-1">
@@ -1398,18 +1396,7 @@ export default function ApplyLoan() {
             </button>
 
             {selectedOption && (
-              <div className="mt-2.5 flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 px-3 py-2">
-                <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
-                <span className="text-[9px] font-black text-emerald-800 dark:text-emerald-200">{selectedOption.label}</span>
-                <button
-                  type="button"
-                  onClick={() => setShowProfessionModal(true)}
-                  className="ml-auto text-[8px] font-black text-emerald-700 dark:text-emerald-300"
-                >
-                  {isBn ? "পরিবর্তন" : "Change"}
-                </button>
-              </div>
-            )}
+              
           </div>
         </section>
 
@@ -1537,13 +1524,6 @@ export default function ApplyLoan() {
             </p>
           </div>
         )}
-
-        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-[#10211f] px-3 py-2 flex items-center gap-2">
-          <Lock size={12} className="text-amber-500 shrink-0" />
-          <p className="text-[7px] leading-3.5 text-slate-500 dark:text-slate-400">
-            {isBn ? "কৃষক/খামারি একটি ব্যবসায়িক পেশা হিসেবে থাকবে; মাছ, মুরগি বা সবজি আলাদা পেশা নয়।" : "Farmer/farm owner is one business occupation; fish, poultry and vegetable farming are not separate occupations."}
-          </p>
-        </div>
 
         {showProfessionModal && (
           <div className="fixed inset-0 z-[70] bg-black/55 flex items-end justify-center">
