@@ -1394,9 +1394,6 @@ export default function ApplyLoan() {
             >
               {isBn ? "সব পেশা দেখুন" : "View all professions"} <ChevronRight size={13} />
             </button>
-
-            {selectedOption && (
-              
           </div>
         </section>
 
