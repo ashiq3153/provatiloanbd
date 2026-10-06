@@ -1453,32 +1453,32 @@ export default function ApplyLoan() {
                 {isBn ? "প্রয়োজনীয় অর্থ ও সুবিধাজনক পরিশোধের মেয়াদ বেছে নিন" : "Choose the amount and a comfortable repayment period"}
               </p>
             </div>
-            <span className="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-[10px] font-black">
+            <span className="shrink-0 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-[10px] font-black border border-emerald-200 dark:border-emerald-800">
               {category.title}
             </span>
           </div>
         </div>
 
-        <section className="rounded-[24px] bg-white dark:bg-[#0f1b2d] border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+        <section className="rounded-[24px] bg-white dark:bg-[#0f2925] border border-slate-200 dark:border-emerald-900/40 p-5 shadow-sm">
           <div className="flex items-center justify-between gap-2">
             <label className="text-sm font-black text-slate-700 dark:text-slate-200">
               {isBn ? "ঋণের পরিমাণ (Loan Amount)" : "Loan Amount"}
             </label>
-            <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300">
+            <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/50">
               {isBn ? "সর্বোচ্চ" : "Max"} {category.limit}
             </span>
           </div>
 
           <div className="mt-5 flex items-end justify-between gap-3">
             <div>
-              <div className="text-[31px] leading-none font-black text-blue-700 dark:text-blue-300 tracking-tight">
+              <div className="text-[31px] leading-none font-black text-emerald-800 dark:text-emerald-300 tracking-tight">
                 {formatCurrency(amount, isBn)}
               </div>
               <div className="mt-2 text-[10px] font-semibold text-slate-400">
                 {isBn ? "ন্যূনতম" : "Min"} {formatCurrency(50000, isBn)} • {isBn ? "সর্বোচ্চ" : "Max"} {formatCurrency(category.maxAmount, isBn)}
               </div>
             </div>
-            <span className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-black text-slate-600 dark:text-slate-300">
+            <span className="px-3 py-1.5 rounded-full bg-emerald-50/80 dark:bg-emerald-950/50 text-[10px] font-black text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
               BDT
             </span>
           </div>
@@ -1491,7 +1491,7 @@ export default function ApplyLoan() {
             step={10000}
             value={Math.min(Math.max(amount, 50000), category.maxAmount)}
             onChange={e => handleAmountChange(Number(e.target.value))}
-            className="mt-6 w-full accent-blue-600"
+            className="mt-6 w-full accent-emerald-600 cursor-pointer"
           />
 
           <div className="mt-2 flex justify-between text-[10px] font-semibold text-slate-400">
@@ -1508,8 +1508,8 @@ export default function ApplyLoan() {
                 onClick={() => handleAmountChange(v)}
                 className={`h-9 rounded-xl text-[10px] font-black border transition-all ${
                   amount === v
-                    ? "bg-blue-600 border-blue-600 text-white"
-                    : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                    ? "bg-emerald-700 border-emerald-700 text-white shadow-sm"
+                    : "bg-slate-50 dark:bg-[#10211f] border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-emerald-500/40"
                 }`}
               >
                 {formatAmount(v, isBn)}
@@ -1518,13 +1518,13 @@ export default function ApplyLoan() {
           </div>
         </section>
 
-        <section className="rounded-[24px] bg-white dark:bg-[#0f1b2d] border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+        <section className="rounded-[24px] bg-white dark:bg-[#0f2925] border border-slate-200 dark:border-emerald-900/40 p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-black text-slate-900 dark:text-white">{isBn ? "পরিশোধের মেয়াদকাল" : "Repayment Tenure"}</h3>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{isBn ? "মাসিক কিস্তি আপনার আয়ের সাথে মিলিয়ে নিন" : "Pick a tenure that fits your monthly budget"}</p>
             </div>
-            <span className="px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-[10px] font-black">
+            <span className="px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-[10px] font-black border border-emerald-200/50 dark:border-emerald-800/50">
               {convertDigits(tenure, isBn)} {isBn ? "মাস নির্বাচিত" : "months selected"}
             </span>
           </div>
@@ -1537,38 +1537,38 @@ export default function ApplyLoan() {
                 onClick={() => setTenure(months)}
                 className={`h-14 rounded-xl text-xs font-black transition-all ${
                   tenure === months
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
-                    : "bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                    ? "bg-emerald-700 text-white shadow-md shadow-emerald-700/20"
+                    : "bg-slate-50 dark:bg-[#10211f] border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-emerald-500/40"
                 }`}
               >
                 {convertDigits(months, isBn)}
-                <span className="block text-[9px] font-semibold opacity-75">{isBn ? "মাস" : "months"}</span>
+                <span className="block text-[9px] font-semibold opacity-85">{isBn ? "মাস" : "months"}</span>
               </button>
             ))}
           </div>
         </section>
 
-        <section className="rounded-[24px] bg-blue-50 dark:bg-[#102044] border border-blue-100 dark:border-blue-900/60 p-5">
+        <section className="rounded-[24px] bg-emerald-50/70 dark:bg-[#092922] border border-emerald-200 dark:border-emerald-800/60 p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] font-black text-blue-800 dark:text-blue-200">{isBn ? "আনুমানিক মাসিক কিস্তি (Estimated EMI)" : "Estimated Monthly EMI"}</p>
-              <p className="mt-1 text-[30px] leading-none font-black text-blue-800 dark:text-blue-100">
+              <p className="text-[11px] font-black text-emerald-900 dark:text-emerald-200">{isBn ? "আনুমানিক মাসিক কিস্তি (Estimated EMI)" : "Estimated Monthly EMI"}</p>
+              <p className="mt-1 text-[30px] leading-none font-black text-emerald-900 dark:text-emerald-100">
                 {formatCurrency(calc.emi, isBn)} <span className="text-sm font-bold">/ {isBn ? "মাস" : "month"}</span>
               </p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#162a4b] flex items-center justify-center text-blue-700 dark:text-blue-300 shadow-sm">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white dark:bg-emerald-700 flex items-center justify-center shadow-sm">
               <FileText size={22} />
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-white dark:bg-[#0d1a2c] border border-blue-100 dark:border-blue-900/50 p-3">
+          <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-white dark:bg-[#0d1f1c] border border-emerald-200/60 dark:border-emerald-900/50 p-3">
             <div>
               <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400">{isBn ? "সুদের হার" : "Rate"}</p>
               <p className="mt-1 text-xs font-black text-slate-900 dark:text-white">{convertDigits(`${(category.minRate * 100).toFixed(2)}% / ${isBn ? "মাস" : "mo"}`, isBn)}</p>
             </div>
             <div className="border-x border-slate-200 dark:border-slate-800 px-2">
               <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400">{isBn ? "মোট পরিশোধ" : "Total"}</p>
-              <p className="mt-1 text-xs font-black text-blue-700 dark:text-blue-300">{formatCurrency(calc.totalPayable, isBn)}</p>
+              <p className="mt-1 text-xs font-black text-emerald-700 dark:text-emerald-300">{formatCurrency(calc.totalPayable, isBn)}</p>
             </div>
             <div>
               <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400">{isBn ? "প্রসেসিং ফি" : "Fee"}</p>
@@ -1578,11 +1578,11 @@ export default function ApplyLoan() {
 
           <div className="mt-3 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
             <span>{isBn ? "সিকিউরিটি ডিপোজিট" : "Security Deposit"}</span>
-            <strong className="text-emerald-600 dark:text-emerald-400">{formatCurrency(calc.securityDeposit, isBn)}</strong>
+            <strong className="text-emerald-700 dark:text-emerald-300 font-black">{formatCurrency(calc.securityDeposit, isBn)}</strong>
           </div>
         </section>
 
-        <div className="rounded-2xl bg-white dark:bg-[#0f1b2d] border border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center gap-2.5">
+        <div className="rounded-2xl bg-white dark:bg-[#0f2925] border border-slate-200 dark:border-emerald-900/40 px-4 py-3 flex items-center gap-2.5">
           <ShieldAlert size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
           <p className="text-[10px] leading-4 text-slate-500 dark:text-slate-400">
             {isBn ? "আপনার তথ্য নিরাপদ থাকবে। আবেদন জমা দেওয়ার আগে হিসাবগুলো আবার যাচাই করুন।" : "Your information stays protected. Review the figures before continuing."}
@@ -3106,19 +3106,19 @@ export default function ApplyLoan() {
   return (
     <FormProvider {...methods}>
     <div className="apply-loan-screen app-apply-theme min-h-full bg-slate-50 dark:bg-[#0b1220] transition-colors flex flex-col relative">
-      {/* Easy-style application header — visual language follows the supplied reference screens. */}
+      {/* Easy-style application header — Emerald bank theme */}
       {step < 5 && (
-        <div className={`loan-easy-font sticky top-0 z-30 backdrop-blur border-b ${
-        step === 1
-          ? "bg-[#063d34] dark:bg-[#052f29] border-emerald-900/50 text-white"
-          : "bg-slate-50/95 dark:bg-[#0b1220]/95 border-slate-200/60 dark:border-slate-800/60"
-      }`}>
+        <div className={`loan-easy-font sticky top-0 z-30 backdrop-blur-md border-b transition-colors ${
+          step === 1
+            ? "bg-[#063d34] dark:bg-[#052f29] border-emerald-900/50 text-white"
+            : "bg-slate-50/95 dark:bg-[#0b1220]/95 border-slate-200/60 dark:border-emerald-900/40"
+        }`}>
           <div className="px-3 pt-2.5 pb-2.5">
             <div className="flex items-center justify-between">
-              <button type="button" onClick={prevStep} disabled={step === 1} className={`w-9 h-9 rounded-full border flex items-center justify-center disabled:opacity-60 ${
+              <button type="button" onClick={prevStep} disabled={step === 1} className={`w-9 h-9 rounded-full border flex items-center justify-center disabled:opacity-40 transition-all ${
                 step === 1
                   ? "bg-white/10 border-white/15 text-white"
-                  : "bg-white dark:bg-[#111c2e] border-slate-200 dark:border-slate-800"
+                  : "bg-white dark:bg-[#0f2925] border-slate-200 dark:border-emerald-800 text-slate-700 dark:text-slate-200 shadow-sm"
               }`}>
                 <ChevronLeft size={19} />
               </button>
@@ -3126,39 +3126,57 @@ export default function ApplyLoan() {
                 <div className={`px-3.5 h-8 rounded-full border flex items-center justify-center ${
                     step === 1
                       ? "bg-white/10 border-white/15"
-                      : "bg-blue-50 dark:bg-blue-950/40 border-blue-100 dark:border-blue-900/50"
+                      : "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800"
                   }`}>
                   <span className={`text-[10px] font-black ${
-                    step === 1 ? "text-white" : "text-blue-800 dark:text-blue-200"
+                    step === 1 ? "text-white" : "text-emerald-900 dark:text-emerald-200"
                   }`}>
-                    {isBn ? `আবেদন • ${step === 2 ? "Loan Amount And Tenure" : "Loan Application"}` : `Apply • ${step === 2 ? "Loan Amount And Tenure" : "Loan Application"}`}
+                    {isBn
+                      ? `আবেদন • ${step === 1 ? "ক্যাটাগরি" : step === 2 ? "পরিমাণ ও মেয়াদ" : step === 3 ? "তথ্য বিবরণী" : "ডকুমেন্ট"}`
+                      : `Apply • ${step === 1 ? "Category" : step === 2 ? "Amount & Tenure" : step === 3 ? "Information" : "Documents"}`
+                    }
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button type="button" onClick={() => {}} className={`w-9 h-9 rounded-full border flex items-center justify-center ${
+                <button type="button" onClick={() => setShowTermsModal(true)} className={`w-9 h-9 rounded-full border flex items-center justify-center ${
                   step === 1
                     ? "bg-white/10 border-white/15 text-white"
-                    : "bg-white dark:bg-[#111c2e] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-200"
+                    : "bg-white dark:bg-[#0f2925] border-slate-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 shadow-sm"
                 }`} aria-label={isBn ? "সহায়তা" : "Help"}>
                   <span className="w-5 h-5 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-black">?</span>
                 </button>
                 {step === 1 ? (
                   <span className="w-9 h-9 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-[10px] font-black">↻</span>
                 ) : (
-                  <button type="button" onClick={() => navigate('/profile')} className="w-10 h-10 rounded-full bg-blue-800 dark:bg-blue-700 text-white flex items-center justify-center shadow-sm" aria-label={isBn ? "প্রোফাইল" : "Profile"}>
-                    <User size={19} />
+                  <button type="button" onClick={() => navigate('/profile')} className="w-9 h-9 rounded-full bg-emerald-700 dark:bg-emerald-600 text-white flex items-center justify-center shadow-sm" aria-label={isBn ? "প্রোফাইল" : "Profile"}>
+                    <User size={18} />
                   </button>
                 )}
               </div>
             </div>
-            <div className={`mt-2 h-1 rounded-full overflow-hidden ${step === 1 ? "bg-white/15" : "bg-slate-200 dark:bg-slate-800"}`}>
-              <motion.div className={`h-full rounded-full ${step === 1 ? "bg-amber-400" : "bg-gradient-to-r from-blue-700 to-blue-500"}`} initial={{ width: 0 }} animate={{ width: `${Math.min(step / 8, 1) * 100}%` }} transition={{ duration: 0.3 }} />
+
+            {/* Progress bar normalized to 5 steps */}
+            <div className={`mt-2.5 h-1.5 rounded-full overflow-hidden ${step === 1 ? "bg-white/15" : "bg-slate-200 dark:bg-slate-800"}`}>
+              <motion.div
+                className={`h-full rounded-full ${step === 1 ? "bg-amber-400" : "bg-gradient-to-r from-emerald-500 to-emerald-700"}`}
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(step / 5, 1) * 100}%` }}
+                transition={{ duration: 0.3 }}
+              />
             </div>
+
             {step >= 2 && category && (
-              <div className="mt-3 flex items-center gap-2 overflow-x-auto no-scrollbar">
-                <span className="shrink-0 px-3 py-1.5 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 text-[10px] font-black text-slate-700 dark:text-slate-200">{isBn ? `ধাপ ${convertDigits(step, true)} / ৮ • ${step === 2 ? "পরিমাণ ও মেয়াদ" : step === 3 ? "ব্যক্তিগত তথ্য" : "ডকুমেন্ট"}` : `Step ${step} / 8 • ${step === 2 ? "Amount & Tenure" : step === 3 ? "Personal Information" : "Documents"}`}</span>
-                <span className="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 text-[10px] font-black text-blue-800 dark:text-blue-200">{category.title} {isBn ? "লোন" : "Loan"}</span>
+              <div className="mt-2.5 flex items-center gap-2 overflow-x-auto no-scrollbar">
+                <span className="shrink-0 px-3 py-1 rounded-full bg-white dark:bg-[#0f2925] border border-slate-200 dark:border-emerald-800 text-[10px] font-black text-slate-700 dark:text-slate-200 shadow-xs">
+                  {isBn
+                    ? `ধাপ ${convertDigits(step, true)} / ৫ • ${step === 2 ? "পরিমাণ ও মেয়াদ" : step === 3 ? "ব্যক্তিগত তথ্য" : "ডকুমেন্ট"}`
+                    : `Step ${step} / 5 • ${step === 2 ? "Amount & Tenure" : step === 3 ? "Personal Info" : "Documents"}`
+                  }
+                </span>
+                <span className="shrink-0 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[10px] font-black text-emerald-800 dark:text-emerald-200">
+                  {category.title} {isBn ? "লোন" : "Loan"}
+                </span>
               </div>
             )}
           </div>
@@ -3184,14 +3202,14 @@ export default function ApplyLoan() {
         </AnimatePresence>
       </div>
 
-      {/* Bottom Action Bar - Compact */}
+      {/* Bottom Action Bar - Emerald Bank Styled */}
       {step > 1 && step < 5 && (
-        <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-white/80 dark:bg-gray-800/80  transition-colors border-t border-gray-200/50 dark:border-gray-800/50 z-40 flex justify-between gap-2">
+        <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-white/90 dark:bg-[#0b1220]/90 backdrop-blur-md transition-colors border-t border-slate-200/80 dark:border-emerald-900/40 z-40 flex justify-between gap-2 shadow-lg">
           {step > 1 && (
             <button
               type="button"
               onClick={prevStep}
-              className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 text-gray-700 dark:text-gray-300"
+              className="flex items-center gap-1 px-5 py-2.5 rounded-xl font-extrabold text-xs bg-slate-100 dark:bg-[#0f2925] border border-slate-200 dark:border-emerald-800 shrink-0 text-slate-700 dark:text-emerald-200 hover:bg-slate-200 dark:hover:bg-[#153a32] transition-colors"
             >
               <ChevronLeft size={16} /> {isBn ? 'পিছনে' : 'Back'}
             </button>
@@ -3200,12 +3218,12 @@ export default function ApplyLoan() {
             type="button"
             onClick={nextStep}
             disabled={(step === 1 && !category) || (step === 4 && !acceptedTerms) || isSubmitting}
-            className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm bg-primary-600 hover:bg-primary-700 text-white shadow-sm shrink-0 disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:shadow-none ml-auto"
+            className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl font-extrabold text-xs bg-emerald-700 hover:bg-emerald-800 text-white shadow-md shadow-emerald-700/20 shrink-0 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:shadow-none ml-auto transition-all active:scale-[0.98]"
           >
             {isSubmitting
               ? (isBn ? 'অপেক্ষা করুন...' : 'Please wait...')
               : step === 4
-              ? (isBn ? 'সাবমিট করুন' : 'Submit')
+              ? (isBn ? 'সাবমিট করুন' : 'Submit Application')
               : (isBn ? 'পরবর্তী ধাপ' : 'Next Step')
             }
             {!isSubmitting && <ChevronRight size={16} />}
