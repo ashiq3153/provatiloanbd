@@ -1738,7 +1738,7 @@ export default function ApplyLoan() {
           </span>
         </div>
 
-        <section className="rounded-[24px] bg-white dark:bg-[#101c31] border border-slate-200 dark:border-[#1e3353] p-4 shadow-sm">
+        <section className="rounded-[24px] bg-[#10203a] dark:bg-[#101c31] border border-[#203b62] dark:border-[#1e3353] p-4 shadow-sm">
           <div className="flex items-center justify-between gap-2">
             <label className="text-sm font-black text-slate-800 dark:text-white">
               {isBn ? "লোনের পরিমাণ" : "Loan amount"}
@@ -1748,7 +1748,7 @@ export default function ApplyLoan() {
             </span>
           </div>
 
-          <div className="mt-4 rounded-2xl bg-slate-50 dark:bg-[#152640] border border-slate-200 dark:border-[#243b5e] p-4">
+          <div className="mt-4 rounded-2xl bg-[#142b4d] dark:bg-[#152640] border border-[#28466f] dark:border-[#243b5e] p-4">
             <div className="flex items-end justify-between gap-3">
               <div>
                 <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400">{isBn ? "নির্বাচিত পরিমাণ" : "Selected amount"}</p>
@@ -1789,8 +1789,8 @@ export default function ApplyLoan() {
                     onClick={() => handleAmountChange(v)}
                     className={`h-9 rounded-xl text-[11px] font-black border transition-all active:scale-95 ${
                       amount === v
-                        ? "bg-blue-600 border-blue-600 text-white shadow-sm shadow-blue-600/20"
-                        : "bg-white dark:bg-[#0d192b] border-slate-200 dark:border-[#29415f] text-slate-700 dark:text-slate-200 hover:border-blue-400 dark:hover:border-blue-500"
+                        ? "bg-blue-600 border-blue-500 text-white"
+                        : "bg-[#0d1b30] dark:bg-[#0d192b] border-[#29415f] text-white hover:border-blue-400 dark:hover:border-blue-500"
                     }`}
                   >
                     {amountLabel(v)}
@@ -1818,10 +1818,10 @@ export default function ApplyLoan() {
                 key={months}
                 type="button"
                 onClick={() => setTenure(months)}
-                className={`h-11 rounded-xl text-sm font-black border transition-all active:scale-95 ${
+                className={`h-10 rounded-xl text-sm font-black border transition-all active:scale-95 ${
                   tenure === months
-                    ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20"
-                    : "bg-slate-50 dark:bg-[#0d192b] border-slate-200 dark:border-[#29415f] text-slate-700 dark:text-slate-200 hover:border-blue-400 dark:hover:border-blue-500"
+                    ? "bg-blue-600 border-blue-500 text-white"
+                    : "bg-[#0d1b30] dark:bg-[#0d192b] border-[#29415f] text-white hover:border-blue-400 dark:hover:border-blue-500"
                 }`}
               >
                 {convertDigits(months, isBn)}
@@ -1841,17 +1841,17 @@ export default function ApplyLoan() {
             <button
               type="button"
               onClick={() => setShowRepaymentSchedule(true)}
-              className="w-11 h-11 rounded-2xl bg-white text-blue-800 flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-transform"
+              className="w-11 h-11 rounded-2xl bg-blue-500 text-white border border-blue-300/40 flex items-center justify-center shadow-none hover:bg-blue-400 hover:scale-105 active:scale-95 transition-transform"
               aria-label={isBn ? "কিস্তির বিস্তারিত দেখুন" : "View repayment schedule"}
             >
-              <FileText size={21} />
+              <FileText size={21} strokeWidth={2.5} />
             </button>
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-2">
-            <div className="rounded-xl bg-white/10 border border-white/10 p-2.5">
+            <div className="rounded-xl bg-white/10 border border-white/10 px-3 py-2 flex flex-col justify-center min-h-[58px]">
               <p className="text-[8px] text-blue-200">{isBn ? "সুদের হার" : "Rate"}</p>
-              <p className="mt-1 text-[11px] font-black">{convertDigits(`${(category.minRate * 100).toFixed(2)}% / ${isBn ? "মাস" : "mo"}`, isBn)}</p>
+              <p className="mt-1 text-[11px] font-black leading-tight">{convertDigits(`${(category.minRate * 100).toFixed(2)}% / ${isBn ? "মাস" : "mo"}`, isBn)}</p>
             </div>
             <div className="rounded-xl bg-white/10 border border-white/10 p-2.5">
               <p className="text-[8px] text-blue-200">{isBn ? "মোট সুদ" : "Total interest"}</p>
@@ -3483,13 +3483,7 @@ export default function ApplyLoan() {
       }`}>
           <div className="px-3 pt-2.5 pb-2.5">
             <div className="flex items-center justify-between">
-              <button type="button" onClick={prevStep} disabled={step === 1} className={`w-9 h-9 rounded-full border flex items-center justify-center disabled:opacity-60 ${
-                step === 1
-                  ? "bg-white/10 border-white/15 text-white"
-                  : "bg-white dark:bg-[#111c2e] border-slate-200 dark:border-slate-800"
-              }`}>
-                <ChevronLeft size={19} />
-              </button>
+              <div className="w-9 h-9" aria-hidden="true" />
               <div className="flex items-center gap-2">
                 <div className={`px-3.5 h-8 rounded-full border flex items-center justify-center ${
                     step === 1
@@ -3554,7 +3548,7 @@ export default function ApplyLoan() {
 
       {/* Bottom Action Bar - Compact */}
       {step > 1 && step < 5 && (
-        <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-white/80 dark:bg-gray-800/80  transition-colors border-t border-gray-200/50 dark:border-gray-800/50 z-40 flex justify-between gap-2">
+        <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-transparent border-0 shadow-none z-40 flex justify-between gap-2">
           {step > 1 && (
             <button
               type="button"
