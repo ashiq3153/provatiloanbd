@@ -3,3 +3,7 @@
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: http://192.168.0.2:5173/
+3:31:00 PM [vite] (client) hmr update /src/pages/ApplyLoan.tsx, /src/index.css
+3:31:26 PM [vite] (client) hmr update /src/pages/ApplyLoan.tsx, /src/index.css
+3:31:42 PM [vite] (client) hmr update /src/pages/ApplyLoan.tsx, /src/index.css
+3:32:16 PM [vite] (client) page reload tsconfig.tsbuildinfo

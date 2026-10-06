@@ -1,0 +1,64 @@
+/* ================================================================
+   EMERALD BANKING THEME — APPLY LOAN SPECIFIC OVERRIDES
+   ================================================================ */
+
+.apply-loan-emerald-container {
+  font-family: "Inter", "Noto Sans Bengali", system-ui, sans-serif;
+}
+
+/* Override global black text rule specifically inside apply-loan screens for emerald elements */
+html:not(.dark) .apply-loan-emerald-container .text-emerald-700,
+html:not(.dark) .apply-loan-emerald-container .text-emerald-800,
+html:not(.dark) .apply-loan-emerald-container .text-emerald-900 {
+  color: #047857 !important;
+  -webkit-text-fill-color: #047857 !important;
+}
+
+html.dark .apply-loan-emerald-container .text-emerald-300,
+html.dark .apply-loan-emerald-container .text-emerald-400,
+body.dark .apply-loan-emerald-container .text-emerald-300,
+body.dark .apply-loan-emerald-container .text-emerald-400 {
+  color: #34d399 !important;
+  -webkit-text-fill-color: #34d399 !important;
+}
+
+/* Emerald Button styling */
+.apply-emerald-btn-primary {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25) !important;
+  transition: all 0.2s ease !important;
+}
+
+.apply-emerald-btn-primary:hover {
+  background: linear-gradient(135deg, #047857 0%, #065f46 100%) !important;
+  box-shadow: 0 6px 18px rgba(5, 150, 105, 0.35) !important;
+  transform: translateY(-1px);
+}
+
+.apply-emerald-btn-primary:active {
+  transform: translateY(0.5px) scale(0.98);
+}
+
+/* Form input custom focus ring for Emerald Bank theme */
+.apply-loan-emerald-container input:focus,
+.apply-loan-emerald-container select:focus,
+.apply-loan-emerald-container textarea:focus {
+  border-color: #059669 !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15) !important;
+}
+
+/* Range slider accent */
+.apply-loan-emerald-container input[type="range"]::-webkit-slider-thumb {
+  background-color: #059669 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.4) !important;
+}
+
+/* Accent Card Highlight */
+.emerald-card-active {
+  border-color: #10b981 !important;
+  box-shadow: 0 8px 24px -6px rgba(16, 185, 129, 0.2) !important;
+}
