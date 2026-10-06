@@ -1379,7 +1379,7 @@ export default function ApplyLoan() {
                 <span className="text-[9px] font-black text-emerald-800 dark:text-emerald-200">{selectedOption.label}</span>
                 <button
                   type="button"
-                  onClick={() => selectProfession(quickProfessionGroups[0])}
+                  onClick={() => setShowProfessionModal(true)}
                   className="ml-auto text-[8px] font-black text-emerald-700 dark:text-emerald-300"
                 >
                   {isBn ? "পরিবর্তন" : "Change"}
@@ -1389,7 +1389,9 @@ export default function ApplyLoan() {
           </div>
         </section>
 
-        <div className="flex items-center justify-between px-1 pt-1">
+        {selectedOption ? (
+          <>
+<div className="flex items-center justify-between px-1 pt-1">
           <div>
             <h3 className="text-[12px] font-black text-slate-800 dark:text-white">
               {isBn ? "উপযুক্ত ক্যাটাগরি" : "Applicable loan categories"}
@@ -1494,12 +1496,15 @@ export default function ApplyLoan() {
               </article>
             );
           })}
-        </div>
-
-        {visibleCategories.length === 0 && (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/50 px-3 py-4 text-center">
-            <p className="text-[10px] font-black text-amber-800 dark:text-amber-200">
-              {isBn ? "এই পেশার জন্য কোনো লোন ক্যাটাগরি সক্রিয় নেই।" : "No active loan category is available for this profession."}
+        
+          </>
+        ) : (
+          <div className="rounded-xl border border-dashed border-emerald-300 dark:border-emerald-900/60 bg-emerald-50/60 dark:bg-emerald-950/20 px-4 py-5 text-center">
+            <p className="text-[11px] font-black text-emerald-800 dark:text-emerald-200">
+              {isBn ? "প্রথমে আপনার পেশা নির্বাচন করুন" : "Please select your profession first"}
+            </p>
+            <p className="mt-1 text-[8px] text-slate-500 dark:text-slate-400">
+              {isBn ? "পেশা নির্বাচন করার পর শুধু আপনার জন্য প্রযোজ্য লোন ক্যাটাগরি দেখানো হবে।" : "Only the loan categories applicable to your profession will appear after selection."}
             </p>
           </div>
         )}
@@ -1591,16 +1596,44 @@ export default function ApplyLoan() {
                 </div>
 
                 <section>
-                  <h4 className="text-[11px] font-black text-slate-900 dark:text-white">প্রয়োজনীয় ডকুমেন্ট</h4>
+                  <h4 className="text-[11px] font-black text-slate-900 dark:text-white">এই ক্যাটাগরিতে যেসব পেশায় আবেদন করা যাবে</h4>
                   <div className="mt-2 space-y-1.5">
-                    {detailsCategory.reqDocs.map((doc: string) => (
-                      <div key={doc} className="flex items-start gap-2 text-[9px] text-slate-600 dark:text-slate-300">
-                        <CheckCircle2 size={13} className="text-emerald-600 mt-0.5 shrink-0" />
-                        <span>{doc}</span>
+                    {detailsProfessions.map(profession => (
+                      <div key={profession.id} className="flex items-center gap-2 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/20 px-2.5 py-2 text-[9px] font-bold text-slate-700 dark:text-slate-200">
+                        <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
+                        <span>{profession.label}</span>
                       </div>
                     ))}
                   </div>
                 </section>
+
+                <section>
+                  <h4 className="text-[11px] font-black text-slate-900 dark:text-white">প্রয়োজনীয় কাগজপত্র</h4>
+                  <div className="mt-2 space-y-1.5">
+                    {detailRequirements.map(doc => (
+                      <div key={doc.key} className="flex items-start gap-2 text-[9px] text-slate-600 dark:text-slate-300">
+                        <CheckCircle2 size={13} className={doc.required ? "text-emerald-600 mt-0.5 shrink-0" : "text-slate-400 mt-0.5 shrink-0"} />
+                        <span>
+                          {doc.labelBn}
+                          {!doc.required && <span className="text-slate-400"> — ঐচ্ছিক/প্রযোজ্য হলে</span>}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {detailInfoFields.length > 0 && (
+                  <section>
+                    <h4 className="text-[11px] font-black text-slate-900 dark:text-white">আবেদনে যে তথ্যগুলো দিতে হবে</h4>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {detailInfoFields.map(field => (
+                        <span key={field} className="rounded-lg bg-slate-100 dark:bg-slate-800 px-2 py-1 text-[8px] font-bold text-slate-600 dark:text-slate-300">
+                          {field}
+                        </span>
+                      ))}
+                    </div>
+                  </section>
+                )}
 
                 <section>
                   <h4 className="text-[11px] font-black text-slate-900 dark:text-white">আবেদনের ধাপ</h4>
