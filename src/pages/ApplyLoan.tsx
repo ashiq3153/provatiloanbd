@@ -37,6 +37,7 @@ import { AddressSelector, AddressValue, emptyAddress, serializeAddress } from ".
 import { getCategories, snapPoints, amountPackages, formatAmount, getAllowedTenure, getColorStyles, getIconColor } from "./apply-loan-utils";
 import { calculateLoan } from "../lib/finance";
 import { getLoanDocumentRequirements, getMissingRequiredDocuments } from "../lib/loan-document-requirements";
+import "../styles/apply-loan-emerald.css";
 
 const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
   const { formState: { errors } } = useFormContext<LoanFormData>();
@@ -82,27 +83,27 @@ const AccordionSection = ({
       <button
         type="button"
         onClick={onToggle}
-        className={`w-full flex items-center justify-between p-4 transition-all text-left font-bold text-sm select-none cursor-pointer border ${
+        className={`w-full flex items-center justify-between p-4 transition-all text-left font-black text-sm select-none cursor-pointer border ${
           isExpanded
             ? flagged
-              ? "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-amber-500 text-amber-900 dark:text-amber-100 rounded-t-2xl rounded-b-none ring-2 ring-amber-500/20"
-              : "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-primary-500/50 dark:border-primary-500/30 text-primary-900 dark:text-primary-100 rounded-t-2xl rounded-b-none"
+              ? "bg-white dark:bg-[#0d221e] border-amber-500 text-amber-900 dark:text-amber-100 rounded-t-2xl rounded-b-none ring-2 ring-amber-500/20 shadow-sm"
+              : "bg-white dark:bg-[#0d221e] border-emerald-600 text-emerald-950 dark:text-emerald-100 rounded-t-2xl rounded-b-none ring-2 ring-emerald-500/20 shadow-sm"
             : flagged
-            ? "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-amber-400 dark:border-amber-900/60 text-amber-800 dark:text-amber-400 rounded-2xl ring-2 ring-amber-500/10 animate-pulse"
+            ? "bg-white dark:bg-[#0d221e] border-amber-400 dark:border-amber-900/60 text-amber-800 dark:text-amber-400 rounded-2xl ring-2 ring-amber-500/10 animate-pulse"
             : hasError
-            ? "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-rose-400/60 dark:border-rose-900 text-rose-700 dark:text-rose-400 rounded-2xl"
-            : "bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800 text-gray-800 dark:text-gray-200 hover:border-primary-500/30 rounded-2xl"
+            ? "bg-white dark:bg-[#0d221e] border-rose-400/60 dark:border-rose-900 text-rose-700 dark:text-rose-400 rounded-2xl"
+            : "bg-white dark:bg-[#0d221e] border-slate-200 dark:border-emerald-900/40 text-slate-800 dark:text-slate-200 hover:border-emerald-500/40 rounded-2xl shadow-xs"
         }`}
       >
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-xl transition-colors ${
+          <div className={`p-2.5 rounded-xl transition-colors ${
             isExpanded
-              ? flagged ? "bg-amber-500 text-white" : "bg-primary-500 text-white"
+              ? flagged ? "bg-amber-500 text-white" : "bg-emerald-600 text-white"
               : flagged
               ? "bg-amber-500 text-white animate-bounce"
               : hasError
               ? "bg-rose-500 text-white"
-              : "bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-gray-500 dark:text-gray-400"
+              : "bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300"
           }`}>
             {icon}
           </div>
@@ -1262,159 +1263,143 @@ export default function ApplyLoan() {
     };
 
     return (
-      <div className="loan-category-reference-screen loan-easy-font space-y-3 pb-5">
-        {/* Intro / profession selector */}
-        <section className="rounded-[18px] bg-white dark:bg-[#0f2925] border border-slate-200 dark:border-emerald-900/40 shadow-sm overflow-hidden">
-          <div className="px-3.5 pt-3 pb-2.5">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <h2 className="text-[15px] leading-tight font-black text-slate-900 dark:text-white">
-                  {isBn ? "আপনার পেশা নির্বাচন করুন" : "Choose your profession"}
-                </h2>
-                <p className="mt-0.5 text-[8px] leading-3.5 text-slate-500 dark:text-slate-400">
-                  {isBn ? "আপনার পেশা ও চাহিদার সাথে সবচেয়ে উপযুক্ত লোন নির্বাচন করুন" : "Choose the loan that best matches your profession and need"}
-                </p>
-              </div>
-              <span className="shrink-0 text-[8px] font-black text-emerald-600 dark:text-emerald-300">
-                {isBn ? "সঠিক পছন্দ" : "Best match"}
-              </span>
-            </div>
+      <div className="loan-category-reference-screen loan-easy-font space-y-4 pb-6">
+        {/* Banner Section */}
+        <div className="rounded-2xl p-4 bg-gradient-to-r from-[#044e3a] via-[#057a55] to-[#047857] text-white shadow-md flex items-center justify-between relative overflow-hidden">
+          <div className="z-10 relative space-y-1 max-w-[70%]">
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-400/20 text-emerald-200 text-[10px] font-bold border border-emerald-400/30 inline-block">
+              {isBn ? "প্রভাতি ডিজিটাল ব্যাংকিং" : "Provati Emerald Banking"}
+            </span>
+            <h2 className="text-lg font-black leading-snug">
+              {isBn ? "সহজ শর্তে দ্রুত ঋণ সেবাসমূহ" : "Quick & Easy Digital Loans"}
+            </h2>
+            <p className="text-[10px] text-emerald-100/90 font-medium">
+              {isBn ? "আপনার পেশা অনুযায়ী সঠিক ক্যাটাগরি সিলেক্ট করুন" : "Select the best matching loan category"}
+            </p>
+          </div>
+          <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-emerald-300 shadow-inner">
+            <ShieldAlert size={32} />
+          </div>
+        </div>
 
-            <div className="mt-2.5 grid grid-cols-4 gap-1.5">
-              {professionOptions.map(item => {
-                const active = selectedProfession === item.label;
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setSelectedProfession(item.label)}
-                    className={`h-[52px] rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
-                      active
-                        ? "bg-amber-50 dark:bg-amber-950/20 border-amber-400 text-slate-900 dark:text-white shadow-sm"
-                        : "bg-slate-50/80 dark:bg-[#10221f] border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300"
-                    }`}
-                  >
-                    <span className={`w-6 h-6 rounded-lg flex items-center justify-center ${
-                      active ? "bg-amber-100 dark:bg-amber-900/30 text-emerald-800 dark:text-emerald-300" : "bg-white dark:bg-[#16302b] text-slate-500 dark:text-slate-300"
-                    }`}>
-                      <Icon size={13} />
-                    </span>
-                    <span className="text-[8px] font-black leading-none">{item.label}</span>
-                  </button>
-                );
-              })}
+        {/* Intro / profession selector */}
+        <section className="rounded-2xl bg-white dark:bg-[#0d221e] border border-slate-200/80 dark:border-emerald-900/50 p-4 shadow-sm">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div>
+              <h3 className="text-sm font-black text-slate-900 dark:text-white">
+                {isBn ? "আপনার পেশা নির্বাচন করুন" : "Choose your profession"}
+              </h3>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                {isBn ? "পেশা সিলেক্ট করলে উপযুক্ত ক্যাটাগরি প্রদর্শন করবে" : "Filter available loans by your profession"}
+              </p>
             </div>
+          </div>
+
+          <div className="grid grid-cols-4 gap-2">
+            {professionOptions.map(item => {
+              const active = selectedProfession === item.label;
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setSelectedProfession(item.label)}
+                  className={`py-2.5 px-2 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    active
+                      ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-600 text-emerald-900 dark:text-emerald-200 font-extrabold shadow-sm ring-2 ring-emerald-500/20"
+                      : "bg-slate-50/80 dark:bg-[#0a1a17] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-emerald-500/40"
+                  }`}
+                >
+                  <span className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                    active ? "bg-emerald-600 text-white shadow-sm" : "bg-white dark:bg-[#122e28] text-slate-500 dark:text-slate-400"
+                  }`}>
+                    <Icon size={16} />
+                  </span>
+                  <span className="text-[10px] text-center leading-tight">{item.label}</span>
+                </button>
+              );
+            })}
           </div>
         </section>
 
         {/* Category heading */}
         <div className="flex items-center justify-between px-1 pt-1">
-          <h3 className="text-[12px] font-black text-slate-800 dark:text-white">
-            {isBn ? "উপযুক্ত ক্যাটাগরির সমূহ" : "Available loan categories"}
+          <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+            {isBn ? "উপযুক্ত ঋণ ক্যাটাগরি সমূহ" : "Available Loan Categories"}
           </h3>
-          <span className="text-[8px] font-semibold text-slate-400">
-            {isBn ? "আরও ক্যাটাগরি" : "More categories"}
+          <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-full border border-emerald-200/50 dark:border-emerald-800/50">
+            {convertDigits(visibleCategories.length, isBn)} {isBn ? "টি সুবিধা" : "options"}
           </span>
         </div>
 
         {/* Premium vertical cards */}
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {visibleCategories.map(cat => {
             const isActive = category?.id === cat.id;
-            const accent =
-              cat.id === 'personal' ? 'emerald' :
-              cat.id === 'business' ? 'amber' :
-              cat.id === 'expat' ? 'sky' :
-              cat.id === 'student' ? 'emerald' : 'rose';
 
             return (
               <article
                 key={cat.id}
-                className={`relative overflow-hidden rounded-[16px] border bg-white dark:bg-[#10211f] shadow-sm transition-all ${
+                className={`relative overflow-hidden rounded-2xl border bg-white dark:bg-[#0d221e] shadow-sm transition-all duration-200 ${
                   isActive
-                    ? "border-amber-400 ring-1 ring-amber-300/70 dark:ring-amber-800/60"
-                    : "border-slate-200 dark:border-slate-700"
+                    ? "border-emerald-600 ring-2 ring-emerald-500/20 shadow-md"
+                    : "border-slate-200 dark:border-emerald-900/40 hover:border-emerald-500/40"
                 }`}
               >
                 {isActive && (
-                  <div className="absolute right-0 top-0 bg-amber-400 text-[7px] font-black text-white px-2 py-1 rounded-bl-lg">
-                    {isBn ? "আপনার জন্য সুপারিশকৃত" : "RECOMMENDED"}
+                  <div className="absolute right-0 top-0 bg-emerald-600 text-[9px] font-black text-white px-3 py-1 rounded-bl-xl shadow-xs">
+                    {isBn ? "নির্বাচিত ক্যাটাগরি" : "SELECTED"}
                   </div>
                 )}
 
-                <div className="px-3 pt-2.5 pb-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                        cat.id === 'personal' ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" :
-                        cat.id === 'business' ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300" :
-                        cat.id === 'expat' ? "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-300" :
-                        cat.id === 'student' ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300" :
-                        "bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-300"
-                      }`}>
-                        <cat.icon size={16} />
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 shadow-xs">
+                        <cat.icon size={22} />
                       </div>
                       <div className="min-w-0">
-                        <h4 className="text-[12px] font-black leading-[1.1] text-slate-900 dark:text-white">
-                          {cat.title} {isBn ? "লোন" : "Loan"} <span className="font-semibold text-slate-400">({cat.id === 'expat' ? 'Probashi' : cat.id === 'business' ? 'SME' : cat.id === 'student' ? 'Student' : cat.id === 'personal' ? 'Personal' : 'Emergency'})</span>
+                        <h4 className="text-base font-black text-slate-900 dark:text-white leading-tight">
+                          {cat.title} {isBn ? "লোন" : "Loan"}
                         </h4>
-                        <p className={`mt-0.5 text-[8px] font-bold ${
-                          cat.id === 'emergency' ? "text-rose-500" : "text-emerald-600 dark:text-emerald-300"
-                        }`}>
-                          {isBn ? `সর্বোচ্চ ${cat.limit} পর্যন্ত` : `Up to ${cat.limit}`}
+                        <p className="mt-1 text-xs font-black text-emerald-700 dark:text-emerald-300">
+                          {isBn ? `সর্বোচ্চ সীমা: ${cat.limit}` : `Max Limit: ${cat.limit}`}
                         </p>
                       </div>
                     </div>
-                    <span className="shrink-0 rounded-full bg-slate-50 dark:bg-slate-800 px-2 py-1 text-[8px] font-black text-slate-600 dark:text-slate-300">
+                    <span className="shrink-0 rounded-full bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 text-[10px] font-extrabold text-slate-600 dark:text-slate-300">
                       {cat.id === 'emergency' ? (isBn ? 'জরুরি সেবা' : 'Urgent') : (isBn ? 'সাধারণ' : 'Standard')}
                     </span>
                   </div>
 
-                  <div className="mt-2 grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-700 rounded-xl bg-slate-50/80 dark:bg-[#0d1b1a] border border-slate-100 dark:border-slate-800 py-1.5">
+                  <div className="mt-3.5 grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-800 rounded-xl bg-slate-50 dark:bg-[#071917] border border-slate-100 dark:border-slate-800/80 py-2.5 px-1">
                     <div className="px-2 text-center">
-                      <p className="text-[7px] text-slate-400 font-semibold">{isBn ? "সুদের হার" : "Interest"}</p>
-                      <p className="mt-0.5 text-[8px] font-black text-slate-800 dark:text-white">{cat.intRates}<span className="text-[6px] text-slate-400">/মাস</span></p>
+                      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{isBn ? "সুদের হার" : "Rate"}</p>
+                      <p className="mt-0.5 text-xs font-black text-slate-900 dark:text-white">{cat.intRates}<span className="text-[8px] text-slate-400">/মাস</span></p>
                     </div>
                     <div className="px-2 text-center">
-                      <p className="text-[7px] text-slate-400 font-semibold">{isBn ? "পরিশোধের সময়" : "Tenure"}</p>
-                      <p className="mt-0.5 text-[8px] font-black text-slate-800 dark:text-white">{cat.tenureRange}</p>
+                      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{isBn ? "সময়কাল" : "Tenure"}</p>
+                      <p className="mt-0.5 text-xs font-black text-slate-900 dark:text-white">{cat.tenureRange}</p>
                     </div>
                     <div className="px-2 text-center">
-                      <p className="text-[7px] text-slate-400 font-semibold">{isBn ? "প্রসেসিং সময়" : "Processing"}</p>
-                      <p className={`mt-0.5 text-[8px] font-black ${
-                        cat.id === 'emergency' ? "text-rose-500" : "text-slate-800 dark:text-white"
-                      }`}>{cat.procTime}</p>
+                      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{isBn ? "প্রসেসিং" : "Process"}</p>
+                      <p className="mt-0.5 text-xs font-black text-emerald-700 dark:text-emerald-300">{cat.procTime}</p>
                     </div>
                   </div>
 
-                  <div className="mt-1.5 space-y-1">
-                    <div className="flex items-center justify-between gap-2 text-[7px]">
-                      <span className="text-slate-400">{isBn ? "প্রসেসিং ফি:" : "Processing fee:"}</span>
-                      <span className="font-semibold text-slate-700 dark:text-slate-200">{convertDigits(`${(cat.procFee * 100).toFixed(2)}% (লোনের উপর নির্ভরশীল)`, isBn)}</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-2 text-[7px]">
-                      <span className="text-slate-400">{isBn ? "প্রয়োজনীয় নথি:" : "Required documents:"}</span>
-                      <span className="font-semibold text-slate-700 dark:text-slate-200 text-right max-w-[68%]">{cat.reqDocs.slice(0, 2).join(" • ")}</span>
-                    </div>
+                  <div className="mt-3 flex items-center justify-between text-[11px] font-medium text-slate-500 dark:text-slate-400 px-1">
+                    <span>{isBn ? "প্রয়োজনীয় নথি:" : "Docs:"}</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{cat.reqDocs.slice(0, 2).join(" • ")}</span>
                   </div>
 
-                  <div className="mt-2 grid grid-cols-2 gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => {}}
-                      className="h-7 rounded-full border border-slate-400 dark:border-slate-600 bg-white dark:bg-transparent text-[8px] font-black text-slate-700 dark:text-slate-200"
-                    >
-                      {isBn ? "লোনের বিস্তারিত" : "Loan details"}
-                    </button>
+                  <div className="mt-3.5 flex gap-2">
                     <button
                       type="button"
                       onClick={() => selectCategory(cat)}
-                      className={`h-7 rounded-full text-[8px] font-black text-white shadow-sm flex items-center justify-center gap-1 ${
-                        cat.id === 'emergency' ? "bg-rose-600" : "bg-[#075f50] hover:bg-[#064c40]"
-                      }`}
+                      className="w-full py-3 rounded-xl text-xs font-extrabold text-white bg-emerald-700 hover:bg-emerald-800 shadow-md shadow-emerald-700/20 flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.99]"
                     >
-                      {isBn ? "আবেদন করুন" : "Apply now"} <ChevronRight size={11} />
+                      {isBn ? "আবেদন নিশ্চিত করুন" : "Apply For Loan"} <ChevronRight size={15} />
                     </button>
                   </div>
                 </div>
@@ -1423,10 +1408,12 @@ export default function ApplyLoan() {
           })}
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-[#10211f] px-3 py-2 flex items-center gap-2">
-          <Lock size={12} className="text-amber-500 shrink-0" />
-          <p className="text-[7px] leading-3.5 text-slate-500 dark:text-slate-400">
-            {isBn ? "আপনার সকল তথ্য নিরাপদ ও গোপনীয়। আবেদন করার আগে সঠিক ক্যাটাগরি নির্বাচন করুন।" : "Your information is secure and confidential. Choose the correct category before applying."}
+        <div className="rounded-2xl border border-emerald-200/60 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-[#071d19] p-3.5 flex items-center gap-3 shadow-xs">
+          <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+            <Lock size={16} />
+          </div>
+          <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-300 font-medium">
+            {isBn ? "আপনার সকল আবেদন সুরক্ষিত ব্যাংকিং এনক্রিপশন দ্বারা রক্ষিত। সঠিক তথ্য প্রদান করে পরবর্তী ধাপে যান।" : "All loan data is protected by secure banking encryption."}
           </p>
         </div>
       </div>
@@ -1453,32 +1440,32 @@ export default function ApplyLoan() {
                 {isBn ? "প্রয়োজনীয় অর্থ ও সুবিধাজনক পরিশোধের মেয়াদ বেছে নিন" : "Choose the amount and a comfortable repayment period"}
               </p>
             </div>
-            <span className="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-[10px] font-black">
+            <span className="shrink-0 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-[10px] font-black border border-emerald-200 dark:border-emerald-800">
               {category.title}
             </span>
           </div>
         </div>
 
-        <section className="rounded-[24px] bg-white dark:bg-[#0f1b2d] border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+        <section className="rounded-[24px] bg-white dark:bg-[#0f2925] border border-slate-200 dark:border-emerald-900/40 p-5 shadow-sm">
           <div className="flex items-center justify-between gap-2">
             <label className="text-sm font-black text-slate-700 dark:text-slate-200">
               {isBn ? "ঋণের পরিমাণ (Loan Amount)" : "Loan Amount"}
             </label>
-            <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300">
+            <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/50">
               {isBn ? "সর্বোচ্চ" : "Max"} {category.limit}
             </span>
           </div>
 
           <div className="mt-5 flex items-end justify-between gap-3">
             <div>
-              <div className="text-[31px] leading-none font-black text-blue-700 dark:text-blue-300 tracking-tight">
+              <div className="text-[31px] leading-none font-black text-emerald-800 dark:text-emerald-300 tracking-tight">
                 {formatCurrency(amount, isBn)}
               </div>
               <div className="mt-2 text-[10px] font-semibold text-slate-400">
                 {isBn ? "ন্যূনতম" : "Min"} {formatCurrency(50000, isBn)} • {isBn ? "সর্বোচ্চ" : "Max"} {formatCurrency(category.maxAmount, isBn)}
               </div>
             </div>
-            <span className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-black text-slate-600 dark:text-slate-300">
+            <span className="px-3 py-1.5 rounded-full bg-emerald-50/80 dark:bg-emerald-950/50 text-[10px] font-black text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
               BDT
             </span>
           </div>
@@ -1491,7 +1478,7 @@ export default function ApplyLoan() {
             step={10000}
             value={Math.min(Math.max(amount, 50000), category.maxAmount)}
             onChange={e => handleAmountChange(Number(e.target.value))}
-            className="mt-6 w-full accent-blue-600"
+            className="mt-6 w-full accent-emerald-600 cursor-pointer"
           />
 
           <div className="mt-2 flex justify-between text-[10px] font-semibold text-slate-400">
@@ -1508,8 +1495,8 @@ export default function ApplyLoan() {
                 onClick={() => handleAmountChange(v)}
                 className={`h-9 rounded-xl text-[10px] font-black border transition-all ${
                   amount === v
-                    ? "bg-blue-600 border-blue-600 text-white"
-                    : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                    ? "bg-emerald-700 border-emerald-700 text-white shadow-sm"
+                    : "bg-slate-50 dark:bg-[#10211f] border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-emerald-500/40"
                 }`}
               >
                 {formatAmount(v, isBn)}
@@ -1518,13 +1505,13 @@ export default function ApplyLoan() {
           </div>
         </section>
 
-        <section className="rounded-[24px] bg-white dark:bg-[#0f1b2d] border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+        <section className="rounded-[24px] bg-white dark:bg-[#0f2925] border border-slate-200 dark:border-emerald-900/40 p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-black text-slate-900 dark:text-white">{isBn ? "পরিশোধের মেয়াদকাল" : "Repayment Tenure"}</h3>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{isBn ? "মাসিক কিস্তি আপনার আয়ের সাথে মিলিয়ে নিন" : "Pick a tenure that fits your monthly budget"}</p>
             </div>
-            <span className="px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-[10px] font-black">
+            <span className="px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-[10px] font-black border border-emerald-200/50 dark:border-emerald-800/50">
               {convertDigits(tenure, isBn)} {isBn ? "মাস নির্বাচিত" : "months selected"}
             </span>
           </div>
@@ -1537,38 +1524,38 @@ export default function ApplyLoan() {
                 onClick={() => setTenure(months)}
                 className={`h-14 rounded-xl text-xs font-black transition-all ${
                   tenure === months
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
-                    : "bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                    ? "bg-emerald-700 text-white shadow-md shadow-emerald-700/20"
+                    : "bg-slate-50 dark:bg-[#10211f] border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-emerald-500/40"
                 }`}
               >
                 {convertDigits(months, isBn)}
-                <span className="block text-[9px] font-semibold opacity-75">{isBn ? "মাস" : "months"}</span>
+                <span className="block text-[9px] font-semibold opacity-85">{isBn ? "মাস" : "months"}</span>
               </button>
             ))}
           </div>
         </section>
 
-        <section className="rounded-[24px] bg-blue-50 dark:bg-[#102044] border border-blue-100 dark:border-blue-900/60 p-5">
+        <section className="rounded-[24px] bg-emerald-50/70 dark:bg-[#092922] border border-emerald-200 dark:border-emerald-800/60 p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] font-black text-blue-800 dark:text-blue-200">{isBn ? "আনুমানিক মাসিক কিস্তি (Estimated EMI)" : "Estimated Monthly EMI"}</p>
-              <p className="mt-1 text-[30px] leading-none font-black text-blue-800 dark:text-blue-100">
+              <p className="text-[11px] font-black text-emerald-900 dark:text-emerald-200">{isBn ? "আনুমানিক মাসিক কিস্তি (Estimated EMI)" : "Estimated Monthly EMI"}</p>
+              <p className="mt-1 text-[30px] leading-none font-black text-emerald-900 dark:text-emerald-100">
                 {formatCurrency(calc.emi, isBn)} <span className="text-sm font-bold">/ {isBn ? "মাস" : "month"}</span>
               </p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#162a4b] flex items-center justify-center text-blue-700 dark:text-blue-300 shadow-sm">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white dark:bg-emerald-700 flex items-center justify-center shadow-sm">
               <FileText size={22} />
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-white dark:bg-[#0d1a2c] border border-blue-100 dark:border-blue-900/50 p-3">
+          <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-white dark:bg-[#0d1f1c] border border-emerald-200/60 dark:border-emerald-900/50 p-3">
             <div>
               <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400">{isBn ? "সুদের হার" : "Rate"}</p>
               <p className="mt-1 text-xs font-black text-slate-900 dark:text-white">{convertDigits(`${(category.minRate * 100).toFixed(2)}% / ${isBn ? "মাস" : "mo"}`, isBn)}</p>
             </div>
             <div className="border-x border-slate-200 dark:border-slate-800 px-2">
               <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400">{isBn ? "মোট পরিশোধ" : "Total"}</p>
-              <p className="mt-1 text-xs font-black text-blue-700 dark:text-blue-300">{formatCurrency(calc.totalPayable, isBn)}</p>
+              <p className="mt-1 text-xs font-black text-emerald-700 dark:text-emerald-300">{formatCurrency(calc.totalPayable, isBn)}</p>
             </div>
             <div>
               <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400">{isBn ? "প্রসেসিং ফি" : "Fee"}</p>
@@ -1578,11 +1565,11 @@ export default function ApplyLoan() {
 
           <div className="mt-3 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
             <span>{isBn ? "সিকিউরিটি ডিপোজিট" : "Security Deposit"}</span>
-            <strong className="text-emerald-600 dark:text-emerald-400">{formatCurrency(calc.securityDeposit, isBn)}</strong>
+            <strong className="text-emerald-700 dark:text-emerald-300 font-black">{formatCurrency(calc.securityDeposit, isBn)}</strong>
           </div>
         </section>
 
-        <div className="rounded-2xl bg-white dark:bg-[#0f1b2d] border border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center gap-2.5">
+        <div className="rounded-2xl bg-white dark:bg-[#0f2925] border border-slate-200 dark:border-emerald-900/40 px-4 py-3 flex items-center gap-2.5">
           <ShieldAlert size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
           <p className="text-[10px] leading-4 text-slate-500 dark:text-slate-400">
             {isBn ? "আপনার তথ্য নিরাপদ থাকবে। আবেদন জমা দেওয়ার আগে হিসাবগুলো আবার যাচাই করুন।" : "Your information stays protected. Review the figures before continuing."}
@@ -2814,23 +2801,23 @@ export default function ApplyLoan() {
           htmlFor={isUploading ? undefined : `file-${id}`}
           className={`w-full transition-all border-2 ${
             documents[id] 
-              ? 'border-solid border-green-500 bg-green-50/10 dark:bg-green-950/5' 
-              : 'border-dashed border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800 bg-gray-100/10 dark:bg-gray-950/10'
-          } rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:scale-[1.01] transition-all cursor-pointer text-center block bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+              ? 'border-solid border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20'
+              : 'border-dashed border-slate-200/80 dark:border-emerald-900/40 bg-slate-50/50 dark:bg-[#081815]'
+          } rounded-2xl p-4 flex flex-col items-center justify-center gap-2.5 hover:border-emerald-500 transition-all cursor-pointer text-center block ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
         >
-           <div className={`w-10 h-10 ${documents[id] ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 border-slate-200 dark:border-slate-800' : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700'} transition-colors rounded-full flex items-center justify-center shadow-sm mx-auto`}>
+           <div className={`w-11 h-11 ${documents[id] ? 'bg-emerald-600 text-white shadow-sm' : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60'} transition-colors rounded-2xl flex items-center justify-center mx-auto`}>
              {isUploading ? (
-               <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+               <div className="w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
              ) : documents[id] ? (
-               <CheckCircle2 size={18} className="text-white" />
+               <CheckCircle2 size={20} className="text-white" />
              ) : (
-               <UploadCloud size={18} className="text-gray-500 dark:text-gray-400" />
+               <UploadCloud size={20} />
              )}
            </div>
-           <span className="text-xs font-bold text-gray-600 dark:text-gray-300 text-center leading-tight block">{displayTitle}</span>
+           <span className="text-xs font-black text-slate-800 dark:text-slate-200 text-center leading-tight block">{displayTitle}</span>
            {documents[id] && (
-             <span className="text-[10px] text-green-600 font-bold block">
-               {isBn ? 'আপলোড হয়েছে' : 'Uploaded'}
+             <span className="text-[10px] text-emerald-700 dark:text-emerald-300 font-extrabold block bg-emerald-100/70 dark:bg-emerald-900/60 px-2 py-0.5 rounded-full border border-emerald-300/50">
+               {isBn ? 'আপলোড সম্পূর্ণ' : 'Uploaded'}
              </span>
            )}
         </label>
@@ -3106,19 +3093,19 @@ export default function ApplyLoan() {
   return (
     <FormProvider {...methods}>
     <div className="apply-loan-screen app-apply-theme min-h-full bg-slate-50 dark:bg-[#0b1220] transition-colors flex flex-col relative">
-      {/* Easy-style application header — visual language follows the supplied reference screens. */}
+      {/* Easy-style application header — Emerald bank theme */}
       {step < 5 && (
-        <div className={`loan-easy-font sticky top-0 z-30 backdrop-blur border-b ${
-        step === 1
-          ? "bg-[#063d34] dark:bg-[#052f29] border-emerald-900/50 text-white"
-          : "bg-slate-50/95 dark:bg-[#0b1220]/95 border-slate-200/60 dark:border-slate-800/60"
-      }`}>
+        <div className={`loan-easy-font sticky top-0 z-30 backdrop-blur-md border-b transition-colors ${
+          step === 1
+            ? "bg-[#063d34] dark:bg-[#052f29] border-emerald-900/50 text-white"
+            : "bg-slate-50/95 dark:bg-[#0b1220]/95 border-slate-200/60 dark:border-emerald-900/40"
+        }`}>
           <div className="px-3 pt-2.5 pb-2.5">
             <div className="flex items-center justify-between">
-              <button type="button" onClick={prevStep} disabled={step === 1} className={`w-9 h-9 rounded-full border flex items-center justify-center disabled:opacity-60 ${
+              <button type="button" onClick={prevStep} disabled={step === 1} className={`w-9 h-9 rounded-full border flex items-center justify-center disabled:opacity-40 transition-all ${
                 step === 1
                   ? "bg-white/10 border-white/15 text-white"
-                  : "bg-white dark:bg-[#111c2e] border-slate-200 dark:border-slate-800"
+                  : "bg-white dark:bg-[#0f2925] border-slate-200 dark:border-emerald-800 text-slate-700 dark:text-slate-200 shadow-sm"
               }`}>
                 <ChevronLeft size={19} />
               </button>
@@ -3126,39 +3113,57 @@ export default function ApplyLoan() {
                 <div className={`px-3.5 h-8 rounded-full border flex items-center justify-center ${
                     step === 1
                       ? "bg-white/10 border-white/15"
-                      : "bg-blue-50 dark:bg-blue-950/40 border-blue-100 dark:border-blue-900/50"
+                      : "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800"
                   }`}>
                   <span className={`text-[10px] font-black ${
-                    step === 1 ? "text-white" : "text-blue-800 dark:text-blue-200"
+                    step === 1 ? "text-white" : "text-emerald-900 dark:text-emerald-200"
                   }`}>
-                    {isBn ? `আবেদন • ${step === 2 ? "Loan Amount And Tenure" : "Loan Application"}` : `Apply • ${step === 2 ? "Loan Amount And Tenure" : "Loan Application"}`}
+                    {isBn
+                      ? `আবেদন • ${step === 1 ? "ক্যাটাগরি" : step === 2 ? "পরিমাণ ও মেয়াদ" : step === 3 ? "তথ্য বিবরণী" : "ডকুমেন্ট"}`
+                      : `Apply • ${step === 1 ? "Category" : step === 2 ? "Amount & Tenure" : step === 3 ? "Information" : "Documents"}`
+                    }
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button type="button" onClick={() => {}} className={`w-9 h-9 rounded-full border flex items-center justify-center ${
+                <button type="button" onClick={() => setShowTermsModal(true)} className={`w-9 h-9 rounded-full border flex items-center justify-center ${
                   step === 1
                     ? "bg-white/10 border-white/15 text-white"
-                    : "bg-white dark:bg-[#111c2e] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-200"
+                    : "bg-white dark:bg-[#0f2925] border-slate-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 shadow-sm"
                 }`} aria-label={isBn ? "সহায়তা" : "Help"}>
                   <span className="w-5 h-5 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-black">?</span>
                 </button>
                 {step === 1 ? (
                   <span className="w-9 h-9 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-[10px] font-black">↻</span>
                 ) : (
-                  <button type="button" onClick={() => navigate('/profile')} className="w-10 h-10 rounded-full bg-blue-800 dark:bg-blue-700 text-white flex items-center justify-center shadow-sm" aria-label={isBn ? "প্রোফাইল" : "Profile"}>
-                    <User size={19} />
+                  <button type="button" onClick={() => navigate('/profile')} className="w-9 h-9 rounded-full bg-emerald-700 dark:bg-emerald-600 text-white flex items-center justify-center shadow-sm" aria-label={isBn ? "প্রোফাইল" : "Profile"}>
+                    <User size={18} />
                   </button>
                 )}
               </div>
             </div>
-            <div className={`mt-2 h-1 rounded-full overflow-hidden ${step === 1 ? "bg-white/15" : "bg-slate-200 dark:bg-slate-800"}`}>
-              <motion.div className={`h-full rounded-full ${step === 1 ? "bg-amber-400" : "bg-gradient-to-r from-blue-700 to-blue-500"}`} initial={{ width: 0 }} animate={{ width: `${Math.min(step / 8, 1) * 100}%` }} transition={{ duration: 0.3 }} />
+
+            {/* Progress bar normalized to 5 steps */}
+            <div className={`mt-2.5 h-1.5 rounded-full overflow-hidden ${step === 1 ? "bg-white/15" : "bg-slate-200 dark:bg-slate-800"}`}>
+              <motion.div
+                className={`h-full rounded-full ${step === 1 ? "bg-amber-400" : "bg-gradient-to-r from-emerald-500 to-emerald-700"}`}
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(step / 5, 1) * 100}%` }}
+                transition={{ duration: 0.3 }}
+              />
             </div>
+
             {step >= 2 && category && (
-              <div className="mt-3 flex items-center gap-2 overflow-x-auto no-scrollbar">
-                <span className="shrink-0 px-3 py-1.5 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 text-[10px] font-black text-slate-700 dark:text-slate-200">{isBn ? `ধাপ ${convertDigits(step, true)} / ৮ • ${step === 2 ? "পরিমাণ ও মেয়াদ" : step === 3 ? "ব্যক্তিগত তথ্য" : "ডকুমেন্ট"}` : `Step ${step} / 8 • ${step === 2 ? "Amount & Tenure" : step === 3 ? "Personal Information" : "Documents"}`}</span>
-                <span className="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 text-[10px] font-black text-blue-800 dark:text-blue-200">{category.title} {isBn ? "লোন" : "Loan"}</span>
+              <div className="mt-2.5 flex items-center gap-2 overflow-x-auto no-scrollbar">
+                <span className="shrink-0 px-3 py-1 rounded-full bg-white dark:bg-[#0f2925] border border-slate-200 dark:border-emerald-800 text-[10px] font-black text-slate-700 dark:text-slate-200 shadow-xs">
+                  {isBn
+                    ? `ধাপ ${convertDigits(step, true)} / ৫ • ${step === 2 ? "পরিমাণ ও মেয়াদ" : step === 3 ? "ব্যক্তিগত তথ্য" : "ডকুমেন্ট"}`
+                    : `Step ${step} / 5 • ${step === 2 ? "Amount & Tenure" : step === 3 ? "Personal Info" : "Documents"}`
+                  }
+                </span>
+                <span className="shrink-0 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[10px] font-black text-emerald-800 dark:text-emerald-200">
+                  {category.title} {isBn ? "লোন" : "Loan"}
+                </span>
               </div>
             )}
           </div>
@@ -3184,14 +3189,14 @@ export default function ApplyLoan() {
         </AnimatePresence>
       </div>
 
-      {/* Bottom Action Bar - Compact */}
+      {/* Bottom Action Bar - Emerald Bank Styled */}
       {step > 1 && step < 5 && (
-        <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-white/80 dark:bg-gray-800/80  transition-colors border-t border-gray-200/50 dark:border-gray-800/50 z-40 flex justify-between gap-2">
+        <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-white/90 dark:bg-[#0b1220]/90 backdrop-blur-md transition-colors border-t border-slate-200/80 dark:border-emerald-900/40 z-40 flex justify-between gap-2 shadow-lg">
           {step > 1 && (
             <button
               type="button"
               onClick={prevStep}
-              className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 text-gray-700 dark:text-gray-300"
+              className="flex items-center gap-1 px-5 py-2.5 rounded-xl font-extrabold text-xs bg-slate-100 dark:bg-[#0f2925] border border-slate-200 dark:border-emerald-800 shrink-0 text-slate-700 dark:text-emerald-200 hover:bg-slate-200 dark:hover:bg-[#153a32] transition-colors"
             >
               <ChevronLeft size={16} /> {isBn ? 'পিছনে' : 'Back'}
             </button>
@@ -3200,12 +3205,12 @@ export default function ApplyLoan() {
             type="button"
             onClick={nextStep}
             disabled={(step === 1 && !category) || (step === 4 && !acceptedTerms) || isSubmitting}
-            className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm bg-primary-600 hover:bg-primary-700 text-white shadow-sm shrink-0 disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:shadow-none ml-auto"
+            className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl font-extrabold text-xs bg-emerald-700 hover:bg-emerald-800 text-white shadow-md shadow-emerald-700/20 shrink-0 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:shadow-none ml-auto transition-all active:scale-[0.98]"
           >
             {isSubmitting
               ? (isBn ? 'অপেক্ষা করুন...' : 'Please wait...')
               : step === 4
-              ? (isBn ? 'সাবমিট করুন' : 'Submit')
+              ? (isBn ? 'সাবমিট করুন' : 'Submit Application')
               : (isBn ? 'পরবর্তী ধাপ' : 'Next Step')
             }
             {!isSubmitting && <ChevronRight size={16} />}
