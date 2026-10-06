@@ -290,6 +290,8 @@ export default function ApplyLoan() {
   const [showProfessionModal, setShowProfessionModal] = useState(false);
   const [professionSearch, setProfessionSearch] = useState("");
   const [detailsCategoryId, setDetailsCategoryId] = useState<string | null>(null);
+  const [showRepaymentSchedule, setShowRepaymentSchedule] = useState(false);
+  const [repaymentStartDate, setRepaymentStartDate] = useState(() => new Date().toISOString().slice(0, 10));
 
   // Structured address states
   const [currentAddress, setCurrentAddress] = useState<AddressValue>(emptyAddress());
@@ -1674,97 +1676,139 @@ export default function ApplyLoan() {
 
   const Step2Calculator = () => {
     if (!category) return null;
+
     const calc = getLoanCalculation();
     const rawAllowed = getAllowedTenure(amount);
     const minAllowed = Math.max(rawAllowed[0], category.minTenure ?? 12);
     const maxAllowed = Math.min(rawAllowed[1], category.maxTenure ?? 60);
-    const tenureOptions = [12, 24, 36, 48, 60, 72, 84, 96, 120, 144, 180].filter(m => m >= minAllowed && m <= maxAllowed);
+    const tenureOptions = [12, 24, 36, 48, 60, 72, 84, 96, 120, 144, 180]
+      .filter(m => m >= minAllowed && m <= maxAllowed);
+
+    const amountOptions = amountPackages.filter(v => v >= 50000 && v <= category.maxAmount);
+    const amountLabel = (value: number) => {
+      const lakh = value / 100000;
+      const text = Number.isInteger(lakh) ? String(lakh) : lakh.toFixed(1).replace(/\\.0$/, "");
+      return convertDigits(text, isBn);
+    };
+
+    const formatDate = (date: Date) =>
+      new Intl.DateTimeFormat(isBn ? "bn-BD" : "en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      }).format(date);
+
+    const repaymentRows = Array.from({ length: tenure }, (_, index) => {
+      const principalPart = index === tenure - 1
+        ? amount - Math.round((amount / tenure) * (tenure - 1))
+        : Math.round((amount / tenure) * 100) / 100;
+      const interestPart = Math.round(amount * (category.minRate || 0) * 100) / 100;
+      const installment = Math.round((principalPart + interestPart) * 100) / 100;
+      const dueDate = new Date(repaymentStartDate ? repaymentStartDate + "T12:00:00" : new Date().toISOString());
+      dueDate.setMonth(dueDate.getMonth() + index + 1);
+      const opening = Math.max(0, amount - Math.round((amount / tenure) * 100) / 100 * index);
+      const closing = Math.max(0, opening - principalPart);
+
+      return {
+        no: index + 1,
+        dueDate,
+        opening,
+        principal: principalPart,
+        interest: interestPart,
+        installment,
+        closing
+      };
+    });
+
+    const upfrontTotal = calc.totalUpfrontFees;
 
     return (
-      <div className="loan-easy-font space-y-5">
-        <div>
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h2 className="text-[24px] leading-tight font-black text-slate-950 dark:text-white">
-                {isBn ? "কত টাকা লোন নিতে চান?" : "How much do you need?"}
-              </h2>
-              <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                {isBn ? "প্রয়োজনীয় অর্থ ও সুবিধাজনক পরিশোধের মেয়াদ বেছে নিন" : "Choose the amount and a comfortable repayment period"}
-              </p>
-            </div>
-            <span className="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-[10px] font-black">
-              {category.title}
-            </span>
+      <div className="loan-easy-font space-y-4 pb-4">
+        <div className="flex items-center justify-between gap-3 px-1">
+          <div className="min-w-0">
+            <h2 className="text-[23px] leading-tight font-black text-slate-950 dark:text-white">
+              {isBn ? "লোনের পরিমাণ ও মেয়াদ" : "Loan amount & tenure"}
+            </h2>
+            <p className="mt-1 text-[11px] leading-5 text-slate-500 dark:text-slate-400">
+              {isBn ? "আপনার প্রয়োজন অনুযায়ী পরিমাণ ও কিস্তির সময় নির্বাচন করুন" : "Choose the amount and repayment period that fits you"}
+            </p>
           </div>
+          <span className="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-200 text-[10px] font-black border border-blue-100 dark:border-blue-900/60">
+            {category.title}
+          </span>
         </div>
 
-        <section className="rounded-[24px] bg-white dark:bg-[#0f1b2d] border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+        <section className="rounded-[24px] bg-white dark:bg-[#101c31] border border-slate-200 dark:border-[#1e3353] p-4 shadow-sm">
           <div className="flex items-center justify-between gap-2">
-            <label className="text-sm font-black text-slate-700 dark:text-slate-200">
-              {isBn ? "ঋণের পরিমাণ (Loan Amount)" : "Loan Amount"}
+            <label className="text-sm font-black text-slate-800 dark:text-white">
+              {isBn ? "লোনের পরিমাণ" : "Loan amount"}
             </label>
-            <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300">
+            <span className="text-[9px] font-black px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-200 border border-blue-100 dark:border-blue-900/50">
               {isBn ? "সর্বোচ্চ" : "Max"} {category.limit}
             </span>
           </div>
 
-          <div className="mt-5 flex items-end justify-between gap-3">
-            <div>
-              <div className="text-[31px] leading-none font-black text-blue-700 dark:text-blue-300 tracking-tight">
-                {formatCurrency(amount, isBn)}
+          <div className="mt-4 rounded-2xl bg-slate-50 dark:bg-[#152640] border border-slate-200 dark:border-[#243b5e] p-4">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400">{isBn ? "নির্বাচিত পরিমাণ" : "Selected amount"}</p>
+                <p className="mt-1 text-[30px] leading-none font-black text-blue-700 dark:text-blue-300 tracking-tight">
+                  {formatCurrency(amount, isBn)}
+                </p>
               </div>
-              <div className="mt-2 text-[10px] font-semibold text-slate-400">
-                {isBn ? "ন্যূনতম" : "Min"} {formatCurrency(50000, isBn)} • {isBn ? "সর্বোচ্চ" : "Max"} {formatCurrency(category.maxAmount, isBn)}
+              <span className="shrink-0 px-3 py-1.5 rounded-full bg-slate-900 dark:bg-[#0b1526] text-white text-[10px] font-black">
+                BDT
+              </span>
+            </div>
+
+            <input
+              aria-label={isBn ? "ঋণের পরিমাণ" : "Loan amount"}
+              type="range"
+              min={50000}
+              max={category.maxAmount}
+              step={10000}
+              value={Math.min(Math.max(amount, 50000), category.maxAmount)}
+              onChange={e => handleAmountChange(Number(e.target.value))}
+              className="mt-5 w-full accent-blue-600"
+            />
+
+            <div className="mt-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[9px] font-black uppercase tracking-wide text-slate-400">
+                  {isBn ? "দ্রুত পরিমাণ নির্বাচন" : "Quick amount"}
+                </p>
+                <p className="text-[9px] font-semibold text-slate-400">
+                  {amountLabel(50000)} — {amountLabel(category.maxAmount)}
+                </p>
+              </div>
+              <div className="grid grid-cols-5 gap-1.5">
+                {amountOptions.map(v => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => handleAmountChange(v)}
+                    className={`h-9 rounded-xl text-[11px] font-black border transition-all active:scale-95 ${
+                      amount === v
+                        ? "bg-blue-600 border-blue-600 text-white shadow-sm shadow-blue-600/20"
+                        : "bg-white dark:bg-[#0d192b] border-slate-200 dark:border-[#29415f] text-slate-700 dark:text-slate-200 hover:border-blue-400 dark:hover:border-blue-500"
+                    }`}
+                  >
+                    {amountLabel(v)}
+                  </button>
+                ))}
               </div>
             </div>
-            <span className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-black text-slate-600 dark:text-slate-300">
-              BDT
-            </span>
-          </div>
-
-          <input
-            aria-label={isBn ? "ঋণের পরিমাণ" : "Loan amount"}
-            type="range"
-            min={50000}
-            max={category.maxAmount}
-            step={10000}
-            value={Math.min(Math.max(amount, 50000), category.maxAmount)}
-            onChange={e => handleAmountChange(Number(e.target.value))}
-            className="mt-6 w-full accent-blue-600"
-          />
-
-          <div className="mt-2 flex justify-between text-[10px] font-semibold text-slate-400">
-            <span>{formatCurrency(50000, isBn)}</span>
-            <span>{formatCurrency(Math.round(category.maxAmount / 2), isBn)}</span>
-            <span>{formatCurrency(category.maxAmount, isBn)}</span>
-          </div>
-
-          <div className="mt-5 grid grid-cols-4 gap-2">
-            {[100000, 200000, 500000, 1000000].filter(v => v <= category.maxAmount).map(v => (
-              <button
-                key={v}
-                type="button"
-                onClick={() => handleAmountChange(v)}
-                className={`h-9 rounded-xl text-[10px] font-black border transition-all ${
-                  amount === v
-                    ? "bg-blue-600 border-blue-600 text-white"
-                    : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-                }`}
-              >
-                {formatAmount(v, isBn)}
-              </button>
-            ))}
           </div>
         </section>
 
-        <section className="rounded-[24px] bg-white dark:bg-[#0f1b2d] border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
-          <div className="flex items-center justify-between">
+        <section className="rounded-[24px] bg-white dark:bg-[#101c31] border border-slate-200 dark:border-[#1e3353] p-4 shadow-sm">
+          <div className="flex items-center justify-between gap-2">
             <div>
-              <h3 className="text-lg font-black text-slate-900 dark:text-white">{isBn ? "পরিশোধের মেয়াদকাল" : "Repayment Tenure"}</h3>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{isBn ? "মাসিক কিস্তি আপনার আয়ের সাথে মিলিয়ে নিন" : "Pick a tenure that fits your monthly budget"}</p>
+              <h3 className="text-base font-black text-slate-900 dark:text-white">{isBn ? "পরিশোধের মেয়াদ" : "Repayment tenure"}</h3>
+              <p className="mt-1 text-[10px] text-slate-500 dark:text-slate-400">{isBn ? "মাসের সংখ্যা নির্বাচন করুন" : "Select the number of months"}</p>
             </div>
-            <span className="px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-[10px] font-black">
-              {convertDigits(tenure, isBn)} {isBn ? "মাস নির্বাচিত" : "months selected"}
+            <span className="px-2.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-200 text-[10px] font-black">
+              {convertDigits(tenure, isBn)}
             </span>
           </div>
 
@@ -1774,59 +1818,144 @@ export default function ApplyLoan() {
                 key={months}
                 type="button"
                 onClick={() => setTenure(months)}
-                className={`h-14 rounded-xl text-xs font-black transition-all ${
+                className={`h-11 rounded-xl text-sm font-black border transition-all active:scale-95 ${
                   tenure === months
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
-                    : "bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                    ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20"
+                    : "bg-slate-50 dark:bg-[#0d192b] border-slate-200 dark:border-[#29415f] text-slate-700 dark:text-slate-200 hover:border-blue-400 dark:hover:border-blue-500"
                 }`}
               >
                 {convertDigits(months, isBn)}
-                <span className="block text-[9px] font-semibold opacity-75">{isBn ? "মাস" : "months"}</span>
               </button>
             ))}
           </div>
         </section>
 
-        <section className="rounded-[24px] bg-blue-50 dark:bg-[#102044] border border-blue-100 dark:border-blue-900/60 p-5">
-          <div className="flex items-center justify-between gap-3">
+        <section className="rounded-[24px] bg-gradient-to-br from-[#102754] via-[#122e63] to-[#0d2349] border border-blue-900/70 p-4 text-white shadow-md shadow-blue-950/20">
+          <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-black text-blue-800 dark:text-blue-200">{isBn ? "আনুমানিক মাসিক কিস্তি (Estimated EMI)" : "Estimated Monthly EMI"}</p>
-              <p className="mt-1 text-[30px] leading-none font-black text-blue-800 dark:text-blue-100">
-                {formatCurrency(calc.emi, isBn)} <span className="text-sm font-bold">/ {isBn ? "মাস" : "month"}</span>
+              <p className="text-[10px] font-black text-blue-100">{isBn ? "আনুমানিক মাসিক কিস্তি" : "Estimated monthly EMI"}</p>
+              <p className="mt-1 text-[28px] leading-none font-black tracking-tight">
+                {formatCurrency(calc.emi, isBn)} <span className="text-[11px] font-bold text-blue-200">/ {isBn ? "মাস" : "month"}</span>
               </p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#162a4b] flex items-center justify-center text-blue-700 dark:text-blue-300 shadow-sm">
-              <FileText size={22} />
+            <button
+              type="button"
+              onClick={() => setShowRepaymentSchedule(true)}
+              className="w-11 h-11 rounded-2xl bg-white text-blue-800 flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-transform"
+              aria-label={isBn ? "কিস্তির বিস্তারিত দেখুন" : "View repayment schedule"}
+            >
+              <FileText size={21} />
+            </button>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="rounded-xl bg-white/10 border border-white/10 p-2.5">
+              <p className="text-[8px] text-blue-200">{isBn ? "সুদের হার" : "Rate"}</p>
+              <p className="mt-1 text-[11px] font-black">{convertDigits(`${(category.minRate * 100).toFixed(2)}% / ${isBn ? "মাস" : "mo"}`, isBn)}</p>
+            </div>
+            <div className="rounded-xl bg-white/10 border border-white/10 p-2.5">
+              <p className="text-[8px] text-blue-200">{isBn ? "মোট সুদ" : "Total interest"}</p>
+              <p className="mt-1 text-[11px] font-black">{formatCurrency(calc.totalInterest, isBn)}</p>
+            </div>
+            <div className="rounded-xl bg-white/10 border border-white/10 p-2.5">
+              <p className="text-[8px] text-blue-200">{isBn ? "মোট পরিশোধ" : "Total payable"}</p>
+              <p className="mt-1 text-[11px] font-black">{formatCurrency(calc.totalPayable, isBn)}</p>
+            </div>
+            <div className="rounded-xl bg-white/10 border border-white/10 p-2.5">
+              <p className="text-[8px] text-blue-200">{isBn ? "প্রসেসিং ফি" : "Processing fee"}</p>
+              <p className="mt-1 text-[11px] font-black">{formatCurrency(calc.processingFee, isBn)}</p>
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-white dark:bg-[#0d1a2c] border border-blue-100 dark:border-blue-900/50 p-3">
-            <div>
-              <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400">{isBn ? "সুদের হার" : "Rate"}</p>
-              <p className="mt-1 text-xs font-black text-slate-900 dark:text-white">{convertDigits(`${(category.minRate * 100).toFixed(2)}% / ${isBn ? "মাস" : "mo"}`, isBn)}</p>
+          <div className="mt-2.5 grid grid-cols-2 gap-2">
+            <div className="flex items-center justify-between rounded-xl bg-emerald-500/10 border border-emerald-300/15 px-3 py-2">
+              <span className="text-[9px] text-blue-100">{isBn ? "সিকিউরিটি ডিপোজিট" : "Security deposit"}</span>
+              <strong className="text-[11px] text-emerald-200">{formatCurrency(calc.securityDeposit, isBn)}</strong>
             </div>
-            <div className="border-x border-slate-200 dark:border-slate-800 px-2">
-              <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400">{isBn ? "মোট পরিশোধ" : "Total"}</p>
-              <p className="mt-1 text-xs font-black text-blue-700 dark:text-blue-300">{formatCurrency(calc.totalPayable, isBn)}</p>
-            </div>
-            <div>
-              <p className="text-[9px] font-semibold text-slate-500 dark:text-slate-400">{isBn ? "প্রসেসিং ফি" : "Fee"}</p>
-              <p className="mt-1 text-xs font-black text-slate-900 dark:text-white">{formatCurrency(calc.processingFee, isBn)}</p>
-            </div>
-          </div>
-
-          <div className="mt-3 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
-            <span>{isBn ? "সিকিউরিটি ডিপোজিট" : "Security Deposit"}</span>
-            <strong className="text-emerald-600 dark:text-emerald-400">{formatCurrency(calc.securityDeposit, isBn)}</strong>
+            {calc.insuranceFee > 0 && (
+              <div className="flex items-center justify-between rounded-xl bg-violet-500/10 border border-violet-300/15 px-3 py-2">
+                <span className="text-[9px] text-blue-100">{isBn ? "বীমা" : "Insurance"}</span>
+                <strong className="text-[11px] text-violet-200">{formatCurrency(calc.insuranceFee, isBn)}</strong>
+              </div>
+            )}
           </div>
         </section>
 
-        <div className="rounded-2xl bg-white dark:bg-[#0f1b2d] border border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center gap-2.5">
-          <ShieldAlert size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <p className="text-[10px] leading-4 text-slate-500 dark:text-slate-400">
-            {isBn ? "আপনার তথ্য নিরাপদ থাকবে। আবেদন জমা দেওয়ার আগে হিসাবগুলো আবার যাচাই করুন।" : "Your information stays protected. Review the figures before continuing."}
-          </p>
+        <div className="rounded-2xl bg-emerald-50 dark:bg-[#0d2a2a] border border-emerald-100 dark:border-emerald-900/50 px-4 py-3 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-black text-emerald-800 dark:text-emerald-200">{isBn ? "আবেদনের আগে হিসাব মিলিয়ে নিন" : "Review before continuing"}</p>
+            <p className="mt-0.5 text-[9px] leading-4 text-emerald-700 dark:text-emerald-300">
+              {isBn ? "লোনের পরিমাণ, মেয়াদ, কিস্তি ও প্রাথমিক ফিগুলো একসাথে দেখে নিন।" : "Review the amount, tenure, EMI and upfront costs together."}
+            </p>
+          </div>
+          <span className="shrink-0 px-2.5 py-1 rounded-full bg-white/70 dark:bg-white/10 text-[9px] font-black text-emerald-700 dark:text-emerald-200">
+            {formatCurrency(upfrontTotal, isBn)}
+          </span>
         </div>
+
+        {showRepaymentSchedule && (
+          <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-slate-950/70 backdrop-blur-sm p-0 sm:p-4">
+            <motion.div
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "100%", opacity: 0 }}
+              className="w-full sm:max-w-lg max-h-[88vh] rounded-t-[28px] sm:rounded-[28px] bg-white dark:bg-[#0d192b] border border-slate-200 dark:border-[#29415f] shadow-2xl overflow-hidden"
+            >
+              <div className="px-4 py-3.5 border-b border-slate-200 dark:border-[#29415f] flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-black text-slate-900 dark:text-white">{isBn ? "কিস্তির পূর্ণ হিসাব" : "Repayment schedule"}</h3>
+                  <p className="mt-0.5 text-[9px] text-slate-500 dark:text-slate-400">
+                    {formatCurrency(amount, isBn)} • {convertDigits(tenure, isBn)} {isBn ? "মাস" : "months"}
+                  </p>
+                </div>
+                <button type="button" onClick={() => setShowRepaymentSchedule(false)} className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-200">
+                  <X size={17} />
+                </button>
+              </div>
+
+              <div className="px-4 py-3 bg-slate-50 dark:bg-[#101c31] border-b border-slate-200 dark:border-[#29415f]">
+                <label className="block text-[9px] font-black text-slate-500 dark:text-slate-400 mb-1.5">
+                  {isBn ? "লোন/কিস্তি শুরুর তারিখ" : "Loan / repayment start date"}
+                </label>
+                <input
+                  type="date"
+                  value={repaymentStartDate}
+                  onChange={e => setRepaymentStartDate(e.target.value)}
+                  className="w-full rounded-xl bg-white dark:bg-[#0b1526] border border-slate-200 dark:border-[#29415f] px-3 py-2.5 text-xs font-bold text-slate-800 dark:text-white outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div className="overflow-auto max-h-[62vh]">
+                <div className="min-w-[590px]">
+                  <div className="sticky top-0 z-10 grid grid-cols-[44px_88px_100px_100px_100px_100px] bg-slate-100 dark:bg-[#13243c] border-b border-slate-200 dark:border-[#29415f] text-[8px] font-black text-slate-500 dark:text-slate-300">
+                    <div className="px-2 py-2">#</div>
+                    <div className="px-2 py-2">{isBn ? "তারিখ" : "Date"}</div>
+                    <div className="px-2 py-2 text-right">{isBn ? "মূল" : "Principal"}</div>
+                    <div className="px-2 py-2 text-right">{isBn ? "সুদ" : "Interest"}</div>
+                    <div className="px-2 py-2 text-right">{isBn ? "কিস্তি" : "Installment"}</div>
+                    <div className="px-2 py-2 text-right">{isBn ? "বাকি" : "Balance"}</div>
+                  </div>
+                  {repaymentRows.map(row => (
+                    <div key={row.no} className="grid grid-cols-[44px_88px_100px_100px_100px_100px] border-b border-slate-100 dark:border-[#1e3353] text-[9px] text-slate-700 dark:text-slate-200">
+                      <div className="px-2 py-2 font-black">{convertDigits(row.no, isBn)}</div>
+                      <div className="px-2 py-2 whitespace-nowrap">{formatDate(row.dueDate)}</div>
+                      <div className="px-2 py-2 text-right font-semibold">{formatCurrency(row.principal, isBn)}</div>
+                      <div className="px-2 py-2 text-right">{formatCurrency(row.interest, isBn)}</div>
+                      <div className="px-2 py-2 text-right font-black text-blue-700 dark:text-blue-300">{formatCurrency(row.installment, isBn)}</div>
+                      <div className="px-2 py-2 text-right">{formatCurrency(row.closing, isBn)}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="px-4 py-3 border-t border-slate-200 dark:border-[#29415f] bg-white dark:bg-[#0d192b] grid grid-cols-3 gap-2 text-center">
+                <div><p className="text-[8px] text-slate-400">{isBn ? "মোট সুদ" : "Interest"}</p><p className="text-[10px] font-black text-slate-900 dark:text-white">{formatCurrency(calc.totalInterest, isBn)}</p></div>
+                <div><p className="text-[8px] text-slate-400">{isBn ? "মোট" : "Total"}</p><p className="text-[10px] font-black text-blue-700 dark:text-blue-300">{formatCurrency(calc.totalPayable, isBn)}</p></div>
+                <div><p className="text-[8px] text-slate-400">{isBn ? "ফি" : "Fees"}</p><p className="text-[10px] font-black text-emerald-700 dark:text-emerald-300">{formatCurrency(upfrontTotal, isBn)}</p></div>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </div>
     );
   };
