@@ -1306,6 +1306,30 @@ export default function ApplyLoan() {
       item.label.toLowerCase().includes(professionSearch.trim().toLowerCase())
     );
     const detailsCategory = categories.find(cat => cat.id === detailsCategoryId);
+    const detailsProfessions = detailsCategory
+      ? professionOptions.filter(item => item.categories.includes(detailsCategory.id))
+      : [];
+    const detailRequirements = detailsCategory
+      ? getLoanDocumentRequirements(detailsCategory.id)
+      : [];
+    const detailInfoLabels: Record<string, string> = {
+      fullName: "পূর্ণ নাম", fatherName: "পিতার নাম", motherName: "মাতার নাম", dob: "জন্ম তারিখ", gender: "লিঙ্গ",
+      mobile: "মোবাইল নম্বর", nidNumber: "NID নম্বর", currentAddress: "বর্তমান ঠিকানা", permanentAddress: "স্থায়ী ঠিকানা",
+      companyName: "প্রতিষ্ঠানের নাম", designation: "পদবী", workDuration: "চাকরির মেয়াদ", monthlyIncome: "মাসিক আয়",
+      businessName: "ব্যবসার নাম", shopAddress: "ব্যবসার ঠিকানা", tradeLicense: "ট্রেড লাইসেন্স", bankName: "ব্যাংকের নাম",
+      accountNumber: "ব্যাংক হিসাব নম্বর", workingCountry: "কর্মরত দেশ", visaType: "ভিসার ধরন", passportNumber: "পাসপোর্ট নম্বর",
+      institutionName: "শিক্ষা প্রতিষ্ঠানের নাম", studentId: "স্টুডেন্ট আইডি", guardianIncome: "অভিভাবকের আয়",
+      targetUniversity: "টার্গেট বিশ্ববিদ্যালয়", targetDepartment: "বিভাগ/কোর্স", tuitionFee: "টিউশন ফি",
+      patientName: "রোগীর নাম", patientRelation: "রোগীর সাথে সম্পর্ক", patientNid: "রোগীর NID", patientCondition: "রোগ/অবস্থা",
+      hospitalName: "হাসপাতালের নাম", treatmentType: "চিকিৎসার ধরন", estimatedCost: "আনুমানিক চিকিৎসা খরচ",
+      avgMonthlySales: "গড় মাসিক বিক্রয়", productType: "পণ্য/সেবার ধরন", eTin: "e-TIN/ট্যাক্স তথ্য",
+      rjscNumber: "RJSC নম্বর", applicantRole: "আবেদনকারীর ভূমিকা", equityPercentage: "মালিকানা শতাংশ",
+      avgMonthlyRemittance: "গড় মাসিক রেমিট্যান্স", remittanceChannel: "রেমিট্যান্স মাধ্যম",
+      receiverBankAccount: "রিসিভার ব্যাংক হিসাব", foreignCompanyName: "বিদেশি প্রতিষ্ঠানের নাম",
+      workerCategory: "কর্মীর ধরন", sponsorIncomeSource: "স্পনসরের আয়ের উৎস", sponsorTaxableIncome: "স্পনসরের আয়"
+    };
+    const detailInfoFields = Array.from(new Set(detailRequirements.flatMap(req => req.mapsTo)))
+      .map(key => detailInfoLabels[key] || key);
 
     const selectCategory = (cat: ReturnType<typeof getCategories>[0]) => {
       const rawAllowed = getAllowedTenure(amount);
