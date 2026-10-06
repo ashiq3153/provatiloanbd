@@ -1496,7 +1496,12 @@ export default function ApplyLoan() {
               </article>
             );
           })}
-        
+        </div>
+        {visibleCategories.length === 0 && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/50 px-3 py-3 text-center">
+            <p className="text-[9px] font-black text-amber-800 dark:text-amber-200">{isBn ? "এই পেশার জন্য কোনো সক্রিয় ক্যাটাগরি নেই।" : "No active category is available for this profession."}</p>
+          </div>
+        )}
           </>
         ) : (
           <div className="rounded-xl border border-dashed border-emerald-300 dark:border-emerald-900/60 bg-emerald-50/60 dark:bg-emerald-950/20 px-4 py-5 text-center">
