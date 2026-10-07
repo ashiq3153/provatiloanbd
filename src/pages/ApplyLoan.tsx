@@ -1787,7 +1787,7 @@ export default function ApplyLoan() {
                     key={v}
                     type="button"
                     onClick={() => handleAmountChange(v)}
-                    className={`h-8.5 rounded-lg text-[10px] font-black border transition-all active:scale-95 ${
+                    className={`h-8 rounded-lg text-[10px] font-black border transition-all active:scale-95 ${
                       amount === v
                         ? "bg-blue-600 border-blue-500 text-white"
                         : "bg-[#0d1b30] dark:bg-[#0d192b] border-[#29415f] text-white hover:border-blue-400 dark:hover:border-blue-500"
