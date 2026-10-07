@@ -1681,13 +1681,14 @@ export default function ApplyLoan() {
     const rawAllowed = getAllowedTenure(amount);
     const minAllowed = Math.max(rawAllowed[0], category.minTenure ?? 12);
     const maxAllowed = Math.min(rawAllowed[1], category.maxTenure ?? 60);
-    const tenureOptions = [12, 24, 36, 48, 60, 72, 84, 96, 120, 144, 180]
-      .filter(m => m >= minAllowed && m <= maxAllowed);
-
     const amountOptions = amountPackages.filter(v => v >= 50000 && v <= category.maxAmount);
+    const tenureOptions = snapPoints.filter(m => m >= minAllowed && m <= maxAllowed);
+
     const amountLabel = (value: number) => {
       const lakh = value / 100000;
-      const text = Number.isInteger(lakh) ? String(lakh) : lakh.toFixed(1).replace(/\\.0$/, "");
+      const text = Number.isInteger(lakh)
+        ? String(lakh)
+        : lakh.toFixed(1).replace(/\\.0$/, "");
       return convertDigits(text, isBn);
     };
 
@@ -1708,57 +1709,37 @@ export default function ApplyLoan() {
       dueDate.setMonth(dueDate.getMonth() + index + 1);
       const opening = Math.max(0, amount - Math.round((amount / tenure) * 100) / 100 * index);
       const closing = Math.max(0, opening - principalPart);
-
-      return {
-        no: index + 1,
-        dueDate,
-        opening,
-        principal: principalPart,
-        interest: interestPart,
-        installment,
-        closing
-      };
+      return { no: index + 1, dueDate, opening, principal: principalPart, interest: interestPart, installment, closing };
     });
 
-    const upfrontTotal = calc.totalUpfrontFees;
-
     return (
-      <div className="loan-easy-font space-y-3 pb-28">
-        <div className="flex items-center justify-between gap-3 px-1">
-          <div className="min-w-0">
-            <h2 className="text-[19px] leading-tight font-black text-slate-950 dark:text-white">
-              {isBn ? "লোনের পরিমাণ ও মেয়াদ" : "Loan amount & tenure"}
-            </h2>
-            <p className="mt-1 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
-              {isBn ? "আপনার প্রয়োজন অনুযায়ী পরিমাণ ও কিস্তির সময় নির্বাচন করুন" : "Choose the amount and repayment period that fits you"}
-            </p>
+      <div className="loan-easy-font space-y-5 pb-28">
+        <div className="px-1 pt-1">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-black text-gray-900 dark:text-white">{isBn ? "লোনের পরিমাণ ও মেয়াদ" : "Loan amount & tenure"}</h2>
+              <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{isBn ? "আপনার প্রয়োজন অনুযায়ী পরিমাণ ও কিস্তির সময় নির্বাচন করুন" : "Choose the amount and repayment period that fits you"}</p>
+            </div>
+            <span className="px-3 py-1.5 rounded-full neu-raised text-[10px] font-black text-primary-700 dark:text-primary-300 shrink-0">{category.title}</span>
           </div>
-          <span className="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-200 text-[10px] font-black border border-blue-100 dark:border-blue-900/60">
-            {category.title}
-          </span>
         </div>
 
-        <section className="rounded-[20px] bg-[#101f38] dark:bg-[#101c31] border border-[#203b62] dark:border-[#1e3353] p-3 shadow-sm">
-          <div className="flex items-center justify-between gap-2">
-            <label className="text-sm font-black text-slate-800 dark:text-white">
-              {isBn ? "লোনের পরিমাণ" : "Loan amount"}
-            </label>
-            <span className="text-[9px] font-black px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-200 border border-blue-100 dark:border-blue-900/50">
-              {isBn ? "সর্বোচ্চ" : "Max"} {category.limit}
-            </span>
-          </div>
-
-          <div className="mt-3 rounded-[18px] bg-[#142b4d] dark:bg-[#152640] border border-[#28466f] dark:border-[#243b5e] p-3">
-            <div className="flex items-end justify-between gap-3">
-              <div>
-                <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400">{isBn ? "নির্বাচিত পরিমাণ" : "Selected amount"}</p>
-                <p className="mt-1 text-[25px] leading-none font-black text-blue-700 dark:text-blue-300 tracking-tight">
-                  {formatCurrency(amount, isBn)}
-                </p>
-              </div>
-              <span className="shrink-0 px-3 py-1.5 rounded-full bg-slate-900 dark:bg-[#0b1526] text-white text-[10px] font-black">
-                BDT
+        <section className="relative overflow-hidden neu-raised p-4 rounded-3xl">
+          <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full bg-primary-500/10 blur-2xl pointer-events-none" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-4">
+              <label className="text-sm font-black text-gray-800 dark:text-gray-100">{isBn ? "লোনের পরিমাণ" : "Loan Amount"}</label>
+              <span className="px-2.5 py-1 rounded-full bg-primary-500/10 text-primary-700 dark:text-primary-300 text-[9px] font-black border border-primary-500/10">
+                {isBn ? "সর্বোচ্চ" : "Max"} {category.limit}
               </span>
+            </div>
+
+            <div className="flex items-end justify-between mb-3 px-1">
+              <div>
+                <p className="text-[9px] font-bold text-gray-500 dark:text-gray-400">{isBn ? "নির্বাচিত পরিমাণ" : "Selected amount"}</p>
+                <p className="mt-1 text-[26px] leading-none font-black text-primary-600 dark:text-primary-300">{formatCurrency(amount, isBn)}</p>
+              </div>
+              <span className="px-3 py-1.5 rounded-full neu-raised text-[10px] font-black text-gray-700 dark:text-gray-200">BDT</span>
             </div>
 
             <input
@@ -1769,189 +1750,164 @@ export default function ApplyLoan() {
               step={10000}
               value={Math.min(Math.max(amount, 50000), category.maxAmount)}
               onChange={e => handleAmountChange(Number(e.target.value))}
-              className="mt-4 w-full accent-blue-600"
+              className="w-full accent-primary-600"
             />
 
-            <div className="mt-3">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[9px] font-black uppercase tracking-wide text-slate-400">
-                  {isBn ? "দ্রুত পরিমাণ নির্বাচন" : "Quick amount"}
-                </p>
-                <p className="text-[9px] font-semibold text-slate-400">
-                  {amountLabel(50000)} — {amountLabel(category.maxAmount)}
-                </p>
-              </div>
-              <div className="grid grid-cols-5 gap-1.5">
-                {amountOptions.map(v => (
-                  <button
-                    key={v}
-                    type="button"
-                    onClick={() => handleAmountChange(v)}
-                    className={`h-8 rounded-lg text-[10px] font-black border transition-all active:scale-95 ${
-                      amount === v
-                        ? "bg-blue-600 border-blue-500 text-white"
-                        : "bg-[#0d1b30] dark:bg-[#0d192b] border-[#29415f] text-white hover:border-blue-400 dark:hover:border-blue-500"
-                    }`}
-                  >
-                    {amountLabel(v)}
-                  </button>
-                ))}
-              </div>
+            <div className="flex items-center justify-between mt-4 mb-2">
+              <p className="text-[10px] font-black text-gray-700 dark:text-gray-200">{isBn ? "দ্রুত পরিমাণ নির্বাচন" : "Quick amount"}</p>
+              <p className="text-[9px] font-semibold text-gray-400">{amountLabel(50000)} — {amountLabel(category.maxAmount)}</p>
+            </div>
+
+            <div className="grid grid-cols-5 gap-2">
+              {amountOptions.map(v => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => handleAmountChange(v)}
+                  className={`py-2 rounded-xl font-black text-[11px] transition-all border ${
+                    amount === v
+                      ? "neu-btn-primary"
+                      : "neu-btn text-gray-700 dark:text-gray-200"
+                  }`}
+                >
+                  {amountLabel(v)}
+                </button>
+              ))}
             </div>
           </div>
         </section>
 
-        <section className="rounded-[20px] bg-[#101f38] dark:bg-[#101c31] border border-[#203b62] dark:border-[#1e3353] p-3 shadow-sm">
-          <div className="flex items-center justify-between gap-2">
+        <section className="neu-raised p-4 rounded-3xl">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-base font-black text-slate-900 dark:text-white">{isBn ? "পরিশোধের মেয়াদ" : "Repayment tenure"}</h3>
-              <p className="mt-1 text-[10px] text-slate-500 dark:text-slate-400">{isBn ? "মাসের সংখ্যা নির্বাচন করুন" : "Select the number of months"}</p>
+              <h3 className="text-sm font-black text-gray-900 dark:text-white">{isBn ? "পরিশোধের মেয়াদ" : "Repayment Tenure"}</h3>
+              <p className="mt-1 text-[10px] text-gray-500 dark:text-gray-400">{isBn ? "মাসের সংখ্যা নির্বাচন করুন" : "Select repayment months"}</p>
             </div>
-            <span className="px-2.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-200 text-[10px] font-black">
+            <span className="px-3 py-1.5 rounded-full neu-raised text-[10px] font-black text-primary-700 dark:text-primary-300">
               {convertDigits(tenure, isBn)}
             </span>
           </div>
 
-          <div className="mt-3 grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             {tenureOptions.map(months => (
               <button
                 key={months}
                 type="button"
                 onClick={() => setTenure(months)}
-                className={`h-9 rounded-lg text-[12px] font-black border transition-all active:scale-95 ${
+                className={`py-2.5 rounded-xl font-black text-[12px] transition-all ${
                   tenure === months
-                    ? "bg-blue-600 border-blue-500 text-white"
-                    : "bg-[#0d1b30] dark:bg-[#0d192b] border-[#29415f] text-white hover:border-blue-400 dark:hover:border-blue-500"
+                    ? "neu-btn-primary"
+                    : "neu-btn text-gray-700 dark:text-gray-200"
                 }`}
               >
                 {convertDigits(months, isBn)}
               </button>
             ))}
           </div>
+
+          <div className="mt-4 flex items-center justify-between px-1">
+            <span className="text-[9px] text-gray-400">{isBn ? "অনুমোদিত সময়কাল" : "Allowed tenure"}</span>
+            <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300">
+              {convertDigits(minAllowed, isBn)} — {convertDigits(maxAllowed, isBn)} {isBn ? "মাস" : "months"}
+            </span>
+          </div>
         </section>
 
-        <section className="rounded-[24px] bg-gradient-to-br from-[#102754] via-[#122e63] to-[#0d2349] border border-blue-900/70 p-3.5 text-white shadow-none">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-black text-blue-100">{isBn ? "আনুমানিক মাসিক কিস্তি" : "Estimated monthly EMI"}</p>
-              <p className="mt-1 text-[28px] leading-none font-black tracking-tight">
-                {formatCurrency(calc.emi, isBn)} <span className="text-[11px] font-bold text-blue-200">/ {isBn ? "মাস" : "month"}</span>
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowRepaymentSchedule(true)}
-              className="w-11 h-11 rounded-2xl bg-blue-500 text-white border border-blue-300/40 flex items-center justify-center shadow-none hover:bg-blue-400 hover:scale-105 active:scale-95 transition-transform"
-              aria-label={isBn ? "কিস্তির বিস্তারিত দেখুন" : "View repayment schedule"}
-            >
-              <FileText size={21} strokeWidth={2.5} />
-            </button>
-          </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-1.5">
-            <div className="rounded-xl bg-white/10 border border-white/10 px-3 py-2 flex flex-col justify-center min-h-[52px]">
-              <p className="text-[8px] text-blue-200">{isBn ? "সুদের হার" : "Rate"}</p>
-              <p className="mt-1 text-[11px] font-black leading-tight">{convertDigits(`${(category.minRate * 100).toFixed(2)}% / ${isBn ? "মাস" : "mo"}`, isBn)}</p>
-            </div>
-            <div className="rounded-xl bg-white/10 border border-white/10 px-3 py-2 flex flex-col justify-center min-h-[52px]">
-              <p className="text-[8px] text-blue-200">{isBn ? "মোট সুদ" : "Total interest"}</p>
-              <p className="mt-1 text-[11px] font-black">{formatCurrency(calc.totalInterest, isBn)}</p>
-            </div>
-            <div className="rounded-xl bg-white/10 border border-white/10 p-2.5">
-              <p className="text-[8px] text-blue-200">{isBn ? "মোট পরিশোধ" : "Total payable"}</p>
-              <p className="mt-1 text-[11px] font-black">{formatCurrency(calc.totalPayable, isBn)}</p>
-            </div>
-            <div className="rounded-xl bg-white/10 border border-white/10 p-2.5">
-              <p className="text-[8px] text-blue-200">{isBn ? "প্রসেসিং ফি" : "Processing fee"}</p>
-              <p className="mt-1 text-[11px] font-black">{formatCurrency(calc.processingFee, isBn)}</p>
-            </div>
-          </div>
-
-          <div className="mt-2 grid grid-cols-2 gap-1.5">
-            <div className="flex items-center justify-between rounded-xl bg-emerald-500/10 border border-emerald-300/15 px-3 py-2">
-              <span className="text-[9px] text-blue-100">{isBn ? "সিকিউরিটি ডিপোজিট" : "Security deposit"}</span>
-              <strong className="text-[11px] text-emerald-200">{formatCurrency(calc.securityDeposit, isBn)}</strong>
-            </div>
-            {calc.insuranceFee > 0 && (
-              <div className="flex items-center justify-between rounded-xl bg-violet-500/10 border border-violet-300/15 px-3 py-2">
-                <span className="text-[9px] text-blue-100">{isBn ? "বীমা" : "Insurance"}</span>
-                <strong className="text-[11px] text-violet-200">{formatCurrency(calc.insuranceFee, isBn)}</strong>
+        <section className="relative overflow-hidden rounded-3xl p-5 text-white bg-gradient-to-br from-[#18253a] via-[#101827] to-[#090e17] border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.25)]">
+          <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-primary-500/15 blur-3xl" />
+          <div className="absolute -bottom-16 -left-10 w-32 h-32 rounded-full bg-emerald-400/10 blur-3xl" />
+          <div className="relative z-10">
+            <div className="flex items-start justify-between gap-3 pb-4 border-b border-white/10">
+              <div>
+                <p className="text-[10px] font-bold text-gray-400">{isBn ? "আনুমানিক মাসিক কিস্তি" : "Estimated Monthly EMI"}</p>
+                <p className="mt-1 text-[28px] leading-none font-black">{formatCurrency(calc.emi, isBn)} <span className="text-[10px] text-gray-400">/ {isBn ? "মাস" : "month"}</span></p>
               </div>
-            )}
+              <button
+                type="button"
+                onClick={() => setShowRepaymentSchedule(true)}
+                className="w-11 h-11 rounded-2xl neu-btn-primary flex items-center justify-center shrink-0"
+                aria-label={isBn ? "কিস্তির পূর্ণ হিসাব দেখুন" : "View repayment schedule"}
+              >
+                <FileText size={20} strokeWidth={2.5} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 py-4 border-b border-white/10 text-center">
+              <div>
+                <p className="text-gray-500 text-[9px] font-bold">{isBn ? "ক্যাটাগরি" : "Category"}</p>
+                <p className="mt-1 text-[10px] font-black text-gray-100 truncate">{category.title}</p>
+              </div>
+              <div className="border-x border-white/10">
+                <p className="text-gray-500 text-[9px] font-bold">{isBn ? "পরিমাণ" : "Amount"}</p>
+                <p className="mt-1 text-[10px] font-black text-primary-300">{formatCurrency(amount, isBn)}</p>
+              </div>
+              <div>
+                <p className="text-gray-500 text-[9px] font-bold">{isBn ? "মেয়াদ" : "Tenure"}</p>
+                <p className="mt-1 text-[10px] font-black text-gray-100">{convertDigits(tenure, isBn)} {isBn ? "মাস" : "mo"}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 pt-4">
+              {[
+                [isBn ? "সুদের হার" : "Interest rate", `${(category.minRate * 100).toFixed(2)}% / ${isBn ? "মাস" : "mo"}`],
+                [isBn ? "মোট সুদ" : "Total interest", formatCurrency(calc.totalInterest, isBn)],
+                [isBn ? "মোট পরিশোধ" : "Total payable", formatCurrency(calc.totalPayable, isBn)],
+                [isBn ? "প্রসেসিং ফি" : "Processing fee", formatCurrency(calc.processingFee, isBn)],
+                [isBn ? "সিকিউরিটি ডিপোজিট" : "Security deposit", formatCurrency(calc.securityDeposit, isBn)],
+                ...(calc.insuranceFee > 0 ? [[isBn ? "বীমা" : "Insurance", formatCurrency(calc.insuranceFee, isBn)]] : [])
+              ].map(([label, value], index) => (
+                <div key={String(label)} className="rounded-2xl bg-white/[0.06] border border-white/[0.07] px-3 py-2.5">
+                  <p className="text-[8px] text-gray-500 font-bold">{label}</p>
+                  <p className="mt-1 text-[11px] font-black text-gray-100">{value}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
-        <div className="rounded-xl bg-[#0d2a2a] border border-emerald-900/50 px-3 py-2.5 flex items-center justify-between gap-2">
+        <div className="neu-raised rounded-2xl px-4 py-3 flex items-center justify-between gap-3">
           <div>
-            <p className="text-[10px] font-black text-emerald-800 dark:text-emerald-200">{isBn ? "আবেদনের আগে হিসাব মিলিয়ে নিন" : "Review before continuing"}</p>
-            <p className="mt-0.5 text-[9px] leading-4 text-emerald-700 dark:text-emerald-300">
-              {isBn ? "লোনের পরিমাণ, মেয়াদ, কিস্তি ও প্রাথমিক ফিগুলো একসাথে দেখে নিন।" : "Review the amount, tenure, EMI and upfront costs together."}
-            </p>
+            <p className="text-[10px] font-black text-gray-800 dark:text-gray-100">{isBn ? "আবেদনের আগে হিসাব মিলিয়ে নিন" : "Review before continuing"}</p>
+            <p className="mt-0.5 text-[9px] leading-4 text-gray-500 dark:text-gray-400">{isBn ? "পরিমাণ, মেয়াদ, কিস্তি ও প্রাথমিক ফি একসাথে দেখে নিন।" : "Review amount, tenure, EMI and upfront fees."}</p>
           </div>
-          <span className="shrink-0 px-2.5 py-1 rounded-full bg-white/70 dark:bg-white/10 text-[9px] font-black text-emerald-700 dark:text-emerald-200">
-            {formatCurrency(upfrontTotal, isBn)}
-          </span>
+          <span className="shrink-0 px-3 py-1.5 rounded-full neu-btn text-[9px] font-black text-gray-700 dark:text-gray-200">{formatCurrency(calc.totalUpfrontFees, isBn)}</span>
         </div>
 
         {showRepaymentSchedule && (
-          <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-slate-950/80 p-0 sm:p-4">
+          <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-black/70 p-0 sm:p-4">
             <motion.div
               initial={{ y: "100%", opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
-              className="w-full sm:max-w-lg max-h-[88vh] rounded-t-[28px] sm:rounded-[28px] bg-[#0d192b] border border-[#29415f] shadow-none overflow-hidden"
+              className="w-full sm:max-w-lg max-h-[88vh] rounded-t-[28px] sm:rounded-[28px] bg-[#101827] border border-white/10 shadow-2xl overflow-hidden"
             >
-              <div className="px-4 py-3.5 border-b border-slate-200 dark:border-[#29415f] flex items-center justify-between">
+              <div className="px-4 py-4 border-b border-white/10 flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-black text-slate-900 dark:text-white">{isBn ? "কিস্তির পূর্ণ হিসাব" : "Repayment schedule"}</h3>
-                  <p className="mt-0.5 text-[9px] text-slate-500 dark:text-slate-400">
-                    {formatCurrency(amount, isBn)} • {convertDigits(tenure, isBn)} {isBn ? "মাস" : "months"}
-                  </p>
+                  <h3 className="text-sm font-black text-white">{isBn ? "কিস্তির পূর্ণ হিসাব" : "Repayment schedule"}</h3>
+                  <p className="mt-1 text-[9px] text-gray-400">{formatCurrency(amount, isBn)} • {convertDigits(tenure, isBn)} {isBn ? "মাস" : "months"}</p>
                 </div>
-                <button type="button" onClick={() => setShowRepaymentSchedule(false)} className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-200">
-                  <X size={17} />
-                </button>
+                <button type="button" onClick={() => setShowRepaymentSchedule(false)} className="w-9 h-9 rounded-full neu-btn flex items-center justify-center text-gray-200"><X size={17} /></button>
               </div>
-
-              <div className="px-4 py-3 bg-[#101f38] border-b border-[#29415f]">
-                <label className="block text-[9px] font-black text-slate-500 dark:text-slate-400 mb-1.5">
-                  {isBn ? "লোন/কিস্তি শুরুর তারিখ" : "Loan / repayment start date"}
-                </label>
-                <input
-                  type="date"
-                  value={repaymentStartDate}
-                  onChange={e => setRepaymentStartDate(e.target.value)}
-                  className="w-full rounded-xl bg-[#0b1526] border border-[#29415f] px-3 py-2.5 text-xs font-bold text-slate-800 dark:text-white outline-none focus:border-blue-500"
-                />
+              <div className="px-4 py-3 bg-[#0c1422] border-b border-white/10">
+                <label className="block text-[9px] font-black text-gray-400 mb-1.5">{isBn ? "লোন/কিস্তি শুরুর তারিখ" : "Loan / repayment start date"}</label>
+                <input type="date" value={repaymentStartDate} onChange={e => setRepaymentStartDate(e.target.value)} className="w-full rounded-xl bg-[#101827] border border-white/10 px-3 py-2.5 text-xs font-bold text-white outline-none focus:border-primary-500" />
               </div>
-
               <div className="overflow-auto max-h-[62vh]">
                 <div className="min-w-[590px]">
-                  <div className="sticky top-0 z-10 grid grid-cols-[44px_88px_100px_100px_100px_100px] bg-[#13243c] border-b border-slate-200 dark:border-[#29415f] text-[8px] font-black text-slate-500 dark:text-slate-300">
-                    <div className="px-2 py-2">#</div>
-                    <div className="px-2 py-2">{isBn ? "তারিখ" : "Date"}</div>
-                    <div className="px-2 py-2 text-right">{isBn ? "মূল" : "Principal"}</div>
-                    <div className="px-2 py-2 text-right">{isBn ? "সুদ" : "Interest"}</div>
-                    <div className="px-2 py-2 text-right">{isBn ? "কিস্তি" : "Installment"}</div>
-                    <div className="px-2 py-2 text-right">{isBn ? "বাকি" : "Balance"}</div>
+                  <div className="sticky top-0 z-10 grid grid-cols-[44px_88px_100px_100px_100px_100px] bg-[#172235] border-b border-white/10 text-[8px] font-black text-gray-400">
+                    <div className="px-2 py-2">#</div><div className="px-2 py-2">{isBn ? "তারিখ" : "Date"}</div><div className="px-2 py-2 text-right">{isBn ? "মূল" : "Principal"}</div><div className="px-2 py-2 text-right">{isBn ? "সুদ" : "Interest"}</div><div className="px-2 py-2 text-right">{isBn ? "কিস্তি" : "Installment"}</div><div className="px-2 py-2 text-right">{isBn ? "বাকি" : "Balance"}</div>
                   </div>
                   {repaymentRows.map(row => (
-                    <div key={row.no} className="grid grid-cols-[44px_88px_100px_100px_100px_100px] border-b border-slate-100 dark:border-[#1e3353] text-[9px] text-slate-700 dark:text-slate-200">
+                    <div key={row.no} className="grid grid-cols-[44px_88px_100px_100px_100px_100px] border-b border-white/5 text-[9px] text-gray-200">
                       <div className="px-2 py-2 font-black">{convertDigits(row.no, isBn)}</div>
                       <div className="px-2 py-2 whitespace-nowrap">{formatDate(row.dueDate)}</div>
-                      <div className="px-2 py-2 text-right font-semibold">{formatCurrency(row.principal, isBn)}</div>
+                      <div className="px-2 py-2 text-right">{formatCurrency(row.principal, isBn)}</div>
                       <div className="px-2 py-2 text-right">{formatCurrency(row.interest, isBn)}</div>
-                      <div className="px-2 py-2 text-right font-black text-blue-700 dark:text-blue-300">{formatCurrency(row.installment, isBn)}</div>
+                      <div className="px-2 py-2 text-right font-black text-primary-300">{formatCurrency(row.installment, isBn)}</div>
                       <div className="px-2 py-2 text-right">{formatCurrency(row.closing, isBn)}</div>
                     </div>
                   ))}
                 </div>
-              </div>
-
-              <div className="px-4 py-3 border-t border-slate-200 dark:border-[#29415f] bg-[#0d192b] grid grid-cols-3 gap-2 text-center">
-                <div><p className="text-[8px] text-slate-400">{isBn ? "মোট সুদ" : "Interest"}</p><p className="text-[10px] font-black text-slate-900 dark:text-white">{formatCurrency(calc.totalInterest, isBn)}</p></div>
-                <div><p className="text-[8px] text-slate-400">{isBn ? "মোট" : "Total"}</p><p className="text-[10px] font-black text-blue-700 dark:text-blue-300">{formatCurrency(calc.totalPayable, isBn)}</p></div>
-                <div><p className="text-[8px] text-slate-400">{isBn ? "ফি" : "Fees"}</p><p className="text-[10px] font-black text-emerald-700 dark:text-emerald-300">{formatCurrency(upfrontTotal, isBn)}</p></div>
               </div>
             </motion.div>
           </div>
