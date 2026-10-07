@@ -1723,13 +1723,13 @@ export default function ApplyLoan() {
     const upfrontTotal = calc.totalUpfrontFees;
 
     return (
-      <div className="loan-easy-font space-y-4 pb-4">
+      <div className="loan-easy-font space-y-3 pb-28">
         <div className="flex items-center justify-between gap-3 px-1">
           <div className="min-w-0">
-            <h2 className="text-[23px] leading-tight font-black text-slate-950 dark:text-white">
+            <h2 className="text-[19px] leading-tight font-black text-slate-950 dark:text-white">
               {isBn ? "লোনের পরিমাণ ও মেয়াদ" : "Loan amount & tenure"}
             </h2>
-            <p className="mt-1 text-[11px] leading-5 text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
               {isBn ? "আপনার প্রয়োজন অনুযায়ী পরিমাণ ও কিস্তির সময় নির্বাচন করুন" : "Choose the amount and repayment period that fits you"}
             </p>
           </div>
@@ -1738,7 +1738,7 @@ export default function ApplyLoan() {
           </span>
         </div>
 
-        <section className="rounded-[24px] bg-[#10203a] dark:bg-[#101c31] border border-[#203b62] dark:border-[#1e3353] p-4 shadow-sm">
+        <section className="rounded-[20px] bg-[#101f38] dark:bg-[#101c31] border border-[#203b62] dark:border-[#1e3353] p-3 shadow-sm">
           <div className="flex items-center justify-between gap-2">
             <label className="text-sm font-black text-slate-800 dark:text-white">
               {isBn ? "লোনের পরিমাণ" : "Loan amount"}
@@ -1748,11 +1748,11 @@ export default function ApplyLoan() {
             </span>
           </div>
 
-          <div className="mt-4 rounded-2xl bg-[#142b4d] dark:bg-[#152640] border border-[#28466f] dark:border-[#243b5e] p-4">
+          <div className="mt-3 rounded-[18px] bg-[#142b4d] dark:bg-[#152640] border border-[#28466f] dark:border-[#243b5e] p-3">
             <div className="flex items-end justify-between gap-3">
               <div>
                 <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400">{isBn ? "নির্বাচিত পরিমাণ" : "Selected amount"}</p>
-                <p className="mt-1 text-[30px] leading-none font-black text-blue-700 dark:text-blue-300 tracking-tight">
+                <p className="mt-1 text-[25px] leading-none font-black text-blue-700 dark:text-blue-300 tracking-tight">
                   {formatCurrency(amount, isBn)}
                 </p>
               </div>
@@ -1769,10 +1769,10 @@ export default function ApplyLoan() {
               step={10000}
               value={Math.min(Math.max(amount, 50000), category.maxAmount)}
               onChange={e => handleAmountChange(Number(e.target.value))}
-              className="mt-5 w-full accent-blue-600"
+              className="mt-4 w-full accent-blue-600"
             />
 
-            <div className="mt-4">
+            <div className="mt-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[9px] font-black uppercase tracking-wide text-slate-400">
                   {isBn ? "দ্রুত পরিমাণ নির্বাচন" : "Quick amount"}
@@ -1787,7 +1787,7 @@ export default function ApplyLoan() {
                     key={v}
                     type="button"
                     onClick={() => handleAmountChange(v)}
-                    className={`h-9 rounded-xl text-[11px] font-black border transition-all active:scale-95 ${
+                    className={`h-8.5 rounded-lg text-[10px] font-black border transition-all active:scale-95 ${
                       amount === v
                         ? "bg-blue-600 border-blue-500 text-white"
                         : "bg-[#0d1b30] dark:bg-[#0d192b] border-[#29415f] text-white hover:border-blue-400 dark:hover:border-blue-500"
@@ -1801,7 +1801,7 @@ export default function ApplyLoan() {
           </div>
         </section>
 
-        <section className="rounded-[24px] bg-white dark:bg-[#101c31] border border-slate-200 dark:border-[#1e3353] p-4 shadow-sm">
+        <section className="rounded-[20px] bg-[#101f38] dark:bg-[#101c31] border border-[#203b62] dark:border-[#1e3353] p-3 shadow-sm">
           <div className="flex items-center justify-between gap-2">
             <div>
               <h3 className="text-base font-black text-slate-900 dark:text-white">{isBn ? "পরিশোধের মেয়াদ" : "Repayment tenure"}</h3>
@@ -1812,13 +1812,13 @@ export default function ApplyLoan() {
             </span>
           </div>
 
-          <div className="mt-4 grid grid-cols-4 gap-2">
+          <div className="mt-3 grid grid-cols-4 gap-2">
             {tenureOptions.map(months => (
               <button
                 key={months}
                 type="button"
                 onClick={() => setTenure(months)}
-                className={`h-10 rounded-xl text-sm font-black border transition-all active:scale-95 ${
+                className={`h-9 rounded-lg text-[12px] font-black border transition-all active:scale-95 ${
                   tenure === months
                     ? "bg-blue-600 border-blue-500 text-white"
                     : "bg-[#0d1b30] dark:bg-[#0d192b] border-[#29415f] text-white hover:border-blue-400 dark:hover:border-blue-500"
@@ -1830,7 +1830,7 @@ export default function ApplyLoan() {
           </div>
         </section>
 
-        <section className="rounded-[24px] bg-gradient-to-br from-[#102754] via-[#122e63] to-[#0d2349] border border-blue-900/70 p-4 text-white shadow-md shadow-blue-950/20">
+        <section className="rounded-[24px] bg-gradient-to-br from-[#102754] via-[#122e63] to-[#0d2349] border border-blue-900/70 p-3.5 text-white shadow-none">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[10px] font-black text-blue-100">{isBn ? "আনুমানিক মাসিক কিস্তি" : "Estimated monthly EMI"}</p>
@@ -1848,12 +1848,12 @@ export default function ApplyLoan() {
             </button>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <div className="rounded-xl bg-white/10 border border-white/10 px-3 py-2 flex flex-col justify-center min-h-[58px]">
+          <div className="mt-3 grid grid-cols-2 gap-1.5">
+            <div className="rounded-xl bg-white/10 border border-white/10 px-3 py-2 flex flex-col justify-center min-h-[52px]">
               <p className="text-[8px] text-blue-200">{isBn ? "সুদের হার" : "Rate"}</p>
               <p className="mt-1 text-[11px] font-black leading-tight">{convertDigits(`${(category.minRate * 100).toFixed(2)}% / ${isBn ? "মাস" : "mo"}`, isBn)}</p>
             </div>
-            <div className="rounded-xl bg-white/10 border border-white/10 p-2.5">
+            <div className="rounded-xl bg-white/10 border border-white/10 px-3 py-2 flex flex-col justify-center min-h-[52px]">
               <p className="text-[8px] text-blue-200">{isBn ? "মোট সুদ" : "Total interest"}</p>
               <p className="mt-1 text-[11px] font-black">{formatCurrency(calc.totalInterest, isBn)}</p>
             </div>
@@ -1867,7 +1867,7 @@ export default function ApplyLoan() {
             </div>
           </div>
 
-          <div className="mt-2.5 grid grid-cols-2 gap-2">
+          <div className="mt-2 grid grid-cols-2 gap-1.5">
             <div className="flex items-center justify-between rounded-xl bg-emerald-500/10 border border-emerald-300/15 px-3 py-2">
               <span className="text-[9px] text-blue-100">{isBn ? "সিকিউরিটি ডিপোজিট" : "Security deposit"}</span>
               <strong className="text-[11px] text-emerald-200">{formatCurrency(calc.securityDeposit, isBn)}</strong>
@@ -1881,7 +1881,7 @@ export default function ApplyLoan() {
           </div>
         </section>
 
-        <div className="rounded-2xl bg-emerald-50 dark:bg-[#0d2a2a] border border-emerald-100 dark:border-emerald-900/50 px-4 py-3 flex items-center justify-between gap-3">
+        <div className="rounded-xl bg-[#0d2a2a] border border-emerald-900/50 px-3 py-2.5 flex items-center justify-between gap-2">
           <div>
             <p className="text-[10px] font-black text-emerald-800 dark:text-emerald-200">{isBn ? "আবেদনের আগে হিসাব মিলিয়ে নিন" : "Review before continuing"}</p>
             <p className="mt-0.5 text-[9px] leading-4 text-emerald-700 dark:text-emerald-300">
@@ -1894,12 +1894,12 @@ export default function ApplyLoan() {
         </div>
 
         {showRepaymentSchedule && (
-          <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-slate-950/70 backdrop-blur-sm p-0 sm:p-4">
+          <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-slate-950/80 p-0 sm:p-4">
             <motion.div
               initial={{ y: "100%", opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
-              className="w-full sm:max-w-lg max-h-[88vh] rounded-t-[28px] sm:rounded-[28px] bg-white dark:bg-[#0d192b] border border-slate-200 dark:border-[#29415f] shadow-2xl overflow-hidden"
+              className="w-full sm:max-w-lg max-h-[88vh] rounded-t-[28px] sm:rounded-[28px] bg-[#0d192b] border border-[#29415f] shadow-none overflow-hidden"
             >
               <div className="px-4 py-3.5 border-b border-slate-200 dark:border-[#29415f] flex items-center justify-between">
                 <div>
@@ -1913,7 +1913,7 @@ export default function ApplyLoan() {
                 </button>
               </div>
 
-              <div className="px-4 py-3 bg-slate-50 dark:bg-[#101c31] border-b border-slate-200 dark:border-[#29415f]">
+              <div className="px-4 py-3 bg-[#101f38] border-b border-[#29415f]">
                 <label className="block text-[9px] font-black text-slate-500 dark:text-slate-400 mb-1.5">
                   {isBn ? "লোন/কিস্তি শুরুর তারিখ" : "Loan / repayment start date"}
                 </label>
@@ -1921,13 +1921,13 @@ export default function ApplyLoan() {
                   type="date"
                   value={repaymentStartDate}
                   onChange={e => setRepaymentStartDate(e.target.value)}
-                  className="w-full rounded-xl bg-white dark:bg-[#0b1526] border border-slate-200 dark:border-[#29415f] px-3 py-2.5 text-xs font-bold text-slate-800 dark:text-white outline-none focus:border-blue-500"
+                  className="w-full rounded-xl bg-[#0b1526] border border-[#29415f] px-3 py-2.5 text-xs font-bold text-slate-800 dark:text-white outline-none focus:border-blue-500"
                 />
               </div>
 
               <div className="overflow-auto max-h-[62vh]">
                 <div className="min-w-[590px]">
-                  <div className="sticky top-0 z-10 grid grid-cols-[44px_88px_100px_100px_100px_100px] bg-slate-100 dark:bg-[#13243c] border-b border-slate-200 dark:border-[#29415f] text-[8px] font-black text-slate-500 dark:text-slate-300">
+                  <div className="sticky top-0 z-10 grid grid-cols-[44px_88px_100px_100px_100px_100px] bg-[#13243c] border-b border-slate-200 dark:border-[#29415f] text-[8px] font-black text-slate-500 dark:text-slate-300">
                     <div className="px-2 py-2">#</div>
                     <div className="px-2 py-2">{isBn ? "তারিখ" : "Date"}</div>
                     <div className="px-2 py-2 text-right">{isBn ? "মূল" : "Principal"}</div>
@@ -1948,7 +1948,7 @@ export default function ApplyLoan() {
                 </div>
               </div>
 
-              <div className="px-4 py-3 border-t border-slate-200 dark:border-[#29415f] bg-white dark:bg-[#0d192b] grid grid-cols-3 gap-2 text-center">
+              <div className="px-4 py-3 border-t border-slate-200 dark:border-[#29415f] bg-[#0d192b] grid grid-cols-3 gap-2 text-center">
                 <div><p className="text-[8px] text-slate-400">{isBn ? "মোট সুদ" : "Interest"}</p><p className="text-[10px] font-black text-slate-900 dark:text-white">{formatCurrency(calc.totalInterest, isBn)}</p></div>
                 <div><p className="text-[8px] text-slate-400">{isBn ? "মোট" : "Total"}</p><p className="text-[10px] font-black text-blue-700 dark:text-blue-300">{formatCurrency(calc.totalPayable, isBn)}</p></div>
                 <div><p className="text-[8px] text-slate-400">{isBn ? "ফি" : "Fees"}</p><p className="text-[10px] font-black text-emerald-700 dark:text-emerald-300">{formatCurrency(upfrontTotal, isBn)}</p></div>
@@ -3548,12 +3548,12 @@ export default function ApplyLoan() {
 
       {/* Bottom Action Bar - Compact */}
       {step > 1 && step < 5 && (
-        <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-transparent border-0 shadow-none z-40 flex justify-between gap-2">
+        <div className="fixed left-0 right-0 bottom-[88px] px-4 py-2 z-40 flex justify-between gap-2 pointer-events-none">
           {step > 1 && (
             <button
               type="button"
               onClick={prevStep}
-              className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 text-gray-700 dark:text-gray-300"
+              className="pointer-events-auto flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm bg-[#152640] border border-[#29415f] shrink-0 text-white shadow-none"
             >
               <ChevronLeft size={16} /> {isBn ? 'পিছনে' : 'Back'}
             </button>
@@ -3562,7 +3562,7 @@ export default function ApplyLoan() {
             type="button"
             onClick={nextStep}
             disabled={(step === 1 && !category) || (step === 4 && !acceptedTerms) || isSubmitting}
-            className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm bg-primary-600 hover:bg-primary-700 text-white shadow-sm shrink-0 disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:shadow-none ml-auto"
+            className="pointer-events-auto flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-500 text-white shadow-none shrink-0 disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:shadow-none ml-auto"
           >
             {isSubmitting
               ? (isBn ? 'অপেক্ষা করুন...' : 'Please wait...')
