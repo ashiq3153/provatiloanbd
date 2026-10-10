@@ -330,7 +330,7 @@ export default function ApplyLoan() {
 
   // Warnings Checklist Checklist States
   const [checkAntiFraud, setCheckAntiFraud] = useState(false);
-  const [checkNoRefund, setCheckNoRefund] = useState(false);
+  const [checkRefundPolicy, setCheckNoRefund] = useState(false);
   const [checkSavingsRule, setCheckSavingsRule] = useState(false);
   const [checkEmiObligation, setCheckEmiObligation] = useState(false);
 
@@ -3701,18 +3701,18 @@ export default function ApplyLoan() {
                       </label>
 
                       {/* Check 2 */}
-                      <label htmlFor="checkNoRefund" className="flex items-start gap-2.5 p-3 rounded-xl cursor-pointer group bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-slate-200 dark:border-slate-800">
+                      <label htmlFor="checkRefundPolicy" className="flex items-start gap-2.5 p-3 rounded-xl cursor-pointer group bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-slate-200 dark:border-slate-800">
                         <input 
-                          id="checkNoRefund"
+                          id="checkRefundPolicy"
                           type="checkbox" 
-                          checked={checkNoRefund}
+                          checked={checkRefundPolicy}
                           onChange={(e) => setCheckNoRefund(e.target.checked)}
                           className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer mt-0.5"
                         />
                         <span className="text-[11px] text-gray-600 dark:text-gray-300 font-medium leading-tight group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                           {isBn 
-                            ? 'আমি জানি যে ঋণ ফাইল রিভিউর জন্য নির্ধারিত "প্রসেসিং ফি" বাধ্যতামূলক এবং এটি সম্পূর্ণ অফেরতযোগ্য (Non-Refundable)।' 
-                            : 'I acknowledge that the required loan processing fee is mandatory and fully non-refundable.'}
+                            ? 'আমি বুঝেছি যে আবেদন প্রত্যাখ্যাত বা বাতিল হলে প্রসেসিং ফি ফেরতযোগ্য; ফেরতের অনুরোধ অ্যাপের Support পৃষ্ঠায় জানাতে হবে। ফি প্রদান ঋণ অনুমোদনের নিশ্চয়তা নয়।' 
+                            : 'I understand that the processing fee is refundable if my application is rejected or cancelled; request it through the in-app Support page. Payment does not guarantee loan approval.'}
                         </span>
                       </label>
 
@@ -3727,8 +3727,8 @@ export default function ApplyLoan() {
                         />
                         <span className="text-[11px] text-gray-600 dark:text-gray-300 font-medium leading-tight group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                           {isBn 
-                            ? 'আমি জানি লোন অনুমোদনের পর তা উত্তোলনের পূর্বে লোন অংকের ১০% / ৫% সঞ্চয় আমানত ডিপোজিট করতে হবে যা আমার একাউন্টে থাকবে।' 
-                            : 'I understand that a 10% / 5% savings deposit is required after loan approval to enable withdrawal permissions.'}
+                            ? 'আমি বুঝেছি যে অনুমোদিত সেটিংস অনুযায়ী প্রযোজ্য সঞ্চয়/সিকিউরিটি ডিপোজিট লক থাকবে এবং Available Balance-এর অংশ হবে না। ঋণের সব কিস্তি ও বকেয়া পরিশোধের পর হিসাব যাচাই করে মুক্তির যোগ্যতা নির্ধারণ করা হবে; অনুরোধ Support পৃষ্ঠায় জানাতে হবে।' 
+                            : 'I understand that the savings/security deposit rate follows approved settings, remains locked and is not part of my Available Balance. After all instalments and applicable dues are paid, release eligibility is checked; I can request this through the in-app Support page.'}
                         </span>
                       </label>
 
@@ -3759,7 +3759,7 @@ export default function ApplyLoan() {
                       {isBn ? 'বাতিল' : 'Cancel'}
                     </button>
                     <button 
-                      disabled={!checkAntiFraud || !checkNoRefund || !checkSavingsRule || !checkEmiObligation}
+                      disabled={!checkAntiFraud || !checkRefundPolicy || !checkSavingsRule || !checkEmiObligation}
                       onClick={processSmartVerification}
                       className="flex-1 py-3 rounded-xl font-bold bg-primary-600 hover:bg-primary-700 text-white shadow-sm disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:shadow-none"
                     >
@@ -4025,12 +4025,12 @@ export default function ApplyLoan() {
                 {isBn ? (
                   <div className="space-y-1.5 bg-amber-50 dark:bg-amber-950/20 p-3 rounded-2xl border border-amber-500/20 dark:border-amber-900/30 text-amber-800 dark:text-amber-300 font-medium">
                     <p className="font-bold">প্রসেসিং ফি বাধ্যতামুলক:</p>
-                    <p>ঋণ আবেদন প্রসেস করার জন্য নির্ধারিত "প্রসেসিং ফি" ডিপোজিট করা বাধ্যতামূলক। ফি প্রদান ছাড়া কোনো আবেদন রিভিউর আওতায় নেওয়া হবে না এবং এটি সম্পূর্ণ অফেরতযোগ্য।</p>
+                    <p>ঋণ আবেদন প্রসেস করার জন্য নির্ধারিত "প্রসেসিং ফি" ডিপোজিট করা বাধ্যতামূলক। পেমেন্ট যাচাই ও আবেদন রিভিউ পৃথক ধাপ। আবেদন প্রত্যাখ্যাত বা বাতিল হলে, অথবা প্রযোজ্য ক্ষেত্রে সেবা সম্পন্ন না হলে, ফি ফেরতযোগ্য। ফেরতের অনুরোধ অ্যাপের Support পৃষ্ঠা দিয়ে করতে হবে; ফি প্রদান ঋণ অনুমোদনের নিশ্চয়তা নয়।</p>
                   </div>
                 ) : (
                   <div className="space-y-1.5 bg-amber-50 dark:bg-amber-950/20 p-3 rounded-2xl border border-amber-500/20 dark:border-amber-900/30 text-amber-800 dark:text-amber-300 font-medium">
                     <p className="font-bold">Processing Fee is Mandatory:</p>
-                    <p>To begin evaluating your loan profile, the processing fee must be deposited. Unpaid files will not be reviewed. Processing fees are non-refundable.</p>
+                    <p>The applicable processing fee must be paid at the rate and amount shown in the application. Payment verification and application review are separate steps. The fee is refundable if the application is rejected or cancelled, or the service is not completed in an applicable case. Request a refund through the in-app Support page. Payment does not guarantee loan approval.</p>
                   </div>
                 )}
               </section>
