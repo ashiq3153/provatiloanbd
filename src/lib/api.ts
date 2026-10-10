@@ -371,13 +371,19 @@ export interface DashboardStats {
   totalOutstanding: number;
 }
 
-export async function getDashboardStats(chatId: number): Promise<DashboardStats> {
-  const { data, error } = await supabase.rpc('get_dashboard_stats', { p_chat_id: chatId });
-  if (error || !data) {
-    console.error('getDashboardStats error:', error);
-    throw error || new Error('Dashboard statistics are unavailable');
+export async function getDashboardStats(_chatId: number): Promise<DashboardStats> {
+  const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+  if (!initData) throw new Error('Telegram initData is missing');
+  const response = await fetch('/api/telegram-auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ initData, action: 'user', userAction: 'get_dashboard_stats' }),
+  });
+  const result = await response.json().catch(() => null);
+  if (!response.ok || result?.success !== true || !result?.data) {
+    throw new Error(result?.error || 'Dashboard statistics are unavailable');
   }
-  return data as DashboardStats;
+  return result.data as DashboardStats;
 }
 
 // ── Deposit Status Check ─────────────────────────────────
