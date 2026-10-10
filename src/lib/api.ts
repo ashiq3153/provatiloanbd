@@ -52,6 +52,15 @@ export type ProfilePersonalDetails = {
   maritalStatus?: string;
   spouseProfession?: string;
   spouseIncome?: string;
+  bankName?: string;
+  accountName?: string;
+  accountNumber?: string;
+  routingNumber?: string;
+  mobileBanking?: string;
+  nomineeName?: string;
+  nomineeRelation?: string;
+  nomineeMobile?: string;
+  nomineeNid?: string;
 };
 
 async function callProfileGateway(userAction: 'get_profile' | 'update_profile', payload?: ProfilePersonalDetails): Promise<Profile | null> {
