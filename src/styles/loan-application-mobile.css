@@ -244,3 +244,61 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* Telegram Mini App viewport + spacing normalization. Keep these rules scoped
+   to the application so the rest of the app can be redesigned in its own PR. */
+.miniapp-loan-flow {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-inline: max(0px, env(safe-area-inset-left, 0px))
+    max(0px, env(safe-area-inset-right, 0px));
+}
+
+.miniapp-loan-flow > .loan-easy-font:first-child {
+  padding-top: env(safe-area-inset-top, 0px);
+  background-clip: padding-box;
+}
+
+.miniapp-loan-flow .apply-loan-content {
+  flex: 1 0 auto;
+}
+
+.miniapp-loan-flow .apply-loan-content .grid {
+  min-width: 0;
+}
+
+.miniapp-loan-flow button,
+.miniapp-loan-flow a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.miniapp-loan-flow button:focus-visible,
+.miniapp-loan-flow a:focus-visible,
+.miniapp-loan-flow input:focus-visible,
+.miniapp-loan-flow select:focus-visible,
+.miniapp-loan-flow textarea:focus-visible {
+  outline: 2px solid var(--loan-app-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 390px) {
+  .miniapp-loan-flow .apply-loan-content {
+    padding-inline: 12px;
+    padding-bottom: calc(116px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .miniapp-loan-flow .rounded-2xl {
+    border-radius: 16px;
+  }
+
+  .miniapp-loan-flow .rounded-xl {
+    border-radius: 12px;
+  }
+}
+
+@media (max-height: 620px) {
+  .miniapp-loan-flow .apply-loan-content {
+    padding-top: 12px;
+  }
+}
