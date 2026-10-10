@@ -14,7 +14,7 @@ export default function Terms() {
   const monthlyRateLabel = (key: string, fallback: number) => {
     const configured = Number(systemSettings?.[key]);
     const rate = Number.isFinite(configured) && configured >= 0 ? configured : fallback;
-    return convertDigits((rate * 100).toFixed(2).replace(/\\.?0+$/, '') + '%', isBn);
+    return convertDigits((rate * 100).toFixed(2).replace(/\.?0+$/, '') + '%', isBn);
   };
   const loanLimitLabel = (key: string, fallback: number) => {
     const configured = Number(systemSettings?.categories?.[key]?.maxAmount);
@@ -22,7 +22,7 @@ export default function Terms() {
     return convertDigits(amount.toLocaleString('en-IN'), isBn);
   };
   const feeTiers = systemSettings?.feeTiers || {};
-  const percentLabel = (rate: number) => convertDigits((rate * 100).toFixed(2).replace(/\\.?0+$/, '') + '%', isBn);
+  const percentLabel = (rate: number) => convertDigits((rate * 100).toFixed(2).replace(/\.?0+$/, '') + '%', isBn);
   const processingFeeUpTo1m = Number(feeTiers.processingFeeUpTo1m ?? 0.01);
   const processingFeeAbove1m = Number(feeTiers.processingFeeAbove1m ?? 0.005);
   const securityDepositUpTo500k = Number(feeTiers.securityDepositUpTo500k ?? 0.1);
