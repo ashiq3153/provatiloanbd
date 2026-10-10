@@ -31,7 +31,8 @@ const getTenureText = (min: number, max: number, isBn: boolean) => {
   return isBn ? `${convertDigits(min.toString(), true)}-${convertDigits(max.toString(), true)} মাস` : `${min}-${max} months`;
 };
 
-export const getCategories = (isBn: boolean, settings?: any) => [
+export const getCategories = (isBn: boolean, settings?: any) => {
+  const categories = [
   {
     id: "personal",
     title: isBn ? "ব্যক্তিগত" : "Personal",
@@ -146,7 +147,28 @@ export const getCategories = (isBn: boolean, settings?: any) => [
     procFee: settings?.procFee ?? 0.01,
     secDeposit: settings?.secDeposit ?? 0.1,
   }
-];
+  ];
+
+  const processingUpTo1m = settings?.feeTiers?.processingFeeUpTo1m ?? 0.01;
+  const processingAbove1m = settings?.feeTiers?.processingFeeAbove1m ?? 0.005;
+  const savingsUpTo500k = settings?.feeTiers?.securityDepositUpTo500k ?? 0.10;
+  const savingsAbove500k = settings?.feeTiers?.securityDepositAbove500k ?? 0.05;
+  const rateText = (rate: number) => convertDigits((rate * 100).toFixed(2).replace(/\\.?0+$/, ''), isBn);
+  const processingFeeLabel = isBn
+    ? `${rateText(processingUpTo1m)}% (১০ লাখ পর্যন্ত) / ${rateText(processingAbove1m)}% (এর বেশি)`
+    : `${rateText(processingUpTo1m)}% (up to BDT 1m) / ${rateText(processingAbove1m)}% (above)`;
+  const securityDepositLabel = isBn
+    ? `${rateText(savingsUpTo500k)}% (৫ লাখ পর্যন্ত) / ${rateText(savingsAbove500k)}% (এর বেশি)`
+    : `${rateText(savingsUpTo500k)}% (up to BDT 500k) / ${rateText(savingsAbove500k)}% (above)`;
+
+  return categories.map(category => ({
+    ...category,
+    procFee: processingUpTo1m,
+    secDeposit: savingsUpTo500k,
+    procFeeLabel: processingFeeLabel,
+    secDepositLabel: securityDepositLabel,
+  }));
+};
 
 export const snapPoints = [12, 24, 36, 48, 60, 72, 84, 96, 120, 144, 180];
 export const amountPackages = [
