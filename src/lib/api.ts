@@ -35,6 +35,50 @@ export async function upsertProfile(profile: Partial<Profile> & { chat_id: numbe
   return data;
 }
 
+export type ProfilePersonalDetails = {
+  fullName?: string;
+  fatherName?: string;
+  motherName?: string;
+  dob?: string;
+  gender?: string;
+  mobile?: string;
+  whatsapp?: string;
+  email?: string;
+  currentAddress?: Record<string, string>;
+  permanentAddress?: Record<string, string>;
+  nidNumber?: string;
+  eTin?: string;
+  bloodGroup?: string;
+  maritalStatus?: string;
+  spouseProfession?: string;
+  spouseIncome?: string;
+};
+
+async function callProfileGateway(userAction: 'get_profile' | 'update_profile', payload?: ProfilePersonalDetails): Promise<Profile | null> {
+  // @ts-ignore Telegram WebApp is injected by Telegram at runtime.
+  const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+  if (!initData) throw new Error('Telegram initData is missing');
+
+  const response = await fetch('/api/telegram-auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ initData, action: 'user', userAction, payload }),
+  });
+  const result = await response.json().catch(() => null);
+  if (!response.ok || !result?.ok || !result?.data) {
+    throw new Error(result?.error || 'Profile request failed');
+  }
+  return result.data as Profile;
+}
+
+export async function getMyProfile(): Promise<Profile | null> {
+  return callProfileGateway('get_profile');
+}
+
+export async function updateMyProfile(details: ProfilePersonalDetails): Promise<Profile | null> {
+  return callProfileGateway('update_profile', details);
+}
+
 // ── Loan Application APIs ────────────────────────────────
 
 export async function submitLoanApplication(application: Omit<LoanApplication, 'id' | 'applied_at' | 'approved_at' | 'admin_feedback' | 'status'>): Promise<LoanApplication | null> {
