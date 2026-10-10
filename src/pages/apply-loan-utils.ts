@@ -153,7 +153,7 @@ export const getCategories = (isBn: boolean, settings?: any) => {
   const processingAbove1m = settings?.feeTiers?.processingFeeAbove1m ?? 0.005;
   const savingsUpTo500k = settings?.feeTiers?.securityDepositUpTo500k ?? 0.10;
   const savingsAbove500k = settings?.feeTiers?.securityDepositAbove500k ?? 0.05;
-  const rateText = (rate: number) => convertDigits((rate * 100).toFixed(2).replace(/\\.?0+$/, ''), isBn);
+  const rateText = (rate: number) => convertDigits((rate * 100).toFixed(2).replace(/\.?0+$/, ''), isBn);
   const processingFeeLabel = isBn
     ? `${rateText(processingUpTo1m)}% (১০ লাখ পর্যন্ত) / ${rateText(processingAbove1m)}% (এর বেশি)`
     : `${rateText(processingUpTo1m)}% (up to BDT 1m) / ${rateText(processingAbove1m)}% (above)`;
