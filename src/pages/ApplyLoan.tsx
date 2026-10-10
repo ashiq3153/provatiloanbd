@@ -3346,7 +3346,8 @@ export default function ApplyLoan() {
     const calculation = getLoanCalculation();
     const requirements = getLoanDocumentRequirements(category?.id || 'personal');
     const missingRequired = getMissingRequiredDocuments(category?.id || 'personal', documents);
-    const uploadedCount = requirements.filter(d => Boolean(documents[d.key])).length;
+    const uploadedRequiredCount = requirements.filter(d => d.required && Boolean(documents[d.key])).length;
+    const uploadedOptionalCount = requirements.filter(d => !d.required && Boolean(documents[d.key])).length;
     const requiredCount = requirements.filter(d => d.required).length;
     const currentAddressLabel = [
       currentAddress.village, currentAddress.union, currentAddress.upazila,
@@ -3479,12 +3480,15 @@ export default function ApplyLoan() {
             <CheckCircle2 size={20} className="text-emerald-600 dark:text-emerald-300 shrink-0" />
             <div>
               <p className="text-sm font-bold text-gray-900 dark:text-white">
-                {convertDigits(uploadedCount, isBn)} / {convertDigits(requiredCount, isBn)} {isBn ? 'প্রয়োজনীয় তালিকার ডকুমেন্ট আপলোড' : 'documents uploaded'}
+                {convertDigits(uploadedRequiredCount, isBn)} / {convertDigits(requiredCount, isBn)} {isBn ? 'বাধ্যতামূলক ডকুমেন্ট আপলোড' : 'required documents uploaded'}
               </p>
               <p className="text-[11px] text-gray-500 dark:text-gray-400">
                 {missingRequired.length === 0
                   ? (isBn ? 'সব বাধ্যতামূলক ডকুমেন্ট পাওয়া গেছে।' : 'All required documents are present.')
                   : (isBn ? 'কিছু বাধ্যতামূলক ডকুমেন্ট বাকি আছে।' : 'Some required documents are missing.')}
+                {uploadedOptionalCount > 0 && (
+                  <span className="block mt-1">{isBn ? `ঐচ্ছিক আপলোড: ${convertDigits(uploadedOptionalCount, isBn)}টি` : `Optional files uploaded: ${uploadedOptionalCount}`}</span>
+                )}
               </p>
             </div>
           </div>
@@ -3495,32 +3499,29 @@ export default function ApplyLoan() {
           )}
         </section>
 
-      {/* Terms and Declaration Checkbox */}
-      <label htmlFor="acceptedTerms" className="flex items-start gap-3 p-4 rounded-2xl cursor-pointer group mt-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800">
-        <div className="pt-0.5">
-          <input 
+        <div className="flex items-start gap-3 p-4 rounded-2xl mt-4 bg-slate-50 dark:bg-[#192c27] border border-slate-200 dark:border-[#30453d]">
+          <input
             id="acceptedTerms"
-            type="checkbox" 
+            type="checkbox"
             checked={acceptedTerms}
             onChange={(e) => setAcceptedTerms(e.target.checked)}
-            className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
+            className="w-5 h-5 mt-0.5 rounded border-gray-300 text-emerald-700 focus:ring-emerald-600 cursor-pointer shrink-0"
           />
+          <div className="min-w-0 space-y-2">
+            <label htmlFor="acceptedTerms" className="block text-sm text-gray-700 dark:text-gray-200 font-medium leading-relaxed cursor-pointer">
+              {isBn
+                ? 'আমি ঘোষণা করছি যে আমার দেওয়া তথ্য সঠিক এবং ঋণের শর্তাবলী ও কর্তৃপক্ষের সিদ্ধান্ত মেনে নিচ্ছি।'
+                : "I declare that the information provided is correct and agree to the loan terms and the authority's approval decision."}
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowTermsModal(true)}
+              className="text-sm font-bold text-emerald-700 dark:text-emerald-300 underline underline-offset-2"
+            >
+              {isBn ? 'শর্তাবলী পড়ুন' : 'Read terms and conditions'}
+            </button>
+          </div>
         </div>
-        <p className="text-xs text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
-          I declare that all provided information is correct. I agree to the{" "}
-          <button 
-            type="button" 
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent toggling the checkbox when clicking the terms link
-              setShowTermsModal(true);
-            }} 
-            className="text-primary-600 font-bold hover:underline bg-transparent border-none p-0 inline cursor-pointer"
-          >
-            {isBn ? "শর্তাবলীতে" : "Terms & Conditions"}
-          </button>
-          {isBn ? " সম্মত আছি এবং লোন অনুমোদনের ক্ষেত্রে Authorities এর সিদ্ধান্ত চূড়ান্ত বলে গণ্য হবে।" : " and authority decision will be considered final regarding loan approval."}
-        </p>
-      </label>
 
         {missingRequired.length > 0 && (
           <p className="text-xs text-amber-800 dark:text-amber-200">
