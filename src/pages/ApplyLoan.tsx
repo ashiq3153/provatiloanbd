@@ -3351,7 +3351,7 @@ export default function ApplyLoan() {
     const requiredCount = requirements.filter(d => d.required).length;
     const currentAddressLabel = [
       currentAddress.village, currentAddress.union, currentAddress.upazila,
-      currentAddress.district, currentAddress.division, currentAddress.postCode,
+      currentAddress.district, currentAddress.postCode,
     ].filter(Boolean).join(', ');
     const bankEnding = String(formData.accountNumber || '').slice(-4);
     const maskedNid = formData.nidNumber ? '•••• ' + String(formData.nidNumber).slice(-4) : '—';
