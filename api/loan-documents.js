@@ -105,7 +105,7 @@ export function normalizeStorageMap(value, expectedChatId, supabaseUrl, options 
 
   const normalized = {};
   for (const [key, reference] of Object.entries(value)) {
-    if (!/^[A-Za-z0-9_-]{1,80}$/.test(key)) {
+    if (!/^[A-Za-z0-9_-]{1,80}$/.test(key) || ["__proto__", "prototype", "constructor"].includes(key)) {
       throw new Error("Invalid document key");
     }
     if (reference == null || reference === "") continue;
