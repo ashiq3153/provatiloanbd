@@ -202,8 +202,11 @@ async function createMyTransaction(telegramUser, payload) {
   const chatId = Number(telegramUser?.id);
   if (!chatId || !payload || typeof payload !== "object") throw new Error("Invalid transaction request");
 
-  const type = String(payload.type || "");
-  if (!["deposit", "withdraw", "emi"].includes(type)) throw new Error("Unsupported transaction type");
+  const requestedType = String(payload.type || "");
+  // Database and browser types use "emi_payment"; keep accepting the historical
+  // short alias but persist one canonical value for history and reconciliation.
+  const type = requestedType === "emi" ? "emi_payment" : requestedType;
+  if (!["deposit", "withdraw", "emi_payment"].includes(type)) throw new Error("Unsupported transaction type");
 
   const amount = Number(payload.amount);
   if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid transaction amount");
