@@ -126,6 +126,20 @@ async function getMyLoanApplications(telegramUser) {
   return data || [];
 }
 
+async function getMyLoanApplicationById(telegramUser, applicationId) {
+  const db = adminClient();
+  const chatId = Number(telegramUser?.id);
+  const id = String(applicationId || "").trim();
+  if (!chatId || !id) throw new Error("Invalid loan application lookup");
+  const { data, error } = await db.from("loan_applications")
+    .select("*")
+    .eq("id", id)
+    .eq("chat_id", chatId)
+    .maybeSingle();
+  if (error) throw error;
+  return data || null;
+}
+
 async function updateMyLoanApplication(telegramUser, applicationId, payload) {
   const db = adminClient();
   const chatId = Number(telegramUser?.id);
@@ -456,6 +470,10 @@ export default async function handler(req, res) {
     }
     if (req.body?.action === "loan" && req.body?.loanAction === "get_my_loans") {
       const data = await getMyLoanApplications(result.user);
+      return res.status(200).json({ ok: true, data });
+    }
+    if (req.body?.action === "loan" && req.body?.loanAction === "get_my_loan") {
+      const data = await getMyLoanApplicationById(result.user, req.body.loanId);
       return res.status(200).json({ ok: true, data });
     }
     if (req.body?.action === "loan" && req.body?.loanAction === "update") {
