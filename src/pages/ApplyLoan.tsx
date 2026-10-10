@@ -36,7 +36,7 @@ import { AddressSelector, AddressValue, emptyAddress, serializeAddress } from ".
 import "../loan-application-redesign.css";
 
 import { getCategories, snapPoints, amountPackages, formatAmount, getAllowedTenure, getColorStyles, getIconColor } from "./apply-loan-utils";
-import { calculateLoan } from "../lib/finance";
+import { calculateLoan, getLoanFeeRates } from "../lib/finance";
 import { getLoanDocumentRequirements, getMissingRequiredDocuments } from "../lib/loan-document-requirements";
 
 const ErrorText = ({ field }: { field: keyof LoanFormData }) => {
@@ -572,16 +572,19 @@ export default function ApplyLoan() {
     if (tenure > maxAllowed) setTenure(maxAllowed);
   };
 
-  const getLoanCalculation = () => calculateLoan({
-    principal: amount,
-    monthlyRate: category?.minRate || 0,
-    tenureMonths: tenure,
-    processingFeeRate: systemSettings?.procFee || 0.01,
-    securityDepositRate: systemSettings?.secDeposit || 0.1,
-    insuranceRate: systemSettings?.insuranceRate || 0,
-    insuranceEnabled: !!systemSettings?.insuranceEnabled,
-    method: "flat",
-  });
+  const getLoanCalculation = () => {
+    const feeRates = getLoanFeeRates(amount, systemSettings);
+    return calculateLoan({
+      principal: amount,
+      monthlyRate: category?.minRate || 0,
+      tenureMonths: tenure,
+      processingFeeRate: feeRates.processingFeeRate,
+      securityDepositRate: feeRates.securityDepositRate,
+      insuranceRate: systemSettings?.insuranceRate || 0,
+      insuranceEnabled: !!systemSettings?.insuranceEnabled,
+      method: "flat",
+    });
+  };
 
   const calculateEMI = () => getLoanCalculation().emi;
 
@@ -1192,8 +1195,8 @@ export default function ApplyLoan() {
         tenure_months: tenure,
         interest_rate: category?.minRate || 0,
         emi_amount: calculateEMI(),
-        processing_fee: amount * (systemSettings?.procFee || 0.01),
-        security_deposit: amount * (systemSettings?.secDeposit || 0.1),
+        processing_fee: getLoanCalculation().processingFee,
+        security_deposit: getLoanCalculation().securityDeposit,
         full_name: formData.fullName,
         father_name: formData.fatherName,
         mother_name: formData.motherName,
