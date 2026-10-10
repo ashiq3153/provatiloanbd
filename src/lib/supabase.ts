@@ -26,12 +26,23 @@ export const supabase = createClient<any>(
  * Establishes a Supabase Auth identity before any user-scoped database work.
  * Anonymous Auth is used because Telegram is the product identity; the server
  * securely bridges the verified Telegram ID to this Supabase Auth user.
+ *
+ * Calls made concurrently during app startup share one sign-in request. This
+ * avoids creating two anonymous users and then racing to bind Telegram to them.
  */
+let anonymousSessionPromise: ReturnType<typeof supabase.auth.signInAnonymously> | null = null;
+
 export async function ensureSupabaseAuthSession() {
   const { data: existing } = await supabase.auth.getSession();
   if (existing.session) return existing.session;
 
-  const { data, error } = await supabase.auth.signInAnonymously();
+  if (!anonymousSessionPromise) {
+    anonymousSessionPromise = supabase.auth.signInAnonymously().finally(() => {
+      anonymousSessionPromise = null;
+    });
+  }
+
+  const { data, error } = await anonymousSessionPromise;
   if (error || !data.session) {
     throw error || new Error('Unable to establish Supabase Auth session');
   }
