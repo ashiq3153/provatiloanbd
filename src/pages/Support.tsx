@@ -36,8 +36,12 @@ export default function Support(){
    </div>
    <div className="grid grid-cols-2 gap-2.5">
     {contacts.map(c=>{
-      const enabled=Boolean(c.url?.trim());
-      return <a key={c.key} href={enabled?c.url:undefined} target={enabled?'_blank':undefined} rel={enabled?'noopener noreferrer':undefined} aria-disabled={!enabled}
+      const configuredUrl = c.url?.trim();
+      const href = c.key === 'emailSupport' && configuredUrl && !/^(mailto:|https?:\\/\\/)/i.test(configuredUrl)
+        ? `mailto:${configuredUrl}`
+        : configuredUrl;
+      const enabled=Boolean(href);
+      return <a key={c.key} href={enabled?href:undefined} target={enabled && !href?.startsWith('mailto:')?'_blank':undefined} rel={enabled && !href?.startsWith('mailto:')?'noopener noreferrer':undefined} aria-disabled={!enabled}
         className={`support-contact-card ${c.key} rounded-2xl border px-3 py-2.5 flex items-center gap-2.5 min-h-[72px] transition-all ${c.bg} ${c.tone} ${enabled?'active:scale-[.97] cursor-pointer hover:shadow-md':'cursor-not-allowed opacity-75'}`}>
         <span className="support-contact-icon shrink-0 w-10 h-10 rounded-xl flex items-center justify-center">{c.icon}</span>
         <span className="min-w-0">
