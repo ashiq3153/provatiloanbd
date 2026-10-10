@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase, ensureSupabaseAuthSession } from './supabase';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../types/database';
 
 type AdminAction =
@@ -34,15 +34,15 @@ async function callAdmin<T>(adminAction: AdminAction, payload: Record<string, un
     throw new Error('Admin gateway: Telegram initData is missing');
   }
 
-  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-  if (sessionError || !sessionData.session?.access_token) {
+  const session = await ensureSupabaseAuthSession();
+  if (!session?.access_token) {
     throw new Error('Admin gateway: authenticated session is missing');
   }
 
   const response = await fetch('/api/telegram-auth', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ initData, accessToken: sessionData.session.access_token, action: 'admin', adminAction, payload }),
+    body: JSON.stringify({ initData, accessToken: session.access_token, action: 'admin', adminAction, payload }),
   });
   const result = await response.json().catch(() => null);
   if (!response.ok || !result?.ok) {
