@@ -100,9 +100,8 @@ test("normalizes an application document map while keeping only object paths", (
 });
 
 test("rejects unsafe object keys and foreign-user document references in a map", () => {
-  assert.throws(() => normalizeStorageMap({
-    "__proto__": "12345/file.png",
-  }, chatId, projectUrl), /Invalid document key/);
+  const prototypeKeyMap = JSON.parse('{"__proto__":"12345/file.png"}');
+  assert.throws(() => normalizeStorageMap(prototypeKeyMap, chatId, projectUrl), /Invalid document key/);
   assert.throws(() => normalizeStorageMap({
     nid_front: "99999/private.png",
   }, chatId, projectUrl), /does not belong/);
