@@ -3,6 +3,7 @@
  */
 import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import { normalizeStoryReaction } from "./story-reactions.js";
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const ADMIN_BOT_TOKEN = process.env.TELEGRAM_ADMIN_BOT_TOKEN;
@@ -437,6 +438,20 @@ export default async function handler(req, res) {
     if (req.body?.accessToken) {
       const bridged = await bridgeIdentity(Number(result.user.id), req.body.accessToken);
       if (!bridged) return res.status(401).json({ ok: false, error: "Supabase identity binding failed" });
+    }
+    if (req.body?.action === "story_reaction") {
+      const storyId = String(req.body?.payload?.storyId || "");
+      const reactionType = normalizeStoryReaction(req.body?.payload?.reactionType);
+      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidPattern.test(storyId) || !reactionType) {
+        return res.status(400).json({ ok: false, error: "Invalid success-story reaction" });
+      }
+      const { data, error } = await adminClient().rpc("increment_success_story_reaction", {
+        p_story_id: storyId,
+        p_reaction_type: reactionType,
+      });
+      if (error) throw error;
+      return res.status(200).json({ ok: true, count: data });
     }
     if (req.body?.action === "sync_profile") {
       const data = await syncProfile(result.user);
