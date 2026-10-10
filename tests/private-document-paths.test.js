@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { normalizeStorageReference, splitStorageReference } from "../api/loan-documents.js";
+import { normalizeStorageReference, normalizeStorageMap, splitStorageReference } from "../api/loan-documents.js";
 
 const projectUrl = "https://example-project.supabase.co";
 const chatId = 12345;
@@ -85,4 +85,25 @@ test("rejects URLs that are not an allowed Supabase Storage object URL", () => {
     /Unsupported Supabase Storage URL/,
   );
   assert.throws(() => splitStorageReference("unknown_bucket/12345/file.pdf"), /Unsupported storage bucket/);
+});
+
+test("normalizes an application document map while keeping only object paths", () => {
+  const normalized = normalizeStorageMap({
+    nid_front: projectUrl + "/storage/v1/object/sign/loan_documents/" + objectPath + "?token=ephemeral",
+    nid_back: "loan_documents/12345/1729000000001_nid_back.png",
+    optional: null,
+  }, chatId, projectUrl);
+  assert.deepEqual(normalized, {
+    nid_front: "loan_documents/" + objectPath,
+    nid_back: "loan_documents/12345/1729000000001_nid_back.png",
+  });
+});
+
+test("rejects unsafe object keys and foreign-user document references in a map", () => {
+  assert.throws(() => normalizeStorageMap({
+    "__proto__": "12345/file.png",
+  }, chatId, projectUrl), /Invalid document key/);
+  assert.throws(() => normalizeStorageMap({
+    nid_front: "99999/private.png",
+  }, chatId, projectUrl), /does not belong/);
 });
