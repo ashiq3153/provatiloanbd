@@ -265,31 +265,31 @@ export async function getSuccessStories(): Promise<SuccessStory[]> {
 }
 
 export async function reactToSuccessStory(storyId: string, reactionType: string): Promise<boolean> {
-  const { data, error: fetchError } = await supabase
-    .from('success_stories')
-    .select('*')
-    .eq('id', storyId)
-    .single();
+  try {
+    // Reaction counts are incremented atomically by a server-only database
+    // function. The client never writes arbitrary success_stories columns.
+    // @ts-ignore
+    const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+    if (!initData) throw new Error('Telegram initData is missing');
 
-  if (fetchError || !data) {
-    console.error('reactToSuccessStory fetch error:', fetchError);
+    const response = await fetch('/api/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        initData,
+        action: 'story_reaction',
+        payload: { storyId, reactionType },
+      }),
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result?.ok) {
+      throw new Error(result?.error || 'Could not add reaction');
+    }
+    return true;
+  } catch (error) {
+    console.error('reactToSuccessStory gateway error:', error);
     return false;
   }
-
-  const column = `${reactionType}_count`;
-  const currentCount = (data as any)[column] || 0;
-
-  const { error: updateError } = await supabase
-    .from('success_stories')
-    .update({ [column]: currentCount + 1 })
-    .eq('id', storyId);
-
-  if (updateError) {
-    console.error('reactToSuccessStory update error:', updateError);
-    return false;
-  }
-
-  return true;
 }
 
 // ── Document Upload API ──────────────────────────────────
