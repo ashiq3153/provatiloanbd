@@ -145,9 +145,12 @@ export default function App() {
 
     // Uses the direct RLS-scoped read (safe: system_settings no longer stores
     // secrets), so this works for every authenticated user, not just admins.
-    getPublicSettings('global_loan_config').then(settings => {
-      if (settings) setSystemSettings(settings);
-    });
+    ensureSupabaseAuthSession()
+      .then(() => getPublicSettings('global_loan_config'))
+      .then(settings => {
+        if (settings !== null) setSystemSettings(settings);
+      })
+      .catch(err => console.error('Global settings load error:', err));
 
     return () => {
       if (presenceChannel) supabase.removeChannel(presenceChannel);
