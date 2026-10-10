@@ -7,6 +7,10 @@ on:
   pull_request:
     branches:
       - main
+      - v1.1-phase1
+
+permissions:
+  contents: read
 
 jobs:
   build:
