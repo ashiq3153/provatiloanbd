@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { getTelegramUser } from "../lib/telegram";
-import { submitLoanApplication, getLoanApplicationById, updateLoanApplication, checkDuplicateApplication, uploadDocument } from "../lib/api";
+import { submitLoanApplication, getLoanApplicationById, updateLoanApplication, checkDuplicateApplication, uploadDocument, getMyProfile } from "../lib/api";
 import { supabase } from "../lib/supabase";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -312,6 +312,7 @@ export default function ApplyLoan() {
   const [detailsCategoryId, setDetailsCategoryId] = useState<string | null>(null);
   const [showRepaymentSchedule, setShowRepaymentSchedule] = useState(false);
   const [repaymentStartDate, setRepaymentStartDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const profilePrefillDone = useRef(false);
 
   // Structured address states
   const [currentAddress, setCurrentAddress] = useState<AddressValue>(emptyAddress());
@@ -559,6 +560,54 @@ export default function ApplyLoan() {
           localStorage.removeItem(draftStorageKey);
         }
       }
+    }
+
+    // Prefill shared personal information only for a new application. Existing
+    // applications keep their saved data, and an in-progress draft is never overwritten.
+    if (!edit && !profilePrefillDone.current) {
+      profilePrefillDone.current = true;
+      getMyProfile().then(profile => {
+        if (!profile) return;
+        const currentValues = methods.getValues();
+        if (currentValues.fullName || currentValues.mobile || currentValues.nidNumber || currentValues.fatherName) return;
+
+        const saved = (profile.personal_details || {}) as Record<string, any>;
+        const toAddress = (candidate: unknown, legacyText?: string | null): AddressValue => {
+          let source = candidate;
+          if (typeof source === 'string') {
+            try { source = JSON.parse(source); } catch { source = null; }
+          }
+          if (source && typeof source === 'object' && !Array.isArray(source)) {
+            return { ...emptyAddress(), ...(source as Partial<AddressValue>) };
+          }
+          if (legacyText?.trim()) return { ...emptyAddress(), village: legacyText.trim() };
+          return emptyAddress();
+        };
+        const fullNameFromTelegram = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
+        const savedCurrentAddress = toAddress(saved.currentAddress, profile.address);
+        const savedPermanentAddress = toAddress(saved.permanentAddress);
+        methods.reset({
+          ...currentValues,
+          fullName: String(saved.fullName || fullNameFromTelegram || ''),
+          fatherName: String(saved.fatherName || ''),
+          motherName: String(saved.motherName || ''),
+          dob: String(saved.dob || ''),
+          gender: String(saved.gender || ''),
+          mobile: String(saved.mobile || profile.phone || ''),
+          whatsapp: String(saved.whatsapp || ''),
+          email: String(saved.email || ''),
+          currentAddress: savedCurrentAddress,
+          permanentAddress: savedPermanentAddress,
+          nidNumber: String(saved.nidNumber || profile.nid_number || ''),
+          eTin: String(saved.eTin || ''),
+          bloodGroup: String(saved.bloodGroup || ''),
+          maritalStatus: String(saved.maritalStatus || ''),
+          spouseProfession: String(saved.spouseProfession || ''),
+          spouseIncome: String(saved.spouseIncome || ''),
+        });
+        setCurrentAddress(savedCurrentAddress);
+        setPermanentAddress(savedPermanentAddress);
+      }).catch(error => console.error('Loan form profile prefill failed:', error));
     }
   }, [location.search, categories]);
 
