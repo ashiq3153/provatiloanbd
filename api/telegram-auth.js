@@ -359,8 +359,10 @@ const ADMIN_ACTION_ROLES = {
   get_profiles: ["owner","admin","support","viewer","finance"],
   get_loans: ["owner","admin","support","viewer","finance"],
   get_transactions: ["owner","admin","finance","viewer"],
-  get_loan_document_url: ["owner","admin","support","viewer"],
-  get_transaction_screenshot_url: ["owner","admin","finance","viewer"],
+  // Identity and loan evidence is restricted to roles that need to review it.
+  // A generic read-only viewer can see summary fields but not raw private documents.
+  get_loan_document_url: ["owner","admin","support"],
+  get_transaction_screenshot_url: ["owner","admin","finance"],
   get_success_stories: ["owner","admin","support","viewer"],
   get_system_setting: ["owner","admin","finance","support","viewer"],
   get_admin_role: ["owner","admin","finance","support","viewer"],
