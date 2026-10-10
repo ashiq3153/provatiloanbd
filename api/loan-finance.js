@@ -23,6 +23,7 @@ export function calculateAuthoritativeLoan({
   settings,
   rateVersion,
   allowDisabledCategory = false,
+  existingTerms = null,
 }) {
   const categoryId = String(category || "").trim();
 
@@ -40,24 +41,42 @@ export function calculateAuthoritativeLoan({
     throw new Error("Loan amount must be a whole BDT amount of at least 50000");
   }
 
-  const maxAmount = Number(categorySettings.maxAmount);
-  if (!Number.isSafeInteger(maxAmount) || maxAmount < MIN_LOAN_AMOUNT || principal > maxAmount) {
-    throw new Error("Loan amount is outside the configured category limit");
-  }
-
   const months = Number(tenureMonths);
   const minTenure = Number(categorySettings.minTenure);
   const maxTenure = Number(categorySettings.maxTenure);
-  if (
-    !Number.isSafeInteger(months) ||
-    !Number.isSafeInteger(minTenure) ||
-    !Number.isSafeInteger(maxTenure) ||
-    minTenure < 1 ||
-    maxTenure < minTenure ||
-    months < minTenure ||
-    months > maxTenure
-  ) {
-    throw new Error("Loan tenure is outside the configured category limit");
+  const isExistingDisabledCategory =
+    categorySettings.enabled === false && allowDisabledCategory === true;
+
+  if (isExistingDisabledCategory) {
+    // Existing applicants must be able to correct personal data/documents even
+    // if an administrator later disables the product or edits its new-loan
+    // limits. Do not allow a disabled product's amount/tenure to be changed.
+    if (
+      !existingTerms ||
+      principal !== Number(existingTerms.amount) ||
+      months !== Number(existingTerms.tenureMonths)
+    ) {
+      throw new Error("Loan amount and tenure cannot be changed for a disabled category");
+    }
+    if (!Number.isSafeInteger(months) || months < 1 || months > 240) {
+      throw new Error("Existing loan tenure is invalid");
+    }
+  } else {
+    const maxAmount = Number(categorySettings.maxAmount);
+    if (!Number.isSafeInteger(maxAmount) || maxAmount < MIN_LOAN_AMOUNT || principal > maxAmount) {
+      throw new Error("Loan amount is outside the configured category limit");
+    }
+    if (
+      !Number.isSafeInteger(months) ||
+      !Number.isSafeInteger(minTenure) ||
+      !Number.isSafeInteger(maxTenure) ||
+      minTenure < 1 ||
+      maxTenure < minTenure ||
+      months < minTenure ||
+      months > maxTenure
+    ) {
+      throw new Error("Loan tenure is outside the configured category limit");
+    }
   }
 
   if (!rateVersion?.id || rateVersion.monthly_rate == null) {
