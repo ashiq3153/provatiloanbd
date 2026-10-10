@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, Copy, ArrowLeft, Edit2, Lock, Unlock, ThumbsUp, Heart, MessageCircle } from 'lucide-react';
-import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, sendAdminTelegramMessage, broadcastAdminTelegramMessage, getFinancialReconciliationReport, getKycReviewQueue, updateKycReview } from '../../lib/adminApi';
+import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, sendAdminTelegramMessage, broadcastAdminTelegramMessage, getFinancialReconciliationReport, getKycReviewQueue, updateKycReview, setAdminPresence } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
 import { useAppStore } from '../../lib/store';
@@ -341,17 +341,21 @@ export default function AdminDashboard() {
   // ── Admin Online Presence ──────────────────────────────────────────────
   useEffect(() => {
     const setOnline = async () => {
-      await supabase
-        .from('admin_status')
-        .update({ is_online: true, last_seen: new Date().toISOString(), updated_at: new Date().toISOString() })
-        .eq('id', 1);
+      try {
+        const saved = await setAdminPresence(true);
+        if (!saved) console.warn('Admin presence heartbeat was not saved.');
+      } catch (error) {
+        console.warn('Admin presence heartbeat failed:', error);
+      }
     };
 
     const setOffline = async () => {
-      await supabase
-        .from('admin_status')
-        .update({ is_online: false, last_seen: new Date().toISOString(), updated_at: new Date().toISOString() })
-        .eq('id', 1);
+      try {
+        const saved = await setAdminPresence(false);
+        if (!saved) console.warn('Admin offline state was not saved.');
+      } catch (error) {
+        console.warn('Admin offline state update failed:', error);
+      }
     };
 
     // Mark online immediately
