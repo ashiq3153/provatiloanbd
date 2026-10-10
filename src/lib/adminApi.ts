@@ -24,20 +24,19 @@ type AdminAction =
   | 'broadcast_telegram_message'
   | 'get_financial_report'
   | 'get_kyc_queue'
-  | 'update_kyc_review';
+  | 'update_kyc_review'
+  | 'set_admin_status';
 
-async function callAdmin<T>(adminAction: AdminAction, payload: Record<string, unknown> = {}): Promise<T | null> {
+async function callAdmin<T>(adminAction: AdminAction, payload: Record<string, unknown> = {}): Promise<T> {
   const telegramWebApp = (window as Window & { Telegram?: { WebApp?: { initData?: string } } }).Telegram?.WebApp;
   const initData = telegramWebApp?.initData;
   if (!initData) {
-    console.error('Admin gateway: Telegram initData is missing');
-    return null;
+    throw new Error('Admin gateway: Telegram initData is missing');
   }
 
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
   if (sessionError || !sessionData.session?.access_token) {
-    console.error('Admin gateway: authenticated session is missing', sessionError);
-    return null;
+    throw new Error('Admin gateway: authenticated session is missing');
   }
 
   const response = await fetch('/api/telegram-auth', {
@@ -47,8 +46,7 @@ async function callAdmin<T>(adminAction: AdminAction, payload: Record<string, un
   });
   const result = await response.json().catch(() => null);
   if (!response.ok || !result?.ok) {
-    console.error('Admin gateway request failed:', result?.error || response.statusText);
-    return null;
+    throw new Error(result?.error || response.statusText || 'Admin gateway request failed');
   }
   return result.data as T;
 }
@@ -94,4 +92,13 @@ export async function getKycReviewQueue(): Promise<any[]> {
 
 export async function updateKycReview(id: string, status: 'under_review' | 'verified' | 'rejected' | 'needs_revision', reviewerNote?: string): Promise<boolean> {
   return (await callAdmin<boolean>('update_kyc_review', { reviewId: id, status, reviewerNote })) === true;
+}
+
+
+/**
+ * Updates the singleton admin presence record through the verified server gateway.
+ * The browser must not write directly to admin_status because that table is read-only for clients.
+ */
+export async function setAdminPresence(isOnline: boolean): Promise<boolean> {
+  return (await callAdmin<boolean>('set_admin_status', { isOnline })) === true;
 }
