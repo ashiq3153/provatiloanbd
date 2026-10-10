@@ -388,10 +388,23 @@ export default function AdminDashboard() {
       setLoans(l);
       setTransactions(t);
       setStories(s);
-      try { setFinancialReport(await getFinancialReconciliationReport()); } catch { setFinancialReport(null); }
-      try { setKycReviews(await getKycReviewQueue()); } catch { setKycReviews([]); }
+      try {
+        setFinancialReport(await getFinancialReconciliationReport());
+      } catch (err) {
+        console.error('Failed to load financial reconciliation report:', err);
+        setFinancialReport(null);
+        toast.error('Financial report could not be loaded. Please retry.');
+      }
+      try {
+        setKycReviews(await getKycReviewQueue());
+      } catch (err) {
+        console.error('Failed to load KYC review queue:', err);
+        setKycReviews([]);
+        toast.error('KYC queue could not be loaded. Please retry.');
+      }
     } catch (err) {
-      toast.error('Failed to load admin data');
+      console.error('Failed to load admin dashboard data:', err);
+      toast.error('Admin data could not be loaded. Please retry.');
     } finally {
       setLoading(false);
     }
