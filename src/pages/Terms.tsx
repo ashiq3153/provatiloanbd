@@ -402,8 +402,8 @@ export default function Terms() {
                   </h4>
                   <p className="leading-relaxed">
                     {isBn 
-                      ? 'উত্তরঃ প্রসেসিং ফি ১% (১০ লাখ টাকার উপরে ০.৫%) যা অফেরতযোগ্য। সঞ্চয় আমানত ১০% (৫ লাখ টাকার উপরে ৫%) যা আপনার অ্যাকাউন্টে জমা থাকে এবং উত্তোলনের পরও সুরক্ষিত থাকে।' 
-                      : 'A: Processing fee is 1% (0.5% above 1M BDT) and is non-refundable. Savings deposit is 10% (5% above 500k BDT) which remains locked and fully visible in your savings balance.'}
+                      ? `উত্তরঃ প্রসেসিং ফি ${percentLabel(processingFeeUpTo1m)} (১০ লাখ টাকার উপরে ${percentLabel(processingFeeAbove1m)}) যা অফেরতযোগ্য। সঞ্চয় আমানত ${percentLabel(securityDepositUpTo500k)} (৫ লাখ টাকার উপরে ${percentLabel(securityDepositAbove500k)}) যা আপনার অ্যাকাউন্টে জমা থাকে এবং উত্তোলনের পরও সুরক্ষিত থাকে।` 
+                      : `A: Processing fee is ${percentLabel(processingFeeUpTo1m)} (${percentLabel(processingFeeAbove1m)} above BDT 1M) and is non-refundable. Savings deposit is ${percentLabel(securityDepositUpTo500k)} (${percentLabel(securityDepositAbove500k)} above BDT 500K) and remains visible in your savings balance.`}
                   </p>
                 </div>
                 
