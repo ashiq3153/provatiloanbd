@@ -6,6 +6,7 @@ import { useAppStore } from '../lib/store';
 import { toast } from 'sonner';
 import { getTelegramUser } from '../lib/telegram';
 import { createTransaction, uploadDocument, getLoanApplications, getDashboardStats, getTransactions } from '../lib/api';
+import { getLoanFeeRates } from '../lib/finance';
 
 import bkashLogo from '../assets/bkash.png';
 import nagadLogo from '../assets/nagad.png';
@@ -66,27 +67,12 @@ export default function Deposit() {
     }
   }, [user]);
 
-  // Charges calculations
+  // Shared fee schedule — keep the Deposit screen aligned with Terms,
+  // the loan calculator and the rates configured in the admin settings.
   const loanAmtNum = Number(loanAmount) || 0;
-  
-  // Processing Fee:
-  // 50,000 BDT to 10 Lakh BDT (1,000,000) = 1%
-  // 10 Lakh BDT up to 50 Lakh BDT (5,000,000) = 0.5%
-  let calculatedProcessingFee = 0;
-  if (loanAmtNum >= 50000) {
-    if (loanAmtNum <= 1000000) {
-      calculatedProcessingFee = loanAmtNum * 0.01;
-    } else if (loanAmtNum <= 5000000) {
-      calculatedProcessingFee = loanAmtNum * 0.005;
-    }
-  }
-
-  // Savings Deposit (formerly security deposit):
-  // FIXED at 10% for all amounts from 50k to 50 Lakh BDT (5,000,000)
-  let calculatedSavingsDeposit = 0;
-  if (loanAmtNum >= 50000 && loanAmtNum <= 5000000) {
-    calculatedSavingsDeposit = loanAmtNum * 0.10;
-  }
+  const feeRates = getLoanFeeRates(loanAmtNum, systemSettings);
+  const calculatedProcessingFee = Math.round(loanAmtNum * feeRates.processingFeeRate * 100) / 100;
+  const calculatedSavingsDeposit = Math.round(loanAmtNum * feeRates.securityDepositRate * 100) / 100;
 
   // Insurance Fee:
   // Configured in admin panel settings, default 1% if enabled
