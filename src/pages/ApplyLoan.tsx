@@ -580,7 +580,7 @@ export default function ApplyLoan() {
       tenureMonths: tenure,
       processingFeeRate: feeRates.processingFeeRate,
       securityDepositRate: feeRates.securityDepositRate,
-      insuranceRate: systemSettings?.insuranceRate || 0,
+      insuranceRate: systemSettings?.insuranceRate ?? 0.01,
       insuranceEnabled: !!systemSettings?.insuranceEnabled,
       method: "flat",
     });
