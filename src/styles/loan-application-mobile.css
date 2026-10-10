@@ -1,0 +1,304 @@
+/*
+ * PROVATI LOAN — Telegram Mini App responsive loan-flow foundation.
+ * Scoped to the Apply Loan page so this PR does not unexpectedly recolor
+ * unrelated screens. A later dedicated pass will move other screens onto
+ * the same semantic tokens after the applicant workflow is agreed.
+ */
+.miniapp-loan-flow {
+  --loan-app-bg: #f3f7f5;
+  --loan-app-surface: #ffffff;
+  --loan-app-surface-soft: #edf4f1;
+  --loan-app-text: #18332d;
+  --loan-app-muted: #61756e;
+  --loan-app-border: #d9e5df;
+  --loan-app-primary: #0f6b57;
+  --loan-app-primary-strong: #0a5143;
+  --loan-app-primary-soft: #e4f2ec;
+  --loan-app-accent: #c2a15e;
+  --loan-app-warning: #996515;
+  --loan-app-danger: #b42318;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  color: var(--loan-app-text);
+  background-color: var(--loan-app-bg);
+  overflow-x: clip;
+  box-sizing: border-box;
+  isolation: isolate;
+}
+
+.miniapp-loan-flow *,
+.miniapp-loan-flow *::before,
+.miniapp-loan-flow *::after {
+  box-sizing: border-box;
+}
+
+.dark .miniapp-loan-flow {
+  --loan-app-bg: #0d1816;
+  --loan-app-surface: #142320;
+  --loan-app-surface-soft: #192c27;
+  --loan-app-text: #edf5f1;
+  --loan-app-muted: #a6b8b0;
+  --loan-app-border: #30453d;
+  --loan-app-primary: #5cb69e;
+  --loan-app-primary-strong: #79cdb6;
+  --loan-app-primary-soft: #1b3a31;
+  --loan-app-accent: #dfc17f;
+  --loan-app-warning: #e4b65a;
+  --loan-app-danger: #ff938b;
+}
+
+/* Use a comfortable reading width without desktop gutters consuming a phone's
+   viewport. Padding protects the final field from persistent app navigation. */
+.miniapp-loan-flow .apply-loan-content {
+  width: 100%;
+  max-width: 760px;
+  min-width: 0;
+  margin-inline: auto;
+  padding:
+    clamp(14px, 3.6vw, 24px)
+    clamp(12px, 3.8vw, 22px)
+    calc(126px + env(safe-area-inset-bottom, 0px));
+}
+
+.miniapp-loan-flow .apply-loan-content > div,
+.miniapp-loan-flow .apply-loan-content section,
+.miniapp-loan-flow .apply-loan-content form {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.miniapp-loan-flow .loan-easy-font {
+  color: var(--loan-app-text);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.miniapp-loan-flow h1 {
+  font-size: clamp(20px, 5.4vw, 26px);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  text-wrap: pretty;
+}
+
+.miniapp-loan-flow h2 {
+  font-size: clamp(17px, 4.6vw, 21px);
+  line-height: 1.3;
+  text-wrap: pretty;
+}
+
+.miniapp-loan-flow h3 {
+  font-size: clamp(15px, 4.1vw, 18px);
+  line-height: 1.35;
+}
+
+.miniapp-loan-flow label {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.miniapp-loan-flow input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.miniapp-loan-flow select,
+.miniapp-loan-flow textarea {
+  min-width: 0;
+  max-width: 100%;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--loan-app-text);
+  border-color: var(--loan-app-border);
+}
+
+.miniapp-loan-flow input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.miniapp-loan-flow select {
+  min-height: 44px;
+}
+
+.miniapp-loan-flow textarea {
+  min-height: 96px;
+}
+
+.miniapp-loan-flow input::placeholder,
+.miniapp-loan-flow textarea::placeholder {
+  color: var(--loan-app-muted);
+  opacity: 0.9;
+}
+
+/* Replace the brightest blue utility accents within this flow with a restrained
+   bank-grade teal. These scoped rules do not change the Home/Profile palettes. */
+.miniapp-loan-flow .bg-white {
+  background-color: var(--loan-app-surface);
+}
+.miniapp-loan-flow .bg-slate-50,
+.miniapp-loan-flow .bg-gray-50 {
+  background-color: var(--loan-app-surface-soft);
+}
+.miniapp-loan-flow .bg-blue-600,
+.miniapp-loan-flow .bg-blue-700,
+.miniapp-loan-flow .bg-blue-800,
+.miniapp-loan-flow .bg-primary-600,
+.miniapp-loan-flow .bg-primary-700 {
+  background-color: var(--loan-app-primary);
+}
+.miniapp-loan-flow .hover\:bg-blue-500:hover,
+.miniapp-loan-flow .hover\:bg-blue-600:hover {
+  background-color: var(--loan-app-primary-strong);
+}
+.miniapp-loan-flow .bg-blue-50,
+.miniapp-loan-flow .bg-primary-50,
+.miniapp-loan-flow .bg-primary-100 {
+  background-color: var(--loan-app-primary-soft);
+}
+.miniapp-loan-flow .text-blue-600,
+.miniapp-loan-flow .text-blue-700,
+.miniapp-loan-flow .text-blue-800,
+.miniapp-loan-flow .text-primary-600,
+.miniapp-loan-flow .text-primary-700,
+.miniapp-loan-flow .text-primary-800 {
+  color: var(--loan-app-primary-strong);
+}
+.miniapp-loan-flow .border-blue-100,
+.miniapp-loan-flow .border-blue-200,
+.miniapp-loan-flow .border-slate-200,
+.miniapp-loan-flow .border-gray-200 {
+  border-color: var(--loan-app-border);
+}
+
+.dark .miniapp-loan-flow .bg-white {
+  background-color: var(--loan-app-surface);
+}
+.dark .miniapp-loan-flow .bg-slate-50,
+.dark .miniapp-loan-flow .bg-gray-50 {
+  background-color: var(--loan-app-surface-soft);
+}
+.dark .miniapp-loan-flow .text-gray-900,
+.dark .miniapp-loan-flow .text-gray-800,
+.dark .miniapp-loan-flow .text-gray-700,
+.dark .miniapp-loan-flow .text-slate-900,
+.dark .miniapp-loan-flow .text-slate-800,
+.dark .miniapp-loan-flow .text-slate-700 {
+  color: var(--loan-app-text);
+}
+.dark .miniapp-loan-flow .text-gray-500,
+.dark .miniapp-loan-flow .text-slate-500 {
+  color: var(--loan-app-muted);
+}
+.dark .miniapp-loan-flow .border-slate-200,
+.dark .miniapp-loan-flow .border-gray-200 {
+  border-color: var(--loan-app-border);
+}
+.dark .miniapp-loan-flow .bg-blue-50,
+.dark .miniapp-loan-flow .bg-primary-50,
+.dark .miniapp-loan-flow .bg-primary-100 {
+  background-color: var(--loan-app-primary-soft);
+}
+
+/* Keep bottom controls above app navigation and Android safe areas without
+   adding a heavy shadow layer. */
+.miniapp-loan-flow .loan-bottom-actions {
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  left: max(0px, env(safe-area-inset-left, 0px));
+  right: max(0px, env(safe-area-inset-right, 0px));
+  padding-inline: clamp(12px, 3.8vw, 22px);
+  padding-block: 8px;
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+@media (max-width: 360px) {
+  .miniapp-loan-flow .apply-loan-content {
+    padding-inline: 12px;
+    padding-top: 14px;
+  }
+
+  .miniapp-loan-flow .loan-easy-font {
+    font-size: 13px;
+  }
+
+  .miniapp-loan-flow .loan-bottom-actions {
+    padding-inline: 10px;
+    gap: 8px;
+  }
+
+  .miniapp-loan-flow .loan-bottom-actions button {
+    min-height: 42px;
+    padding-inline: 12px;
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 768px) {
+  .miniapp-loan-flow .apply-loan-content {
+    padding-inline: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .miniapp-loan-flow *,
+  .miniapp-loan-flow *::before,
+  .miniapp-loan-flow *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* Telegram Mini App viewport + spacing normalization. Keep these rules scoped
+   to the application so the rest of the app can be redesigned in its own PR. */
+.miniapp-loan-flow {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-inline: max(0px, env(safe-area-inset-left, 0px))
+    max(0px, env(safe-area-inset-right, 0px));
+}
+
+.miniapp-loan-flow > .loan-easy-font:first-child {
+  padding-top: env(safe-area-inset-top, 0px);
+  background-clip: padding-box;
+}
+
+.miniapp-loan-flow .apply-loan-content {
+  flex: 1 0 auto;
+}
+
+.miniapp-loan-flow .apply-loan-content .grid {
+  min-width: 0;
+}
+
+.miniapp-loan-flow button,
+.miniapp-loan-flow a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.miniapp-loan-flow button:focus-visible,
+.miniapp-loan-flow a:focus-visible,
+.miniapp-loan-flow input:focus-visible,
+.miniapp-loan-flow select:focus-visible,
+.miniapp-loan-flow textarea:focus-visible {
+  outline: 2px solid var(--loan-app-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 390px) {
+  .miniapp-loan-flow .apply-loan-content {
+    padding-inline: 12px;
+    padding-bottom: calc(116px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .miniapp-loan-flow .rounded-2xl {
+    border-radius: 16px;
+  }
+
+  .miniapp-loan-flow .rounded-xl {
+    border-radius: 12px;
+  }
+}
+
+@media (max-height: 620px) {
+  .miniapp-loan-flow .apply-loan-content {
+    padding-top: 12px;
+  }
+}

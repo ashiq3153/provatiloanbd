@@ -1,3 +1,4 @@
+import "../styles/loan-application-mobile.css";
 import React, { useState, useEffect } from "react";
 import { getTelegramUser } from "../lib/telegram";
 import { submitLoanApplication, getLoanApplicationById, updateLoanApplication, checkDuplicateApplication, uploadDocument } from "../lib/api";
@@ -682,11 +683,10 @@ export default function ApplyLoan() {
           toast.error(isBn ? `প্রয়োজনীয় কাগজপত্র দিন: ${preview}${extra}` : `Required documents missing: ${preview}${extra}`);
           return;
         }
-        if (!acceptedTerms) {
-          toast.error(isBn ? 'অনুগ্রহ করে শর্তাবলীতে সম্মত হন' : 'Please agree to the terms and conditions');
-          return;
-        }
-        setVerificationStage('confirm');
+        // Show a dedicated review screen before the user starts automated checks
+        // or creates the submitted application row.
+        setStep(5);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
 
@@ -982,7 +982,7 @@ export default function ApplyLoan() {
       if (result) {
         toast.success(isBn ? 'আপনার আবেদন সফলভাবে জমা হয়েছে!' : 'Application successfully submitted!', { id: loadingId });
         localStorage.removeItem('loan_draft_v1');
-        setStep(5);
+        setStep(6);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         toast.error(isBn ? 'সমস্যা হয়েছে, আবার চেষ্টা করুন' : 'Failed, please try again', { id: loadingId });
@@ -1226,7 +1226,7 @@ export default function ApplyLoan() {
 
         localStorage.removeItem('loan_draft_v1');
         handleCloseVerification();
-        setStep(5);
+        setStep(6);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         setVerifyingError(
@@ -3337,36 +3337,202 @@ export default function ApplyLoan() {
         </div>
       </div>
 
-      {/* Terms and Declaration Checkbox */}
-      <label htmlFor="acceptedTerms" className="flex items-start gap-3 p-4 rounded-2xl cursor-pointer group mt-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800">
-        <div className="pt-0.5">
-          <input 
-            id="acceptedTerms"
-            type="checkbox" 
-            checked={acceptedTerms}
-            onChange={(e) => setAcceptedTerms(e.target.checked)}
-            className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
-          />
-        </div>
-        <p className="text-xs text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
-          I declare that all provided information is correct. I agree to the{" "}
-          <button 
-            type="button" 
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent toggling the checkbox when clicking the terms link
-              setShowTermsModal(true);
-            }} 
-            className="text-primary-600 font-bold hover:underline bg-transparent border-none p-0 inline cursor-pointer"
-          >
-            {isBn ? "শর্তাবলীতে" : "Terms & Conditions"}
-          </button>
-          {isBn ? " সম্মত আছি এবং লোন অনুমোদনের ক্ষেত্রে Authorities এর সিদ্ধান্ত চূড়ান্ত বলে গণ্য হবে।" : " and authority decision will be considered final regarding loan approval."}
-        </p>
-      </label>
+
     </div>
   );
 
-  const Step5Success = () => (
+  const Step5Review = () => {
+    const formData = methods.getValues();
+    const calculation = getLoanCalculation();
+    const requirements = getLoanDocumentRequirements(category?.id || 'personal');
+    const missingRequired = getMissingRequiredDocuments(category?.id || 'personal', documents);
+    const uploadedRequiredCount = requirements.filter(d => d.required && Boolean(documents[d.key])).length;
+    const uploadedOptionalCount = requirements.filter(d => !d.required && Boolean(documents[d.key])).length;
+    const requiredCount = requirements.filter(d => d.required).length;
+    const currentAddressLabel = [
+      currentAddress.village, currentAddress.union, currentAddress.upazila,
+      currentAddress.district, currentAddress.postCode,
+    ].filter(Boolean).join(', ');
+    const bankEnding = String(formData.accountNumber || '').slice(-4);
+    const maskedNid = formData.nidNumber ? '•••• ' + String(formData.nidNumber).slice(-4) : '—';
+
+    return (
+      <div className="space-y-4 pb-6 miniapp-loan-review">
+        <div className="space-y-1">
+          <p className="text-[11px] uppercase tracking-[0.12em] font-bold text-emerald-700 dark:text-emerald-300">
+            {isBn ? 'শেষ ধাপ' : 'Final step'}
+          </p>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            {isBn ? 'আবেদন যাচাই করে জমা দিন' : 'Review before submitting'}
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+            {isBn
+              ? 'জমা দেওয়ার আগে আপনার তথ্য, ঋণের হিসাব এবং কাগজপত্র একবার দেখে নিন।'
+              : 'Check your information, estimated loan figures and uploaded documents before submission.'}
+          </p>
+        </div>
+
+        <section className="rounded-2xl border border-emerald-200 dark:border-emerald-900/70 bg-white dark:bg-[#142320] overflow-hidden">
+          <div className="flex items-center justify-between gap-3 p-4 border-b border-emerald-100 dark:border-emerald-900/50">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                {category?.icon ? <category.icon size={19} /> : <FileText size={19} />}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">{isBn ? 'ঋণের ধরন' : 'Loan category'}</p>
+                <h3 className="font-bold text-gray-900 dark:text-white truncate">{category?.title || '—'}</h3>
+              </div>
+            </div>
+            <button type="button" onClick={() => setStep(1)} className="text-sm font-bold text-emerald-700 dark:text-emerald-300 shrink-0">
+              {isBn ? 'পরিবর্তন' : 'Edit'}
+            </button>
+          </div>
+          <div className="p-4 grid grid-cols-2 gap-3">
+            <div className="rounded-xl bg-slate-50 dark:bg-[#192c27] p-3">
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">{isBn ? 'ঋণের পরিমাণ' : 'Loan amount'}</p>
+              <p className="mt-1 text-base font-bold text-gray-900 dark:text-white">{formatCurrency(amount, isBn)}</p>
+            </div>
+            <div className="rounded-xl bg-slate-50 dark:bg-[#192c27] p-3">
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">{isBn ? 'মেয়াদ' : 'Tenure'}</p>
+              <p className="mt-1 text-base font-bold text-gray-900 dark:text-white">{convertDigits(tenure, isBn)} {isBn ? 'মাস' : 'months'}</p>
+            </div>
+            <div className="col-span-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/60 p-3">
+              <p className="text-[11px] text-emerald-800 dark:text-emerald-300">{isBn ? 'আনুমানিক মাসিক কিস্তি' : 'Estimated monthly installment'}</p>
+              <p className="mt-1 text-xl font-black text-emerald-800 dark:text-emerald-200">{formatCurrency(calculation.emi, isBn)}</p>
+            </div>
+            <div className="col-span-2 divide-y divide-slate-100 dark:divide-slate-700/70">
+              <div className="py-2.5 flex items-start justify-between gap-3">
+                <span className="text-sm text-gray-500 dark:text-gray-400">{isBn ? 'প্রসেসিং ফি' : 'Processing fee'}</span>
+                <span className="text-sm font-semibold text-gray-900 dark:text-white text-right">{formatCurrency(calculation.processingFee, isBn)}</span>
+              </div>
+              <div className="py-2.5 flex items-start justify-between gap-3">
+                <span className="text-sm text-gray-500 dark:text-gray-400">{isBn ? 'সঞ্চয়/জামানত' : 'Security deposit'}</span>
+                <span className="text-sm font-semibold text-gray-900 dark:text-white text-right">{formatCurrency(calculation.securityDeposit, isBn)}</span>
+              </div>
+              <div className="py-2.5 flex items-start justify-between gap-3">
+                <span className="text-sm text-gray-500 dark:text-gray-400">{isBn ? 'মোট সুদ' : 'Total interest'}</span>
+                <span className="text-sm font-semibold text-gray-900 dark:text-white text-right">{formatCurrency(calculation.totalInterest, isBn)}</span>
+              </div>
+              <div className="py-3 flex items-start justify-between gap-3">
+                <span className="text-sm font-bold text-gray-900 dark:text-white">{isBn ? 'মোট পরিশোধযোগ্য' : 'Total payable'}</span>
+                <span className="text-base font-black text-gray-900 dark:text-white text-right">{formatCurrency(calculation.totalPayable, isBn)}</span>
+              </div>
+            </div>
+          </div>
+          <p className="px-4 pb-4 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+            {isBn
+              ? 'এগুলো আনুমানিক হিসাব। জমা দেওয়ার সময় সার্ভার-নির্ধারিত বর্তমান হার ও শর্ত দিয়ে চূড়ান্ত হিসাব যাচাই করা হবে।'
+              : 'These are estimates. The server recalculates the final figures from the current approved rate and configuration at submission.'}
+          </p>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 dark:border-[#30453d] bg-white dark:bg-[#142320] p-4 space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="font-bold text-gray-900 dark:text-white">{isBn ? 'আবেদনকারীর তথ্য' : 'Applicant information'}</h3>
+            <button type="button" onClick={() => setStep(3)} className="text-sm font-bold text-emerald-700 dark:text-emerald-300 shrink-0">
+              {isBn ? 'পরিবর্তন' : 'Edit'}
+            </button>
+          </div>
+          <div className="grid grid-cols-1 gap-3">
+            <div>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">{isBn ? 'পূর্ণ নাম' : 'Full name'}</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white break-words">{formData.fullName || '—'}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="min-w-0">
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">{isBn ? 'মোবাইল' : 'Mobile'}</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white break-words">{formData.mobile || '—'}</p>
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">{isBn ? 'NID (শেষ ৪ সংখ্যা)' : 'NID (last 4 digits)'}</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">{maskedNid}</p>
+              </div>
+            </div>
+            {formData.email && (
+              <div>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">{isBn ? 'ইমেইল' : 'Email'}</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white break-words">{formData.email}</p>
+              </div>
+            )}
+            {currentAddressLabel && (
+              <div>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">{isBn ? 'বর্তমান ঠিকানা' : 'Current address'}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white break-words">{currentAddressLabel}</p>
+              </div>
+            )}
+            {formData.accountName && (
+              <div>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">{isBn ? 'ব্যাংক অ্যাকাউন্ট' : 'Bank account'}</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">{formData.accountName} {bankEnding ? '•••• ' + bankEnding : ''}</p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 dark:border-[#30453d] bg-white dark:bg-[#142320] p-4 space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="font-bold text-gray-900 dark:text-white">{isBn ? 'কাগজপত্রের অবস্থা' : 'Document status'}</h3>
+            <button type="button" onClick={() => setStep(4)} className="text-sm font-bold text-emerald-700 dark:text-emerald-300 shrink-0">
+              {isBn ? 'পরিবর্তন' : 'Edit'}
+            </button>
+          </div>
+          <div className="flex items-center gap-3">
+            <CheckCircle2 size={20} className="text-emerald-600 dark:text-emerald-300 shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-gray-900 dark:text-white">
+                {convertDigits(uploadedRequiredCount, isBn)} / {convertDigits(requiredCount, isBn)} {isBn ? 'বাধ্যতামূলক ডকুমেন্ট আপলোড' : 'required documents uploaded'}
+              </p>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                {missingRequired.length === 0
+                  ? (isBn ? 'সব বাধ্যতামূলক ডকুমেন্ট পাওয়া গেছে।' : 'All required documents are present.')
+                  : (isBn ? 'কিছু বাধ্যতামূলক ডকুমেন্ট বাকি আছে।' : 'Some required documents are missing.')}
+                {uploadedOptionalCount > 0 && (
+                  <span className="block mt-1">{isBn ? `ঐচ্ছিক আপলোড: ${convertDigits(uploadedOptionalCount, isBn)}টি` : `Optional files uploaded: ${uploadedOptionalCount}`}</span>
+                )}
+              </p>
+            </div>
+          </div>
+          {missingRequired.length > 0 && (
+            <div className="rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/20 p-3 text-sm text-amber-800 dark:text-amber-200">
+              {missingRequired.map(d => isBn ? d.labelBn : d.labelEn).join(', ')}
+            </div>
+          )}
+        </section>
+
+        <div className="flex items-start gap-3 p-4 rounded-2xl mt-4 bg-slate-50 dark:bg-[#192c27] border border-slate-200 dark:border-[#30453d]">
+          <input
+            id="acceptedTerms"
+            type="checkbox"
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            className="w-5 h-5 mt-0.5 rounded border-gray-300 text-emerald-700 focus:ring-emerald-600 cursor-pointer shrink-0"
+          />
+          <div className="min-w-0 space-y-2">
+            <label htmlFor="acceptedTerms" className="block text-sm text-gray-700 dark:text-gray-200 font-medium leading-relaxed cursor-pointer">
+              {isBn
+                ? 'আমি ঘোষণা করছি যে আমার দেওয়া তথ্য সঠিক এবং ঋণের শর্তাবলী ও কর্তৃপক্ষের সিদ্ধান্ত মেনে নিচ্ছি।'
+                : "I declare that the information provided is correct and agree to the loan terms and the authority's approval decision."}
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowTermsModal(true)}
+              className="text-sm font-bold text-emerald-700 dark:text-emerald-300 underline underline-offset-2"
+            >
+              {isBn ? 'শর্তাবলী পড়ুন' : 'Read terms and conditions'}
+            </button>
+          </div>
+        </div>
+
+        {missingRequired.length > 0 && (
+          <p className="text-xs text-amber-800 dark:text-amber-200">
+            {isBn ? 'বাধ্যতামূলক কাগজপত্র সম্পূর্ণ করে তারপর জমা দিন।' : 'Complete the required documents before submitting.'}
+          </p>
+        )}
+      </div>
+    );
+  };
+
+  const Step6Success = () => (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -3429,10 +3595,10 @@ export default function ApplyLoan() {
 
   return (
     <FormProvider {...methods}>
-    <div className="apply-loan-screen app-apply-theme min-h-full bg-slate-50 dark:bg-[#0b1220] transition-colors flex flex-col relative">
+    <div className="apply-loan-screen app-apply-theme miniapp-loan-flow min-h-full bg-slate-50 dark:bg-[#0b1220] transition-colors flex flex-col relative">
       {/* Easy-style application header — visual language follows the supplied reference screens. */}
-      {step < 5 && (
-        <div className={`loan-easy-font sticky top-0 z-30 backdrop-blur border-b ${
+      {step < 6 && (
+        <div className={`loan-easy-font sticky top-0 z-30 border-b ${
         step === 1
           ? "bg-[#063d34] dark:bg-[#052f29] border-emerald-900/50 text-white"
           : "bg-slate-50/95 dark:bg-[#0b1220]/95 border-slate-200/60 dark:border-slate-800/60"
@@ -3471,11 +3637,11 @@ export default function ApplyLoan() {
               </div>
             </div>
             <div className={`mt-2 h-1 rounded-full overflow-hidden ${step === 1 ? "bg-white/15" : "bg-slate-200 dark:bg-slate-800"}`}>
-              <motion.div className={`h-full rounded-full ${step === 1 ? "bg-amber-400" : "bg-gradient-to-r from-blue-700 to-blue-500"}`} initial={{ width: 0 }} animate={{ width: `${Math.min(step / 8, 1) * 100}%` }} transition={{ duration: 0.3 }} />
+              <motion.div className={`h-full rounded-full ${step === 1 ? "bg-amber-400" : "bg-gradient-to-r from-blue-700 to-blue-500"}`} initial={{ width: 0 }} animate={{ width: `${Math.min(step / totalSteps, 1) * 100}%` }} transition={{ duration: 0.3 }} />
             </div>
             {step >= 2 && category && (
               <div className="mt-3 flex items-center gap-2 overflow-x-auto no-scrollbar">
-                <span className="shrink-0 px-3 py-1.5 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 text-[10px] font-black text-slate-700 dark:text-slate-200">{isBn ? `ধাপ ${convertDigits(step, true)} / ৮ • ${step === 2 ? "পরিমাণ ও মেয়াদ" : step === 3 ? "ব্যক্তিগত তথ্য" : "ডকুমেন্ট"}` : `Step ${step} / 8 • ${step === 2 ? "Amount & Tenure" : step === 3 ? "Personal Information" : "Documents"}`}</span>
+                <span className="shrink-0 px-3 py-1.5 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 text-[10px] font-black text-slate-700 dark:text-slate-200">{isBn ? `ধাপ ${convertDigits(step, true)} / ৫ • ${step === 2 ? "পরিমাণ ও মেয়াদ" : step === 3 ? "ব্যক্তিগত তথ্য" : step === 4 ? "ডকুমেন্ট" : "চূড়ান্ত পর্যালোচনা"}` : `Step ${step} / 5 • ${step === 2 ? "Amount & Tenure" : step === 3 ? "Applicant Information" : step === 4 ? "Documents" : "Final Review"}`}</span>
                 <span className="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 text-[10px] font-black text-blue-800 dark:text-blue-200">{category.title} {isBn ? "লোন" : "Loan"}</span>
               </div>
             )}
@@ -3497,14 +3663,15 @@ export default function ApplyLoan() {
             {step === 2 && Step2Calculator()}
             {step === 3 && Step3CombinedInfo()}
             {step === 4 && Step4Documents()}
-            {step === 5 && Step5Success()}
+            {step === 5 && Step5Review()}
+            {step === 6 && Step6Success()}
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* Bottom Action Bar - Compact */}
-      {step > 1 && step < 5 && (
-        <div className="fixed left-0 right-0 bottom-[88px] px-4 py-2 z-40 flex justify-between gap-2 pointer-events-none">
+      {step > 1 && step < 6 && (
+        <div className="loan-bottom-actions fixed left-0 right-0 bottom-[88px] px-4 py-2 z-40 flex justify-between gap-2 pointer-events-none">
           {step > 1 && (
             <button
               type="button"
@@ -3516,14 +3683,16 @@ export default function ApplyLoan() {
           )}
           <button
             type="button"
-            onClick={nextStep}
-            disabled={(step === 1 && !category) || (step === 4 && !acceptedTerms) || isSubmitting}
+            onClick={() => step === 5 ? setVerificationStage("confirm") : nextStep()}
+            disabled={(step === 1 && !category) || (step === 5 && !acceptedTerms) || isSubmitting}
             className="pointer-events-auto flex items-center gap-1 px-4 py-2.5 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-500 text-white shadow-none shrink-0 disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:text-gray-400 dark:disabled:text-gray-600 disabled:shadow-none ml-auto"
           >
             {isSubmitting
               ? (isBn ? 'অপেক্ষা করুন...' : 'Please wait...')
               : step === 4
-              ? (isBn ? 'সাবমিট করুন' : 'Submit')
+              ? (isBn ? 'পর্যালোচনা করুন' : 'Review application')
+              : step === 5
+              ? (isBn ? 'যাচাই ও জমা দিন' : 'Verify & submit')
               : (isBn ? 'পরবর্তী ধাপ' : 'Next Step')
             }
             {!isSubmitting && <ChevronRight size={16} />}
