@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { getLoanApplicationById } from '../lib/api';
 import type { LoanApplication } from '../types/database';
 
-type LoanAppStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'action_required' | 'active' | 'completed';
+type LoanAppStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'action_required' | 'active' | 'completed' | 'cancelled';
 
 export default function ApplicationDetails() {
   const { id } = useParams();
@@ -95,6 +95,7 @@ export default function ApplicationDetails() {
       case 'rejected': return 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 border-slate-200 dark:border-slate-800';
       case 'action_required': return 'bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 border-slate-200 dark:border-slate-800';
       case 'completed': return 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 border-slate-200 dark:border-slate-800';
+      case 'cancelled': return 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700';
       default: return 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 border-slate-200 dark:border-slate-800';
     }
   };
@@ -108,6 +109,7 @@ export default function ApplicationDetails() {
       case 'rejected': return <XCircle size={28} className="text-white" />;
       case 'action_required': return <AlertCircle size={28} className="text-white" />;
       case 'completed': return <CheckCircle2 size={28} className="text-white" />;
+      case 'cancelled': return <XCircle size={28} className="text-white" />;
       default: return <FileText size={28} className="text-white" />;
     }
   };
@@ -131,9 +133,10 @@ export default function ApplicationDetails() {
         case 'under_review': return 'রিভিউ চলছে';
         case 'approved': return 'অনুমোদিত';
         case 'active': return 'সক্রিয়';
-        case 'rejected': return 'বাতিল';
+        case 'rejected': return 'প্রত্যাখ্যাত';
         case 'action_required': return 'আপডেট প্রয়োজন';
         case 'completed': return 'সম্পন্ন';
+        case 'cancelled': return 'বাতিল';
         default: return status;
       }
     }
@@ -145,6 +148,7 @@ export default function ApplicationDetails() {
       case 'rejected': return 'Rejected';
       case 'action_required': return 'Action Required';
       case 'completed': return 'Completed';
+      case 'cancelled': return 'Cancelled';
       default: return status;
     }
   };
