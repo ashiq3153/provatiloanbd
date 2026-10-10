@@ -3383,7 +3383,7 @@ export default function ApplyLoan() {
                 <h3 className="font-bold text-gray-900 dark:text-white truncate">{category?.title || '—'}</h3>
               </div>
             </div>
-            <button type="button" onClick={() => setStep(2)} className="text-sm font-bold text-emerald-700 dark:text-emerald-300 shrink-0">
+            <button type="button" onClick={() => setStep(1)} className="text-sm font-bold text-emerald-700 dark:text-emerald-300 shrink-0">
               {isBn ? 'পরিবর্তন' : 'Edit'}
             </button>
           </div>
