@@ -87,22 +87,23 @@ export default function Deposit() {
     ((selectInsurance && isInsuranceEnabled) ? calculatedInsurance : 0);
 
   const configuredPayment = systemSettings?.paymentNumbers?.[method];
+  const paymentText = (value: unknown) => value == null ? '' : String(value).trim();
   const paymentDetails: Array<{ label: string; value: string }> = method === 'bank'
     ? [
-        { label: isBn ? 'ব্যাংক' : 'Bank', value: configuredPayment?.name || '' },
-        { label: isBn ? 'অ্যাকাউন্টের নাম' : 'Account name', value: configuredPayment?.accName || '' },
-        { label: isBn ? 'অ্যাকাউন্ট নম্বর' : 'Account number', value: configuredPayment?.accNo || '' },
-        { label: isBn ? 'শাখা' : 'Branch', value: configuredPayment?.branch || '' },
-        { label: isBn ? 'রাউটিং নম্বর' : 'Routing number', value: configuredPayment?.routing || '' },
+        { label: isBn ? 'ব্যাংক' : 'Bank', value: paymentText(configuredPayment?.name) },
+        { label: isBn ? 'অ্যাকাউন্টের নাম' : 'Account name', value: paymentText(configuredPayment?.accName) },
+        { label: isBn ? 'অ্যাকাউন্ট নম্বর' : 'Account number', value: paymentText(configuredPayment?.accNo) },
+        { label: isBn ? 'শাখা' : 'Branch', value: paymentText(configuredPayment?.branch) },
+        { label: isBn ? 'রাউটিং নম্বর' : 'Routing number', value: paymentText(configuredPayment?.routing) },
       ].filter(item => item.value.trim())
     : method === 'visa'
       ? [
-          { label: isBn ? 'কার্ডের নাম' : 'Card name', value: configuredPayment?.name || '' },
-          { label: isBn ? 'কার্ড নম্বর' : 'Card number', value: configuredPayment?.number || '' },
+          { label: isBn ? 'কার্ডের নাম' : 'Card name', value: paymentText(configuredPayment?.name) },
+          { label: isBn ? 'কার্ড নম্বর' : 'Card number', value: paymentText(configuredPayment?.number) },
         ].filter(item => item.value.trim())
       : [
-          { label: isBn ? 'পেমেন্ট নম্বর' : 'Payment number', value: configuredPayment?.number || '' },
-          { label: isBn ? 'অ্যাকাউন্টের ধরন' : 'Account type', value: configuredPayment?.type || '' },
+          { label: isBn ? 'পেমেন্ট নম্বর' : 'Payment number', value: paymentText(configuredPayment?.number) },
+          { label: isBn ? 'অ্যাকাউন্টের ধরন' : 'Account type', value: paymentText(configuredPayment?.type) },
         ].filter(item => item.value.trim());
 
   const getSelectedDepositTypes = () => {
