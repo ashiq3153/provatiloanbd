@@ -36,12 +36,14 @@ revoke insert, update, delete, truncate, references, trigger
 -- expose data must add narrowly scoped SELECT grants and RLS policies explicitly.
 alter default privileges for role postgres in schema public
   revoke all on tables from anon, authenticated;
-alter default privileges for role supabase_admin in schema public
-  revoke all on tables from anon, authenticated;
 
 alter default privileges for role postgres in schema public
   revoke all on sequences from anon, authenticated;
-alter default privileges for role supabase_admin in schema public
-  revoke all on sequences from anon, authenticated;
+
+-- The connected migration role is postgres and is not a member of supabase_admin.
+-- PostgreSQL denies ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin from this
+-- session. Its pre-existing default grants must be addressed in a separate,
+-- appropriately privileged project-admin operation; do not silently assume this
+-- migration removes them.
 
 commit;
