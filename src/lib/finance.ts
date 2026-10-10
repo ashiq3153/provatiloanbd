@@ -60,3 +60,37 @@ export function calculateLoan(input: LoanCalculationInput): LoanCalculation {
 }
 
 export const normalizeMonthlyRatePercent = (percent: number) => Math.max(0, Number(percent) || 0) / 100;
+
+
+export interface LoanFeeRates {
+  processingFeeRate: number;
+  securityDepositRate: number;
+}
+
+/**
+ * Shared policy tiers used by loan estimates and deposit requests.
+ * Defaults match the current Terms screen: processing fee 1% up to BDT 1m,
+ * then 0.5%; savings deposit 10% up to BDT 500k, then 5%.
+ * Rates saved in systemSettings.feeTiers are fractions (e.g. 0.01 = 1%).
+ */
+export function getLoanFeeRates(principalInput: number, settings?: any): LoanFeeRates {
+  const principal = Math.max(0, Number(principalInput) || 0);
+  if (principal < 50_000) {
+    return { processingFeeRate: 0, securityDepositRate: 0 };
+  }
+
+  const tiers = settings?.feeTiers || {};
+  const asRate = (value: unknown, fallback: number) => {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) && numeric >= 0 ? numeric : fallback;
+  };
+
+  return {
+    processingFeeRate: principal <= 1_000_000
+      ? asRate(tiers.processingFeeUpTo1m, 0.01)
+      : asRate(tiers.processingFeeAbove1m, 0.005),
+    securityDepositRate: principal <= 500_000
+      ? asRate(tiers.securityDepositUpTo500k, 0.10)
+      : asRate(tiers.securityDepositAbove500k, 0.05),
+  };
+}
