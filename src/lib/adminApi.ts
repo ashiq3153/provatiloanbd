@@ -5,6 +5,8 @@ type AdminAction =
   | 'get_profiles'
   | 'get_loans'
   | 'get_transactions'
+  | 'get_loan_document_url'
+  | 'get_transaction_screenshot_url'
   | 'get_success_stories'
   | 'get_system_setting'
   | 'ban_user'
@@ -60,6 +62,12 @@ export async function deleteUser(chatId: number): Promise<boolean> { return (awa
 export async function getAllLoanApplications(): Promise<LoanApplication[]> { return (await callAdmin<LoanApplication[]>('get_loans')) || []; }
 export async function updateLoanApplicationStatus(id: string, status: LoanApplication['status'], feedback?: string): Promise<boolean> { return (await callAdmin<boolean>('update_loan', { id, status, feedback: feedback || null })) === true; }
 export async function getAllTransactions(): Promise<Transaction[]> { return (await callAdmin<Transaction[]>('get_transactions')) || []; }
+export async function getLoanDocumentUrl(loanId: string, documentKey: string): Promise<string | null> {
+  return await callAdmin<string>('get_loan_document_url', { loanId, documentKey });
+}
+export async function getTransactionScreenshotUrl(transactionId: string): Promise<string | null> {
+  return await callAdmin<string>('get_transaction_screenshot_url', { transactionId });
+}
 export async function updateTransactionStatus(id: string, status: Transaction['status'], verificationNote?: string): Promise<boolean> {
   return (await callAdmin<boolean>('update_transaction', { id, status, verificationNote })) === true;
 }
