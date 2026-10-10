@@ -3528,7 +3528,7 @@ export default function ApplyLoan() {
             {isSubmitting
               ? (isBn ? 'অপেক্ষা করুন...' : 'Please wait...')
               : step === 4
-              ? (isBn ? 'সাবমিট করুন' : 'Submit')
+              ? (isBn ? 'রিভিউ করুন' : 'Review application')
               : (isBn ? 'পরবর্তী ধাপ' : 'Next Step')
             }
             {!isSubmitting && <ChevronRight size={16} />}
