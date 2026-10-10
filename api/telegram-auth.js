@@ -4,6 +4,7 @@
 import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { calculateAuthoritativeLoan } from "./loan-finance.js";
+import { normalizeStorageReference, normalizeStorageMap, splitStorageReference } from "./loan-documents.js";
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const ADMIN_BOT_TOKEN = process.env.TELEGRAM_ADMIN_BOT_TOKEN;
@@ -42,6 +43,23 @@ export function verifyInitData(initData) {
 function adminClient() {
   if (!SUPABASE_URL || !SERVICE_ROLE_KEY) throw new Error("Server database credentials are not configured");
   return createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+}
+
+async function createSignedPrivateDocumentUrl(db, reference, ownerChatId, options = {}) {
+  if (reference == null || reference === "") return null;
+  const normalized = normalizeStorageReference(reference, ownerChatId, SUPABASE_URL, {
+    allowedBuckets: options.allowedBuckets || ["loan_documents"],
+    defaultBucket: options.defaultBucket || "loan_documents",
+  });
+  if (!normalized) return null;
+
+  const { bucket, path } = splitStorageReference(normalized);
+  const { data, error } = await db.storage.from(bucket).createSignedUrl(path, 300);
+  if (error || !data?.signedUrl) {
+    console.error("Private document URL creation failed:", error);
+    throw new Error("Could not create a short-lived document URL");
+  }
+  return data.signedUrl;
 }
 
 async function getAuthoritativeLoanTerms(db, input, options = {}) {
@@ -187,6 +205,12 @@ async function updateMyLoanApplication(telegramUser, applicationId, payload) {
   for (const key of allowedFields) {
     if (Object.prototype.hasOwnProperty.call(payload, key)) update[key] = payload[key];
   }
+  if (Object.prototype.hasOwnProperty.call(update, "documents")) {
+    update.documents = normalizeStorageMap(update.documents, chatId, SUPABASE_URL, {
+      allowedBuckets: ["loan_documents"],
+      defaultBucket: "loan_documents",
+    });
+  }
 
   const financialInputs = {
     loan_category: update.loan_category ?? existingLoan.loan_category,
@@ -235,6 +259,12 @@ async function submitLoanApplication(telegramUser, payload) {
   for (const key of allowedFields) {
     if (Object.prototype.hasOwnProperty.call(payload, key)) record[key] = payload[key];
   }
+  if (Object.prototype.hasOwnProperty.call(record, "documents")) {
+    record.documents = normalizeStorageMap(record.documents, chatId, SUPABASE_URL, {
+      allowedBuckets: ["loan_documents"],
+      defaultBucket: "loan_documents",
+    });
+  }
 
   Object.assign(record, await getAuthoritativeLoanTerms(db, record));
 
@@ -274,7 +304,10 @@ async function createMyTransaction(telegramUser, payload) {
     payment_method: typeof payload.payment_method === "string" ? payload.payment_method : null,
     sender_number: typeof payload.sender_number === "string" ? payload.sender_number : null,
     trx_id: typeof payload.trx_id === "string" ? payload.trx_id : null,
-    screenshot_url: typeof payload.screenshot_url === "string" ? payload.screenshot_url : null,
+    screenshot_url: normalizeStorageReference(payload.screenshot_url, chatId, SUPABASE_URL, {
+      allowedBuckets: ["loan_documents", "deposit_screenshots"],
+      defaultBucket: "loan_documents",
+    }),
     status: "pending"
   };
 
@@ -333,6 +366,10 @@ const ADMIN_ACTION_ROLES = {
   get_profiles: ["owner","admin","support","viewer","finance"],
   get_loans: ["owner","admin","support","viewer","finance"],
   get_transactions: ["owner","admin","finance","viewer"],
+  // Identity and loan evidence is restricted to roles that need to review it.
+  // A generic read-only viewer can see summary fields but not raw private documents.
+  get_loan_document_url: ["owner","admin","support"],
+  get_transaction_screenshot_url: ["owner","admin","finance"],
   get_success_stories: ["owner","admin","support","viewer"],
   get_system_setting: ["owner","admin","finance","support","viewer"],
   get_admin_role: ["owner","admin","finance","support","viewer"],
@@ -399,6 +436,39 @@ async function adminAction(action, payload) {
     case "get_profiles": return (await db.from("profiles").select("*").order("created_at", { ascending: false })).data || [];
     case "get_loans": return (await db.from("loan_applications").select("*").order("applied_at", { ascending: false })).data || [];
     case "get_transactions": return (await db.from("transactions").select("*").order("created_at", { ascending: false })).data || [];
+    case "get_loan_document_url": {
+      const loanId = String(payload.loanId || "");
+      const documentKey = String(payload.documentKey || "");
+      if (!loanId || !/^[A-Za-z0-9_-]{1,80}$/.test(documentKey)) throw new Error("Invalid loan document request");
+      const { data: loan, error } = await db.from("loan_applications")
+        .select("id,chat_id,documents")
+        .eq("id", loanId)
+        .maybeSingle();
+      if (error) throw error;
+      if (!loan || !loan.documents || typeof loan.documents !== "object") throw new Error("Loan document not found");
+      const reference = loan.documents[documentKey];
+      if (typeof reference !== "string" || !reference) throw new Error("Loan document not found");
+      return await createSignedPrivateDocumentUrl(db, reference, loan.chat_id, {
+        allowedBuckets: ["loan_documents"],
+        defaultBucket: "loan_documents",
+      });
+    }
+    case "get_transaction_screenshot_url": {
+      const transactionId = String(payload.transactionId || "");
+      if (!transactionId) throw new Error("Invalid transaction screenshot request");
+      const { data: transaction, error } = await db.from("transactions")
+        .select("id,chat_id,screenshot_url")
+        .eq("id", transactionId)
+        .maybeSingle();
+      if (error) throw error;
+      if (!transaction || typeof transaction.screenshot_url !== "string" || !transaction.screenshot_url) {
+        throw new Error("Transaction screenshot not found");
+      }
+      return await createSignedPrivateDocumentUrl(db, transaction.screenshot_url, transaction.chat_id, {
+        allowedBuckets: ["loan_documents", "deposit_screenshots"],
+        defaultBucket: "loan_documents",
+      });
+    }
     case "get_success_stories": return (await db.from("success_stories").select("*").order("rating", { ascending: false })).data || [];
     case "get_system_setting": return (await db.from("system_settings").select("value").eq("key", payload.key).single()).data?.value || null;
     case "ban_user": return !(await db.from("profiles").update({ is_banned: !!payload.isBanned }).eq("chat_id", payload.chatId)).error;

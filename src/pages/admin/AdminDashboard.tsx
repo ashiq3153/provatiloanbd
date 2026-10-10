@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, Copy, ArrowLeft, Edit2, Lock, Unlock, ThumbsUp, Heart, MessageCircle } from 'lucide-react';
-import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, sendAdminTelegramMessage, broadcastAdminTelegramMessage, getFinancialReconciliationReport, getKycReviewQueue, updateKycReview } from '../../lib/adminApi';
+import { getAllProfiles, getAllLoanApplications, getAllTransactions, getLoanDocumentUrl, getTransactionScreenshotUrl, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, sendAdminTelegramMessage, broadcastAdminTelegramMessage, getFinancialReconciliationReport, getKycReviewQueue, updateKycReview } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
 import { useAppStore } from '../../lib/store';
@@ -42,6 +42,7 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<LoanApplication | null>(null);
+  const [openingDocumentKey, setOpeningDocumentKey] = useState<string | null>(null);
 
   const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
   const [adminRole, setAdminRole] = useState<'owner' | 'admin' | 'finance' | 'support' | 'viewer' | null>(null);
@@ -158,6 +159,32 @@ export default function AdminDashboard() {
 
   const { systemSettings, setSystemSettings, language, setLanguage } = useAppStore();
   const isBn = language === 'bn';
+
+  const openPrivateDocument = async (
+    requestKey: string,
+    getUrl: () => Promise<string | null>,
+  ) => {
+    // Open a tab synchronously from the user gesture so the browser does not
+    // block the later navigation when the signed URL comes back asynchronously.
+    const newTab = window.open('about:blank', '_blank');
+    if (!newTab) {
+      toast.error(isBn ? 'নতুন ট্যাব খোলার অনুমতি দিন' : 'Please allow pop-ups to view this file');
+      return;
+    }
+
+    setOpeningDocumentKey(requestKey);
+    try {
+      const url = await getUrl();
+      if (!url) throw new Error('Private file URL could not be created');
+      newTab.opener = null;
+      newTab.location.href = url;
+    } catch {
+      newTab.close();
+      toast.error(isBn ? 'ডকুমেন্ট খোলা যায়নি। আবার চেষ্টা করুন।' : 'Unable to open document. Please try again.');
+    } finally {
+      setOpeningDocumentKey(null);
+    }
+  };
   
   const copyToClipboard = (text: string | null | undefined) => {
     if (!text) return;
@@ -1152,9 +1179,17 @@ export default function AdminDashboard() {
                             </td>
                             <td className="px-6 py-4">
                               {txn.screenshot_url ? (
-                                <a href={txn.screenshot_url} target="_blank" rel="noreferrer" className="text-primary-600 bg-primary-50 px-3 py-1.5 rounded-lg hover:bg-primary-100 transition-colors text-xs flex items-center gap-1.5 font-bold w-max">
-                                  <Eye size={14} /> View
-                                </a>
+                                <button
+                                  type="button"
+                                  onClick={() => void openPrivateDocument(
+                                    `transaction:${txn.id}`,
+                                    () => getTransactionScreenshotUrl(txn.id),
+                                  )}
+                                  disabled={openingDocumentKey === `transaction:${txn.id}`}
+                                  className="text-primary-600 bg-primary-50 px-3 py-1.5 rounded-lg hover:bg-primary-100 disabled:opacity-50 transition-colors text-xs flex items-center gap-1.5 font-bold w-max"
+                                >
+                                  <Eye size={14} /> {openingDocumentKey === `transaction:${txn.id}` ? (isBn ? 'খুলছে…' : 'Opening…') : (isBn ? 'দেখুন' : 'View')}
+                                </button>
                               ) : (
                                 <span className="text-gray-400 text-xs italic">No image</span>
                               )}
@@ -2395,14 +2430,17 @@ export default function AdminDashboard() {
                                 {url.split('/').pop() || 'document_file'}
                               </span>
                             </div>
-                            <a 
-                              href={url} 
-                              target="_blank" 
-                              rel="noreferrer" 
-                              className="px-3 py-2 bg-primary-50 hover:bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 dark:hover:bg-primary-900/50 rounded-lg text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                            <button
+                              type="button"
+                              onClick={() => void openPrivateDocument(
+                                `loan:${selectedLoan.id}:${key}`,
+                                () => getLoanDocumentUrl(selectedLoan.id, key),
+                              )}
+                              disabled={openingDocumentKey === `loan:${selectedLoan.id}:${key}`}
+                              className="px-3 py-2 bg-primary-50 hover:bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 dark:hover:bg-primary-900/50 rounded-lg text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
                             >
-                              <Eye size={14} /> {isBn ? 'ডকুমেন্ট দেখুন' : 'View Document'}
-                            </a>
+                              <Eye size={14} /> {openingDocumentKey === `loan:${selectedLoan.id}:${key}` ? (isBn ? 'খুলছে…' : 'Opening…') : (isBn ? 'ডকুমেন্ট দেখুন' : 'View Document')}
+                            </button>
                           </div>
                         ))}
                       </div>
