@@ -1,17 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { AlertTriangle, Clock, X, MessageCircle, CreditCard } from 'lucide-react';
+import { AlertTriangle, X, MessageCircle, CreditCard } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { getTelegramUser } from '../lib/telegram';
 import { getLoanApplications, getDepositStatus } from '../lib/api';
 import { useAppStore } from '../lib/store';
-import { convertDigits } from '../lib/translation';
 
 export default function FeeWarningPopup() {
   const [showPopup, setShowPopup] = useState(false);
   const [pendingLoan, setPendingLoan] = useState<any>(null);
-  const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number } | null>(null);
-  const [isExpired, setIsExpired] = useState(false);
   const { language } = useAppStore();
   const isBn = language === 'bn';
   const location = useLocation();
@@ -55,37 +52,6 @@ export default function FeeWarningPopup() {
 
     return () => clearInterval(interval);
   }, [location.pathname]);
-
-  useEffect(() => {
-    if (!pendingLoan) return;
-
-    const calculateTimeLeft = () => {
-      const appliedDate = new Date(pendingLoan.applied_at);
-      // Deadline is 8:00 PM (20:00:00) on the day of application
-      const deadline = new Date(appliedDate);
-      deadline.setHours(20, 0, 0, 0);
-
-      const now = new Date();
-      const difference = deadline.getTime() - now.getTime();
-
-      if (difference <= 0) {
-        setIsExpired(true);
-        setTimeLeft(null);
-      } else {
-        setIsExpired(false);
-        setTimeLeft({
-          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          minutes: Math.floor((difference / 1000 / 60) % 60),
-          seconds: Math.floor((difference / 1000) % 60)
-        });
-      }
-    };
-
-    calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 1000);
-
-    return () => clearInterval(timer);
-  }, [pendingLoan]);
 
   const handleClose = () => {
     lastClosedTime.current = Date.now();
@@ -138,48 +104,18 @@ export default function FeeWarningPopup() {
                     : 'Your application will not go into review or processing without paying the processing fee.'}
                 </p>
 
-                <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/30 rounded-xl p-3 mb-4">
+                <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl p-3 mb-4">
                   <div className="flex items-center gap-2 mb-1">
-                    <Clock size={14} className="text-rose-600 dark:text-rose-400" />
-                    <span className="text-[10px] font-bold uppercase text-rose-700 dark:text-rose-400 tracking-wider">
-                      {isBn ? 'আজ রাত ৮টার মধ্যে জমা দিন' : 'Pay by 8:00 PM today'}
+                    <CreditCard size={14} className="text-amber-700 dark:text-amber-300" />
+                    <span className="text-[11px] font-bold text-amber-900 dark:text-amber-200">
+                      {isBn ? 'প্রসেসিং ফি পর্যালোচনা করুন' : 'Review your processing fee'}
                     </span>
                   </div>
-                  <div className="text-[10px] text-rose-600 dark:text-rose-400 mb-2 leading-tight">
-                    {isBn 
-                      ? 'যে দিন আবেদন করেছেন, ওই দিনের ওয়ার্কিং টাইমের ভেতর জমা না দিলে আবেদন স্বয়ংক্রিয়ভাবে বাতিল হবে।' 
-                      : 'If not paid within working hours of the application day, it will be automatically cancelled.'}
-                  </div>
-                  
-                  {/* Countdown Timer */}
-                  <div className="flex items-center gap-2 justify-center bg-white dark:bg-gray-900 rounded-lg py-2 shadow-sm border border-rose-100 dark:border-rose-900/50">
-                    {isExpired ? (
-                      <span className="font-black text-rose-600 text-sm">{isBn ? 'সময় শেষ (বাতিলযোগ্য)' : 'Expired (Cancellable)'}</span>
-                    ) : timeLeft ? (
-                      <>
-                        <div className="flex flex-col items-center">
-                          <span className="font-black text-gray-900 dark:text-white text-base leading-none">
-                            {convertDigits(timeLeft.hours.toString().padStart(2, '0'), isBn)}
-                          </span>
-                          <span className="text-[8px] font-bold text-gray-500 uppercase mt-0.5">{isBn ? 'ঘণ্টা' : 'HR'}</span>
-                        </div>
-                        <span className="text-gray-300 dark:text-gray-700 font-black mb-2">:</span>
-                        <div className="flex flex-col items-center">
-                          <span className="font-black text-gray-900 dark:text-white text-base leading-none">
-                            {convertDigits(timeLeft.minutes.toString().padStart(2, '0'), isBn)}
-                          </span>
-                          <span className="text-[8px] font-bold text-gray-500 uppercase mt-0.5">{isBn ? 'মিনিট' : 'MIN'}</span>
-                        </div>
-                        <span className="text-gray-300 dark:text-gray-700 font-black mb-2">:</span>
-                        <div className="flex flex-col items-center">
-                          <span className="font-black text-rose-600 text-base leading-none">
-                            {convertDigits(timeLeft.seconds.toString().padStart(2, '0'), isBn)}
-                          </span>
-                          <span className="text-[8px] font-bold text-gray-500 uppercase mt-0.5">{isBn ? 'সেকেন্ড' : 'SEC'}</span>
-                        </div>
-                      </>
-                    ) : null}
-                  </div>
+                  <p className="text-[11px] leading-relaxed text-amber-800 dark:text-amber-300">
+                    {isBn
+                      ? 'প্রযোজ্য ফি ও জমার অবস্থা ডিপোজিট স্ক্রিনে যাচাই করুন। ফি যাচাই না হওয়া পর্যন্ত আবেদন পর্যালোচনায় দেরি হতে পারে।'
+                      : 'Review the applicable fee and current payment status on the Deposit screen. Review may be delayed until the fee is verified.'}
+                  </p>
                 </div>
 
                 <div className="flex gap-2">
