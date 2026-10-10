@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronDown, ArrowLeft, Mail } from 'lucide-react';
 import { useAppStore } from '../lib/store';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,12 @@ function ImoIcon(){return <span className="w-7 h-7 rounded-lg bg-current text-wh
 
 export default function Support(){
  const {language,systemSettings}=useAppStore(); const isBn=language==='bn'; const navigate=useNavigate(); const [openFaq,setOpenFaq]=useState<number|null>(0);
+
+ useEffect(() => {
+  if (window.location.hash === '#faqs') {
+   document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+ }, []);
  const contacts=[
   {key:'whatsappSupport',name:'WhatsApp',url:systemSettings?.whatsappSupport,icon:<WhatsAppIcon/>,tone:'text-[#25D366]',bg:'bg-[#25D366]/10 border-[#25D366]/20'},
   {key:'telegramSupport',name:'Telegram',url:systemSettings?.telegramSupport,icon:<TelegramIcon/>,tone:'text-[#229ED9]',bg:'bg-[#229ED9]/10 border-[#229ED9]/20'},
@@ -52,7 +58,7 @@ export default function Support(){
     })}
    </div>
 
-   <div id="faqs" className="mt-5 mb-2.5 flex items-end justify-between">
+   <div id="faqs" className="mt-5 mb-2.5 flex items-end justify-between scroll-mt-16">
     <div><h2 className="text-sm font-black text-slate-900 dark:text-white">{isBn?'সাধারণ জিজ্ঞাসা':'FAQs'}</h2><p className="text-[9px] text-slate-500 dark:text-slate-400 mt-0.5">{isBn?'দ্রুত উত্তর পেতে প্রশ্ন নির্বাচন করুন':'Tap a question for a quick answer'}</p></div>
    </div>
    <div className="space-y-2">
