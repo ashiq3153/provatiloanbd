@@ -326,18 +326,9 @@ async function uploadViaTelegramServer(file: File): Promise<string | null> {
     throw new Error(uploadError.message || 'File upload failed');
   }
 
-  const urlResponse = await fetch('/api/telegram-document-url', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ initData, path: prepared.path }),
-  });
-
-  const urlResult = await urlResponse.json().catch(() => null);
-  if (!urlResponse.ok || !urlResult?.ok || !urlResult?.url) {
-    throw new Error(urlResult?.error || 'Could not create file URL');
-  }
-
-  return urlResult.url;
+  // Persist only a bucket-qualified object path. The admin gateway creates a
+  // fresh short-lived signed URL only when an authorized reviewer opens a file.
+  return `loan_documents/${prepared.path}`;
 }
 
 export async function uploadDocument(file: File, _userId: number, _docType: string): Promise<string | null> {
