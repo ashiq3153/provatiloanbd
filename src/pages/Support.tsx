@@ -37,7 +37,7 @@ export default function Support(){
    <div className="grid grid-cols-2 gap-2.5">
     {contacts.map(c=>{
       const configuredUrl = c.url?.trim();
-      const href = c.key === 'emailSupport' && configuredUrl && !/^(mailto:|https?:\\/\\/)/i.test(configuredUrl)
+      const href = c.key === 'emailSupport' && configuredUrl && !/^(mailto:|https?:)/i.test(configuredUrl)
         ? `mailto:${configuredUrl}`
         : configuredUrl;
       const enabled=Boolean(href);
