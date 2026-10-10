@@ -3,6 +3,7 @@
  */
 import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import { calculateAuthoritativeLoan } from "./loan-finance.js";
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const ADMIN_BOT_TOKEN = process.env.TELEGRAM_ADMIN_BOT_TOKEN;
@@ -41,6 +42,38 @@ export function verifyInitData(initData) {
 function adminClient() {
   if (!SUPABASE_URL || !SERVICE_ROLE_KEY) throw new Error("Server database credentials are not configured");
   return createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+}
+
+async function getAuthoritativeLoanTerms(db, input, options = {}) {
+  const category = String(input?.loan_category || "").trim();
+  const { data: settingsRow, error: settingsError } = await db
+    .from("system_settings")
+    .select("value")
+    .eq("key", "global_loan_config")
+    .single();
+  if (settingsError || !settingsRow?.value) {
+    throw new Error("Loan configuration is unavailable");
+  }
+
+  const { data: activeRates, error: ratesError } = await db
+    .from("loan_rate_versions")
+    .select("id,monthly_rate,calculation_method")
+    .eq("loan_category", category)
+    .eq("is_active", true);
+  if (ratesError) throw ratesError;
+  if (!Array.isArray(activeRates) || activeRates.length !== 1) {
+    throw new Error("Exactly one active rate version is required for this loan category");
+  }
+
+  return calculateAuthoritativeLoan({
+    category,
+    amount: input?.amount,
+    tenureMonths: input?.tenure_months,
+    settings: settingsRow.value,
+    rateVersion: activeRates[0],
+    allowDisabledCategory: options.allowDisabledCategory === true,
+    existingTerms: options.existingTerms || null,
+  });
 }
 
 async function bridgeIdentity(telegramChatId, accessToken) {
@@ -133,9 +166,17 @@ async function updateMyLoanApplication(telegramUser, applicationId, payload) {
     throw new Error("Invalid loan update request");
   }
 
+  const { data: existingLoan, error: existingLoanError } = await db
+    .from("loan_applications")
+    .select("loan_category,amount,tenure_months")
+    .eq("id", applicationId)
+    .eq("chat_id", chatId)
+    .maybeSingle();
+  if (existingLoanError) throw existingLoanError;
+  if (!existingLoan) throw new Error("Loan application not found");
+
   const allowedFields = [
-    "loan_category","amount","tenure_months","interest_rate","emi_amount",
-    "processing_fee","security_deposit","full_name","father_name","mother_name",
+    "loan_category","amount","tenure_months","full_name","father_name","mother_name",
     "dob","gender","mobile","whatsapp","email","current_address",
     "permanent_address","nid_number","professional_info","bank_name",
     "account_name","account_number","routing_number","mobile_banking",
@@ -146,6 +187,24 @@ async function updateMyLoanApplication(telegramUser, applicationId, payload) {
   for (const key of allowedFields) {
     if (Object.prototype.hasOwnProperty.call(payload, key)) update[key] = payload[key];
   }
+
+  const financialInputs = {
+    loan_category: update.loan_category ?? existingLoan.loan_category,
+    amount: update.amount ?? existingLoan.amount,
+    tenure_months: update.tenure_months ?? existingLoan.tenure_months,
+  };
+  Object.assign(update, financialInputs);
+  const allowDisabledCategory = financialInputs.loan_category === existingLoan.loan_category;
+  Object.assign(
+    update,
+    await getAuthoritativeLoanTerms(db, financialInputs, {
+      allowDisabledCategory,
+      existingTerms: {
+        amount: existingLoan.amount,
+        tenureMonths: existingLoan.tenure_months,
+      },
+    })
+  );
 
   const { data, error } = await db.from("loan_applications")
     .update(update)
@@ -165,8 +224,7 @@ async function submitLoanApplication(telegramUser, payload) {
   await syncProfile(telegramUser);
 
   const allowedFields = [
-    "loan_category","amount","tenure_months","interest_rate","emi_amount",
-    "processing_fee","security_deposit","full_name","father_name","mother_name",
+    "loan_category","amount","tenure_months","full_name","father_name","mother_name",
     "dob","gender","mobile","whatsapp","email","current_address",
     "permanent_address","nid_number","professional_info","bank_name",
     "account_name","account_number","routing_number","mobile_banking",
@@ -177,6 +235,8 @@ async function submitLoanApplication(telegramUser, payload) {
   for (const key of allowedFields) {
     if (Object.prototype.hasOwnProperty.call(payload, key)) record[key] = payload[key];
   }
+
+  Object.assign(record, await getAuthoritativeLoanTerms(db, record));
 
   const { data, error } = await db.from("loan_applications").insert(record).select().single();
   if (error) throw error;
