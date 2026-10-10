@@ -44,14 +44,17 @@ These files were present on `v1.1-phase1` but did not match an applied migration
 
 - `20260911_phase1_security.sql` — combined SQL that overlaps earlier applied work but is not an exact applied migration source.
 - `20260912090000_v11_security_policies.sql` — explanatory/target-policy notes with no executable policy changes.
-- `20260919125000_phase1_authoritative_dashboard_stats.sql` — contains `public.get_dashboard_stats(bigint)`. The function exists in the live DB, its definition matches the stored proposal, and the DB ACL allows `authenticated` and `service_role` but not `anon`. However, no applied migration-history statement mentions that function. This is an **untracked live object** that needs a documented migration-history repair/baseline decision; do not blindly run it.
+- `20260919125000_phase1_authoritative_dashboard_stats.sql` — contains `public.get_dashboard_stats(bigint)`. The function exists in the live DB, its definition matches the stored SQL, and the DB ACL allows `authenticated` and `service_role` but not `anon`. However, no applied migration-history statement mentions that function. Its original legacy file remains preserved under proposals for audit.
 - `20260920150000_phase1_allow_revision_and_workflow_statuses.sql` — the same logical status constraint change is recorded as applied under `20260920085322`, not this filename/version.
+
+## Forward migration staged (not applied)
+
+Added `20261010060000_reconcile_live_dashboard_stats_function.sql` as a safe forward reconciliation. It reasserts the same verified `SECURITY INVOKER` function definition and explicit execute ACL (`authenticated` and `service_role`; not `anon`) and does not update application/customer rows. This is a new pending migration, not a claim that the old function was present in the recorded history. When approved and applied by the normal controlled migration workflow, it should establish a source-controlled forward record for the pre-existing object.
 
 ## Do not deploy yet
 
-1. Review the recovered SQL against the current live schema, policies, grants, triggers and function definitions.
-2. Resolve the `get_dashboard_stats` live-object/history discrepancy with the Supabase CLI on a working copy; use a deliberate migration repair or safe new migration only after review.
-3. Validate a local/non-production environment against this recovered sequence.
-4. Only then stage the new applicant draft/document tables and the core table-write restrictions (issues #21, #5 and PRs #14/#23).
+1. Review the recovered SQL against current live schema, policies, grants, triggers and function definitions.
+2. Validate the recovered sequence plus the new forward migration in a local/non-production database matching the live state; verify that function output and ACLs remain the same.
+3. Only then stage the applicant draft/document migration and core table-write restrictions (issues #21, #5 and PRs #14/#23).
 
-**No SQL was run from this recovery operation, and no live database schema/data/history was changed.** This branch is not permission to run `supabase db push` until the reconciliation is reviewed.
+**No SQL was run from this recovery operation, and no live database schema/data/history was changed.** The branch now has 29 active migration files: 28 recovered versions plus one pending forward reconciliation migration. Do not run `supabase db push` until review and non-production validation are complete.
