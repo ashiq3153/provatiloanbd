@@ -102,6 +102,8 @@ const blankProfileEditor: ProfileEditorFields = {
   fullName: '', fatherName: '', motherName: '', dob: '', gender: '',
   mobile: '', whatsapp: '', email: '', nidNumber: '', eTin: '',
   bloodGroup: '', maritalStatus: '', spouseProfession: '', spouseIncome: '',
+  bankName: '', accountName: '', accountNumber: '', routingNumber: '',
+  mobileBanking: '', nomineeName: '', nomineeRelation: '', nomineeMobile: '', nomineeNid: '',
 };
 
 function profileAddress(value: unknown, fallback?: string | null): AddressValue {
