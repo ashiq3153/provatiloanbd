@@ -72,7 +72,7 @@
   color: #34465a;
 }
 .dark .apply-accordion-body label { color: #d1dbe7; }
-.apply-accordion-body input,
+.apply-accordion-body input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
 .apply-accordion-body select,
 .apply-accordion-body textarea {
   width: 100%;
@@ -87,17 +87,17 @@
   font-weight: 500 !important;
   box-shadow: 0 1px 2px rgba(15, 42, 67, .03);
 }
-.dark .apply-accordion-body input,
+.dark .apply-accordion-body input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
 .dark .apply-accordion-body select,
 .dark .apply-accordion-body textarea {
   background-color: #111e2d !important;
   color: #f1f5f9 !important;
   border-color: #35485d !important;
 }
-.apply-accordion-body input::placeholder,
+.apply-accordion-body input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"])::placeholder,
 .apply-accordion-body textarea::placeholder { color: #8292a4 !important; opacity: 1; }
 .apply-accordion-body > div { min-width: 0; }
-@media (max-width: 380px) {
+@media (max-width: 430px) {
   .loan-category-reference-screen > section:first-child > div { padding-left: 14px !important; padding-right: 14px !important; }
   .loan-category-reference-screen article [class*="grid-cols-3"] { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
   .apply-accordion-body .grid.grid-cols-2 { grid-template-columns: minmax(0, 1fr) !important; }
@@ -124,4 +124,60 @@
 }
 .dark .loan-category-reference-screen button[class*="dark:bg-amber-950"] {
   background-color: #123431 !important;
+}
+
+/* Harmonize the accordion section headers that group the applicant's details. */
+div[id^="accordion-section-"] > button {
+  min-height: 64px !important;
+  padding: 12px 14px !important;
+  border-radius: 15px !important;
+  border-color: #d8e2ec !important;
+  background: #fff !important;
+  color: #1e3449 !important;
+  box-shadow: 0 3px 12px rgba(15, 42, 67, .045) !important;
+  gap: 10px !important;
+}
+.dark div[id^="accordion-section-"] > button {
+  border-color: #2b3d50 !important;
+  background: #101d2b !important;
+  color: #e5edf5 !important;
+}
+div[id^="accordion-section-"] > button > div:first-child > div:first-child {
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 12px !important;
+}
+div[id^="accordion-section-"] > button span {
+  line-height: 1.4 !important;
+}
+div[id^="accordion-section-"] > button [class*="text-[9px]"],
+div[id^="accordion-section-"] > button [class*="text-[10px]"] {
+  font-size: 11px !important;
+}
+.apply-accordion-body .space-y-3 > div,
+.apply-accordion-body .grid > div {
+  min-width: 0;
+}
+.apply-accordion-body .grid { column-gap: 12px !important; row-gap: 14px !important; }
+.apply-accordion-body input[type="checkbox"],
+.apply-accordion-body input[type="radio"] {
+  width: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  height: 18px !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+@media (max-width: 430px) {
+  /* A single-column form keeps every label and control readable inside Telegram. */
+  .apply-accordion-body .grid.grid-cols-2 {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .apply-accordion-body .grid.grid-cols-2 > .col-span-2 {
+    grid-column: auto !important;
+  }
+  .loan-category-reference-screen .flex.gap-1\.5.overflow-x-auto > button {
+    min-width: 96px !important;
+    padding: 8px 10px !important;
+  }
 }
