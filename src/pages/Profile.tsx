@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAppStore } from '../lib/store';
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, type FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { convertDigits } from '../lib/translation';
 import { AddressSelector, AddressValue, emptyAddress } from '../components/AddressSelector';
@@ -153,7 +153,7 @@ export default function Profile() {
     setEditorFields(previous => ({ ...previous, [key]: value }));
   };
 
-  const saveProfileEditor = async (event: React.FormEvent<HTMLFormElement>) => {
+  const saveProfileEditor = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (profileSaving) return;
     setProfileSaving(true);
