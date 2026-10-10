@@ -1,3 +1,4 @@
+import "../styles/loan-application-mobile.css";
 import React, { useState, useEffect } from "react";
 import { getTelegramUser } from "../lib/telegram";
 import { submitLoanApplication, getLoanApplicationById, updateLoanApplication, checkDuplicateApplication, uploadDocument } from "../lib/api";
@@ -3429,7 +3430,7 @@ export default function ApplyLoan() {
 
   return (
     <FormProvider {...methods}>
-    <div className="apply-loan-screen app-apply-theme min-h-full bg-slate-50 dark:bg-[#0b1220] transition-colors flex flex-col relative">
+    <div className="apply-loan-screen app-apply-theme miniapp-loan-flow min-h-full bg-slate-50 dark:bg-[#0b1220] transition-colors flex flex-col relative">
       {/* Easy-style application header — visual language follows the supplied reference screens. */}
       {step < 5 && (
         <div className={`loan-easy-font sticky top-0 z-30 backdrop-blur border-b ${
@@ -3471,11 +3472,11 @@ export default function ApplyLoan() {
               </div>
             </div>
             <div className={`mt-2 h-1 rounded-full overflow-hidden ${step === 1 ? "bg-white/15" : "bg-slate-200 dark:bg-slate-800"}`}>
-              <motion.div className={`h-full rounded-full ${step === 1 ? "bg-amber-400" : "bg-gradient-to-r from-blue-700 to-blue-500"}`} initial={{ width: 0 }} animate={{ width: `${Math.min(step / 8, 1) * 100}%` }} transition={{ duration: 0.3 }} />
+              <motion.div className={`h-full rounded-full ${step === 1 ? "bg-amber-400" : "bg-gradient-to-r from-blue-700 to-blue-500"}`} initial={{ width: 0 }} animate={{ width: `${Math.min(step / 4, 1) * 100}%` }} transition={{ duration: 0.3 }} />
             </div>
             {step >= 2 && category && (
               <div className="mt-3 flex items-center gap-2 overflow-x-auto no-scrollbar">
-                <span className="shrink-0 px-3 py-1.5 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 text-[10px] font-black text-slate-700 dark:text-slate-200">{isBn ? `ধাপ ${convertDigits(step, true)} / ৮ • ${step === 2 ? "পরিমাণ ও মেয়াদ" : step === 3 ? "ব্যক্তিগত তথ্য" : "ডকুমেন্ট"}` : `Step ${step} / 8 • ${step === 2 ? "Amount & Tenure" : step === 3 ? "Personal Information" : "Documents"}`}</span>
+                <span className="shrink-0 px-3 py-1.5 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 text-[10px] font-black text-slate-700 dark:text-slate-200">{isBn ? `ধাপ ${convertDigits(step, true)} / ৪ • ${step === 2 ? "পরিমাণ ও মেয়াদ" : step === 3 ? "ব্যক্তিগত তথ্য" : "ডকুমেন্ট"}` : `Step ${step} / 4 • ${step === 2 ? "Amount & Tenure" : step === 3 ? "Personal Information" : "Documents"}`}</span>
                 <span className="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 text-[10px] font-black text-blue-800 dark:text-blue-200">{category.title} {isBn ? "লোন" : "Loan"}</span>
               </div>
             )}
@@ -3504,7 +3505,7 @@ export default function ApplyLoan() {
 
       {/* Bottom Action Bar - Compact */}
       {step > 1 && step < 5 && (
-        <div className="fixed left-0 right-0 bottom-[88px] px-4 py-2 z-40 flex justify-between gap-2 pointer-events-none">
+        <div className="loan-bottom-actions fixed left-0 right-0 bottom-[88px] px-4 py-2 z-40 flex justify-between gap-2 pointer-events-none">
           {step > 1 && (
             <button
               type="button"
