@@ -16,17 +16,36 @@ export default function ApplicationDetails() {
   const isBn = language === 'bn';
   const [loading, setLoading] = useState(true);
   const [appDetails, setAppDetails] = useState<LoanApplication | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchApp = async () => {
-      if (!id) return;
       setLoading(true);
-      const data = await getLoanApplicationById(id);
-      setAppDetails(data);
-      setLoading(false);
+      setLoadError(false);
+      if (!id) {
+        setAppDetails(null);
+        setLoadError(true);
+        setLoading(false);
+        return;
+      }
+      try {
+        const data = await getLoanApplicationById(id);
+        if (!cancelled) setAppDetails(data);
+      } catch (error) {
+        console.error('Application details load failed:', error);
+        if (!cancelled) {
+          setAppDetails(null);
+          setLoadError(true);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     };
     fetchApp();
-  }, [id]);
+    return () => { cancelled = true; };
+  }, [id, retryCount]);
 
   if (loading) {
     return (
@@ -36,17 +55,33 @@ export default function ApplicationDetails() {
     );
   }
 
-  if (!appDetails) {
+  if (loadError || !appDetails) {
+    const retryableError = loadError;
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-[#0b1220] flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0b1220] flex flex-col items-center justify-center p-6 text-center">
         <div className="w-20 h-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-center mb-4">
-          <FileText size={32} className="text-gray-400" />
+          {retryableError ? <AlertCircle size={32} className="text-amber-500" /> : <FileText size={32} className="text-gray-400" />}
         </div>
-        <p className="text-gray-900 dark:text-white font-bold text-lg mb-2">{isBn ? 'আবেদন পাওয়া যায়নি' : 'Application not found'}</p>
-        <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-6">{isBn ? 'দুঃখিত, এই আইডি দিয়ে কোনো আবেদন খুঁজে পাওয়া যায়নি।' : 'Sorry, no application could be found with this ID.'}</p>
-        <button onClick={() => navigate(-1)} className="px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold active:scale-95 transition-all shadow-sm">
-          {isBn ? 'ফিরে যান' : 'Go Back'}
-        </button>
+        <p className="text-gray-900 dark:text-white font-bold text-lg mb-2">
+          {retryableError
+            ? (isBn ? 'আবেদনের তথ্য লোড করা যায়নি' : 'Could not load application details')
+            : (isBn ? 'আবেদন পাওয়া যায়নি' : 'Application not found')}
+        </p>
+        <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-6">
+          {retryableError
+            ? (isBn ? 'সার্ভার বা সংযোগে সমস্যা হতে পারে। আপনার আবেদন মুছে গেছে—এমনটি ধরে নেওয়া হচ্ছে না।' : 'The service may be temporarily unavailable. This does not mean your application was deleted.')
+            : (isBn ? 'এই আবেদনটি পাওয়া যায়নি অথবা আপনার অ্যাকাউন্ট থেকে দেখা যাচ্ছে না।' : 'This application was not found or is not available to your account.')}
+        </p>
+        <div className="flex w-full max-w-xs flex-col gap-2">
+          {retryableError && (
+            <button onClick={() => setRetryCount(value => value + 1)} className="px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold active:scale-95 transition-all shadow-sm">
+              {isBn ? 'আবার চেষ্টা করুন' : 'Try again'}
+            </button>
+          )}
+          <button onClick={() => navigate(-1)} className="px-8 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-gray-800 dark:text-white rounded-xl font-bold active:scale-95 transition-all">
+            {isBn ? 'ফিরে যান' : 'Go Back'}
+          </button>
+        </div>
       </div>
     );
   }
