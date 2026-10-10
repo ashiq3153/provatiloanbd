@@ -133,40 +133,48 @@ export async function checkDuplicateApplication(
 
 export async function getLoanApplications(_chatId: number): Promise<LoanApplication[]> {
   try {
-    // Read through the Telegram-verified server gateway so My Loans does not
-    // depend on a stale/mismatched browser Supabase anonymous session.
+    // Reads are scoped by Telegram initData on the server; never turn an
+    // authentication/service failure into a misleading empty loan list.
     // @ts-ignore
     const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
-    if (!initData) return [];
+    if (!initData) throw new Error('Telegram initData is missing');
     const response = await fetch('/api/telegram-auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ initData, action: 'loan', loanAction: 'get_my_loans' }),
     });
     const result = await response.json().catch(() => null);
-    if (!response.ok || !result?.ok) {
-      console.error('getLoanApplications gateway error:', result?.error || response.statusText);
-      return [];
+    if (!response.ok || !result?.ok || !Array.isArray(result?.data)) {
+      throw new Error(result?.error || 'Could not load loan records');
     }
-    return (result.data || []) as LoanApplication[];
+    return result.data as LoanApplication[];
   } catch (error) {
     console.error('getLoanApplications error:', error);
-    return [];
+    throw error;
   }
 }
 
 export async function getLoanApplicationById(applicationId: string): Promise<LoanApplication | null> {
-  const { data, error } = await supabase
-    .from('loan_applications')
-    .select('*')
-    .eq('id', applicationId)
-    .single();
-
-  if (error) {
+  try {
+    // Fetch through the Telegram-verified, owner-scoped gateway instead of an
+    // unrestricted-by-ID browser query.
+    // @ts-ignore
+    const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+    if (!initData) throw new Error('Telegram initData is missing');
+    const response = await fetch('/api/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, action: 'loan', loanAction: 'get_my_loan', loanId: applicationId }),
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result?.ok) {
+      throw new Error(result?.error || 'Could not load the loan application');
+    }
+    return (result.data || null) as LoanApplication | null;
+  } catch (error) {
     console.error('getLoanApplicationById error:', error);
-    return null;
+    throw error;
   }
-  return data;
 }
 
 export async function getLoanEmiSchedule(loanId: string): Promise<import('../types/database').LoanEmiSchedule[]> {
@@ -184,42 +192,35 @@ export async function getLoanEmiSchedule(loanId: string): Promise<import('../typ
 }
 
 export async function getActiveLoans(chatId: number): Promise<LoanApplication[]> {
-  const { data, error } = await supabase
-    .from('loan_applications')
-    .select('*')
-    .eq('chat_id', chatId)
-    .in('status', ['active', 'approved'])
-    .order('applied_at', { ascending: false });
-
-  if (error) {
-    console.error('getActiveLoans error:', error);
-    return [];
-  }
-  return data || [];
+  // Reuse the same server-verified user-scoped list used by the Loans screen.
+  const loans = await getLoanApplications(chatId);
+  return loans
+    .filter(loan => loan.status === 'active' || loan.status === 'approved')
+    .sort((a, b) => new Date(b.applied_at).getTime() - new Date(a.applied_at).getTime());
 }
 
 // ── Transaction APIs ─────────────────────────────────────
 
 export async function getTransactions(_chatId: number): Promise<Transaction[]> {
   try {
-    // Use the same Telegram-verified gateway for transaction history.
+    // Use the Telegram-verified gateway; distinguish service errors from a
+    // genuinely empty transaction history.
     // @ts-ignore
     const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
-    if (!initData) return [];
+    if (!initData) throw new Error('Telegram initData is missing');
     const response = await fetch('/api/telegram-auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ initData, action: 'transaction', transactionAction: 'get_my_transactions' }),
     });
     const result = await response.json().catch(() => null);
-    if (!response.ok || !result?.ok) {
-      console.error('getTransactions gateway error:', result?.error || response.statusText);
-      return [];
+    if (!response.ok || !result?.ok || !Array.isArray(result?.data)) {
+      throw new Error(result?.error || 'Could not load transaction history');
     }
-    return (result.data || []) as Transaction[];
+    return result.data as Transaction[];
   } catch (error) {
     console.error('getTransactions error:', error);
-    return [];
+    throw error;
   }
 }
 
@@ -386,7 +387,7 @@ export async function getDashboardStats(chatId: number): Promise<DashboardStats>
   const { data, error } = await supabase.rpc('get_dashboard_stats', { p_chat_id: chatId });
   if (error || !data) {
     console.error('getDashboardStats error:', error);
-    return { totalBalance: 0, depositBalance: 0, withdrawBalance: 0, savingsBalance: 0, activeLoansCount: 0, pendingApplications: 0, totalOutstanding: 0 };
+    throw error || new Error('Dashboard statistics are unavailable');
   }
   return data as DashboardStats;
 }
@@ -444,32 +445,41 @@ export async function getPublicSettings(key: string): Promise<any> {
 export async function getMyNotifications(): Promise<any[]> {
   const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
   const user = getTelegramUser();
+  if (!initData) throw new Error('Telegram initData is missing');
   const response = await fetch('/api/telegram-auth', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ initData, action: 'user', userAction: 'get_notifications', payload: { chatId: user.id } }),
   });
   const result = await response.json().catch(() => null);
-  return response.ok && result?.ok ? (result.data || []) : [];
+  if (!response.ok || result?.success !== true || !Array.isArray(result?.data)) {
+    throw new Error(result?.error || 'Could not load notifications');
+  }
+  return result.data;
 }
 
 export async function markMyNotificationRead(id: string): Promise<boolean> {
   const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
   const user = getTelegramUser();
+  if (!initData || !id) return false;
   const response = await fetch('/api/telegram-auth', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ initData, action: 'user', userAction: 'mark_notification_read', payload: { id, chatId: user.id } }),
+    body: JSON.stringify({ initData, action: 'user', userAction: 'mark_notification_read', id, payload: { id, chatId: user.id } }),
   });
   const result = await response.json().catch(() => null);
-  return response.ok && result?.ok && result.data === true;
+  return response.ok && result?.success === true && result.data === true;
 }
 
 export async function getMyKycReviews(): Promise<any[]> {
   const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
   const user = getTelegramUser();
+  if (!initData) throw new Error('Telegram initData is missing');
   const response = await fetch('/api/telegram-auth', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ initData, action: 'user', userAction: 'get_kyc_reviews', payload: { chatId: user.id } }),
   });
   const result = await response.json().catch(() => null);
-  return response.ok && result?.ok ? (result.data || []) : [];
+  if (!response.ok || result?.success !== true || !Array.isArray(result?.data)) {
+    throw new Error(result?.error || 'Could not load KYC reviews');
+  }
+  return result.data;
 }
