@@ -178,7 +178,7 @@ export default function AdminDashboard() {
       if (!url) throw new Error('Private file URL could not be created');
       newTab.opener = null;
       newTab.location.href = url;
-    } catch (error) {
+    } catch {
       newTab.close();
       toast.error(isBn ? 'ডকুমেন্ট খোলা যায়নি। আবার চেষ্টা করুন।' : 'Unable to open document. Please try again.');
     } finally {
