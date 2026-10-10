@@ -15,11 +15,13 @@ export default function Withdraw() {
   const { language } = useAppStore();
   const isBn = language === 'bn';
   const user = getTelegramUser();
+  const bankStorageKey = `provati_user_bank_${user.id}`;
   const [amount, setAmount] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [availableBalance, setAvailableBalance] = useState(0);
   const [activeLoan, setActiveLoan] = useState<LoanApplication | null>(null);
+  const [detailsLoadError, setDetailsLoadError] = useState(false);
 
   const [bankAccount, setBankAccount] = useState<{
     bankName: string;
@@ -34,15 +36,24 @@ export default function Withdraw() {
   const [newRoutingNumber, setNewRoutingNumber] = useState('');
 
   useEffect(() => {
-    const savedBank = localStorage.getItem('provati_user_bank');
+    // The old unscoped key could expose one Telegram member's bank details to
+    // another account used on the same device. Do not migrate ownerless data.
+    localStorage.removeItem('provati_user_bank');
+    const savedBank = localStorage.getItem(bankStorageKey);
     if (savedBank) {
       try {
-        setBankAccount(JSON.parse(savedBank));
+        const parsed = JSON.parse(savedBank);
+        if (parsed && typeof parsed.bankName === 'string' && typeof parsed.accountName === 'string' && typeof parsed.accountNumber === 'string') {
+          setBankAccount(parsed);
+        } else {
+          localStorage.removeItem(bankStorageKey);
+        }
       } catch (e) {
-        console.error(e);
+        console.error('Could not read saved bank account:', e);
+        localStorage.removeItem(bankStorageKey);
       }
     }
-  }, []);
+  }, [bankStorageKey]);
 
   const saveBankAccount = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,14 +67,14 @@ export default function Withdraw() {
       accountNumber: newAccountNumber,
       routingNumber: newRoutingNumber || undefined
     };
-    localStorage.setItem('provati_user_bank', JSON.stringify(newAcc));
+    localStorage.setItem(bankStorageKey, JSON.stringify(newAcc));
     setBankAccount(newAcc);
     setShowAddForm(false);
     toast.success(isBn ? 'ব্যাংক একাউন্ট সফলভাবে সংরক্ষিত হয়েছে' : 'Bank account saved successfully');
   };
 
   const deleteBankAccount = () => {
-    localStorage.removeItem('provati_user_bank');
+    localStorage.removeItem(bankStorageKey);
     setBankAccount(null);
     setNewBankName('');
     setNewAccountName('');
@@ -95,12 +106,17 @@ export default function Withdraw() {
         }
       } catch (err) {
         console.error('Error fetching withdrawal details:', err);
+        setDetailsLoadError(true);
       }
     };
     fetchData();
   }, [user.id]);
 
   const handleWithdraw = async () => {
+    if (detailsLoadError) {
+      toast.error(isBn ? 'ব্যালেন্স ও ডিপোজিটের অবস্থা লোড হয়নি। আগে আবার চেষ্টা করুন।' : 'Balance and deposit status have not loaded. Please retry first.');
+      return;
+    }
     if (!amount || Number(amount) <= 0) {
       toast.error(isBn ? 'সঠিক পরিমাণ লিখুন' : 'Enter a valid amount');
       return;
@@ -174,6 +190,13 @@ export default function Withdraw() {
       </div>
 
       <div className="flex-1 p-5 space-y-6">
+        {detailsLoadError && (
+          <div role="alert" className="rounded-2xl border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4">
+            <p className="text-sm font-bold text-amber-900 dark:text-amber-200">{isBn ? 'ব্যালেন্স যাচাই করা যায়নি' : 'Balance could not be verified'}</p>
+            <p className="mt-1 text-xs leading-relaxed text-amber-800 dark:text-amber-300">{isBn ? 'সার্ভারের তথ্য ছাড়া উত্তোলন করা যাবে না।' : 'Withdrawals are blocked until current balance and deposit status are confirmed.'}</p>
+            <button type="button" onClick={() => window.location.reload()} className="mt-3 min-h-10 rounded-xl bg-amber-700 px-4 py-2 text-xs font-bold text-white">{isBn ? 'আবার চেষ্টা করুন' : 'Retry'}</button>
+          </div>
+        )}
         
         {/* Available Balance Card */}
         <motion.div 
