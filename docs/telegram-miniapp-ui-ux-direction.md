@@ -30,14 +30,14 @@ Recommended six clear stages:
 5. **Profession, income & banking** — conditional occupation/business/student/expat/medical details and bank fields; hide irrelevant options when a profession is selected.
 6. **Documents, review & submit** — required/optional file groups, missing-item checklist, complete application summary and declaration. The final Review state must be a separate substate before the submit action, not an immediate submit from the document uploader.
 
-The current code is not yet at this target: it has five actual states, the progress label incorrectly says “of 8”, and most logic is concentrated in a ~286 KB `ApplyLoan.tsx`. This PR corrects the step counter and introduces scoped responsive style tokens only. Further component extraction and the dedicated review substate remain subsequent work.
+The current code has four data-entry views (category, amount/tenure, combined applicant details, documents), a separate final review/consent view, and a success view. This PR corrects the progress counter to five actionable stages and adds the final review before submit. Applicant identity/address/profession fields are still combined in one large view; splitting them into the target six-stage journey and extracting maintainable components remains the next UI iteration. Most of the flow is still concentrated in a ~286 KB `ApplyLoan.tsx`.
 
 ## Implementation order
 1. Normalize responsive page canvas, mobile gutters, safe-area actions and body-control sizes.
-2. Make the displayed progress indicator match the actual four editable stages plus final success screen (the current flow); prevent the visual from claiming nonexistent steps.
+2. Make the displayed progress indicator match the five actionable stages (four data-entry views plus final review) and keep success outside the step count.
 3. Split the giant ApplyLoan component into step components while retaining the server-side field allowlists and validations.
 4. Integrate resumable drafts and normalized documents after the database migration history is reconciled (issue #20; applicant model in PR #23).
-5. Add the explicit Review/Consent state and align the user journey with six clear stages.
+5. Split the combined applicant details view into distinct Identity/Contact, Address/Family and Profession/Income/Banking stages; align the complete journey with six clear stages.
 6. Apply the same semantic token system to Home, Loan Categories, My Loans, Profile and Admin in controlled screen-by-screen batches.
 
 ## Manual visual QA (no paid TestSprite)
