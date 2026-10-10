@@ -48,7 +48,7 @@ export default function Support(){
     })}
    </div>
 
-   <div className="mt-5 mb-2.5 flex items-end justify-between">
+   <div id="faqs" className="mt-5 mb-2.5 flex items-end justify-between">
     <div><h2 className="text-sm font-black text-slate-900 dark:text-white">{isBn?'সাধারণ জিজ্ঞাসা':'FAQs'}</h2><p className="text-[9px] text-slate-500 dark:text-slate-400 mt-0.5">{isBn?'দ্রুত উত্তর পেতে প্রশ্ন নির্বাচন করুন':'Tap a question for a quick answer'}</p></div>
    </div>
    <div className="space-y-2">
