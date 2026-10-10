@@ -250,8 +250,8 @@ export default function LoanCategories() {
                   <InfoBox label="সুদের হার" value={details.intRates + '/মাস'} />
                   <InfoBox label="মেয়াদ" value={details.tenureRange} />
                   <InfoBox label="প্রসেসিং সময়" value={details.procTime} />
-                  <InfoBox label="প্রসেসিং ফি" value={(details.procFee * 100).toFixed(2) + '%'} />
-                  <InfoBox label="সঞ্চয়/ডিপোজিট" value={(details.secDeposit * 100).toFixed(0) + '%'} />
+                  <InfoBox label="প্রসেসিং ফি" value={details.procFeeLabel} />
+                  <InfoBox label="সঞ্চয়/ডিপোজিট" value={details.secDepositLabel} />
                 </div>
               </section>
               <section>
