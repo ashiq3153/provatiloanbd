@@ -4,12 +4,16 @@ import {
   UserRound, Phone, MapPin, IdCard, FileText, ShieldCheck, Shield,
   LockKeyhole, CircleHelp, Headset, ChevronRight, CheckCircle2,
   LogOut, Sun, Moon, Languages, Volume2, VolumeX, Wallet, ArrowDownToLine, ArrowUpFromLine,
+  Pencil, X, Save, LoaderCircle, CalendarDays, Mail, Fingerprint,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAppStore } from '../lib/store';
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { convertDigits } from '../lib/translation';
+import { AddressSelector, AddressValue, emptyAddress } from '../components/AddressSelector';
+import { getMyProfile, updateMyProfile, type ProfilePersonalDetails } from '../lib/api';
+import { toast } from 'sonner';
 
 type InfoRowProps = {
   icon: typeof UserRound;
@@ -68,13 +72,109 @@ const maskTail = (value: string | null | undefined) => {
   return '•••• ' + cleaned.slice(-4);
 };
 
+type ProfileEditorFields = {
+  fullName: string;
+  fatherName: string;
+  motherName: string;
+  dob: string;
+  gender: string;
+  mobile: string;
+  whatsapp: string;
+  email: string;
+  nidNumber: string;
+  eTin: string;
+  bloodGroup: string;
+  maritalStatus: string;
+  spouseProfession: string;
+  spouseIncome: string;
+};
+
+const blankProfileEditor: ProfileEditorFields = {
+  fullName: '', fatherName: '', motherName: '', dob: '', gender: '',
+  mobile: '', whatsapp: '', email: '', nidNumber: '', eTin: '',
+  bloodGroup: '', maritalStatus: '', spouseProfession: '', spouseIncome: '',
+};
+
+function profileAddress(value: unknown, fallback?: string | null): AddressValue {
+  let source = value;
+  if (typeof source === 'string') {
+    try { source = JSON.parse(source); } catch { source = null; }
+  }
+  if (source && typeof source === 'object' && !Array.isArray(source)) {
+    return { ...emptyAddress(), ...(source as Partial<AddressValue>) };
+  }
+  if (fallback?.trim()) return { ...emptyAddress(), village: fallback.trim() };
+  return emptyAddress();
+}
+
 export default function Profile() {
   const user = getTelegramUser();
   const navigate = useNavigate();
   const {
-    theme, toggleTheme, language, setLanguage, soundEnabled, setSoundEnabled, userProfile,
+    theme, toggleTheme, language, setLanguage, soundEnabled, setSoundEnabled, userProfile, setUserProfile,
   } = useAppStore();
+  const [profileEditorOpen, setProfileEditorOpen] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [editorFields, setEditorFields] = useState<ProfileEditorFields>(blankProfileEditor);
+  const [editorCurrentAddress, setEditorCurrentAddress] = useState<AddressValue>(emptyAddress());
+  const [editorPermanentAddress, setEditorPermanentAddress] = useState<AddressValue>(emptyAddress());
   const isBn = language === 'bn';
+
+  useEffect(() => {
+    getMyProfile()
+      .then(profile => { if (profile) setUserProfile(profile); })
+      .catch(error => console.error('Profile refresh failed:', error));
+  }, [setUserProfile]);
+
+  const openProfileEditor = () => {
+    const details = (userProfile?.personal_details || {}) as Partial<ProfilePersonalDetails>;
+    setEditorFields({
+      fullName: details.fullName || [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(' '),
+      fatherName: details.fatherName || '',
+      motherName: details.motherName || '',
+      dob: details.dob || '',
+      gender: details.gender || '',
+      mobile: details.mobile || userProfile?.phone || '',
+      whatsapp: details.whatsapp || '',
+      email: details.email || '',
+      nidNumber: details.nidNumber || userProfile?.nid_number || '',
+      eTin: details.eTin || '',
+      bloodGroup: details.bloodGroup || '',
+      maritalStatus: details.maritalStatus || '',
+      spouseProfession: details.spouseProfession || '',
+      spouseIncome: details.spouseIncome || '',
+    });
+    setEditorCurrentAddress(profileAddress(details.currentAddress, userProfile?.address));
+    setEditorPermanentAddress(profileAddress(details.permanentAddress));
+    setProfileEditorOpen(true);
+  };
+
+  const updateEditorField = (key: keyof ProfileEditorFields, value: string) => {
+    setEditorFields(previous => ({ ...previous, [key]: value }));
+  };
+
+  const saveProfileEditor = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (profileSaving) return;
+    setProfileSaving(true);
+    try {
+      const payload: ProfilePersonalDetails = {
+        ...editorFields,
+        currentAddress: editorCurrentAddress as unknown as Record<string, string>,
+        permanentAddress: editorPermanentAddress as unknown as Record<string, string>,
+      };
+      const saved = await updateMyProfile(payload);
+      if (!saved) throw new Error('Profile was not saved');
+      setUserProfile(saved);
+      setProfileEditorOpen(false);
+      toast.success(isBn ? 'প্রোফাইল সফলভাবে আপডেট হয়েছে' : 'Profile updated successfully');
+    } catch (error) {
+      console.error('Profile update failed:', error);
+      toast.error(isBn ? 'প্রোফাইল আপডেট করা যায়নি। আবার চেষ্টা করুন।' : 'Could not update your profile. Please try again.');
+    } finally {
+      setProfileSaving(false);
+    }
+  };
   const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Telegram User';
   const memberName = [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(' ') || fullName;
   const memberId = 'PSS-' + String(userProfile?.chat_id ?? user.id).slice(-6);
@@ -132,18 +232,33 @@ export default function Profile() {
             <span>{isBn ? 'এটি শুধু প্রোফাইলে থাকা তথ্যের হিসাব—KYC যাচাই সম্পন্ন হওয়ার প্রমাণ নয়।' : 'This measures profile information only; it does not mean KYC verification is complete.'}</span>
           </div>
         </section>
+        <div className="fig-profile-edit-bar">
+          <div>
+            <strong>{isBn ? 'আপনার তথ্য হালনাগাদ রাখুন' : 'Keep your information up to date'}</strong>
+            <span>{isBn ? 'এখানে সেভ করা তথ্য লোন আবেদনে অটো-ফিল হবে।' : 'Saved details will prefill your loan application.'}</span>
+          </div>
+          <button type="button" onClick={openProfileEditor}><Pencil size={15} />{isBn ? 'তথ্য সম্পাদনা' : 'Edit details'}</button>
+        </div>
         <div className="fig-profile-separator" />
 
         <SectionCard title={isBn ? 'সদস্য পরিচিতি' : 'Member information'} icon={UserRound}>
           <InfoRow icon={UserRound} title={isBn ? 'Telegram নাম' : 'Telegram name'} value={memberName} /><RowDivider />
           <InfoRow icon={IdCard} title={isBn ? 'সদস্য আইডি' : 'Member ID'} value={memberId} /><RowDivider />
           <InfoRow icon={FileText} title={isBn ? 'Telegram ইউজারনেম' : 'Telegram username'} value={user.username ? '@' + user.username : displayOrMissing(null, isBn)} /><RowDivider />
-          <InfoRow icon={IdCard} title={isBn ? 'জাতীয় পরিচয়পত্র' : 'National ID'} value={nid} />
+          <InfoRow icon={IdCard} title={isBn ? 'জাতীয় পরিচয়পত্র' : 'National ID'} value={nid} onClick={openProfileEditor} />
+        </SectionCard>
+
+        <SectionCard title={isBn ? 'লোন আবেদনের ব্যক্তিগত তথ্য' : 'Loan application details'} icon={Fingerprint} action={<button type="button" className="fig-profile-text-action" onClick={openProfileEditor}>{isBn ? 'সম্পাদনা' : 'Edit'}</button>}>
+          <InfoRow icon={UserRound} title={isBn ? 'আবেদনকারীর নাম' : 'Applicant name'} value={displayOrMissing((userProfile?.personal_details as any)?.fullName, isBn)} onClick={openProfileEditor} /><RowDivider />
+          <InfoRow icon={UserRound} title={isBn ? 'পিতার নাম' : "Father's name"} value={displayOrMissing((userProfile?.personal_details as any)?.fatherName, isBn)} onClick={openProfileEditor} /><RowDivider />
+          <InfoRow icon={UserRound} title={isBn ? 'মাতার নাম' : "Mother's name"} value={displayOrMissing((userProfile?.personal_details as any)?.motherName, isBn)} onClick={openProfileEditor} /><RowDivider />
+          <InfoRow icon={CalendarDays} title={isBn ? 'জন্ম তারিখ' : 'Date of birth'} value={displayOrMissing((userProfile?.personal_details as any)?.dob, isBn)} onClick={openProfileEditor} /><RowDivider />
+          <InfoRow icon={Mail} title={isBn ? 'ইমেইল' : 'Email'} value={displayOrMissing((userProfile?.personal_details as any)?.email, isBn)} onClick={openProfileEditor} />
         </SectionCard>
 
         <SectionCard title={isBn ? 'যোগাযোগ' : 'Contact'} icon={Phone}>
-          <InfoRow icon={Phone} title={isBn ? 'মোবাইল' : 'Mobile'} value={phone} description={isBn ? 'সংরক্ষিত নম্বরের শেষ চারটি অঙ্ক দেখানো হচ্ছে' : 'Only the last four digits of a saved number are shown'} /><RowDivider />
-          <InfoRow icon={MapPin} title={isBn ? 'ঠিকানা' : 'Address'} value={address} description={isBn ? 'প্রোফাইলে থাকা ঠিকানা' : 'Address currently saved in your profile'} />
+          <InfoRow icon={Phone} title={isBn ? 'মোবাইল' : 'Mobile'} value={phone} description={isBn ? 'সংরক্ষিত নম্বরের শেষ চারটি অঙ্ক দেখানো হচ্ছে' : 'Only the last four digits of a saved number are shown'} onClick={openProfileEditor} /><RowDivider />
+          <InfoRow icon={MapPin} title={isBn ? 'ঠিকানা' : 'Address'} value={address} description={isBn ? 'প্রোফাইলে থাকা ঠিকানা' : 'Address currently saved in your profile'} onClick={openProfileEditor} />
         </SectionCard>
 
         <SectionCard title={isBn ? 'প্রোফাইল তথ্যের অবস্থা' : 'Profile information status'} icon={ShieldCheck} action={<span className="fig-profile-count">{convertDigits(profileChecks.filter(Boolean).length, isBn)}/4</span>}>
@@ -173,6 +288,41 @@ export default function Profile() {
 
         <button type="button" onClick={closeMiniApp} className="fig-profile-logout"><LogOut size={17} /><span>{isBn ? 'মিনি অ্যাপ বন্ধ করুন' : 'Close Mini App'}</span><ChevronRight size={15} /></button>
         <div className="fig-profile-footer"><strong>PROVATI LOAN • PROVATI SOMOBAY SOMITI</strong><span>{isBn ? 'সদস্য সেবা • সংস্করণ ১.১' : 'Member service • Version 1.1'}</span></div>
+        {profileEditorOpen && (
+          <div className="fig-profile-editor-overlay" role="presentation" onClick={() => !profileSaving && setProfileEditorOpen(false)}>
+            <section className="fig-profile-editor" role="dialog" aria-modal="true" aria-label={isBn ? 'প্রোফাইল সম্পাদনা' : 'Edit profile'} onClick={event => event.stopPropagation()}>
+              <header className="fig-profile-editor-head">
+                <div><span>{isBn ? 'সদস্য তথ্য' : 'MEMBER DETAILS'}</span><h2>{isBn ? 'প্রোফাইল আপডেট করুন' : 'Update your profile'}</h2><p>{isBn ? 'এখানে সেভ করা তথ্য পরবর্তী লোন আবেদনে স্বয়ংক্রিয়ভাবে পূরণ হবে।' : 'Saved details will automatically fill matching loan application fields.'}</p></div>
+                <button type="button" aria-label={isBn ? 'বন্ধ করুন' : 'Close'} disabled={profileSaving} onClick={() => setProfileEditorOpen(false)}><X size={20}/></button>
+              </header>
+              <form onSubmit={saveProfileEditor} className="fig-profile-editor-form">
+                <div className="fig-profile-editor-grid">
+                  <label>{isBn ? 'আবেদনকারীর পূর্ণ নাম' : 'Applicant full name'}<input required minLength={3} maxLength={120} value={editorFields.fullName} onChange={e => updateEditorField('fullName',e.target.value)} autoComplete="name"/></label>
+                  <label>{isBn ? 'পিতার নাম' : "Father's name"}<input value={editorFields.fatherName} onChange={e => updateEditorField('fatherName',e.target.value)} maxLength={120}/></label>
+                  <label>{isBn ? 'মাতার নাম' : "Mother's name"}<input value={editorFields.motherName} onChange={e => updateEditorField('motherName',e.target.value)} maxLength={120}/></label>
+                  <label>{isBn ? 'জন্ম তারিখ' : 'Date of birth'}<input type="date" value={editorFields.dob} onChange={e => updateEditorField('dob',e.target.value)}/></label>
+                  <label>{isBn ? 'লিঙ্গ' : 'Gender'}<select value={editorFields.gender} onChange={e => updateEditorField('gender',e.target.value)}><option value="">{isBn ? 'নির্বাচন করুন' : 'Select'}</option><option value="Male">{isBn ? 'পুরুষ' : 'Male'}</option><option value="Female">{isBn ? 'নারী' : 'Female'}</option><option value="Other">{isBn ? 'অন্যান্য' : 'Other'}</option></select></label>
+                  <label>{isBn ? 'মোবাইল নম্বর' : 'Mobile number'}<input inputMode="tel" autoComplete="tel" maxLength={20} value={editorFields.mobile} onChange={e => updateEditorField('mobile',e.target.value)} placeholder="01XXXXXXXXX"/></label>
+                  <label>{isBn ? 'হোয়াটসঅ্যাপ নম্বর' : 'WhatsApp number'}<input inputMode="tel" maxLength={20} value={editorFields.whatsapp} onChange={e => updateEditorField('whatsapp',e.target.value)}/></label>
+                  <label>{isBn ? 'ইমেইল' : 'Email'}<input type="email" autoComplete="email" maxLength={254} value={editorFields.email} onChange={e => updateEditorField('email',e.target.value)}/></label>
+                  <label>{isBn ? 'জাতীয় পরিচয়পত্র (NID)' : 'National ID number'}<input inputMode="numeric" maxLength={40} value={editorFields.nidNumber} onChange={e => updateEditorField('nidNumber',e.target.value)}/></label>
+                  <label>{isBn ? 'ই-টিন (ঐচ্ছিক)' : 'e-TIN (optional)'}<input maxLength={40} value={editorFields.eTin} onChange={e => updateEditorField('eTin',e.target.value)}/></label>
+                  <label>{isBn ? 'রক্তের গ্রুপ' : 'Blood group'}<select value={editorFields.bloodGroup} onChange={e => updateEditorField('bloodGroup',e.target.value)}><option value="">{isBn ? 'নির্বাচন করুন' : 'Select'}</option>{['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(group=><option key={group} value={group}>{group}</option>)}</select></label>
+                  <label>{isBn ? 'বৈবাহিক অবস্থা' : 'Marital status'}<select value={editorFields.maritalStatus} onChange={e => updateEditorField('maritalStatus',e.target.value)}><option value="">{isBn ? 'নির্বাচন করুন' : 'Select'}</option><option value="Single">{isBn ? 'অবিবাহিত' : 'Single'}</option><option value="Married">{isBn ? 'বিবাহিত' : 'Married'}</option><option value="Widowed">{isBn ? 'বিধবা/বিপত্নীক' : 'Widowed'}</option><option value="Divorced">{isBn ? 'তালাকপ্রাপ্ত' : 'Divorced'}</option></select></label>
+                  <label>{isBn ? 'স্বামী/স্ত্রীর পেশা (ঐচ্ছিক)' : 'Spouse profession (optional)'}<input maxLength={120} value={editorFields.spouseProfession} onChange={e => updateEditorField('spouseProfession',e.target.value)}/></label>
+                  <label>{isBn ? 'স্বামী/স্ত্রীর আয় (ঐচ্ছিক)' : 'Spouse income (optional)'}<input inputMode="numeric" maxLength={30} value={editorFields.spouseIncome} onChange={e => updateEditorField('spouseIncome',e.target.value)}/></label>
+                </div>
+                <div className="fig-profile-editor-address"><AddressSelector label={isBn ? 'বর্তমান ঠিকানা' : 'Current address'} value={editorCurrentAddress} onChange={setEditorCurrentAddress} isBn={isBn} prefix="profile-current" showDetailedFields showOwnershipFields /></div>
+                <div className="fig-profile-editor-address"><AddressSelector label={isBn ? 'স্থায়ী ঠিকানা (NID অনুযায়ী)' : 'Permanent address (as per NID)'} value={editorPermanentAddress} onChange={setEditorPermanentAddress} isBn={isBn} prefix="profile-permanent" showDetailedFields /></div>
+                <div className="fig-profile-editor-note"><ShieldCheck size={17}/><span>{isBn ? 'শুধু আপনার নিজের প্রোফাইলের তথ্য আপডেট হবে। ব্যাংক ও নমিনির তথ্য প্রতিটি আবেদনেই আলাদাভাবে যাচাই করে দিতে হবে।' : 'Only your own profile information is updated. Bank and nominee details should still be reviewed for each application.'}</span></div>
+                <footer className="fig-profile-editor-actions">
+                  <button type="button" disabled={profileSaving} onClick={() => setProfileEditorOpen(false)}>{isBn ? 'বাতিল' : 'Cancel'}</button>
+                  <button type="submit" disabled={profileSaving}>{profileSaving ? <LoaderCircle size={16} className="animate-spin"/> : <Save size={16}/>} {profileSaving ? (isBn ? 'সেভ হচ্ছে…' : 'Saving…') : (isBn ? 'প্রোফাইল সেভ করুন' : 'Save profile')}</button>
+                </footer>
+              </form>
+            </section>
+          </div>
+        )}
       </motion.main>
     </div>
   );
