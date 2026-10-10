@@ -252,6 +252,88 @@ async function getMyTransactions(telegramUser) {
   return data || [];
 }
 
+async function getMyDashboardStats(telegramUser) {
+  const db = adminClient();
+  const chatId = Number(telegramUser?.id);
+  if (!Number.isSafeInteger(chatId) || chatId <= 0) throw new Error("Invalid Telegram identity");
+
+  const [loansResult, transactionsResult] = await Promise.all([
+    db.from("loan_applications")
+      .select("id,amount,total_payable,status")
+      .eq("chat_id", chatId),
+    db.from("transactions")
+      .select("type,deposit_type,amount,status,loan_id")
+      .eq("chat_id", chatId)
+  ]);
+  if (loansResult.error) throw loansResult.error;
+  if (transactionsResult.error) throw transactionsResult.error;
+
+  const loans = loansResult.data || [];
+  const transactions = transactionsResult.data || [];
+  const approvedStatuses = new Set(["approved", "active", "completed"]);
+  const currentLoanStatuses = new Set(["approved", "active"]);
+  const approvedLoanTotal = loans
+    .filter(loan => approvedStatuses.has(loan.status))
+    .reduce((sum, loan) => sum + Number(loan.amount || 0), 0);
+  const currentLoanTotal = loans
+    .filter(loan => currentLoanStatuses.has(loan.status))
+    .reduce((sum, loan) => sum + Number(loan.amount || 0), 0);
+
+  const loanIds = loans.filter(loan => currentLoanStatuses.has(loan.status)).map(loan => loan.id);
+  let schedules = [];
+  if (loanIds.length) {
+    const scheduleResult = await db.from("loan_emi_schedule")
+      .select("loan_id,total_due,paid_amount")
+      .in("loan_id", loanIds);
+    if (scheduleResult.error) throw scheduleResult.error;
+    schedules = scheduleResult.data || [];
+  }
+
+  const completedEmiPayments = transactions.filter(tx => tx.type === "emi_payment" && tx.status === "completed");
+  const loanOutstanding = loans
+    .filter(loan => currentLoanStatuses.has(loan.status))
+    .reduce((sum, loan) => {
+      const loanSchedule = schedules.filter(item => item.loan_id === loan.id);
+      if (loanSchedule.length) {
+        return sum + loanSchedule.reduce((remaining, item) =>
+          remaining + Math.max(0, Number(item.total_due || 0) - Number(item.paid_amount || 0)), 0);
+      }
+      const paid = completedEmiPayments
+        .filter(tx => tx.loan_id === loan.id)
+        .reduce((amount, tx) => amount + Number(tx.amount || 0), 0);
+      return sum + Math.max(0, Number(loan.total_payable || loan.amount || 0) - paid);
+    }, 0);
+
+  const completedDeposits = transactions.filter(tx => tx.type === "deposit" && tx.status === "completed");
+  const depositBalance = completedDeposits.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+  const savingsBalance = completedDeposits
+    .filter(tx => String(tx.deposit_type || "").toLowerCase().includes("security_deposit"))
+    .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+  const processingFeeTotal = completedDeposits
+    .filter(tx => String(tx.deposit_type || "").toLowerCase().includes("processing_fee"))
+    .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+  const withdrawBalance = transactions
+    .filter(tx => tx.type === "withdraw" && tx.status === "completed")
+    .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+  const reservedWithdrawals = transactions
+    .filter(tx => tx.type === "withdraw" && ["completed", "pending"].includes(tx.status))
+    .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+
+  return {
+    totalBalance: Math.max(0, currentLoanTotal - reservedWithdrawals),
+    depositBalance,
+    withdrawBalance,
+    savingsBalance,
+    securityDepositTotal: savingsBalance,
+    processingFeeTotal,
+    approvedLoanTotal,
+    activeLoansCount: loans.filter(loan => currentLoanStatuses.has(loan.status)).length,
+    pendingApplications: loans.filter(loan => loan.status === "pending").length,
+    totalOutstanding: loanOutstanding,
+    loanOutstanding
+  };
+}
+
 async function syncProfile(telegramUser) {
   const db = adminClient();
   const chatId = Number(telegramUser?.id);
@@ -525,6 +607,10 @@ export default async function handler(req, res) {
     const userAction = String(req.body?.userAction || "");
     const userChatId = Number(result.user.id);
     if (!Number.isSafeInteger(userChatId) || userChatId <= 0) throw new Error("Invalid Telegram identity");
+    if (userAction === "get_dashboard_stats") {
+      const data = await getMyDashboardStats(result.user);
+      return res.status(200).json({ success: true, data });
+    }
     if (userAction === "get_notifications") {
       const { data, error } = await db.from("notifications").select("*").eq("chat_id", userChatId).order("created_at", { ascending: false }).limit(100);
       if (error) throw error;
