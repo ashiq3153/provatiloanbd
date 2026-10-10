@@ -3598,7 +3598,7 @@ export default function ApplyLoan() {
     <div className="apply-loan-screen app-apply-theme miniapp-loan-flow min-h-full bg-slate-50 dark:bg-[#0b1220] transition-colors flex flex-col relative">
       {/* Easy-style application header — visual language follows the supplied reference screens. */}
       {step < 6 && (
-        <div className={`loan-easy-font sticky top-0 z-30 backdrop-blur border-b ${
+        <div className={`loan-easy-font sticky top-0 z-30 border-b ${
         step === 1
           ? "bg-[#063d34] dark:bg-[#052f29] border-emerald-900/50 text-white"
           : "bg-slate-50/95 dark:bg-[#0b1220]/95 border-slate-200/60 dark:border-slate-800/60"
