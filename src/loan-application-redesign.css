@@ -181,3 +181,324 @@ div[id^="accordion-section-"] > button [class*="text-[10px]"] {
     padding: 8px 10px !important;
   }
 }
+
+
+/* Step 2 — amount, tenure and repayment estimate */
+.apply-loan-screen {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 100dvh;
+  overflow-x: clip;
+  color: #183149;
+}
+.dark .apply-loan-screen { color: #e5edf5; }
+.apply-loan-content {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 16px 12px 152px !important;
+}
+.apply-loan-screen .loan-easy-font.space-y-5 > section.neu-raised {
+  background: #fff !important;
+  border: 1px solid #dce5ee !important;
+  border-radius: 20px !important;
+  box-shadow: 0 6px 18px rgba(15, 42, 67, .055) !important;
+}
+.dark .apply-loan-screen .loan-easy-font.space-y-5 > section.neu-raised {
+  background: #101d2b !important;
+  border-color: #2b3d50 !important;
+}
+.apply-loan-screen .loan-easy-font.space-y-5 > section.relative.overflow-hidden.rounded-3xl.p-5.text-white {
+  background: linear-gradient(135deg, #14324d 0%, #0f4f62 58%, #0f766e 100%) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 12px 30px rgba(14, 54, 75, .18) !important;
+}
+.apply-loan-screen .loan-easy-font.space-y-5 h2 {
+  font-size: clamp(20px, 5vw, 25px) !important;
+  line-height: 1.35 !important;
+  letter-spacing: -.02em;
+}
+.apply-loan-screen .loan-easy-font.space-y-5 section label {
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+}
+.apply-loan-screen .loan-easy-font.space-y-5 input[type="range"] {
+  width: 100%;
+  margin-block: 10px;
+  accent-color: #0f766e !important;
+  touch-action: pan-y;
+}
+.apply-loan-screen .loan-easy-font.space-y-5 .grid.grid-cols-5 {
+  gap: 8px !important;
+}
+.apply-loan-screen .loan-easy-font.space-y-5 .grid.grid-cols-5 button {
+  min-height: 44px !important;
+  border: 1px solid #d6e1eb !important;
+  border-radius: 12px !important;
+  background: #f7fafc !important;
+  color: #31485e !important;
+  font-size: 12px !important;
+  padding: 8px 6px !important;
+  box-shadow: none !important;
+}
+.apply-loan-screen .loan-easy-font.space-y-5 .grid.grid-cols-5 button.neu-btn-primary {
+  background: #0f766e !important;
+  border-color: #0f766e !important;
+  color: #fff !important;
+}
+.dark .apply-loan-screen .loan-easy-font.space-y-5 .grid.grid-cols-5 button {
+  background: #15283a !important;
+  border-color: #34495e !important;
+  color: #e4edf5 !important;
+}
+.dark .apply-loan-screen .loan-easy-font.space-y-5 .grid.grid-cols-5 button.neu-btn-primary {
+  background: #0f766e !important; color: #fff !important; border-color: #0f766e !important;
+}
+.apply-loan-screen .loan-easy-font.space-y-5 .grid.grid-cols-3 button,
+.apply-loan-screen .loan-easy-font.space-y-5 .grid button {
+  min-height: 44px;
+}
+.apply-loan-screen .loan-easy-font.space-y-5 .rounded-2xl.px-4.py-3.flex.items-center.justify-between {
+  border: 1px solid #dce5ee !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+}
+.dark .apply-loan-screen .loan-easy-font.space-y-5 .rounded-2xl.px-4.py-3.flex.items-center.justify-between {
+  border-color: #2b3d50 !important; background: #101d2b !important;
+}
+
+/* Step 4 — clearer, consistently sized document upload cards */
+.apply-loan-screen input[type="file"] + label {
+  min-height: 138px !important;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 14px 10px !important;
+  gap: 10px !important;
+  border-radius: 16px !important;
+  border: 1.5px dashed #c6d5e2 !important;
+  background: #f8fafc !important;
+  color: #253d54 !important;
+  cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.dark .apply-loan-screen input[type="file"] + label {
+  background: #132235 !important;
+  border-color: #3a5066 !important;
+  color: #e6edf5 !important;
+}
+.apply-loan-screen input[type="file"] + label:has(span.text-green-600) {
+  border-style: solid !important;
+  border-color: #0f8a73 !important;
+  background: #f0faf6 !important;
+}
+.dark .apply-loan-screen input[type="file"] + label:has(span.text-green-600) {
+  background: #10322c !important;
+  border-color: #16836f !important;
+}
+.apply-loan-screen input[type="file"] + label > div:first-of-type {
+  width: 44px !important; height: 44px !important;
+  border-radius: 13px !important;
+}
+.apply-loan-screen input[type="file"] + label > span {
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  font-weight: 700 !important;
+  overflow-wrap: anywhere;
+}
+.apply-loan-screen input[type="file"] + label > span.text-green-600 {
+  font-size: 12px !important;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #dcfce7;
+}
+.apply-loan-screen .space-y-5.pb-6.text-xs > div[class*="bg-white"] {
+  border-radius: 18px !important;
+  border-color: #dbe5ee !important;
+  padding: 16px !important;
+  box-shadow: 0 5px 16px rgba(15, 42, 67, .045) !important;
+}
+.dark .apply-loan-screen .space-y-5.pb-6.text-xs > div[class*="bg-white"] {
+  background: #101d2b !important;
+  border-color: #2b3d50 !important;
+}
+.apply-loan-screen .space-y-5.pb-6.text-xs h3 {
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+  padding-bottom: 10px !important;
+}
+.apply-loan-screen .space-y-5.pb-6.text-xs h4 {
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+.apply-loan-screen .space-y-5.pb-6.text-xs .grid {
+  align-items: stretch;
+  gap: 10px !important;
+}
+
+/* Step 5 — calm receipt-like success page */
+.apply-loan-screen .text-center.py-10.px-5.space-y-6 {
+  padding: 24px 14px calc(28px + env(safe-area-inset-bottom, 0px)) !important;
+  gap: 22px !important;
+}
+.apply-loan-screen .text-center.py-10.px-5.space-y-6 > div:first-child {
+  width: 76px !important; height: 76px !important; margin-bottom: 4px !important;
+  box-shadow: 0 6px 18px rgba(16, 128, 95, .10) !important;
+}
+.apply-loan-screen .text-center.py-10.px-5.space-y-6 > div:first-child svg {
+  width: 38px !important; height: 38px !important;
+}
+.apply-loan-screen .text-center.py-10.px-5.space-y-6 h2 {
+  font-size: clamp(24px, 6vw, 30px) !important;
+  line-height: 1.3 !important;
+}
+.apply-loan-screen .text-center.py-10.px-5.space-y-6 > div.rounded-2xl.max-w-xs {
+  max-width: 100% !important;
+  width: 100%;
+  border-radius: 18px !important;
+  background: #f7fafc !important;
+  border-color: #dbe5ee !important;
+}
+.dark .apply-loan-screen .text-center.py-10.px-5.space-y-6 > div.rounded-2xl.max-w-xs {
+  background: #101d2b !important; border-color: #2b3d50 !important;
+}
+.apply-loan-screen .text-center.py-10.px-5.space-y-6 a {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px !important;
+  padding: 13px 16px !important;
+  border-radius: 14px !important;
+  text-decoration: none;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  box-shadow: 0 4px 12px rgba(15, 42, 67, .07) !important;
+}
+
+/* Modal surfaces — bottom-sheet feel on phones, dialog layout on larger screens */
+.apply-loan-screen .fixed.inset-0.z-50 {
+  padding: max(10px, env(safe-area-inset-top, 0px)) 12px max(14px, env(safe-area-inset-bottom, 0px)) !important;
+  background: rgba(8, 22, 36, .64) !important;
+  backdrop-filter: blur(4px);
+  overscroll-behavior: contain;
+}
+.apply-loan-screen .fixed.inset-0.z-50 > .rounded-3xl {
+  width: 100% !important;
+  max-width: 520px !important;
+  max-height: calc(100dvh - 28px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+  margin: auto !important;
+  border-radius: 22px !important;
+  border: 1px solid #d9e4ed !important;
+  box-shadow: 0 24px 70px rgba(2, 12, 24, .28) !important;
+  background: #fff !important;
+  color: #20374d !important;
+}
+.dark .apply-loan-screen .fixed.inset-0.z-50 > .rounded-3xl {
+  background: #101d2b !important;
+  border-color: #2b3d50 !important;
+  color: #e5edf5 !important;
+}
+.apply-loan-screen .fixed.inset-0.z-50 > .rounded-3xl > div:first-child {
+  padding: 16px 18px !important;
+  background: #f4f8fb !important;
+  border-color: #e1e8ef !important;
+}
+.dark .apply-loan-screen .fixed.inset-0.z-50 > .rounded-3xl > div:first-child {
+  background: #15263a !important; border-color: #2b3d50 !important;
+}
+.apply-loan-screen .fixed.inset-0.z-50 > .rounded-3xl > div[class*="max-h-"] {
+  padding: 16px !important;
+  max-height: calc(100dvh - 110px) !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.apply-loan-screen .fixed.inset-0.z-50 button {
+  min-height: 40px;
+}
+.apply-loan-screen .fixed.inset-0.z-50 button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+.apply-loan-screen [class*="z-[70]"] > div[class*="max-w-[520px]"] {
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+  border-radius: 24px 24px 0 0 !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.apply-loan-screen [class*="z-[70]"] h3 {
+  font-size: 17px !important;
+  line-height: 1.35 !important;
+}
+.apply-loan-screen [class*="z-[70]"] button {
+  min-height: 44px;
+}
+
+/* Fixed bottom actions stay clear of the Telegram app's bottom navigation */
+.apply-loan-screen [class*="bottom-[88px]"] {
+  bottom: calc(82px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 0 !important; right: 0 !important;
+  padding: 10px 14px !important;
+  gap: 10px !important;
+}
+.apply-loan-screen [class*="bottom-[88px]"] button {
+  min-height: 48px !important;
+  border-radius: 14px !important;
+  padding: 12px 18px !important;
+  font-size: 14px !important;
+  box-shadow: 0 5px 14px rgba(14, 43, 70, .12) !important;
+}
+.apply-loan-screen [class*="bottom-[88px]"] button:last-child {
+  background: #0f766e !important;
+  border-color: #0f766e !important;
+  color: #fff !important;
+}
+.apply-loan-screen [class*="bottom-[88px]"] button:disabled {
+  background: #dce5ed !important;
+  color: #8796a6 !important;
+  box-shadow: none !important;
+}
+.dark .apply-loan-screen [class*="bottom-[88px]"] button:disabled {
+  background: #243447 !important; color: #8292a4 !important;
+}
+
+/* Step header and progress labels */
+.apply-loan-screen .sticky.top-0 {
+  padding-top: env(safe-area-inset-top, 0px);
+  border-bottom-color: #dce5ee;
+  box-shadow: 0 2px 9px rgba(15, 42, 67, .04);
+}
+.apply-loan-screen .sticky.top-0 > div {
+  max-width: 760px;
+  margin-inline: auto;
+}
+.apply-loan-screen .sticky.top-0 span {
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+}
+.apply-loan-screen .sticky.top-0 button {
+  min-width: 40px; min-height: 40px;
+}
+@media (max-width: 430px) {
+  .apply-loan-content { padding: 14px 10px 160px !important; }
+  .apply-loan-screen .loan-easy-font.space-y-5 .grid.grid-cols-5 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  .apply-loan-screen .loan-easy-font.space-y-5 > section.relative.overflow-hidden.rounded-3xl.p-5.text-white {
+    padding: 17px 14px !important;
+  }
+  .apply-loan-screen .space-y-5.pb-6.text-xs > div[class*="bg-white"] { padding: 12px !important; }
+  .apply-loan-screen input[type="file"] + label {
+    min-height: 130px !important;
+    padding: 12px 7px !important;
+  }
+  .apply-loan-screen .fixed.inset-0.z-50 > .rounded-3xl {
+    border-radius: 22px !important;
+  }
+  .apply-loan-screen .fixed.inset-0.z-50 > .rounded-3xl > div[class*="max-h-"] {
+    padding: 14px !important;
+  }
+}
+@media (min-width: 640px) {
+  .apply-loan-content { padding-inline: 20px !important; max-width: 800px; margin-inline: auto; }
+  .apply-loan-screen .fixed.inset-0.z-50 > .rounded-3xl { max-width: 560px !important; }
+}
