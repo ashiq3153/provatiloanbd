@@ -262,6 +262,7 @@ export default function ApplyLoan() {
   const { language, systemSettings } = useAppStore();
   const isBn = language === "bn";
   const user = getTelegramUser();
+  const draftStorageKey = `loan_draft_v1_${user.id}`;
   const categories = React.useMemo(() => {
     const allCats = getCategories(isBn, systemSettings);
     return allCats.filter(cat => systemSettings?.categories?.[cat.id]?.enabled !== false);
@@ -386,6 +387,8 @@ export default function ApplyLoan() {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
+    // Remove the legacy shared key: it has no owner ID and could contain another member's private draft.
+    localStorage.removeItem('loan_draft_v1');
     const selectedCategory = params.get('category');
     const edit = params.get('edit');
 
@@ -510,12 +513,12 @@ export default function ApplyLoan() {
       }
     } else {
       // Try to restore in-progress draft (only if past step 1)
-      const draftStr = localStorage.getItem('loan_draft_v1');
+      const draftStr = localStorage.getItem(draftStorageKey);
       if (draftStr) {
         try {
           const draft = JSON.parse(draftStr);
           // Only restore if user was past step 1 (mid-application)
-          if (draft.step && draft.step > 1 && draft.step < 5) {
+          if (Number(draft.chatId) === user.id && draft.step && draft.step > 1 && draft.step < 5) {
             setStep(draft.step);
             if (draft.categoryId) {
               const matched = categories.find(cat => cat.id === draft.categoryId);
@@ -533,10 +536,10 @@ export default function ApplyLoan() {
               }
             }
           } else {
-            localStorage.removeItem('loan_draft_v1');
+            localStorage.removeItem(draftStorageKey);
           }
         } catch(e) {
-          localStorage.removeItem('loan_draft_v1');
+          localStorage.removeItem(draftStorageKey);
         }
       }
     }
@@ -547,13 +550,14 @@ export default function ApplyLoan() {
     if (editId || step >= 5) return;
     const subscription = methods.watch((formData) => {
       const draft = {
+        chatId: user.id,
         step,
         categoryId: category?.id,
         amount,
         tenure,
         formData
       };
-      localStorage.setItem('loan_draft_v1', JSON.stringify(draft));
+      localStorage.setItem(draftStorageKey, JSON.stringify(draft));
     });
     return () => subscription.unsubscribe();
   }, [step, category, amount, tenure, editId]);
@@ -697,12 +701,12 @@ export default function ApplyLoan() {
       setStep(newStep);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
-      const draftStr = localStorage.getItem('loan_draft_v1');
+      const draftStr = localStorage.getItem(draftStorageKey);
       if (draftStr) {
         try {
           const draft = JSON.parse(draftStr);
           draft.step = newStep;
-          localStorage.setItem('loan_draft_v1', JSON.stringify(draft));
+          localStorage.setItem(draftStorageKey, JSON.stringify(draft));
         } catch (e) {}
       }
     }
@@ -985,7 +989,7 @@ export default function ApplyLoan() {
       if (result) {
         setSubmittedApplicationId(result.id || editId || null);
         toast.success(isBn ? 'আপনার আবেদন সফলভাবে জমা হয়েছে!' : 'Application successfully submitted!', { id: loadingId });
-        localStorage.removeItem('loan_draft_v1');
+        localStorage.removeItem(draftStorageKey);
         setStep(5);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
@@ -1004,12 +1008,12 @@ export default function ApplyLoan() {
       setStep(newStep);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
-      const draftStr = localStorage.getItem('loan_draft_v1');
+      const draftStr = localStorage.getItem(draftStorageKey);
       if (draftStr) {
         try {
           const draft = JSON.parse(draftStr);
           draft.step = newStep;
-          localStorage.setItem('loan_draft_v1', JSON.stringify(draft));
+          localStorage.setItem(draftStorageKey, JSON.stringify(draft));
         } catch (e) {}
       }
     }
@@ -1229,7 +1233,7 @@ export default function ApplyLoan() {
         setVerificationStage('success');
         await sleep(650);
 
-        localStorage.removeItem('loan_draft_v1');
+        localStorage.removeItem(draftStorageKey);
         handleCloseVerification();
         setStep(5);
         window.scrollTo({ top: 0, behavior: 'smooth' });
