@@ -4,7 +4,7 @@ import {
   UserRound, Phone, MapPin, IdCard, FileText, ShieldCheck, Shield,
   LockKeyhole, CircleHelp, Headset, ChevronRight, CheckCircle2,
   LogOut, Sun, Moon, Languages, Volume2, VolumeX, Wallet, ArrowDownToLine, ArrowUpFromLine,
-  Pencil, X, Save, LoaderCircle, CalendarDays, Mail, Fingerprint,
+  Pencil, X, Save, LoaderCircle, CalendarDays, Mail, Fingerprint, Landmark,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAppStore } from '../lib/store';
