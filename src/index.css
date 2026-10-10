@@ -126,13 +126,13 @@
   box-shadow: none !important;
 }
 
-.bg-white.rounded-2xl, 
-.bg-white.rounded-3xl,
-.bg-white.rounded-\[20px\], 
-.bg-white.rounded-\[23px\], 
-.bg-white.rounded-\[24px\], 
-.bg-white.rounded-\[28px\], 
-.bg-white.rounded-\[32px\] {
+html:not(.dark) .bg-white.rounded-2xl, 
+html:not(.dark) .bg-white.rounded-3xl,
+html:not(.dark) .bg-white.rounded-\[20px\], 
+html:not(.dark) .bg-white.rounded-\[23px\], 
+html:not(.dark) .bg-white.rounded-\[24px\], 
+html:not(.dark) .bg-white.rounded-\[28px\], 
+html:not(.dark) .bg-white.rounded-\[32px\] {
   background-color: #ffffff !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -454,28 +454,16 @@ html.dark, body.dark, .dark {
   --app-text-info: #dbeafe;
 }
 
-/* Apply legible foreground across all screens and nested components. */
-html:not(.dark) body,
-html:not(.dark) body :where(p, span, label, small, h1, h2, h3, h4, h5, h6,
-strong, b, em, i, li, dt, dd, th, td, caption, summary, legend,
-a, button, input, textarea, select, option, [role="button"], [role="tab"],
-[role="alert"], [role="status"], [aria-label]) {
-  color: #000000;
-  -webkit-text-fill-color: #000000;
+/* Set only the page-level fallback color. Do not force every nested
+   label to black/white: explicit Tailwind text utilities must keep their
+   semantic contrast, especially on dark cards and colored status badges. */
+html:not(.dark) body {
+  color: #0f172a;
   text-shadow: none;
 }
 html.dark body,
-html.dark body :where(p, span, label, small, h1, h2, h3, h4, h5, h6,
-strong, b, em, i, li, dt, dd, th, td, caption, summary, legend,
-a, button, input, textarea, select, option, [role="button"], [role="tab"],
-[role="alert"], [role="status"], [aria-label]),
-body.dark,
-body.dark :where(p, span, label, small, h1, h2, h3, h4, h5, h6,
-strong, b, em, i, li, dt, dd, th, td, caption, summary, legend,
-a, button, input, textarea, select, option, [role="button"], [role="tab"],
-[role="alert"], [role="status"], [aria-label]) {
-  color: #ffffff;
-  -webkit-text-fill-color: #ffffff;
+body.dark {
+  color: #f8fafc;
   text-shadow: none;
 }
 
