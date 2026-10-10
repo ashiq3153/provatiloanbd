@@ -185,3 +185,119 @@ html.dark .fig-profile-text-action, body.dark .fig-profile-text-action{color:#5a
   .fig-profile-row-icon{width:30px;height:30px;border-radius:10px;}
   .fig-profile-row-value{font-size:8.5px!important;}
 }
+
+/* Editable profile and reusable loan-application information */
+.fig-profile-edit-bar{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin:12px 0 2px;padding:12px;border:1px solid #cceee4;border-radius:15px;
+  background:linear-gradient(135deg,#f0fdf8,#e3f8f0);box-shadow:0 4px 14px rgba(9,120,95,.06);
+}
+.fig-profile-edit-bar>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fig-profile-edit-bar strong{font-size:10px!important;line-height:1.35;color:#174b40!important;font-weight:900!important}
+.fig-profile-edit-bar span{font-size:8.5px!important;line-height:1.45;color:#47766b!important;font-weight:600!important}
+.fig-profile-edit-bar>button{
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;flex:none;
+  padding:9px 11px;border-radius:11px!important;border:1px solid #a3e6d4!important;
+  background:linear-gradient(135deg,#d5faeb,#a7f3d0)!important;color:#075b49!important;
+  font-size:9px!important;font-weight:900!important;box-shadow:0 3px 9px rgba(16,185,129,.12)!important;
+}
+.fig-profile-edit-bar>button svg{flex:none}
+.fig-profile-editor-overlay{
+  position:fixed;inset:0;z-index:9999;display:flex;align-items:stretch;justify-content:center;
+  background:rgba(2,11,23,.76);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.fig-profile-editor{
+  display:flex;flex-direction:column;width:100%;height:100dvh;max-height:100dvh;overflow:hidden;
+  background:#f7fbfa;color:#17312e;padding-top:env(safe-area-inset-top);
+}
+.fig-profile-editor-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex:none;
+  padding:15px 16px 13px;background:linear-gradient(120deg,#0b2428,#123f42);
+  border-bottom:1px solid rgba(139,230,209,.15);color:#fff;
+}
+.fig-profile-editor-head>div{min-width:0}
+.fig-profile-editor-head>div>span{font-size:9px!important;letter-spacing:.14em;color:#7be2cb!important;font-weight:900!important}
+.fig-profile-editor-head h2{margin:3px 0 0!important;font-size:18px!important;line-height:1.2;color:#fff!important;font-weight:900!important}
+.fig-profile-editor-head p{margin:5px 0 0!important;font-size:10px!important;line-height:1.45;color:#bfd8d4!important;font-weight:600!important}
+.fig-profile-editor-head>button{
+  width:38px;height:38px;display:flex;align-items:center;justify-content:center;flex:none;
+  border-radius:13px!important;background:rgba(255,255,255,.1)!important;color:#e8fffa!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+}
+.fig-profile-editor-form{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:14px 13px 22px}
+.fig-profile-editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fig-profile-editor-grid label{
+  min-width:0;display:flex;flex-direction:column;gap:6px;font-size:10px!important;
+  line-height:1.3;color:#2e5951!important;font-weight:850!important;
+}
+.fig-profile-editor-grid label:first-child{grid-column:1/-1}
+.fig-profile-editor-grid input,.fig-profile-editor-grid select{
+  width:100%;min-width:0;min-height:42px;box-sizing:border-box;padding:10px 11px;
+  border-radius:12px!important;border:1px solid #d8e9e4!important;background:#fff!important;
+  color:#172e2c!important;-webkit-text-fill-color:#172e2c!important;
+  font-size:12px!important;font-weight:650!important;outline:none;
+  box-shadow:0 2px 7px rgba(19,71,61,.035)!important;
+}
+.fig-profile-editor-grid input:focus,.fig-profile-editor-grid select:focus{
+  border-color:#36b9a0!important;box-shadow:0 0 0 3px rgba(54,185,160,.13)!important;
+}
+.fig-profile-editor-address{
+  margin-top:15px;padding:12px;border:1px solid #deece7;border-radius:16px;
+  background:#fff;box-shadow:0 3px 10px rgba(19,71,61,.035);
+}
+.fig-profile-editor-address>div>label:first-child{font-size:12px!important}
+.fig-profile-editor-address input,.fig-profile-editor-address select{min-height:40px}
+.fig-profile-editor-note{
+  display:flex;align-items:flex-start;gap:9px;margin-top:14px;padding:11px;
+  background:#e5f7f1;border:1px solid #c9ede0;border-radius:13px;color:#236657!important;
+}
+.fig-profile-editor-note svg{flex:none;margin-top:1px;color:#168a73!important}
+.fig-profile-editor-note span{font-size:9px!important;line-height:1.5;color:#326b60!important;font-weight:650!important}
+.fig-profile-editor-actions{
+  position:sticky;bottom:0;display:flex;gap:10px;margin:15px -13px -22px;padding:12px 13px calc(12px + env(safe-area-inset-bottom));
+  border-top:1px solid #dcebe6;background:rgba(247,251,250,.96);backdrop-filter:blur(10px);
+}
+.fig-profile-editor-actions button{
+  flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;gap:7px;
+  border-radius:13px!important;font-size:11px!important;font-weight:900!important;
+}
+.fig-profile-editor-actions button:first-child{background:#fff!important;border:1px solid #d8e7e2!important;color:#57736d!important}
+.fig-profile-editor-actions button:last-child{background:linear-gradient(135deg,#0e9e83,#087f70)!important;border:1px solid #0b8d77!important;color:#fff!important;box-shadow:0 6px 14px rgba(8,127,112,.18)!important}
+.fig-profile-editor-actions button:disabled,.fig-profile-editor-head button:disabled{opacity:.65!important}
+.fig-profile-editor .fig-profile-section-card{background:#fff!important}
+html.dark .fig-profile-edit-bar,body.dark .fig-profile-edit-bar{
+  background:linear-gradient(135deg,#102c28,#11372f)!important;border-color:#245b4e!important;
+  box-shadow:0 6px 16px rgba(0,0,0,.12)!important;
+}
+html.dark .fig-profile-edit-bar strong,body.dark .fig-profile-edit-bar strong{color:#d7fff1!important}
+html.dark .fig-profile-edit-bar span,body.dark .fig-profile-edit-bar span{color:#98c9bb!important}
+html.dark .fig-profile-edit-bar>button,body.dark .fig-profile-edit-bar>button{
+  background:linear-gradient(135deg,#1b5a4b,#164d41)!important;color:#b7f9e4!important;border-color:#337d6a!important;
+}
+html.dark .fig-profile-editor,body.dark .fig-profile-editor{background:#071714!important;color:#eafff9!important}
+html.dark .fig-profile-editor-grid label,body.dark .fig-profile-editor-grid label{color:#acd9cd!important}
+html.dark .fig-profile-editor-grid input,html.dark .fig-profile-editor-grid select,
+body.dark .fig-profile-editor-grid input,body.dark .fig-profile-editor-grid select{
+  background:#102621!important;color:#f0fffb!important;-webkit-text-fill-color:#f0fffb!important;border-color:#2c4d45!important;
+}
+html.dark .fig-profile-editor-grid input:focus,html.dark .fig-profile-editor-grid select:focus,
+body.dark .fig-profile-editor-grid input:focus,body.dark .fig-profile-editor-grid select:focus{border-color:#46cdb1!important}
+html.dark .fig-profile-editor-address,body.dark .fig-profile-editor-address{
+  background:#0c201b!important;border-color:#24463d!important;
+}
+html.dark .fig-profile-editor-note,body.dark .fig-profile-editor-note{background:#103129!important;border-color:#245b4e!important}
+html.dark .fig-profile-editor-note span,body.dark .fig-profile-editor-note span{color:#a1d4c5!important}
+html.dark .fig-profile-editor-actions,body.dark .fig-profile-editor-actions{background:rgba(7,23,20,.96)!important;border-color:#24443c!important}
+html.dark .fig-profile-editor-actions button:first-child,body.dark .fig-profile-editor-actions button:first-child{background:#14251f!important;border-color:#345149!important;color:#badad1!important}
+@media(min-width:640px){
+  .fig-profile-editor-overlay{align-items:center;padding:18px;box-sizing:border-box}
+  .fig-profile-editor{width:min(100%,640px);height:min(92dvh,920px);max-height:92dvh;border-radius:22px;border:1px solid rgba(147,227,207,.23);box-shadow:0 25px 80px rgba(0,0,0,.4)}
+  .fig-profile-editor-form{padding:17px}
+  .fig-profile-editor-actions{margin:15px -17px -22px;padding-left:17px;padding-right:17px}
+}
+@media(max-width:360px){
+  .fig-profile-editor-grid{grid-template-columns:1fr;gap:10px}
+  .fig-profile-editor-grid label:first-child{grid-column:auto}
+  .fig-profile-edit-bar{align-items:flex-start;flex-direction:column}
+  .fig-profile-edit-bar>button{align-self:flex-start}
+}
