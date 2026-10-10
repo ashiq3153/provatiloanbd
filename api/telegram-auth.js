@@ -194,6 +194,14 @@ async function submitLoanApplication(telegramUser, payload) {
 
   const { data, error } = await db.from("loan_applications").insert(record).select().single();
   if (error) throw error;
+
+  // Keep reusable personal fields in the member profile after a successful application.
+  // A profile-sync failure must not turn an already-created loan into a false submit failure.
+  try {
+    await syncProfileDetailsFromLoan(telegramUser, payload);
+  } catch (profileError) {
+    console.error("Profile auto-sync after loan submit failed:", profileError);
+  }
   return data;
 }
 
@@ -348,6 +356,120 @@ async function getMyDashboardStats(telegramUser) {
     totalOutstanding: loanOutstanding,
     loanOutstanding
   };
+}
+
+const PROFILE_DETAIL_KEYS = {
+  fullName: 120, fatherName: 120, motherName: 120, dob: 20, gender: 32,
+  mobile: 20, whatsapp: 20, email: 254, nidNumber: 40, eTin: 40,
+  bloodGroup: 8, maritalStatus: 32, spouseProfession: 120, spouseIncome: 30
+};
+const PROFILE_ADDRESS_KEYS = [
+  "district","upazila","union","village","postCode","houseNo","flatNo",
+  "holdingNo","roadNo","ownership","rentAmount","stayDuration"
+];
+
+function sanitizeProfileAddress(value) {
+  let source = value;
+  if (typeof source === "string") {
+    try { source = JSON.parse(source); } catch { return null; }
+  }
+  if (!source || typeof source !== "object" || Array.isArray(source)) return null;
+  const result = {};
+  for (const key of PROFILE_ADDRESS_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      result[key] = typeof source[key] === "string" ? source[key].trim().slice(0, 180) : "";
+    }
+  }
+  return result;
+}
+
+function sanitizeProfileDetails(payload, { keepEmpty = true } = {}) {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) throw new Error("Invalid profile details");
+  const result = {};
+  for (const [key, maxLength] of Object.entries(PROFILE_DETAIL_KEYS)) {
+    if (!Object.prototype.hasOwnProperty.call(payload, key)) continue;
+    const value = typeof payload[key] === "string" ? payload[key].trim().slice(0, maxLength) : "";
+    if (keepEmpty || value) result[key] = value;
+  }
+  for (const key of ["currentAddress","permanentAddress"]) {
+    if (!Object.prototype.hasOwnProperty.call(payload, key)) continue;
+    const value = sanitizeProfileAddress(payload[key]);
+    if (value) result[key] = value;
+  }
+  return result;
+}
+
+function profileAddressToText(value) {
+  const address = sanitizeProfileAddress(value);
+  if (!address) return "";
+  return [
+    address.houseNo ? "House " + address.houseNo : "",
+    address.flatNo ? "Flat " + address.flatNo : "",
+    address.holdingNo ? "Holding " + address.holdingNo : "",
+    address.roadNo ? "Road " + address.roadNo : "",
+    address.village, address.union, address.upazila, address.district,
+    address.postCode ? "Post code " + address.postCode : ""
+  ].filter(Boolean).join(", ");
+}
+
+async function getMyProfile(telegramUser) {
+  const db = adminClient();
+  const chatId = Number(telegramUser?.id);
+  if (!Number.isSafeInteger(chatId) || chatId <= 0) throw new Error("Invalid Telegram identity");
+  const { data, error } = await db.from("profiles").select("*").eq("chat_id", chatId).maybeSingle();
+  if (error) throw error;
+  return data || await syncProfile(telegramUser);
+}
+
+async function updateMyProfile(telegramUser, payload) {
+  const db = adminClient();
+  const chatId = Number(telegramUser?.id);
+  if (!Number.isSafeInteger(chatId) || chatId <= 0) throw new Error("Invalid Telegram identity");
+  const normalized = sanitizeProfileDetails(payload);
+  let { data: existing, error: readError } = await db.from("profiles")
+    .select("personal_details").eq("chat_id", chatId).maybeSingle();
+  if (readError) throw readError;
+  if (!existing) {
+    await syncProfile(telegramUser);
+    const retry = await db.from("profiles").select("personal_details").eq("chat_id", chatId).single();
+    if (retry.error) throw retry.error;
+    existing = retry.data;
+  }
+
+  const patch = {
+    personal_details: { ...(existing?.personal_details || {}), ...normalized }
+  };
+  if (Object.prototype.hasOwnProperty.call(normalized, "mobile")) patch.phone = normalized.mobile || null;
+  if (Object.prototype.hasOwnProperty.call(normalized, "currentAddress")) patch.address = profileAddressToText(normalized.currentAddress) || null;
+  if (Object.prototype.hasOwnProperty.call(normalized, "nidNumber")) patch.nid_number = normalized.nidNumber || null;
+
+  const { data, error } = await db.from("profiles").update(patch).eq("chat_id", chatId).select("*").single();
+  if (error) throw error;
+  return data;
+}
+
+async function syncProfileDetailsFromLoan(telegramUser, applicationPayload) {
+  const source = applicationPayload || {};
+  const addressValue = value => {
+    if (typeof value !== "string") return value;
+    try { return JSON.parse(value); } catch { return null; }
+  };
+  const candidate = {
+    fullName: source.full_name,
+    fatherName: source.father_name,
+    motherName: source.mother_name,
+    dob: source.dob,
+    gender: source.gender,
+    mobile: source.mobile,
+    whatsapp: source.whatsapp,
+    email: source.email,
+    nidNumber: source.nid_number,
+    currentAddress: addressValue(source.current_address),
+    permanentAddress: addressValue(source.permanent_address)
+  };
+  const normalized = sanitizeProfileDetails(candidate, { keepEmpty: false });
+  if (!Object.keys(normalized).length) return null;
+  return updateMyProfile(telegramUser, normalized);
 }
 
 async function syncProfile(telegramUser) {
@@ -623,6 +745,14 @@ export default async function handler(req, res) {
     const userAction = String(req.body?.userAction || "");
     const userChatId = Number(result.user.id);
     if (!Number.isSafeInteger(userChatId) || userChatId <= 0) throw new Error("Invalid Telegram identity");
+    if (userAction === "get_profile") {
+      const data = await getMyProfile(result.user);
+      return res.status(200).json({ ok: true, data });
+    }
+    if (userAction === "update_profile") {
+      const data = await updateMyProfile(result.user, req.body?.payload || {});
+      return res.status(200).json({ ok: true, data });
+    }
     if (userAction === "get_dashboard_stats") {
       const data = await getMyDashboardStats(result.user);
       return res.status(200).json({ success: true, data });
