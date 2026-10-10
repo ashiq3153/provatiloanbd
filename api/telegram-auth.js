@@ -181,7 +181,8 @@ async function updateMyLoanApplication(telegramUser, applicationId, payload) {
       email: data.email,
       nid_number: data.nid_number,
       current_address: data.current_address,
-      permanent_address: data.permanent_address
+      permanent_address: data.permanent_address,
+      professional_info: data.professional_info
     });
   } catch (profileError) {
     console.error("Profile auto-sync after loan revision failed:", profileError);
@@ -483,7 +484,12 @@ async function syncProfileDetailsFromLoan(telegramUser, applicationPayload) {
     email: source.email,
     nidNumber: source.nid_number,
     currentAddress: addressValue(source.current_address),
-    permanentAddress: addressValue(source.permanent_address)
+    permanentAddress: addressValue(source.permanent_address),
+    eTin: source.professional_info?.eTin,
+    bloodGroup: source.professional_info?.bloodGroup,
+    maritalStatus: source.professional_info?.maritalStatus,
+    spouseProfession: source.professional_info?.spouseProfession,
+    spouseIncome: source.professional_info?.spouseIncome
   };
   const normalized = sanitizeProfileDetails(candidate, { keepEmpty: false });
   if (!Object.keys(normalized).length) return null;
