@@ -293,6 +293,7 @@ const ADMIN_ACTION_ROLES = {
   get_success_stories: ["owner","admin","support","viewer"],
   get_system_setting: ["owner","admin","finance","support","viewer"],
   get_admin_role: ["owner","admin","finance","support","viewer"],
+  set_admin_status: ["owner","admin"],
   ban_user: ["owner","admin","support"],
   lock_user: ["owner","admin","support"],
   delete_user: ["owner","admin"],
@@ -316,6 +317,17 @@ async function adminAction(action, payload) {
     case "get_admin_role": {
       const role = await getAdminRole(payload.chatId || 0);
       return { role };
+    }
+    case "set_admin_status": {
+      const now = new Date().toISOString();
+      const { error } = await db.from("admin_status").upsert({
+        id: 1,
+        is_online: payload.isOnline === true,
+        last_seen: now,
+        updated_at: now
+      }, { onConflict: "id" });
+      if (error) throw error;
+      return true;
     }
     case "get_financial_report": {
       const { data, error } = await db.from("financial_reconciliation_summary").select("*").single();
@@ -353,11 +365,31 @@ async function adminAction(action, payload) {
       if (error) throw error;
       return data || [];
     }
-    case "get_profiles": return (await db.from("profiles").select("*").order("created_at", { ascending: false })).data || [];
-    case "get_loans": return (await db.from("loan_applications").select("*").order("applied_at", { ascending: false })).data || [];
-    case "get_transactions": return (await db.from("transactions").select("*").order("created_at", { ascending: false })).data || [];
-    case "get_success_stories": return (await db.from("success_stories").select("*").order("rating", { ascending: false })).data || [];
-    case "get_system_setting": return (await db.from("system_settings").select("value").eq("key", payload.key).single()).data?.value || null;
+    case "get_profiles": {
+      const { data, error } = await db.from("profiles").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    }
+    case "get_loans": {
+      const { data, error } = await db.from("loan_applications").select("*").order("applied_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    }
+    case "get_transactions": {
+      const { data, error } = await db.from("transactions").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    }
+    case "get_success_stories": {
+      const { data, error } = await db.from("success_stories").select("*").order("rating", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    }
+    case "get_system_setting": {
+      const { data, error } = await db.from("system_settings").select("value").eq("key", payload.key).maybeSingle();
+      if (error) throw error;
+      return data?.value ?? null;
+    }
     case "ban_user": return !(await db.from("profiles").update({ is_banned: !!payload.isBanned }).eq("chat_id", payload.chatId)).error;
     case "lock_user": return !(await db.from("profiles").update({ is_locked: !!payload.isLocked, lock_reason: payload.isLocked ? (payload.reason || null) : null }).eq("chat_id", payload.chatId)).error;
     case "delete_user":
@@ -373,7 +405,8 @@ async function adminAction(action, payload) {
       const { error } = await db.from("transactions").update(patch).eq("id", payload.id);
       if (error) throw error;
       if (payload.status === "completed") {
-        await db.rpc("finalize_completed_transaction", { p_transaction_id: payload.id });
+        const { error: finalizeError } = await db.rpc("finalize_completed_transaction", { p_transaction_id: payload.id });
+        if (finalizeError) throw finalizeError;
       }
       return true;
     }
@@ -524,21 +557,24 @@ export default async function handler(req, res) {
       const data = await adminAction(adminActionName, { ...adminPayload, chatId: adminPayload.chatId ?? Number(result.user.id) });
 
       // Keep an immutable, server-side activity trail without storing secrets or message bodies.
-      const activityDetails = {
-        result_type: typeof data,
-        id: typeof adminPayload.id === "string" ? adminPayload.id : null,
-        chat_id: Number.isFinite(Number(adminPayload.chatId)) ? Number(adminPayload.chatId) : null,
-        status: typeof adminPayload.status === "string" ? adminPayload.status : null,
-        setting_key: typeof adminPayload.key === "string" ? adminPayload.key : null
-      };
-      const { error: activityError } = await adminClient().from("admin_activity_log").insert({
-        admin_chat_id: Number(result.user.id),
-        action: adminActionName,
-        entity_type: adminActionName.startsWith("update_") ? adminActionName.slice(7) : "admin",
-        entity_id: activityDetails.id || activityDetails.chat_id?.toString() || null,
-        details: activityDetails
-      });
-      if (activityError) console.error("Admin activity log failed:", activityError);
+      // The recurring online-presence heartbeat is intentionally excluded to avoid log noise.
+      if (adminActionName !== "set_admin_status") {
+        const activityDetails = {
+          result_type: typeof data,
+          id: typeof adminPayload.id === "string" ? adminPayload.id : null,
+          chat_id: Number.isFinite(Number(adminPayload.chatId)) ? Number(adminPayload.chatId) : null,
+          status: typeof adminPayload.status === "string" ? adminPayload.status : null,
+          setting_key: typeof adminPayload.key === "string" ? adminPayload.key : null
+        };
+        const { error: activityError } = await adminClient().from("admin_activity_log").insert({
+          admin_chat_id: Number(result.user.id),
+          action: adminActionName,
+          entity_type: adminActionName.startsWith("update_") ? adminActionName.slice(7) : "admin",
+          entity_id: activityDetails.id || activityDetails.chat_id?.toString() || null,
+          details: activityDetails
+        });
+        if (activityError) console.error("Admin activity log failed:", activityError);
+      }
 
       return res.status(200).json({ ok: true, data });
     }
