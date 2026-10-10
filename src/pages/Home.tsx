@@ -1,6 +1,7 @@
 import '../styles/home.css';
 import { HomeHeader } from '../components/home/HomeHeader';
 import { BalanceCard } from '../components/home/BalanceCard';
+import { BalanceDetailsModal } from '../components/home/BalanceDetailsModal';
 import { LoanStatusCard } from '../components/home/LoanStatusCard';
 import { QuickServices } from '../components/home/QuickServices';
 import { LoanServices } from '../components/home/LoanServices';
@@ -36,7 +37,7 @@ export default function Home() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
   const [balanceVisible, setBalanceVisible] = useState(true);
-  const [balanceView, setBalanceView] = useState<'savings' | 'outstanding'>('savings');
+  const [showBalanceDetails, setShowBalanceDetails] = useState(false);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activeLoan, setActiveLoan] = useState<LoanApplication | null>(null);
   const [loans, setLoans] = useState<LoanApplication[]>([]);
@@ -226,14 +227,14 @@ export default function Home() {
         )}
 
         {/* Approved reference balance card */}
-        <BalanceCard isBn={isBn} balanceView={balanceView} balanceVisible={balanceVisible} setBalanceVisible={setBalanceVisible} loading={loading} stats={stats} outstanding={outstanding} userId={user.id} />
+        <BalanceCard isBn={isBn} balanceVisible={balanceVisible} setBalanceVisible={setBalanceVisible} loading={loading} stats={stats} userId={user.id} onViewDetails={() => setShowBalanceDetails(true)} />
 
         {/* Smart loan status — one source of truth for application/active loan */}
         <LoanStatusCard activeLoan={activeLoan} latestApplication={latestApplication} isBn={isBn} outstanding={outstanding} nextInstallment={nextInstallment} nextEmiDate={nextEmiDate} categoryName={categoryName} applicationStatus={applicationStatus} />
 
         {/* Mobile-first responsive spacing */}
         <div className="h-px bg-transparent sm:hidden" aria-hidden="true" />
-        <QuickServices isBn={isBn} />
+        <QuickServices isBn={isBn} onQuickBalance={() => setShowBalanceDetails(true)} />
 
         <LoanServices isBn={isBn} categoryName={categoryName} />
 
@@ -246,6 +247,14 @@ export default function Home() {
           <div className="flex gap-3"><ShieldCheck className="text-sky-400 shrink-0" size={21}/><div><p className="font-black text-sm">{isBn?'সদস্য তথ্য ও হিসাব':'Member account & records'}</p><p className="text-[11px] text-slate-400 leading-5 mt-1">{isBn?'আপনার সঞ্চয়, ঋণ, কিস্তি, লেনদেন ও নথির তথ্য এক জায়গা থেকে দেখুন।':'View your savings, loans, installments, transactions and documents in one place.'}</p></div></div>
         </section>
       </div>
+      {showBalanceDetails && (
+        <BalanceDetailsModal
+          isBn={isBn}
+          stats={stats}
+          balanceVisible={balanceVisible}
+          onClose={() => setShowBalanceDetails(false)}
+        />
+      )}
     </main>
   );
 }
