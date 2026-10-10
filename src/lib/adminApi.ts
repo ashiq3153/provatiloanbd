@@ -42,7 +42,7 @@ async function callAdmin<T>(adminAction: AdminAction, payload: Record<string, un
   const response = await fetch('/api/telegram-auth', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ initData, accessToken: session.access_token, action: 'admin', adminAction, payload }),
+    body: JSON.stringify({ initData, action: 'admin', adminAction, payload }),
   });
   const result = await response.json().catch(() => null);
   if (!response.ok || !result?.ok) {
