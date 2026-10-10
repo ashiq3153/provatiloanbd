@@ -43,6 +43,7 @@ export default function Loans() {
       case 'rejected': return { text: isBn ? 'প্রত্যাখ্যাত' : 'Rejected', color: 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-900', icon: XCircle };
       case 'action_required': return { text: isBn ? 'আপডেট প্রয়োজন' : 'Action Required', color: 'bg-violet-50 dark:bg-violet-950/40 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-900', icon: AlertCircle };
       case 'completed': return { text: isBn ? 'সম্পন্ন' : 'Completed', color: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 border-slate-200 dark:border-slate-800', icon: CheckCircle2 };
+      case 'cancelled': return { text: isBn ? 'বাতিল' : 'Cancelled', color: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700', icon: XCircle };
       default: return { text: status, color: 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 border-slate-200 dark:border-slate-800', icon: FileText };
     }
   };
