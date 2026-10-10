@@ -1,3 +1,4 @@
+-- RECOVERY NOTE: a function matching this definition exists in the live database, but no applied migration-history row contains this SQL. Do not apply blindly; reconcile via Supabase CLI after review.
 -- v1.1 Phase 1: authoritative customer dashboard calculations
 create or replace function public.get_dashboard_stats(p_chat_id bigint)
 returns jsonb

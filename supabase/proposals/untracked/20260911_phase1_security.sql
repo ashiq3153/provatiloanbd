@@ -1,3 +1,4 @@
+-- RECOVERY NOTE: this file is not a migration recorded in the live Supabase migration history. Preserved for audit only; do not run with db push.
 -- Provatiloanbd v1.1 Phase 1 — Security & data-integrity migration source
 -- IMPORTANT: v1.0 main remains unchanged. Apply only on v1.1 development branch.
 

@@ -1,3 +1,4 @@
+-- RECOVERY NOTE: this file is not a migration recorded in the live Supabase migration history. Preserved for audit only; do not run with db push.
 -- v1.1 Phase 1 security policy definitions.
 -- Intentionally disabled from production rollout until the frontend/server migration is validated.
 -- This migration documents the target authorization model without changing live V1.0 behavior.

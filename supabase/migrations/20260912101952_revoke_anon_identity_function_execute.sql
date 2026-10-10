@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.current_telegram_chat_id() FROM PUBLIC, anon; GRANT EXECUTE ON FUNCTION public.current_telegram_chat_id() TO authenticated;

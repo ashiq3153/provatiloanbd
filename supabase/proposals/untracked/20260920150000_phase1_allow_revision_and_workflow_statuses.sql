@@ -1,3 +1,4 @@
+-- RECOVERY NOTE: this file is not a migration recorded in the live Supabase migration history. Preserved for audit only; do not run with db push.
 alter table public.loan_applications
   drop constraint if exists loan_applications_status_valid;
 
