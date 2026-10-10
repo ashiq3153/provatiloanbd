@@ -266,31 +266,19 @@ export async function getSuccessStories(): Promise<SuccessStory[]> {
 }
 
 export async function reactToSuccessStory(storyId: string, reactionType: string): Promise<boolean> {
-  const { data, error: fetchError } = await supabase
-    .from('success_stories')
-    .select('*')
-    .eq('id', storyId)
-    .single();
+  // The database RPC validates reaction types and increments atomically so
+  // simultaneous reactions cannot overwrite each other's counter updates.
+  const { data, error } = await supabase.rpc('react_to_success_story', {
+    p_story_id: storyId,
+    p_reaction_type: reactionType,
+  });
 
-  if (fetchError || !data) {
-    console.error('reactToSuccessStory fetch error:', fetchError);
+  if (error) {
+    console.error('reactToSuccessStory error:', error);
     return false;
   }
 
-  const column = `${reactionType}_count`;
-  const currentCount = (data as any)[column] || 0;
-
-  const { error: updateError } = await supabase
-    .from('success_stories')
-    .update({ [column]: currentCount + 1 })
-    .eq('id', storyId);
-
-  if (updateError) {
-    console.error('reactToSuccessStory update error:', updateError);
-    return false;
-  }
-
-  return true;
+  return data === true;
 }
 
 // ── Document Upload API ──────────────────────────────────
