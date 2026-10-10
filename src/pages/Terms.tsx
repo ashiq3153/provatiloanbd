@@ -2,14 +2,31 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ShieldCheck, Landmark, FileText, CheckCircle2, AlertCircle, HelpCircle, UserCheck, ShieldAlert, BadgeAlert } from 'lucide-react';
 import { useAppStore } from '../lib/store';
+import { convertDigits } from '../lib/translation';
 
 export default function Terms() {
   const navigate = useNavigate();
-  const { language } = useAppStore();
+  const { language, systemSettings } = useAppStore();
   const [currentLang, setCurrentLang] = useState<'bn' | 'en'>(language === 'bn' ? 'bn' : 'en');
   const [activeSection, setActiveSection] = useState<string>('all');
 
   const isBn = currentLang === 'bn';
+  const monthlyRateLabel = (key: string, fallback: number) => {
+    const configured = Number(systemSettings?.[key]);
+    const rate = Number.isFinite(configured) && configured >= 0 ? configured : fallback;
+    return convertDigits((rate * 100).toFixed(2).replace(/\\.?0+$/, '') + '%', isBn);
+  };
+  const loanLimitLabel = (key: string, fallback: number) => {
+    const configured = Number(systemSettings?.categories?.[key]?.maxAmount);
+    const amount = Number.isFinite(configured) && configured > 0 ? configured : fallback;
+    return convertDigits(amount.toLocaleString('en-IN'), isBn);
+  };
+  const feeTiers = systemSettings?.feeTiers || {};
+  const percentLabel = (rate: number) => convertDigits((rate * 100).toFixed(2).replace(/\\.?0+$/, '') + '%', isBn);
+  const processingFeeUpTo1m = Number(feeTiers.processingFeeUpTo1m ?? 0.01);
+  const processingFeeAbove1m = Number(feeTiers.processingFeeAbove1m ?? 0.005);
+  const securityDepositUpTo500k = Number(feeTiers.securityDepositUpTo500k ?? 0.1);
+  const securityDepositAbove500k = Number(feeTiers.securityDepositAbove500k ?? 0.05);
 
   const sections = [
     { id: 'terms', titleBn: '১. নিয়ম ও শর্তাবলী', titleEn: '1. Terms & Conditions', icon: FileText },
@@ -135,12 +152,12 @@ export default function Terms() {
                 <div className="text-xs text-gray-600 dark:text-gray-300 space-y-3 leading-relaxed font-bold">
                   <p>ঋণ পাওয়ার জন্য আবেদনকারীকে তার পেশা অনুযায়ী সঠিক ক্যাটাগরি নির্বাচন করতে হবে। প্রতিটি ক্যাটাগরির জন্য ঋণের সর্বোচ্চ সীমা এবং মাসিক সুদের হার আলাদা হতে পারে:</p>
                   <ul className="list-disc pl-5 space-y-1.5 font-extrabold">
-                    <li><b>ব্যক্তিগত লোন (Personal):</b> চাকুরিজীবীদের জন্য সর্বোচ্চ ৫,০০,০০০ টাকা পর্যন্ত ঋণ। মাসিক সুদ ১.২%।</li>
-                    <li><b>ব্যবসায়িক লোন (Business):</b> ব্যবসায়ীদের জন্য সর্বোচ্চ ৫০,০০,০০০ টাকা পর্যন্ত ঋণ। মাসিক সুদ ১.৫%।</li>
-                    <li><b>প্রবাসী লোন (Probashi):</b> রেমিট্যান্স যোদ্ধাদের জন্য সর্বোচ্চ ১০,০০,০০০ টাকা পর্যন্ত ঋণ। মাসিক সুদ ১.০%।</li>
-                    <li><b>শিক্ষা লোন (Student):</b> শিক্ষার্থীদের জন্য সর্বোচ্চ ৫,০০,০০০ টাকা পর্যন্ত ঋণ। মাসিক সুদ ০.৮%।</li>
-                    <li><b>জরুরি লোন (Emergency):</b> তাৎক্ষণিক প্রয়োজনের জন্য সর্বোচ্চ ১,০০,০০০ টাকা পর্যন্ত ঋণ। মাসিক সুদ ২.০%।</li>
-                    <li><b>মহিলা উদ্যোক্তা লোন (Women):</b> নারী উদ্যোক্তাদের জন্য সর্বোচ্চ ২০,০০,০০০ টাকা পর্যন্ত ঋণ। মাসিক সুদ ০.৮%।</li>
+                    <li><b>ব্যক্তিগত লোন (Personal):</b> চাকুরিজীবীদের জন্য সর্বোচ্চ {loanLimitLabel('personal', 500000)} টাকা পর্যন্ত ঋণ। মাসিক সুদ {monthlyRateLabel('minRatePersonal', 0.0055)}।</li>
+                    <li><b>ব্যবসায়িক লোন (Business):</b> ব্যবসায়ীদের জন্য সর্বোচ্চ {loanLimitLabel('business', 5000000)} টাকা পর্যন্ত ঋণ। মাসিক সুদ {monthlyRateLabel('minRateBusiness', 0.0055)}।</li>
+                    <li><b>প্রবাসী লোন (Probashi):</b> রেমিট্যান্স যোদ্ধাদের জন্য সর্বোচ্চ {loanLimitLabel('expat', 1000000)} টাকা পর্যন্ত ঋণ। মাসিক সুদ {monthlyRateLabel('minRateExpat', 0.005)}।</li>
+                    <li><b>শিক্ষা লোন (Student):</b> শিক্ষার্থীদের জন্য সর্বোচ্চ {loanLimitLabel('student', 500000)} টাকা পর্যন্ত ঋণ। মাসিক সুদ {monthlyRateLabel('minRateStudent', 0.005)}।</li>
+                    <li><b>জরুরি লোন (Emergency):</b> তাৎক্ষণিক প্রয়োজনের জন্য সর্বোচ্চ {loanLimitLabel('emergency', 100000)} টাকা পর্যন্ত ঋণ। মাসিক সুদ {monthlyRateLabel('minRateEmergency', 0.006)}।</li>
+                    <li><b>মহিলা উদ্যোক্তা লোন (Women):</b> নারী উদ্যোক্তাদের জন্য সর্বোচ্চ {loanLimitLabel('women', 2000000)} টাকা পর্যন্ত ঋণ। মাসিক সুদ {monthlyRateLabel('minRateWomen', 0.0055)}।</li>
                   </ul>
                   <p className="font-bold">ঋণের মাসিক কিস্তি (EMI) লোন ক্যালকুলেটরের মাধ্যমে স্বয়ংক্রিয়ভাবে হিসাব করা হয়। সময়কাল ৬ থেকে ১২০ মাসের মধ্যে স্ন্যাপ পয়েন্ট অনুযায়ী নির্বাচন করা যাবে।</p>
                 </div>
@@ -148,12 +165,12 @@ export default function Terms() {
                 <div className="text-xs text-gray-600 dark:text-gray-300 space-y-3 leading-relaxed font-bold">
                   <p>Applicants must select the appropriate category matching their profession. Loan limits and interest rates are defined as follows:</p>
                   <ul className="list-disc pl-5 space-y-1.5 font-extrabold">
-                    <li><b>Personal Loan:</b> For salaried employees up to BDT 500,000. Monthly rate 1.2%.</li>
-                    <li><b>Business Loan:</b> For entrepreneurs up to BDT 5,000,000. Monthly rate 1.5%.</li>
-                    <li><b>Probashi Loan:</b> For overseas workers up to BDT 1,000,000. Monthly rate 1.0%.</li>
-                    <li><b>Student Loan:</b> For students up to BDT 500,000. Monthly rate 0.8%.</li>
-                    <li><b>Emergency Loan:</b> For urgent situations up to BDT 100,000. Monthly rate 2.0%.</li>
-                    <li><b>Women Entrepreneur Loan:</b> For female entrepreneurs up to BDT 2,000,000. Monthly rate 0.8%.</li>
+                    <li><b>Personal Loan:</b> For salaried employees up to BDT {loanLimitLabel('personal', 500000)}. Monthly rate {monthlyRateLabel('minRatePersonal', 0.0055)}.</li>
+                    <li><b>Business Loan:</b> For entrepreneurs up to BDT {loanLimitLabel('business', 5000000)}. Monthly rate {monthlyRateLabel('minRateBusiness', 0.0055)}.</li>
+                    <li><b>Probashi Loan:</b> For overseas workers up to BDT {loanLimitLabel('expat', 1000000)}. Monthly rate {monthlyRateLabel('minRateExpat', 0.005)}.</li>
+                    <li><b>Student Loan:</b> For students up to BDT {loanLimitLabel('student', 500000)}. Monthly rate {monthlyRateLabel('minRateStudent', 0.005)}.</li>
+                    <li><b>Emergency Loan:</b> For urgent situations up to BDT {loanLimitLabel('emergency', 100000)}. Monthly rate {monthlyRateLabel('minRateEmergency', 0.006)}.</li>
+                    <li><b>Women Entrepreneur Loan:</b> For female entrepreneurs up to BDT {loanLimitLabel('women', 2000000)}. Monthly rate {monthlyRateLabel('minRateWomen', 0.0055)}.</li>
                   </ul>
                   <p className="font-bold">Equated Monthly Installments (EMI) are auto-calculated. Repayment periods are snappable between 6 and 120 months depending on category limits.</p>
                 </div>
@@ -223,10 +240,10 @@ export default function Terms() {
                   <p>লোন প্রসেস ও বিতরণের স্বার্থে দুই ধরনের ডিপোজিট প্রযোজ্য হয়ে থাকে:</p>
                   <div className="space-y-2">
                     <p className="font-extrabold text-gray-900 dark:text-white">• প্রসেসিং ফি (Processing Fee):</p>
-                    <p className="pl-4">লোনের পরিমাণ ৫০,০০০ থেকে ১০,০০,০০০ টাকা পর্যন্ত হলে <b>১% প্রসেসিং ফি</b> এবং ১০,০০,০০০ টাকার ওপরে হলে <b>০.৫% প্রসেসিং ফি</b> প্রযোজ্য। এটি ফাইল প্রসেসিংয়ের জন্য অফেরতযোগ্য ফি।</p>
+                    <p className="pl-4">লোনের পরিমাণ ৫০,০০০ থেকে ১০,০০,০০০ টাকা পর্যন্ত হলে <b>{percentLabel(processingFeeUpTo1m)} প্রসেসিং ফি</b> এবং ১০,০০,০০০ টাকার ওপরে হলে <b>{percentLabel(processingFeeAbove1m)} প্রসেসিং ফি</b> প্রযোজ্য। এটি ফাইল প্রসেসিংয়ের জন্য অফেরতযোগ্য ফি।</p>
                     
                     <p className="font-extrabold text-gray-900 dark:text-white">• সঞ্চয় আমানত (Savings Deposit / Security Deposit):</p>
-                    <p className="pl-4">সমিতি সদস্যদের নিরাপত্তা ও আমানত সুরক্ষার্থে ৫০,০০০ থেকে ৫,০০,০০০ টাকা ঋণের জন্য <b>১০% সঞ্চয়</b> এবং ৫,০০,০০০ টাকার ওপরে হলে <b>৫% সঞ্চয়</b> ডিপোজিট করা বাধ্যতামূলক। এই সঞ্চয় ব্যালেন্স আপনার একাউন্টে জমা থাকবে এবং লোন বিতরণের পরেও এটি আপনার একাউন্টেই দৃশ্যমান থাকবে।</p>
+                    <p className="pl-4">সমিতি সদস্যদের নিরাপত্তা ও আমানত সুরক্ষার্থে ৫০,০০০ থেকে ৫,০০,০০০ টাকা ঋণের জন্য <b>{percentLabel(securityDepositUpTo500k)} সঞ্চয়</b> এবং ৫,০০,০০০ টাকার ওপরে হলে <b>{percentLabel(securityDepositAbove500k)} সঞ্চয়</b> ডিপোজিট করা বাধ্যতামূলক। এই সঞ্চয় ব্যালেন্স আপনার একাউন্টে জমা থাকবে এবং লোন বিতরণের পরেও এটি আপনার একাউন্টেই দৃশ্যমান থাকবে।</p>
                   </div>
                   <p className="bg-rose-500/10 text-rose-700 dark:text-rose-400 p-3 rounded-xl border border-rose-500/20 text-[11px] font-extrabold">
                     *বিশেষ সতর্কবার্তা: যেকোনো ভুয়া ট্রানজেকশন আইডি (DEP-xxxxx) অথবা অন্যের স্ক্রিনশট পেমেন্ট প্রুফ হিসেবে সাবমিট করলে সম্পূর্ণ ঋণ বাতিলসহ সদস্যপদ স্থায়ীভাবে স্থগিত করা হবে।
@@ -237,10 +254,10 @@ export default function Terms() {
                   <p>Two types of deposits apply under the microfinance structure:</p>
                   <div className="space-y-2">
                     <p className="font-extrabold text-gray-900 dark:text-white">• Processing Fee:</p>
-                    <p className="pl-4">For loan amounts between BDT 50,000 to BDT 1,000,000, a <b>1% processing fee</b> is charged. For loans above BDT 1,000,000, the fee is <b>0.5%</b>. This fee is non-refundable.</p>
+                    <p className="pl-4">For loan amounts between BDT 50,000 and BDT 1,000,000, a <b>{percentLabel(processingFeeUpTo1m)} processing fee</b> applies. Above BDT 1,000,000, the fee is <b>{percentLabel(processingFeeAbove1m)}</b>. This fee is non-refundable.</p>
                     
                     <p className="font-extrabold text-gray-900 dark:text-white">• Savings Deposit:</p>
-                    <p className="pl-4">To support cooperative savings, BDT 50,000 to BDT 500,000 loans require a <b>10% savings deposit</b>. Loans above BDT 500,000 require a <b>5% savings deposit</b>. This deposit remains locked in your account and is fully visible even after loan disbursement.</p>
+                    <p className="pl-4">To support cooperative savings, BDT 50,000 to BDT 500,000 loans require a <b>{percentLabel(securityDepositUpTo500k)} savings deposit</b>. Loans above BDT 500,000 require a <b>{percentLabel(securityDepositAbove500k)} savings deposit</b>. This deposit remains locked in your account and is visible after loan disbursement.</p>
                   </div>
                   <p className="bg-rose-500/10 text-rose-700 dark:text-rose-400 p-3 rounded-xl border border-rose-500/20 text-[11px] font-extrabold">
                     *Fraud Notice: Submitting fake screenshot proofs or forged Transaction IDs (DEP-xxxxx) will lead to immediate cancellation of the application and a permanent account ban.
