@@ -72,6 +72,7 @@ async function getAuthoritativeLoanTerms(db, input, options = {}) {
     settings: settingsRow.value,
     rateVersion: activeRates[0],
     allowDisabledCategory: options.allowDisabledCategory === true,
+    existingTerms: options.existingTerms || null,
   });
 }
 
@@ -196,7 +197,13 @@ async function updateMyLoanApplication(telegramUser, applicationId, payload) {
   const allowDisabledCategory = financialInputs.loan_category === existingLoan.loan_category;
   Object.assign(
     update,
-    await getAuthoritativeLoanTerms(db, financialInputs, { allowDisabledCategory })
+    await getAuthoritativeLoanTerms(db, financialInputs, {
+      allowDisabledCategory,
+      existingTerms: {
+        amount: existingLoan.amount,
+        tenureMonths: existingLoan.tenure_months,
+      },
+    })
   );
 
   const { data, error } = await db.from("loan_applications")
