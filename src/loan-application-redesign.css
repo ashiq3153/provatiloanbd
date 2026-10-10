@@ -582,3 +582,38 @@ div[id^="accordion-section-"] > button [class*="text-[10px]"] {
   font-size: 19px !important;
   letter-spacing: .04em;
 }
+
+
+/* Category detail, repayment schedule, terms and confirmation sheets */
+.apply-loan-screen [class*="z-[70]"] p,
+.apply-loan-screen [class*="z-[70]"] li,
+.apply-loan-screen [class*="z-[70]"] label {
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+.apply-loan-screen [class*="z-[70]"] h3,
+.apply-loan-screen [class*="z-[70]"] h4 {
+  line-height: 1.4 !important;
+}
+.apply-loan-screen [class*="z-[70]"] button {
+  overflow-wrap: anywhere;
+}
+.apply-loan-screen [class*="z-[70]"] [class*="min-w-[590px]"] > div {
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+}
+.apply-loan-screen [class*="z-[70]"] [class*="min-w-[590px]"] > div > div {
+  padding-top: 9px !important;
+  padding-bottom: 9px !important;
+}
+.apply-loan-screen [class*="z-[70]"] [class*="min-w-[590px]"] > div:first-child {
+  font-size: 11px !important;
+}
+.apply-loan-screen .fixed.inset-0.z-50 > .rounded-3xl > div[class*="max-h-"] span {
+  line-height: 1.5 !important;
+}
+@media (max-width: 430px) {
+  .apply-loan-screen [class*="z-[70]"] > div[class*="max-h-"] {
+    padding: 12px !important;
+  }
+}
