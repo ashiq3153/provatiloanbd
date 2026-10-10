@@ -5,7 +5,6 @@ import { BalanceDetailsModal } from '../components/home/BalanceDetailsModal';
 import { LoanStatusCard } from '../components/home/LoanStatusCard';
 import { QuickServices } from '../components/home/QuickServices';
 import { LoanServices } from '../components/home/LoanServices';
-import { SuccessStories } from '../components/home/SuccessStories';
 import { RecentActivity } from '../components/home/RecentActivity';
 import {
   Bell, ChevronRight, AlertCircle,
@@ -18,10 +17,10 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import {
   getDashboardStats, getActiveLoans, getTransactions,
-  getLoanApplications, getMyNotifications, markMyNotificationRead, getSuccessStories, reactToSuccessStory, getLoanEmiSchedule
+  getLoanApplications, getMyNotifications, markMyNotificationRead, getLoanEmiSchedule
 } from '../lib/api';
 import type { DashboardStats } from '../lib/api';
-import type { LoanApplication, Transaction, SuccessStory, LoanEmiSchedule } from '../types/database';
+import type { LoanApplication, Transaction, LoanEmiSchedule } from '../types/database';
 
 export default function Home() {
   const user = getTelegramUser();
@@ -44,8 +43,6 @@ export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [stories, setStories] = useState<SuccessStory[]>([]);
-  const [storyReactions, setStoryReactions] = useState<Record<string, { like: number; love: number; wow: number }>>({});
   const [emiSchedule, setEmiSchedule] = useState<LoanEmiSchedule[]>([]);
 
   useEffect(() => {
@@ -76,12 +73,8 @@ export default function Home() {
         setLoading(false);
         setRefreshing(false);
 
-        const [nextStories, nextEmi] = await Promise.all([
-          getSuccessStories().catch(() => []),
-          active[0]?.id ? getLoanEmiSchedule(active[0].id).catch(() => []) : Promise.resolve([])
-        ]);
+        const nextEmi = active[0]?.id ? await getLoanEmiSchedule(active[0].id).catch(() => []) : [];
         if (!mounted) return;
-        setStories(nextStories || []);
         setEmiSchedule(nextEmi || []);
       } catch (e) {
         console.error('Home dashboard error:', e);
@@ -162,23 +155,6 @@ export default function Home() {
     return map[status || ''] || { bn: 'স্ট্যাটাস আপডেট', en: 'Status update', tone: 'slate' };
   };
 
-  const handleStoryReaction = async (story: SuccessStory, type: 'like' | 'love' | 'wow') => {
-    const ok = await reactToSuccessStory(story.id, type);
-    if (!ok) {
-      toast.error(isBn ? 'রিঅ্যাকশন দেওয়া যায়নি' : 'Could not add reaction');
-      return;
-    }
-    setStoryReactions(prev => ({
-      ...prev,
-      [story.id]: {
-        like: prev[story.id]?.like ?? Number(story.like_count || 0),
-        love: prev[story.id]?.love ?? Number(story.love_count || 0),
-        wow: prev[story.id]?.wow ?? Number(story.wow_count || 0),
-        [type]: (prev[story.id]?.[type] ?? Number(story[`${type}_count` as 'like_count' | 'love_count' | 'wow_count'] || 0)) + 1,
-      }
-    }));
-  };
-
   const markReadAndOpen = async (n: any) => {
     if (!n.is_read) {
       await markMyNotificationRead(n.id);
@@ -237,8 +213,6 @@ export default function Home() {
         <QuickServices isBn={isBn} onQuickBalance={() => setShowBalanceDetails(true)} />
 
         <LoanServices isBn={isBn} categoryName={categoryName} />
-
-        <SuccessStories isBn={isBn} stories={stories} storyReactions={storyReactions} onReact={handleStoryReaction} />
 
         <RecentActivity isBn={isBn} transactions={transactions} />
 
