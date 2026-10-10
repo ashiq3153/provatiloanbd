@@ -86,6 +86,25 @@ export default function Deposit() {
     (selectSecurity ? calculatedSavingsDeposit : 0) + 
     ((selectInsurance && isInsuranceEnabled) ? calculatedInsurance : 0);
 
+  const configuredPayment = systemSettings?.paymentNumbers?.[method];
+  const paymentDetails: Array<{ label: string; value: string }> = method === 'bank'
+    ? [
+        { label: isBn ? 'ব্যাংক' : 'Bank', value: configuredPayment?.name || '' },
+        { label: isBn ? 'অ্যাকাউন্টের নাম' : 'Account name', value: configuredPayment?.accName || '' },
+        { label: isBn ? 'অ্যাকাউন্ট নম্বর' : 'Account number', value: configuredPayment?.accNo || '' },
+        { label: isBn ? 'শাখা' : 'Branch', value: configuredPayment?.branch || '' },
+        { label: isBn ? 'রাউটিং নম্বর' : 'Routing number', value: configuredPayment?.routing || '' },
+      ].filter(item => item.value.trim())
+    : method === 'visa'
+      ? [
+          { label: isBn ? 'কার্ডের নাম' : 'Card name', value: configuredPayment?.name || '' },
+          { label: isBn ? 'কার্ড নম্বর' : 'Card number', value: configuredPayment?.number || '' },
+        ].filter(item => item.value.trim())
+      : [
+          { label: isBn ? 'পেমেন্ট নম্বর' : 'Payment number', value: configuredPayment?.number || '' },
+          { label: isBn ? 'অ্যাকাউন্টের ধরন' : 'Account type', value: configuredPayment?.type || '' },
+        ].filter(item => item.value.trim());
+
   const getSelectedDepositTypes = () => {
     const selected: string[] = [];
     if (selectProcessing) selected.push('processing_fee');
@@ -509,20 +528,42 @@ ${selectProcessing ? `প্রসেসিং ফি: ৳${calculatedProcessing
           animate={{ opacity: 1, y: 0 }}
           className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 border-0"
         >
-          <div className="flex items-center justify-between gap-3 relative z-10">
-            <div>
-              <h4 className="font-extrabold text-xs text-gray-900 dark:text-white mb-0.5">{isBn ? 'পেমেন্ট নাম্বার সংগ্রহ করুন' : 'Get Support Agent Number'}</h4>
-              <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold">{isBn ? '💬 আমাদের টিম থেকে নম্বর নিয়ে পেমেন্ট করুন।' : 'Contact live chat to get payment details.'}</p>
+          {paymentDetails.length > 0 ? (
+            <div className="relative z-10 space-y-3">
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={17} className="text-emerald-600 dark:text-emerald-400" />
+                <div>
+                  <h4 className="font-extrabold text-sm text-gray-900 dark:text-white">{isBn ? 'অফিশিয়াল পেমেন্ট তথ্য' : 'Official payment details'}</h4>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400">{isBn ? 'অ্যাডমিন সেটিংসে সংরক্ষিত তথ্য' : 'Details configured by the admin'}</p>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+                {paymentDetails.map(item => (
+                  <div key={item.label} className="flex items-start justify-between gap-3 px-3.5 py-3">
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0">{item.label}</span>
+                    <span className="text-xs font-extrabold text-slate-900 dark:text-white text-right break-all">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] leading-relaxed text-amber-700 dark:text-amber-300">{isBn ? 'পেমেন্ট করার আগে নম্বর ও অ্যাকাউন্টের তথ্য মিলিয়ে নিন।' : 'Verify the recipient details before sending any payment.'}</p>
+              <button type="button" onClick={handleLiveSupportChat} className="min-h-10 w-full rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200">{isBn ? 'সাহায্যের জন্য সাপোর্টে যোগাযোগ করুন' : 'Contact support for help'}</button>
             </div>
-            <button
-              type="button"
-              onClick={handleLiveSupportChat}
-              className="bg-primary-600 hover:bg-primary-700 text-white shadow-sm font-black text-xs py-2.5 px-4 rounded-full active:scale-95 transition-all border-0 flex items-center gap-1.5 shrink-0"
-            >
-              <ShieldCheck size={14} />
-              {isBn ? 'পেমেন্ট নির্দেশনা নিন' : 'Live Chat'}
-            </button>
-          </div>
+          ) : (
+            <div className="flex items-center justify-between gap-3 relative z-10">
+              <div>
+                <h4 className="font-extrabold text-xs text-gray-900 dark:text-white mb-0.5">{isBn ? 'পেমেন্ট নাম্বার সংগ্রহ করুন' : 'Get Support Agent Number'}</h4>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold">{isBn ? '💬 আমাদের টিম থেকে নম্বর নিয়ে পেমেন্ট করুন।' : 'Contact live chat to get payment details.'}</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleLiveSupportChat}
+                className="bg-primary-600 hover:bg-primary-700 text-white shadow-sm font-black text-xs py-2.5 px-4 rounded-full active:scale-95 transition-all border-0 flex items-center gap-1.5 shrink-0"
+              >
+                <ShieldCheck size={14} />
+                {isBn ? 'পেমেন্ট নির্দেশনা নিন' : 'Live Chat'}
+              </button>
+            </div>
+          )}
         </motion.div>
 
         {/* Steps 5 & 6: Payment Proof Submission Form */}
