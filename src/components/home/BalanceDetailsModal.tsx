@@ -57,7 +57,7 @@ export function BalanceDetailsModal({ isBn, stats, balanceVisible, onClose }: Pr
     balanceVisible ? formatCurrency(value, isBn) : '৳ • • • • •';
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] h-[100dvh] min-h-[100svh] w-full overflow-hidden bg-[#07111f] text-white" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+    <div className="fixed inset-0 z-[9999] flex h-[100dvh] min-h-[100svh] w-full flex-col overflow-hidden bg-[#07111f] text-white" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="pointer-events-none absolute -right-28 top-12 h-72 w-72 rounded-full bg-blue-600/20 blur-3xl" />
       <div className="pointer-events-none absolute -left-28 top-[42%] h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
 
@@ -76,7 +76,7 @@ export function BalanceDetailsModal({ isBn, stats, balanceVisible, onClose }: Pr
         </button>
       </header>
 
-      <main className="relative z-10 h-[calc(100dvh-76px-env(safe-area-inset-top))] overflow-y-auto overscroll-contain px-4 pb-7 pt-5 sm:px-6" style={{ paddingBottom: 'max(28px, env(safe-area-inset-bottom))' }}>
+      <main className="relative z-10 min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-7 pt-5 sm:px-6" style={{ paddingBottom: 'max(28px, env(safe-area-inset-bottom))' }}>
         <section className="relative isolate overflow-hidden rounded-[28px] border border-white/15 bg-gradient-to-br from-[#2355e8] via-[#1745b8] to-[#087f9b] p-5 shadow-[0_18px_48px_rgba(16,72,185,.25)] sm:p-7">
           <div className="pointer-events-none absolute -right-8 -top-14 h-48 w-48 rounded-full border-[28px] border-white/[0.07]"/>
           <div className="pointer-events-none absolute -bottom-16 right-16 h-36 w-36 rounded-full bg-cyan-300/10 blur-2xl"/>
