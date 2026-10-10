@@ -366,18 +366,34 @@ export interface DashboardStats {
   depositBalance: number;
   withdrawBalance: number;
   savingsBalance: number;
+  securityDepositTotal: number;
+  processingFeeTotal: number;
+  approvedLoanTotal: number;
   activeLoansCount: number;
   pendingApplications: number;
   totalOutstanding: number;
+  loanOutstanding: number;
 }
 
-export async function getDashboardStats(chatId: number): Promise<DashboardStats> {
-  const { data, error } = await supabase.rpc('get_dashboard_stats', { p_chat_id: chatId });
-  if (error || !data) {
+export async function getDashboardStats(_chatId: number): Promise<DashboardStats> {
+  // Use verified Telegram initData, not a Supabase Auth session that may not
+  // exist for migrated Telegram users. The gateway derives chat_id from the
+  // signed Telegram payload and aggregates only that user's financial records.
+  const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+  if (!initData) throw new Error('Telegram initData is missing');
+
+  const response = await fetch('/api/telegram-auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ initData, action: 'user', userAction: 'get_dashboard_stats' }),
+  });
+  const result = await response.json().catch(() => null);
+  if (!response.ok || result?.success !== true || !result?.data) {
+    const error = new Error(result?.error || 'Dashboard statistics are unavailable');
     console.error('getDashboardStats error:', error);
-    throw error || new Error('Dashboard statistics are unavailable');
+    throw error;
   }
-  return data as DashboardStats;
+  return result.data as DashboardStats;
 }
 // ── Deposit Status Check ─────────────────────────────────
 
