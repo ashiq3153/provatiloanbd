@@ -190,6 +190,10 @@ export default function AdminDashboard() {
   const [config, setConfig] = useState({
     processingFee: 1,
     securityDeposit: 10,
+    processingFeeUpTo1m: 1,
+    processingFeeAbove1m: 0.5,
+    securityDepositUpTo500k: 10,
+    securityDepositAbove500k: 5,
     insuranceEnabled: false,
     insuranceRate: 1.0,
     minRatePersonal: 0.55,
@@ -259,8 +263,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (systemSettings) {
       setConfig({
-        processingFee: systemSettings.procFee ? systemSettings.procFee * 100 : 1,
-        securityDeposit: systemSettings.secDeposit ? systemSettings.secDeposit * 100 : 10,
+        processingFee: (systemSettings.feeTiers?.processingFeeUpTo1m ?? systemSettings.procFee ?? 0.01) * 100,
+        securityDeposit: (systemSettings.feeTiers?.securityDepositUpTo500k ?? systemSettings.secDeposit ?? 0.1) * 100,
+        processingFeeUpTo1m: (systemSettings.feeTiers?.processingFeeUpTo1m ?? 0.01) * 100,
+        processingFeeAbove1m: (systemSettings.feeTiers?.processingFeeAbove1m ?? 0.005) * 100,
+        securityDepositUpTo500k: (systemSettings.feeTiers?.securityDepositUpTo500k ?? 0.10) * 100,
+        securityDepositAbove500k: (systemSettings.feeTiers?.securityDepositAbove500k ?? 0.05) * 100,
         insuranceEnabled: !!systemSettings.insuranceEnabled,
         insuranceRate: systemSettings.insuranceRate ? systemSettings.insuranceRate * 100 : 1.0,
         minRatePersonal: systemSettings.minRatePersonal ? systemSettings.minRatePersonal * 100 : 0.55,
@@ -440,8 +448,15 @@ export default function AdminDashboard() {
   const handleSaveSettings = async () => {
     const loadingId = toast.loading('Saving settings...');
     const newSettings = {
-      procFee: config.processingFee / 100,
-      secDeposit: config.securityDeposit / 100,
+      // Keep the legacy single-rate keys in sync with the first tier for older screens.
+      procFee: config.processingFeeUpTo1m / 100,
+      secDeposit: config.securityDepositUpTo500k / 100,
+      feeTiers: {
+        processingFeeUpTo1m: config.processingFeeUpTo1m / 100,
+        processingFeeAbove1m: config.processingFeeAbove1m / 100,
+        securityDepositUpTo500k: config.securityDepositUpTo500k / 100,
+        securityDepositAbove500k: config.securityDepositAbove500k / 100,
+      },
       insuranceEnabled: config.insuranceEnabled,
       insuranceRate: config.insuranceRate / 100,
       minRatePersonal: config.minRatePersonal / 100,
@@ -1708,14 +1723,27 @@ export default function AdminDashboard() {
                               <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-primary-600 dark:text-primary-400">
                                 <DollarSign size={16} /> {isBn ? 'গ্লোবাল ফি এবং পার্সেন্টেজ' : 'Global Fees & Percentages'}
                               </h3>
+                              <p className="text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                                {isBn
+                                  ? 'ঋণের অঙ্ক অনুযায়ী টার্মস স্ক্রিনে দেখানো দুই-স্তরের ফি এখান থেকে নিয়ন্ত্রণ করুন। পরিবর্তন সেভ করলে নতুন হিসাব ও ডিপোজিট স্ক্রিন একই হার ব্যবহার করবে।'
+                                  : 'Configure the two fee tiers shown in Terms. Saved rates are shared by loan estimates and the Deposit screen.'}
+                              </p>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 <div>
-                                  <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'প্রসেসিং ফি (%)' : 'Processing Fee (%)'}</label>
-                                  <input type="number" step="0.1" value={config.processingFee} onChange={e => setConfig({...config, processingFee: parseFloat(e.target.value) || 0})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm transition-all" />
+                                  <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'প্রসেসিং ফি ≤ ১০ লাখ (%)' : 'Processing fee ≤ BDT 1m (%)'}</label>
+                                  <input type="number" min="0" max="100" step="0.1" value={config.processingFeeUpTo1m} onChange={e => setConfig({...config, processingFeeUpTo1m: Math.max(0, Math.min(100, parseFloat(e.target.value) || 0))})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm transition-all" />
                                 </div>
                                 <div>
-                                  <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'সিকিউরিটি ডিপোজিট (%)' : 'Security Deposit (%)'}</label>
-                                  <input type="number" step="0.1" value={config.securityDeposit} onChange={e => setConfig({...config, securityDeposit: parseFloat(e.target.value) || 0})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm transition-all" />
+                                  <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'প্রসেসিং ফি &gt; ১০ লাখ (%)' : 'Processing fee above BDT 1m (%)'}</label>
+                                  <input type="number" min="0" max="100" step="0.1" value={config.processingFeeAbove1m} onChange={e => setConfig({...config, processingFeeAbove1m: Math.max(0, Math.min(100, parseFloat(e.target.value) || 0))})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm transition-all" />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'সঞ্চয়/সিকিউরিটি ডিপোজিট ≤ ৫ লাখ (%)' : 'Savings deposit ≤ BDT 500k (%)'}</label>
+                                  <input type="number" min="0" max="100" step="0.1" value={config.securityDepositUpTo500k} onChange={e => setConfig({...config, securityDepositUpTo500k: Math.max(0, Math.min(100, parseFloat(e.target.value) || 0))})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm transition-all" />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">{isBn ? 'সঞ্চয়/সিকিউরিটি ডিপোজিট &gt; ৫ লাখ (%)' : 'Savings deposit above BDT 500k (%)'}</label>
+                                  <input type="number" min="0" max="100" step="0.1" value={config.securityDepositAbove500k} onChange={e => setConfig({...config, securityDepositAbove500k: Math.max(0, Math.min(100, parseFloat(e.target.value) || 0))})} className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm transition-all" />
                                 </div>
                                 
                                 <div className="col-span-1 sm:col-span-2 pt-2 border-t border-gray-200/50 dark:border-gray-700/50 flex items-center justify-between">
