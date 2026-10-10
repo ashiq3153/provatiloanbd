@@ -286,6 +286,7 @@ export default function ApplyLoan() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [submittedApplicationId, setSubmittedApplicationId] = useState<string | null>(null);
   const [documents, setDocuments] = useState<Record<string, string>>({});
   const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
   const [showProfessionModal, setShowProfessionModal] = useState(false);
@@ -335,6 +336,7 @@ export default function ApplyLoan() {
   });
 
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showStepHelp, setShowStepHelp] = useState(false);
   const [feedbackNote, setFeedbackNote] = useState<string | null>(null);
   const [flaggedSections, setFlaggedSections] = useState<Record<string, boolean>>({
     personal: false,
@@ -981,6 +983,7 @@ export default function ApplyLoan() {
       }
 
       if (result) {
+        setSubmittedApplicationId(result.id || editId || null);
         toast.success(isBn ? 'আপনার আবেদন সফলভাবে জমা হয়েছে!' : 'Application successfully submitted!', { id: loadingId });
         localStorage.removeItem('loan_draft_v1');
         setStep(5);
@@ -1220,6 +1223,7 @@ export default function ApplyLoan() {
       }
 
       if (result) {
+        setSubmittedApplicationId(result.id || editId || null);
         setProgressPercent(100);
         setActiveCheck(4);
         setVerificationStage('success');
@@ -3383,7 +3387,7 @@ export default function ApplyLoan() {
 
       <div className="rounded-2xl border border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800 p-5 text-left max-w-xs mx-auto bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
         <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">{isBn ? "ট্র্যাকিং আইডি" : "Tracking ID"}</p>
-        <p className="text-lg font-mono font-black text-gray-900 dark:text-white transition-colors mb-4">#LN-{(Math.random()*100000).toFixed(0).padStart(6,'0')}</p>
+        <p className="text-lg font-mono font-black text-gray-900 dark:text-white transition-colors mb-4">#LN-{submittedApplicationId ? submittedApplicationId.slice(0, 8).toUpperCase() : "—"}</p>
         
         <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">{isBn ? "বর্তমান স্ট্যাটাস" : "Current Status"}</p>
         <div className="flex items-center gap-2">
@@ -3450,12 +3454,12 @@ export default function ApplyLoan() {
                   <span className={`text-[10px] font-black ${
                     step === 1 ? "text-white" : "text-blue-800 dark:text-blue-200"
                   }`}>
-                    {isBn ? `আবেদন • ${step === 2 ? "Loan Amount And Tenure" : "Loan Application"}` : `Apply • ${step === 2 ? "Loan Amount And Tenure" : "Loan Application"}`}
+                    {isBn ? `আবেদন • ${step === 2 ? "পরিমাণ ও মেয়াদ" : step === 3 ? "আবেদনকারীর তথ্য" : step === 4 ? "ডকুমেন্ট আপলোড" : "ক্যাটাগরি নির্বাচন"}` : `Apply • ${step === 2 ? "Amount & Tenure" : step === 3 ? "Applicant Details" : step === 4 ? "Documents" : "Loan Category"}`}
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button type="button" onClick={() => {}} className={`w-9 h-9 rounded-full border flex items-center justify-center ${
+                <button type="button" onClick={() => setShowStepHelp(true)} className={`w-9 h-9 rounded-full border flex items-center justify-center ${
                   step === 1
                     ? "bg-white/10 border-white/15 text-white"
                     : "bg-white dark:bg-[#111c2e] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-200"
@@ -3472,11 +3476,11 @@ export default function ApplyLoan() {
               </div>
             </div>
             <div className={`mt-2 h-1 rounded-full overflow-hidden ${step === 1 ? "bg-white/15" : "bg-slate-200 dark:bg-slate-800"}`}>
-              <motion.div className={`h-full rounded-full ${step === 1 ? "bg-amber-400" : "bg-gradient-to-r from-blue-700 to-blue-500"}`} initial={{ width: 0 }} animate={{ width: `${Math.min(step / 8, 1) * 100}%` }} transition={{ duration: 0.3 }} />
+              <motion.div className={`h-full rounded-full ${step === 1 ? "bg-amber-400" : "bg-gradient-to-r from-blue-700 to-blue-500"}`} initial={{ width: 0 }} animate={{ width: `${Math.min(step / totalSteps, 1) * 100}%` }} transition={{ duration: 0.3 }} />
             </div>
             {step >= 2 && category && (
               <div className="mt-3 flex items-center gap-2 overflow-x-auto no-scrollbar">
-                <span className="shrink-0 px-3 py-1.5 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 text-[10px] font-black text-slate-700 dark:text-slate-200">{isBn ? `ধাপ ${convertDigits(step, true)} / ৮ • ${step === 2 ? "পরিমাণ ও মেয়াদ" : step === 3 ? "ব্যক্তিগত তথ্য" : "ডকুমেন্ট"}` : `Step ${step} / 8 • ${step === 2 ? "Amount & Tenure" : step === 3 ? "Personal Information" : "Documents"}`}</span>
+                <span className="shrink-0 px-3 py-1.5 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 text-[10px] font-black text-slate-700 dark:text-slate-200">{isBn ? `ধাপ ${convertDigits(step, true)} / ${convertDigits(totalSteps, true)} • ${step === 2 ? "পরিমাণ ও মেয়াদ" : step === 3 ? "আবেদনকারীর তথ্য" : "ডকুমেন্ট আপলোড"}` : `Step ${step} / ${totalSteps} • ${step === 2 ? "Amount & Tenure" : step === 3 ? "Applicant Details" : "Documents"}`}</span>
                 <span className="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 text-[10px] font-black text-blue-800 dark:text-blue-200">{category.title} {isBn ? "লোন" : "Loan"}</span>
               </div>
             )}
@@ -3827,6 +3831,32 @@ export default function ApplyLoan() {
             </motion.div>
           </div>
         )}
+      {/* Contextual help for each application step */}
+      {showStepHelp && (
+        <div className="apply-loan-help-modal fixed inset-0 z-[75] flex items-center justify-center p-3 bg-slate-950/60 overscroll-contain">
+          <motion.div initial={{ opacity: 0, y: 12, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="w-full max-w-md rounded-3xl bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60">
+              <div>
+                <p className="text-[11px] font-bold text-teal-700 dark:text-teal-300">{isBn ? ("ধাপ " + convertDigits(step, true) + " / " + convertDigits(totalSteps, true)) : ("Step " + step + " of " + totalSteps)}</p>
+                <h3 className="mt-1 text-lg font-black text-slate-900 dark:text-white">{isBn ? "এই ধাপে কী করবেন" : "Step guide"}</h3>
+              </div>
+              <button type="button" onClick={() => setShowStepHelp(false)} aria-label={isBn ? "বন্ধ করুন" : "Close help"} className="w-10 h-10 rounded-xl flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-200"><X size={18} /></button>
+            </div>
+            <div className="px-5 py-5 space-y-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+              {step === 1 ? (
+                <><p>{isBn ? "প্রথমে আপনার পেশা বা প্রয়োজন নির্বাচন করুন। এরপর আপনার জন্য প্রযোজ্য লোন ক্যাটাগরি দেখানো হবে।" : "Choose your profession or need first. The app will then show matching loan categories."}</p><p>{isBn ? "ক্যাটাগরির বিস্তারিত দেখে সর্বোচ্চ সীমা, সুদের হার, মেয়াদ ও প্রয়োজনীয় কাগজপত্র মিলিয়ে নিন।" : "Open loan details to review the limit, rate, tenure and required documents."}</p></>
+              ) : step === 2 ? (
+                <><p>{isBn ? "স্লাইডার বা দ্রুত পরিমাণের বোতাম দিয়ে লোনের পরিমাণ নির্ধারণ করুন। এরপর অনুমোদিত মেয়াদ নির্বাচন করুন।" : "Set your loan amount using the slider or quick amount buttons, then choose an allowed tenure."}</p><p>{isBn ? "মাসিক কিস্তি, মোট পরিশোধ ও প্রাথমিক ফি আনুমানিক হিসাব—চালিয়ে যাওয়ার আগে পুরো হিসাব দেখে নিন।" : "Monthly EMI, total payable and upfront fees are estimates; review the full calculation before continuing."}</p></>
+              ) : step === 3 ? (
+                <><p>{isBn ? "ব্যক্তিগত, ঠিকানা, পেশাগত, ব্যাংক ও নমিনি তথ্যের প্রতিটি সেকশন খুলে প্রয়োজনীয় তথ্য পূরণ করুন।" : "Open each section and complete the required personal, address, professional, bank and nominee details."}</p><p>{isBn ? "লাল চিহ্নিত ত্রুটি থাকলে সংশোধন করুন। ঠিকানা ও পরিচয়পত্রের তথ্য সঠিকভাবে মিলিয়ে দিন।" : "Correct red validation messages and make sure address and identity information is accurate."}</p></>
+              ) : (
+                <><p>{isBn ? "যে কাগজপত্রের পাশে ‘আবশ্যক’ লেখা আছে, সেগুলো আপলোড করুন। ছবি পরিষ্কার হতে হবে; ছবি বা PDF দেওয়া যাবে।" : "Upload every document marked Required. Photos must be readable; images and PDFs are accepted."}</p><p>{isBn ? "শর্তাবলী পড়ে সম্মতি দিন, তারপর সাবমিট করুন। পরবর্তী ধাপে চূড়ান্ত সারসংক্ষেপ দেখে আবেদন পাঠানো হবে।" : "Review and accept the terms, then submit. The final review checklist appears before the application is sent."}</p></>
+              )}
+            </div>
+            <div className="px-5 pb-5"><button type="button" onClick={() => setShowStepHelp(false)} className="w-full min-h-12 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-sm">{isBn ? "বুঝেছি" : "Got it"}</button></div>
+          </motion.div>
+        </div>
+      )}
       {/* Local Terms Modal */}
       {showTermsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60  overflow-hidden text-gray-800 dark:text-gray-200">
