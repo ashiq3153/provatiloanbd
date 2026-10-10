@@ -259,7 +259,7 @@ async function getMyDashboardStats(telegramUser) {
 
   const [loansResult, transactionsResult] = await Promise.all([
     db.from("loan_applications")
-      .select("id,amount,total_payable,status")
+      .select("id,amount,total_payable,status,processing_fee,security_deposit")
       .eq("chat_id", chatId),
     db.from("transactions")
       .select("type,deposit_type,amount,status,loan_id")
@@ -306,12 +306,28 @@ async function getMyDashboardStats(telegramUser) {
 
   const completedDeposits = transactions.filter(tx => tx.type === "deposit" && tx.status === "completed");
   const depositBalance = completedDeposits.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
-  const savingsBalance = completedDeposits
-    .filter(tx => String(tx.deposit_type || "").toLowerCase().includes("security_deposit"))
-    .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
-  const processingFeeTotal = completedDeposits
-    .filter(tx => String(tx.deposit_type || "").toLowerCase().includes("processing_fee"))
-    .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+  let savingsBalance = 0;
+  let processingFeeTotal = 0;
+  const usedLoanIds = new Set();
+  for (const tx of completedDeposits) {
+    const kind = String(tx.deposit_type || "").toLowerCase();
+    const hasSecurity = kind.includes("security_deposit");
+    const hasFee = kind.includes("processing_fee");
+    if (hasSecurity && hasFee) {
+      const amount = Number(tx.amount || 0);
+      const loan = (tx.loan_id ? loans.find(row => row.id === tx.loan_id) : null)
+        || loans.find(row => !usedLoanIds.has(row.id)
+          && Math.abs(Number(row.processing_fee || 0) + Number(row.security_deposit || 0) - amount) < 0.01);
+      if (loan && Math.abs(Number(loan.processing_fee || 0) + Number(loan.security_deposit || 0) - amount) < 0.01) {
+        processingFeeTotal += Number(loan.processing_fee || 0);
+        savingsBalance += Number(loan.security_deposit || 0);
+        usedLoanIds.add(loan.id);
+      }
+    } else {
+      if (hasSecurity) savingsBalance += Number(tx.amount || 0);
+      if (hasFee) processingFeeTotal += Number(tx.amount || 0);
+    }
+  }
   const withdrawBalance = transactions
     .filter(tx => tx.type === "withdraw" && tx.status === "completed")
     .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
