@@ -168,6 +168,24 @@ async function updateMyLoanApplication(telegramUser, applicationId, payload) {
     .select()
     .single();
   if (error) throw error;
+
+  try {
+    await syncProfileDetailsFromLoan(telegramUser, {
+      full_name: data.full_name,
+      father_name: data.father_name,
+      mother_name: data.mother_name,
+      dob: data.dob,
+      gender: data.gender,
+      mobile: data.mobile,
+      whatsapp: data.whatsapp,
+      email: data.email,
+      nid_number: data.nid_number,
+      current_address: data.current_address,
+      permanent_address: data.permanent_address
+    });
+  } catch (profileError) {
+    console.error("Profile auto-sync after loan revision failed:", profileError);
+  }
   return data;
 }
 
