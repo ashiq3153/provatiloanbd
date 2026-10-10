@@ -11,7 +11,7 @@ import type { Transaction as DBTransaction, LoanApplication } from '../types/dat
 
 type TransactionType = 'deposit' | 'withdraw' | 'emi' | 'loan';
 type TransactionStatus = 'completed' | 'pending' | 'failed';
-type LoanAppStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'action_required' | 'cancelled';
+type LoanAppStatus = 'pending' | 'under_review' | 'approved' | 'active' | 'completed' | 'rejected' | 'action_required' | 'cancelled';
 
 interface Transaction {
   id: string;
@@ -38,7 +38,7 @@ export default function Transactions() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'transactions' | 'applications'>('transactions');
   const [filter, setFilter] = useState<'all' | 'deposit' | 'withdraw' | 'emi' | 'loan'>('all');
-  const [appFilter, setAppFilter] = useState<'all' | 'pending' | 'under_review' | 'approved' | 'rejected' | 'action_required' | 'cancelled'>('all');
+  const [appFilter, setAppFilter] = useState<'all' | 'pending' | 'under_review' | 'approved' | 'active' | 'completed' | 'rejected' | 'action_required' | 'cancelled'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'amount-high' | 'amount-low'>('newest');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -84,7 +84,7 @@ export default function Transactions() {
 
         // Map DB applications to display format
         const mappedApps: LoanApp[] = appData
-          .filter((a: LoanApplication) => ['pending', 'under_review', 'approved', 'rejected', 'action_required', 'cancelled'].includes(a.status))
+          .filter((a: LoanApplication) => ['pending', 'under_review', 'approved', 'active', 'completed', 'rejected', 'action_required', 'cancelled'].includes(a.status))
           .map((a: LoanApplication) => ({
             id: a.id,
             amount: a.amount,
@@ -156,13 +156,15 @@ export default function Transactions() {
     }
   };
 
-  const getAppStatusLabel = (status: LoanAppStatus) => ({ pending: isBn ? 'জমা হয়েছে' : 'Submitted', under_review: isBn ? 'যাচাই চলছে' : 'Under review', approved: isBn ? 'অনুমোদিত' : 'Approved', rejected: isBn ? 'প্রত্যাখ্যাত' : 'Rejected', action_required: isBn ? 'পদক্ষেপ প্রয়োজন' : 'Action required', cancelled: isBn ? 'বাতিল' : 'Cancelled' }[status]);
+  const getAppStatusLabel = (status: LoanAppStatus) => ({ pending: isBn ? 'জমা হয়েছে' : 'Submitted', under_review: isBn ? 'যাচাই চলছে' : 'Under review', approved: isBn ? 'অনুমোদিত' : 'Approved', active: isBn ? 'সক্রিয়' : 'Active', completed: isBn ? 'সম্পন্ন' : 'Completed', rejected: isBn ? 'প্রত্যাখ্যাত' : 'Rejected', action_required: isBn ? 'পদক্ষেপ প্রয়োজন' : 'Action required', cancelled: isBn ? 'বাতিল' : 'Cancelled' }[status]);
 
   const getAppStatusStyles = (status: LoanAppStatus) => {
     switch (status) {
       case 'pending': return 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900';
       case 'under_review': return 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900';
       case 'approved': return 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900';
+      case 'active': return 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900';
+      case 'completed': return 'bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-900';
       case 'rejected': return 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900';
       case 'action_required': return 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900';
       case 'cancelled': return 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900';
@@ -174,6 +176,8 @@ export default function Transactions() {
       case 'pending': return <Clock size={16} />;
       case 'under_review': return <Clock size={16} />;
       case 'approved': return <CheckCircle2 size={16} />;
+      case 'active': return <CheckCircle2 size={16} />;
+      case 'completed': return <CheckCircle2 size={16} />;
       case 'rejected': return <XCircle size={16} />;
       case 'action_required': return <AlertCircle size={16} />;
       case 'cancelled': return <XCircle size={16} />;
@@ -463,7 +467,7 @@ export default function Transactions() {
               className="space-y-4"
             >
               <div className="flex gap-2 mb-2 overflow-x-auto hide-scrollbar pb-2">
-                {(['all', 'pending', 'under_review', 'action_required', 'approved', 'rejected', 'cancelled'] as const).map((f) => (
+                {(['all', 'pending', 'under_review', 'action_required', 'approved', 'active', 'completed', 'rejected', 'cancelled'] as const).map((f) => (
                   <button
                     key={f}
                     onClick={() => setAppFilter(f)}
@@ -475,11 +479,11 @@ export default function Transactions() {
                   >
                     {isBn ? ({
     all: 'সব', pending: 'জমা হয়েছে', under_review: 'যাচাই চলছে',
-    action_required: 'পদক্ষেপ প্রয়োজন', approved: 'অনুমোদিত',
+    action_required: 'পদক্ষেপ প্রয়োজন', approved: 'অনুমোদিত', active: 'সক্রিয়', completed: 'সম্পন্ন',
     rejected: 'প্রত্যাখ্যাত', cancelled: 'বাতিল'
   } as Record<string,string>)[f] : ({
     all: 'All', pending: 'Submitted', under_review: 'Under review',
-    action_required: 'Action required', approved: 'Approved',
+    action_required: 'Action required', approved: 'Approved', active: 'Active', completed: 'Completed',
     rejected: 'Rejected', cancelled: 'Cancelled'
   } as Record<string,string>)[f]}
                   </button>
