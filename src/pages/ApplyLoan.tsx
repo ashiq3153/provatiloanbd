@@ -1490,7 +1490,7 @@ export default function ApplyLoan() {
                   <div className="mt-1.5 space-y-1">
                     <div className="flex items-center justify-between gap-2 text-[7px]">
                       <span className="text-slate-400">{isBn ? "প্রসেসিং ফি:" : "Processing fee:"}</span>
-                      <span className="font-semibold text-slate-700 dark:text-slate-200">{convertDigits((cat.procFee * 100).toFixed(2) + "% (লোনের উপর নির্ভরশীল)", isBn)}</span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-200">{cat.procFeeLabel}</span>
                     </div>
                     <div className="flex items-center justify-between gap-2 text-[7px]">
                       <span className="text-slate-400">{isBn ? "প্রয়োজনীয় নথি:" : "Required documents:"}</span>
@@ -1611,8 +1611,8 @@ export default function ApplyLoan() {
                   <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><p className="text-[8px] text-slate-400">সুদের হার</p><p className="text-[10px] font-black mt-1 text-slate-900 dark:text-white">{detailsCategory.intRates}/মাস</p></div>
                   <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><p className="text-[8px] text-slate-400">মেয়াদ</p><p className="text-[10px] font-black mt-1 text-slate-900 dark:text-white">{detailsCategory.tenureRange}</p></div>
                   <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><p className="text-[8px] text-slate-400">প্রসেসিং সময়</p><p className="text-[10px] font-black mt-1 text-slate-900 dark:text-white">{detailsCategory.procTime}</p></div>
-                  <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><p className="text-[8px] text-slate-400">প্রসেসিং ফি</p><p className="text-[10px] font-black mt-1 text-slate-900 dark:text-white">{(detailsCategory.procFee * 100).toFixed(2)}%</p></div>
-                  <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><p className="text-[8px] text-slate-400">সঞ্চয়/ডিপোজিট</p><p className="text-[10px] font-black mt-1 text-slate-900 dark:text-white">{(detailsCategory.secDeposit * 100).toFixed(0)}%</p></div>
+                  <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><p className="text-[8px] text-slate-400">প্রসেসিং ফি</p><p className="text-[10px] font-black mt-1 text-slate-900 dark:text-white">{detailsCategory.procFeeLabel}</p></div>
+                  <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><p className="text-[8px] text-slate-400">সঞ্চয়/ডিপোজিট</p><p className="text-[10px] font-black mt-1 text-slate-900 dark:text-white">{detailsCategory.secDepositLabel}</p></div>
                 </div>
 
                 <section>
