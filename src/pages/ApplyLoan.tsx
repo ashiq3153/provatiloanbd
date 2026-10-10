@@ -268,6 +268,23 @@ export default function ApplyLoan() {
     return allCats.filter(cat => systemSettings?.categories?.[cat.id]?.enabled !== false);
   }, [isBn, systemSettings]);
 
+  const monthlyRateLabel = (key: string, fallback: number) => {
+    const configured = Number(systemSettings?.[key]);
+    const rate = Number.isFinite(configured) && configured >= 0 ? configured : fallback;
+    return convertDigits((rate * 100).toFixed(2) + "%", isBn);
+  };
+  const loanLimitLabel = (key: string, fallback: number) => {
+    const configured = Number(systemSettings?.categories?.[key]?.maxAmount);
+    const amount = Number.isFinite(configured) && configured > 0 ? configured : fallback;
+    return convertDigits(amount.toLocaleString("en-IN"), isBn);
+  };
+  const feeTiers = systemSettings?.feeTiers || {};
+  const percentLabel = (rate: number) => convertDigits((rate * 100).toFixed(2) + "%", isBn);
+  const processingFeeUpTo1m = Number(feeTiers.processingFeeUpTo1m ?? 0.01);
+  const processingFeeAbove1m = Number(feeTiers.processingFeeAbove1m ?? 0.005);
+  const securityDepositUpTo500k = Number(feeTiers.securityDepositUpTo500k ?? 0.10);
+  const securityDepositAbove500k = Number(feeTiers.securityDepositAbove500k ?? 0.05);
+
   const methods = useForm<LoanFormData>({
     resolver: zodResolver(getLoanSchema(isBn)),
     mode: "onChange",
@@ -3918,24 +3935,24 @@ export default function ApplyLoan() {
                   <div className="space-y-1.5">
                     <p>ঋণ পাওয়ার জন্য আবেদনকারীকে তার পেশা অনুযায়ী সঠিক ক্যাটাগরি নির্বাচন করতে হবে। প্রতিটি ক্যাটাগরির জন্য ঋণের সর্বোচ্চ সীমা এবং মাসিক সুদের হার আলাদা হতে পারে:</p>
                     <ul className="list-disc pl-5 space-y-1">
-                      <li><b>ব্যক্তিগত লোন (Personal):</b> সর্বোচ্চ ৫,০০,০০০ টাকা। মাসিক সুদ ১.২%।</li>
-                      <li><b>ব্যবসায়িক লোন (Business):</b> সর্বোচ্চ ৫০,০০,০০০ টাকা। মাসিক সুদ ১.৫%।</li>
-                      <li><b>প্রবাসী লোন (Probashi):</b> সর্বোচ্চ ১০,০০,০০০ টাকা। মাসিক সুদ ১.০%।</li>
-                      <li><b>শিক্ষা লোন (Student):</b> সর্বোচ্চ ৫,০০,০০০ টাকা। মাসিক সুদ ০.৮%।</li>
-                      <li><b>জরুরি লোন (Emergency):</b> সর্বোচ্চ ১,০০,০০০ টাকা। মাসিক সুদ ২.০%।</li>
-                      <li><b>মহিলা উদ্যোক্তা লোন (Women):</b> সর্বোচ্চ ২০,০০,০০০ টাকা। মাসিক সুদ ০.৮%।</li>
+                      <li><b>ব্যক্তিগত লোন (Personal):</b> সর্বোচ্চ {loanLimitLabel('personal', 500000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRatePersonal', 0.0055)}।</li>
+                      <li><b>ব্যবসায়িক লোন (Business):</b> সর্বোচ্চ {loanLimitLabel('business', 5000000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRateBusiness', 0.0055)}।</li>
+                      <li><b>প্রবাসী লোন (Probashi):</b> সর্বোচ্চ {loanLimitLabel('expat', 1000000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRateExpat', 0.005)}।</li>
+                      <li><b>শিক্ষা লোন (Student):</b> সর্বোচ্চ {loanLimitLabel('student', 500000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRateStudent', 0.005)}।</li>
+                      <li><b>জরুরি লোন (Emergency):</b> সর্বোচ্চ {loanLimitLabel('emergency', 100000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRateEmergency', 0.006)}।</li>
+                      <li><b>মহিলা উদ্যোক্তা লোন (Women):</b> সর্বোচ্চ {loanLimitLabel('women', 2000000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRateWomen', 0.0055)}।</li>
                     </ul>
                   </div>
                 ) : (
                   <div className="space-y-1.5">
                     <p>Applicants must select the appropriate category matching their profession. Loan limits and interest rates are defined as follows:</p>
                     <ul className="list-disc pl-5 space-y-1">
-                      <li><b>Personal Loan:</b> up to BDT 500,000. Monthly rate 1.2%.</li>
-                      <li><b>Business Loan:</b> up to BDT 5,000,000. Monthly rate 1.5%.</li>
-                      <li><b>Probashi Loan:</b> up to BDT 1,000,000. Monthly rate 1.0%.</li>
-                      <li><b>Student Loan:</b> up to BDT 500,000. Monthly rate 0.8%.</li>
-                      <li><b>Emergency Loan:</b> up to BDT 100,000. Monthly rate 2.0%.</li>
-                      <li><b>Women Entrepreneur Loan:</b> up to BDT 2,000,000. Monthly rate 0.8%.</li>
+                      <li><b>Personal Loan:</b> up to BDT {loanLimitLabel('personal', 500000)}. Monthly rate {monthlyRateLabel('minRatePersonal', 0.0055)}.</li>
+                      <li><b>Business Loan:</b> up to BDT {loanLimitLabel('business', 5000000)}. Monthly rate {monthlyRateLabel('minRateBusiness', 0.0055)}.</li>
+                      <li><b>Probashi Loan:</b> up to BDT {loanLimitLabel('expat', 1000000)}. Monthly rate {monthlyRateLabel('minRateExpat', 0.005)}.</li>
+                      <li><b>Student Loan:</b> up to BDT {loanLimitLabel('student', 500000)}. Monthly rate {monthlyRateLabel('minRateStudent', 0.005)}.</li>
+                      <li><b>Emergency Loan:</b> up to BDT {loanLimitLabel('emergency', 100000)}. Monthly rate {monthlyRateLabel('minRateEmergency', 0.006)}.</li>
+                      <li><b>Women Entrepreneur Loan:</b> up to BDT {loanLimitLabel('women', 2000000)}. Monthly rate {monthlyRateLabel('minRateWomen', 0.0055)}.</li>
                     </ul>
                   </div>
                 )}
@@ -3968,13 +3985,13 @@ export default function ApplyLoan() {
                 </h4>
                 {isBn ? (
                   <div className="space-y-1.5">
-                    <p><b>• প্রসেসিং ফি:</b> ৫০,০০০ থেকে ১০,০০,০০০ টাকা পর্যন্ত লোন আবেদনের ক্ষেত্রে ১% প্রসেসিং ফি এবং ১০,০০,০০০ টাকার ওপরে হলে ০.৫% প্রসেসিং ফি প্রযোজ্য।</p>
-                    <p><b>• সঞ্চয় আমানত:</b> সমবায় আমানত সুরক্ষার্থে ৫০,০০০ থেকে ৫,০০,০০০ টাকা ঋণের জন্য ১০% সঞ্চয় এবং ৫,০০,০০০ টাকার ওপরে হলে ৫% সঞ্চয় ডিপোজিট করা বাধ্যতামূলক।</p>
+                    <p><b>• প্রসেসিং ফি:</b> ৫০,০০০ থেকে ১০,০০,০০০ টাকা পর্যন্ত লোন আবেদনের ক্ষেত্রে {percentLabel(processingFeeUpTo1m)} প্রসেসিং ফি এবং ১০,০০,০০০ টাকার ওপরে হলে {percentLabel(processingFeeAbove1m)} প্রসেসিং ফি প্রযোজ্য।</p>
+                    <p><b>• সঞ্চয় আমানত:</b> সমবায় আমানত সুরক্ষার্থে ৫০,০০০ থেকে ৫,০০,০০০ টাকা ঋণের জন্য {percentLabel(securityDepositUpTo500k)} সঞ্চয় এবং ৫,০০,০০০ টাকার ওপরে হলে {percentLabel(securityDepositAbove500k)} সঞ্চয় ডিপোজিট করা বাধ্যতামূলক।</p>
                   </div>
                 ) : (
                   <div className="space-y-1.5">
-                    <p><b>• Processing Fee:</b> BDT 50k to BDT 1M requires 1% processing fee. BDT 1M+ requires 0.5% processing fee.</p>
-                    <p><b>• Savings Deposit:</b> BDT 50k to BDT 500k loans require a 10% savings deposit. BDT 500k+ loans require a 5% savings deposit.</p>
+                    <p><b>• Processing Fee:</b> BDT 50k to BDT 1M requires {percentLabel(processingFeeUpTo1m)} processing fee. BDT 1M+ requires {percentLabel(processingFeeAbove1m)}.</p>
+                    <p><b>• Savings Deposit:</b> BDT 50k to BDT 500k loans require a {percentLabel(securityDepositUpTo500k)} savings deposit. BDT 500k+ loans require a {percentLabel(securityDepositAbove500k)} savings deposit.</p>
                   </div>
                 )}
               </section>
