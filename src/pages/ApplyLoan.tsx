@@ -33,6 +33,7 @@ import { useForm, FormProvider, useFormContext } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getLoanSchema, LoanFormData } from "./ApplyLoanSchema";
 import { AddressSelector, AddressValue, emptyAddress, serializeAddress } from "../components/AddressSelector";
+import "../loan-application-redesign.css";
 
 import { getCategories, snapPoints, amountPackages, formatAmount, getAllowedTenure, getColorStyles, getIconColor } from "./apply-loan-utils";
 import { calculateLoan } from "../lib/finance";
