@@ -604,6 +604,15 @@ export default function ApplyLoan() {
           maritalStatus: String(saved.maritalStatus || ''),
           spouseProfession: String(saved.spouseProfession || ''),
           spouseIncome: String(saved.spouseIncome || ''),
+          bankName: String(saved.bankName || ''),
+          accountName: String(saved.accountName || ''),
+          accountNumber: String(saved.accountNumber || ''),
+          routingNumber: String(saved.routingNumber || ''),
+          mobileBanking: String(saved.mobileBanking || ''),
+          nomineeName: String(saved.nomineeName || ''),
+          nomineeRelation: String(saved.nomineeRelation || ''),
+          nomineeMobile: String(saved.nomineeMobile || ''),
+          nomineeNid: String(saved.nomineeNid || ''),
         });
         setCurrentAddress(savedCurrentAddress);
         setPermanentAddress(savedPermanentAddress);
