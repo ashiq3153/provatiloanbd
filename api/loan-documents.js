@@ -96,3 +96,28 @@ export function splitStorageReference(reference) {
   if (!BUCKETS.has(bucket)) throw new Error("Unsupported storage bucket");
   return { bucket, path };
 }
+
+export function normalizeStorageMap(value, expectedChatId, supabaseUrl, options = {}) {
+  if (value == null) return {};
+  if (typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("Invalid document map");
+  }
+
+  const normalized = {};
+  for (const [key, reference] of Object.entries(value)) {
+    if (!/^[A-Za-z0-9_-]{1,80}$/.test(key)) {
+      throw new Error("Invalid document key");
+    }
+    if (reference == null || reference === "") continue;
+    normalized[key] = normalizeStorageReference(
+      reference,
+      expectedChatId,
+      supabaseUrl,
+      {
+        allowedBuckets: options.allowedBuckets || ["loan_documents"],
+        defaultBucket: options.defaultBucket || "loan_documents",
+      },
+    );
+  }
+  return normalized;
+}
