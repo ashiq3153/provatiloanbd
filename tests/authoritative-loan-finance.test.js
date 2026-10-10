@@ -89,17 +89,45 @@ test("rejects unsupported, disabled, or out-of-range loan categories", () => {
   }), /not currently available/);
 });
 
-test("allows a same-category correction for a category disabled after the original application", () => {
+test("allows corrections to existing applications after a category is disabled", () => {
+  const settings = makeSettings();
+  // Mirrors the current live configuration: the category is disabled and
+  // maxTenure is smaller than minTenure.
+  settings.categories.women.maxTenure = 10;
+
   const result = calculateAuthoritativeLoan({
     category: "women",
     amount: 100_000,
-    tenureMonths: 12,
-    settings: makeSettings(),
+    tenureMonths: 24,
+    settings,
     rateVersion: makeRate(),
     allowDisabledCategory: true,
+    existingTerms: { amount: 100_000, tenureMonths: 24 },
   });
 
-  assert.equal(result.total_payable, 103_600);
+  assert.equal(result.total_interest, 7_200);
+  assert.equal(result.total_payable, 107_200);
+});
+
+test("does not allow changing amount or tenure when correcting a disabled-category application", () => {
+  const settings = makeSettings();
+  settings.categories.women.maxTenure = 10;
+  const common = {
+    category: "women",
+    settings,
+    rateVersion: makeRate(),
+    allowDisabledCategory: true,
+    existingTerms: { amount: 100_000, tenureMonths: 24 },
+  };
+
+  assert.throws(
+    () => calculateAuthoritativeLoan({ ...common, amount: 150_000, tenureMonths: 24 }),
+    /cannot be changed for a disabled category/,
+  );
+  assert.throws(
+    () => calculateAuthoritativeLoan({ ...common, amount: 100_000, tenureMonths: 12 }),
+    /cannot be changed for a disabled category/,
+  );
 });
 
 test("rejects invalid amount and tenure boundaries", () => {
