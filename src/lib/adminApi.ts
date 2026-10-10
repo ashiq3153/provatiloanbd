@@ -1,4 +1,3 @@
-import { supabase, ensureSupabaseAuthSession } from './supabase';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../types/database';
 
 type AdminAction =
@@ -32,11 +31,6 @@ async function callAdmin<T>(adminAction: AdminAction, payload: Record<string, un
   const initData = telegramWebApp?.initData;
   if (!initData) {
     throw new Error('Admin gateway: Telegram initData is missing');
-  }
-
-  const session = await ensureSupabaseAuthSession();
-  if (!session?.access_token) {
-    throw new Error('Admin gateway: authenticated session is missing');
   }
 
   const response = await fetch('/api/telegram-auth', {
