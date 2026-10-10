@@ -21,12 +21,12 @@ export default function Terms() {
     const amount = Number.isFinite(configured) && configured > 0 ? configured : fallback;
     return convertDigits(amount.toLocaleString('en-IN'), isBn);
   };
-  const feeTiers = systemSettings?.feeTiers || {};
-  const percentLabel = (rate: number) => convertDigits((rate * 100).toFixed(2).replace(/\.?0+$/, '') + '%', isBn);
-  const processingFeeUpTo1m = Number(feeTiers.processingFeeUpTo1m ?? 0.01);
-  const processingFeeAbove1m = Number(feeTiers.processingFeeAbove1m ?? 0.005);
-  const securityDepositUpTo500k = Number(feeTiers.securityDepositUpTo500k ?? 0.1);
-  const securityDepositAbove500k = Number(feeTiers.securityDepositAbove500k ?? 0.05);
+
+
+
+
+
+
 
   const sections = [
     { id: 'terms', titleBn: '১. নিয়ম ও শর্তাবলী', titleEn: '1. Terms & Conditions', icon: FileText },
@@ -39,7 +39,8 @@ export default function Terms() {
     { id: 'verification_rules', titleBn: '৮. যাচাইকরণ নিয়মাবলী', titleEn: '8. Verification Rules', icon: ShieldCheck },
     { id: 'privacy', titleBn: '৯. গোপনীয়তা নীতি', titleEn: '9. Privacy Policy', icon: ShieldAlert },
     { id: 'warnings', titleBn: '১০. সতর্কবার্তা ও ঝুঁকি নোটিশ', titleEn: '10. Warnings & Risk Notices', icon: AlertCircle },
-    { id: 'faq', titleBn: '১১. সাধারণ জিজ্ঞাসা (FAQ)', titleEn: '11. FAQ', icon: HelpCircle },
+    { id: 'appeals', titleBn: '১১. অভিযোগ ও আপিল', titleEn: '11. Complaints & Appeals', icon: HelpCircle },
+    { id: 'faq', titleBn: '১২. সাধারণ জিজ্ঞাসা (FAQ)', titleEn: '12. FAQ', icon: HelpCircle },
   ];
 
   return (
@@ -128,14 +129,14 @@ export default function Terms() {
               {isBn ? (
                 <div className="text-xs text-gray-600 dark:text-gray-300 space-y-2.5 leading-relaxed font-bold">
                   <p>ক. <b>প্রভাতি সমবায় সমিতি</b> অ্যাপ্লিকেশনের মাধ্যমে ঋণ আবেদনের ক্ষেত্রে আবেদনকারীকে অবশ্যই সমিতির একজন বৈধ সদস্য হতে হবে এবং তার সমস্ত তথ্য সঠিক হতে হবে।</p>
-                  <p>খ. Authorities decision regarding loan approval or rejection is final and binding on all applicants.</p>
-                  <p>গ. ভুল তথ্য প্রদান বা জাল প্রমাণপত্র আপলোড করা হলে সমিতি কর্তৃপক্ষ কোনো নোটিশ ছাড়াই ব্যবহারকারীর অ্যাকাউন্ট সাময়িকভাবে বা চিরতরে স্থগিত (Suspended/Banned) করার অধিকার সংরক্ষণ করে।</p>
+                  <p>খ. ঋণ অনুমোদন বা প্রত্যাখ্যানের সিদ্ধান্ত প্রযোজ্য নীতিমালা ও যাচাইয়ের ভিত্তিতে নেওয়া হবে। সিদ্ধান্ত পুনর্বিবেচনার অনুরোধ জানাতে ব্যবহারকারী অ্যাপের সহায়তা (Support) পৃষ্ঠা ব্যবহার করতে পারবেন।</p>
+                  <p>গ. ভুল তথ্য বা জাল নথির যুক্তিসংগত সন্দেহ হলে যাচাইয়ের জন্য অ্যাকাউন্ট সাময়িকভাবে সীমিত করা হতে পারে। নিশ্চিত জালিয়াতির ক্ষেত্রে প্রযোজ্য ব্যবস্থা নেওয়া হবে; ব্যবহারকারী Support পৃষ্ঠার মাধ্যমে পুনর্বিবেচনার অনুরোধ করতে পারবেন।</p>
                 </div>
               ) : (
                 <div className="text-xs text-gray-600 dark:text-gray-300 space-y-2.5 leading-relaxed font-bold">
                   <p>a. To apply for a loan through <b>Provati Somobay Somiti</b>, the applicant must be a registered member, and all provided details must be accurate.</p>
-                  <p>b. The authority's decisions regarding loan approval, rejection, or revision requests are final and binding on all applicants.</p>
-                  <p>c. Submission of fraudulent data or forged documents will lead to instant suspension/ban of the user account without prior notice.</p>
+                  <p>b. Loan approval or rejection decisions are made under applicable policies and verification. Applicants may request reconsideration through the in-app Support page.</p>
+                  <p>c. Suspected false information or forged documents may lead to a temporary restriction while reviewed. Appropriate action may follow confirmed fraud; users may request reconsideration through the in-app Support page.</p>
                 </div>
               )}
             </section>
@@ -188,16 +189,16 @@ export default function Terms() {
               {isBn ? (
                 <div className="text-xs text-amber-800 dark:text-amber-300 bg-amber-500/10 p-4 rounded-2xl border border-amber-500/20 leading-relaxed space-y-2 font-bold">
                   <p className="font-extrabold flex items-center gap-1.5"><AlertCircle size={14} /> প্রসেসিং ফি বাধ্যতামুলক:</p>
-                  <p>ঋণ আবেদন প্রসেস করার জন্য নির্ধারিত "প্রসেসিং ফি" ডিপোজিট করা বাধ্যতামূলক। ফি প্রদান ছাড়া কোনো আবেদন রিভিউর আওতায় নেওয়া হবে না এবং এটি সম্পূর্ণ অফেরতযোগ্য।</p>
+                  <p>প্রযোজ্য প্রসেসিং ফি আবেদনপত্রে দেখানো হার ও পরিমাণ অনুযায়ী জমা দিতে হবে। আবেদন প্রত্যাখ্যাত বা বাতিল হলে, অথবা প্রযোজ্য ক্ষেত্রে সেবা সম্পন্ন না হলে, আবেদনকারী প্রসেসিং ফি ফেরত পাওয়ার যোগ্য হবেন। ফেরতের অনুরোধ ও যাচাইয়ের জন্য অ্যাপের Support পৃষ্ঠা ব্যবহার করুন। পেমেন্ট যাচাই ও আবেদন পর্যালোচনা পৃথক ধাপ; ফি প্রদান ঋণ অনুমোদনের নিশ্চয়তা নয়।</p>
                   <p className="font-extrabold mt-3">অ্যাডমিন রিভিউ এবং চ্যাট:</p>
-                  <p>যাচাইকরণের সময় কোনো তথ্যে ঘাটতি থাকলে অ্যাডমিন থেকে সংশোধন (Revision) নোট পাঠানো হতে পারে, যা আপনার টেলিগ্রামে নোটিফিকেশনের মাধ্যমে জানানো হবে।</p>
+                  <p>যাচাইকরণের সময় কোনো তথ্যে ঘাটতি থাকলে সংশোধন (Revision) নোট পাঠানো হতে পারে। নোটের নির্দেশনা অনুসারে তথ্য সংশোধন করে পুনরায় যাচাইয়ের জন্য জমা দিন।</p>
                 </div>
               ) : (
                 <div className="text-xs text-amber-800 dark:text-amber-300 bg-amber-500/10 p-4 rounded-2xl border border-amber-500/20 leading-relaxed space-y-2 font-bold">
                   <p className="font-extrabold flex items-center gap-1.5"><AlertCircle size={14} /> Processing Fee is Mandatory:</p>
-                  <p>To begin evaluating your loan profile, the processing fee must be deposited. Unpaid files will not be reviewed. Processing fees are non-refundable.</p>
+                  <p>The applicable processing fee must be paid at the rate and amount shown in the application. If an application is rejected or cancelled, or the service is not completed in an applicable case, the applicant is eligible for a processing-fee refund. Use the in-app Support page to request and verify a refund. Payment verification and application review are separate steps; payment does not guarantee loan approval.</p>
                   <p className="font-extrabold mt-3">Admin Reviews & Revisions:</p>
-                  <p>If any details require updates, revision notes will be sent to the user, triggering immediate Telegram messages for correction.</p>
+                  <p>If details require correction, a revision note may be issued. Follow the note, correct the information and resubmit for review.</p>
                 </div>
               )}
             </section>
@@ -240,13 +241,13 @@ export default function Terms() {
                   <p>লোন প্রসেস ও বিতরণের স্বার্থে দুই ধরনের ডিপোজিট প্রযোজ্য হয়ে থাকে:</p>
                   <div className="space-y-2">
                     <p className="font-extrabold text-gray-900 dark:text-white">• প্রসেসিং ফি (Processing Fee):</p>
-                    <p className="pl-4">লোনের পরিমাণ ৫০,০০০ থেকে ১০,০০,০০০ টাকা পর্যন্ত হলে <b>{percentLabel(processingFeeUpTo1m)} প্রসেসিং ফি</b> এবং ১০,০০,০০০ টাকার ওপরে হলে <b>{percentLabel(processingFeeAbove1m)} প্রসেসিং ফি</b> প্রযোজ্য। এটি ফাইল প্রসেসিংয়ের জন্য অফেরতযোগ্য ফি।</p>
+                    <p className="pl-4">প্রসেসিং ফি অ্যাডমিনের বর্তমান অনুমোদিত সিস্টেম সেটিংস অনুযায়ী নির্ধারিত হবে। পেমেন্টের আগে আবেদনপত্রে প্রদর্শিত হার ও পরিমাণ যাচাই করুন। আবেদন প্রত্যাখ্যাত বা বাতিল হলে, অথবা প্রযোজ্য ক্ষেত্রে সেবা সম্পন্ন না হলে, ফি ফেরতযোগ্য; ফেরতের অনুরোধ অ্যাপের Support পৃষ্ঠা দিয়ে করতে হবে।</p>
                     
                     <p className="font-extrabold text-gray-900 dark:text-white">• সঞ্চয় আমানত (Savings Deposit / Security Deposit):</p>
-                    <p className="pl-4">সমিতি সদস্যদের নিরাপত্তা ও আমানত সুরক্ষার্থে ৫০,০০০ থেকে ৫,০০,০০০ টাকা ঋণের জন্য <b>{percentLabel(securityDepositUpTo500k)} সঞ্চয়</b> এবং ৫,০০,০০০ টাকার ওপরে হলে <b>{percentLabel(securityDepositAbove500k)} সঞ্চয়</b> ডিপোজিট করা বাধ্যতামূলক। এই সঞ্চয় ব্যালেন্স আপনার একাউন্টে জমা থাকবে এবং লোন বিতরণের পরেও এটি আপনার একাউন্টেই দৃশ্যমান থাকবে।</p>
+                    <p className="pl-4">সঞ্চয়/সিকিউরিটি ডিপোজিটের হার অনুমোদিত সিস্টেম সেটিংস অনুযায়ী নির্ধারিত হবে। ডিপোজিট লক থাকবে এবং Available Balance-এর অংশ হবে না। ঋণের সব কিস্তি ও প্রযোজ্য বকেয়া পরিশোধের পর হিসাব যাচাই করে মুক্তির যোগ্যতা নির্ধারণ করা হবে; আবেদন অ্যাপের Support পৃষ্ঠা দিয়ে করতে হবে।</p>
                   </div>
                   <p className="bg-rose-500/10 text-rose-700 dark:text-rose-400 p-3 rounded-xl border border-rose-500/20 text-[11px] font-extrabold">
-                    *বিশেষ সতর্কবার্তা: যেকোনো ভুয়া ট্রানজেকশন আইডি (DEP-xxxxx) অথবা অন্যের স্ক্রিনশট পেমেন্ট প্রুফ হিসেবে সাবমিট করলে সম্পূর্ণ ঋণ বাতিলসহ সদস্যপদ স্থায়ীভাবে স্থগিত করা হবে।
+                    *সতর্কতা: ভুয়া ট্রানজেকশন আইডি বা অন্যের পেমেন্ট প্রমাণ জমা দিলে আবেদন প্রত্যাখ্যান ও অ্যাকাউন্ট-সংক্রান্ত ব্যবস্থা নেওয়া হতে পারে। Support পৃষ্ঠার মাধ্যমে সিদ্ধান্ত পুনর্বিবেচনার অনুরোধ করা যাবে.
                   </p>
                 </div>
               ) : (
@@ -254,13 +255,13 @@ export default function Terms() {
                   <p>Two types of deposits apply under the microfinance structure:</p>
                   <div className="space-y-2">
                     <p className="font-extrabold text-gray-900 dark:text-white">• Processing Fee:</p>
-                    <p className="pl-4">For loan amounts between BDT 50,000 and BDT 1,000,000, a <b>{percentLabel(processingFeeUpTo1m)} processing fee</b> applies. Above BDT 1,000,000, the fee is <b>{percentLabel(processingFeeAbove1m)}</b>. This fee is non-refundable.</p>
+                    <p className="pl-4">The processing fee is determined by the administrator's currently approved system settings. Check the rate and amount displayed in the application before payment. The fee is refundable if the application is rejected or cancelled, or the service is not completed in an applicable case; use the in-app Support page to request a refund.</p>
                     
                     <p className="font-extrabold text-gray-900 dark:text-white">• Savings Deposit:</p>
-                    <p className="pl-4">To support cooperative savings, BDT 50,000 to BDT 500,000 loans require a <b>{percentLabel(securityDepositUpTo500k)} savings deposit</b>. Loans above BDT 500,000 require a <b>{percentLabel(securityDepositAbove500k)} savings deposit</b>. This deposit remains locked in your account and is visible after loan disbursement.</p>
+                    <p className="pl-4">The savings/security deposit rate is determined by currently approved system settings. The deposit remains locked and is not part of the Available Balance. After all instalments and applicable outstanding dues are paid, the account will be reconciled to determine release eligibility; request this through the in-app Support page.</p>
                   </div>
                   <p className="bg-rose-500/10 text-rose-700 dark:text-rose-400 p-3 rounded-xl border border-rose-500/20 text-[11px] font-extrabold">
-                    *Fraud Notice: Submitting fake screenshot proofs or forged Transaction IDs (DEP-xxxxx) will lead to immediate cancellation of the application and a permanent account ban.
+                    *Fraud notice: Forged transaction IDs or another person's payment proof may lead to application rejection and appropriate account action. Users may request reconsideration through the Support page.
                   </p>
                 </div>
               )}
@@ -303,17 +304,17 @@ export default function Terms() {
               </h2>
               {isBn ? (
                 <div className="text-xs text-gray-600 dark:text-gray-300 space-y-2.5 leading-relaxed font-bold">
-                  <p>ক. লোন চূড়ান্তভাবে অনুমোদিত হওয়ার পর অনুমোদিত ঋণের টাকা ব্যবহারকারীর "মোট ব্যালেন্স" (Total Balance) এ যোগ হবে।</p>
-                  <p>খ. আবেদন করার পূর্বে মোট ব্যালেন্স ০ থাকবে। লোন অনুমোদনের পরেই কেবল ব্যবহারকারী উক্ত টাকা উত্তোলনের জন্য রিকোয়েস্ট পাঠাতে পারবেন।</p>
-                  <p>গ. ব্যবহারকারী যখন টাকা উত্তোলন করবেন, তখন তার মোট ব্যালেন্স থেকে সমপরিমাণ অর্থ কেটে নেওয়া হবে।</p>
-                  <p>ঘ. সঞ্চয় ব্যালেন্স সম্পূর্ণ পৃথক এবং এটি লোন উত্তোলনের পরেও আপনার একাউন্টে দৃশ্যমান ও সংরক্ষিত থাকবে।</p>
+                  <p>ক. ঋণ অনুমোদন, ঋণের অর্থ বিতরণ এবং উত্তোলনযোগ্য ব্যালেন্স পৃথক ধাপ। শুধু ঋণ অনুমোদিত হলেই পুরো অনুমোদিত অঙ্ক Available Balance-এ যোগ হয়েছে বলে গণ্য হবে না।</p>
+                  <p>খ. Available Balance-এ কেবল যাচাইকৃত ও লেজারে নথিভুক্ত এমন অর্থ গণ্য হবে, যা বাস্তবে উত্তোলন করা যায়। উত্তোলনের অনুরোধের আগে অ্যাপে প্রদর্শিত বর্তমান ব্যালেন্স যাচাই করুন।</p>
+                  <p>গ. উত্তোলন সফল হলে লেনদেনের পরিমাণ অনুযায়ী Available Balance হালনাগাদ হবে। অপেক্ষমাণ উত্তোলন অনুরোধের অর্থ প্রযোজ্য ক্ষেত্রে সাময়িকভাবে সংরক্ষিত থাকতে পারে।</p>
+                  <p>ঘ. লক থাকা সঞ্চয়/সিকিউরিটি ডিপোজিট পৃথকভাবে হিসাবভুক্ত হবে এবং উত্তোলনযোগ্য ব্যালেন্সের সঙ্গে যোগ হবে না।</p>
                 </div>
               ) : (
                 <div className="text-xs text-gray-600 dark:text-gray-300 space-y-2.5 leading-relaxed font-bold">
-                  <p>a. Upon approval, the approved loan amount is credited directly to the user's "Total Balance".</p>
-                  <p>b. Before loan approval, the Total Balance displays BDT 0. Withdrawal requests can only be placed after the status updates to Approved.</p>
-                  <p>c. When a member withdraws the loan, the available Total Balance is reduced accordingly.</p>
-                  <p>d. The Savings Balance is stored separately and remains fully visible and protected after loan withdrawal.</p>
+                  <p>a. Loan approval, disbursement and available withdrawal balance are separate stages. Approval alone does not mean that the full approved amount is available to withdraw.</p>
+                  <p>b. Available Balance includes only verified funds properly recorded in the ledger and actually available for withdrawal. Check the balance displayed in the app before requesting a withdrawal.</p>
+                  <p>c. After a successful withdrawal, the Available Balance is updated by the transaction amount. Funds associated with pending withdrawal requests may be reserved where applicable.</p>
+                  <p>d. Locked savings/security deposits are accounted for separately and are not included in the withdrawable balance.</p>
                 </div>
               )}
             </section>
@@ -351,15 +352,15 @@ export default function Terms() {
               </h2>
               {isBn ? (
                 <div className="text-xs text-gray-600 dark:text-gray-300 space-y-2.5 leading-relaxed font-bold">
-                  <p>ক. আপনার ব্যক্তিগত তথ্য (নাম, পিতার নাম, মাতার নাম, এনআইডি নম্বর, মোবাইল ব্যাংকিং তথ্য, এবং আয়ের উৎস) অত্যন্ত নিরাপদে রাখা হয় এবং তৃতীয় কোনো পক্ষের সাথে তা শেয়ার করা হয় না।</p>
+                  <p>ক. ঋণ আবেদন ও হিসাব পরিচালনার জন্য নাম, যোগাযোগের তথ্য, ঠিকানা, এনআইডি, পেশা/আয়ের তথ্য, ব্যাংক বা মোবাইল ব্যাংকিং তথ্য, নমিনি এবং আপলোড করা নথির মতো তথ্য প্রক্রিয়া করা হতে পারে। প্রয়োজনীয় সেবা-প্রদানকারী তথ্য প্রক্রিয়া করতে পারে; তাই কোনো তৃতীয় পক্ষের সঙ্গে কখনো তথ্য শেয়ার হয় না—এমন পরম নিশ্চয়তা দেওয়া হচ্ছে না।</p>
                   <p>খ. ঋণ আবেদনের প্রতিটি ধাপের রিয়েল-টাইম আপডেট প্রদান করতে আমরা আবেদনকারীর টেলিগ্রাম চ্যাট আইডি (Telegram Chat ID) ব্যবহার করি।</p>
-                  <p>গ. আপনার সমস্ত ফাইল ও আপলোডকৃত ছবি Supabase সিকিউর স্টোরেজে এনক্রিপ্ট করে সংরক্ষণ করা হয় এবং তা কেবল সমিতির অনুমোদিত কর্মকর্তাদের রিভিউ করার অ্যাক্সেস থাকে।</p>
+                  <p>গ. আপলোড করা নথি অ্যাপের স্টোরেজে সংরক্ষণ করা হয় এবং অ্যাক্সেস নিয়ন্ত্রণের মাধ্যমে তা সীমিত রাখার ব্যবস্থা রয়েছে। এনক্রিপশন, সংরক্ষণকাল ও প্রবেশাধিকার সম্পর্কে দাবি যাচাইকৃত প্রযুক্তিগত ব্যবস্থার সঙ্গে সামঞ্জস্যপূর্ণ হতে হবে।</p>
                 </div>
               ) : (
                 <div className="text-xs text-gray-600 dark:text-gray-300 space-y-2.5 leading-relaxed font-bold">
-                  <p>a. Your personal details (names, NID numbers, mobile banking info, and salary proofs) are encrypted and stored safely, never shared with third parties.</p>
+                  <p>a. To process applications and manage accounts, the app may process names, contact details, addresses, NID, occupation/income details, bank or mobile-banking information, nominee details and uploaded documents. Necessary service providers may process data under applicable safeguards; the app does not make an absolute claim that information is never shared with any third party.</p>
                   <p>b. We collect the user's Telegram Chat ID to send automatic real-time transaction and loan application updates.</p>
-                  <p>c. Uploaded documentation is stored securely in Supabase buckets, accessible only by verified auditing officers.</p>
+                  <p>c. Uploaded documents are stored in the app's storage with intended access controls. Claims about encryption, retention and exclusive access must match verified technical controls.</p>
                 </div>
               )}
             </section>
@@ -374,21 +375,46 @@ export default function Terms() {
               </h2>
               {isBn ? (
                 <div className="text-xs text-rose-800 dark:text-rose-400 bg-rose-500/10 p-4 rounded-2xl border border-rose-500/20 leading-relaxed space-y-2.5 font-bold">
-                  <p>• <b>ঋণ খেলাপি সতর্কতা (Default Warning):</b> সময়মতো মাসিক কিস্তি পরিশোধে ব্যর্থ হলে আপনার অ্যাকাউন্টটি লাল তালিকাভুক্ত (Overdue status) হবে, যা পরবর্তীতে নতুন কোনো লোন পাওয়ার যোগ্যতাকে চিরতরে বাতিল করতে পারে।</p>
+                  <p>• <b>ঋণ খেলাপি সতর্কতা:</b> সময়মতো কিস্তি পরিশোধ না হলে ঋণ overdue হিসেবে চিহ্নিত হতে পারে এবং ভবিষ্যৎ আবেদনের যোগ্যতা প্রভাবিত হতে পারে। প্রযোজ্য ব্যবস্থা নীতিমালা অনুযায়ী নেওয়া হবে।</p>
                   <p>• <b>জালিয়াতি দমন (Anti-Fraud Policy):</b> যদি কোনো আবেদনকারীর মোবাইল নাম্বার, ব্যাংক একাউন্ট বা এনআইডি জালিয়াতি বা অন্যের তথ্য ব্যবহারের মাধ্যমে সনাক্ত হয়, তবে "Fake Apply Detected" অ্যালার্ম ট্রিগার হবে এবং অ্যাকাউন্ট সাথে সাথে সাসপেন্ড করা হবে।</p>
-                  <p>• <b>সমবায় নীতিমালা:</b> প্রভাতি সমবায় সমিতির আইন অনুযায়ী সমিতির সিদ্ধান্তই ঋণের আবেদন নিষ্পত্তি করার জন্য চূড়ান্ত কর্তৃপক্ষ হিসেবে গণ্য হবে।</p>
+                  <p>• <b>সমবায় নীতিমালা:</b> ঋণ-সংক্রান্ত সিদ্ধান্ত অনুমোদিত নীতিমালা অনুযায়ী নেওয়া হবে। আবেদনকারী অভিযোগ বা পুনর্বিবেচনার অনুরোধ জানাতে পারবেন।</p>
                 </div>
               ) : (
                 <div className="text-xs text-rose-800 dark:text-rose-300 bg-rose-500/10 p-4 rounded-2xl border border-rose-500/20 leading-relaxed space-y-2.5 font-bold">
                   <p>• <b>Payment Default:</b> Failure to repay monthly EMIs will lead to loan classification (Overdue) and may permanently affect credit eligibility for future cooperative loans.</p>
-                  <p>• <b>Anti-Fraud Trigger:</b> Attempting to apply with duplicate phone numbers, nominee NIDs, bank routing credentials, or fake transaction numbers triggers a "Fake Apply Detected" flag and results in permanent suspension.</p>
-                  <p>• <b>Cooperative Rules:</b> In accordance with the Provati Somobay Somiti bylaws, the administration's audits and files disposition are final.</p>
+                  <p>• <b>Anti-Fraud Policy:</b> Suspected duplicate identities or forged payment proofs may trigger review or temporary restriction. Confirmed fraud may result in appropriate action; users may request reconsideration through the Support page.</p>
+                  <p>• <b>Cooperative Rules:</b> Administrative decisions are made under applicable approved policies. This does not remove the applicant's ability to raise a complaint or request reconsideration.</p>
                 </div>
               )}
             </section>
           )}
 
-          {/* Section 11: FAQ */}
+          {/* Section 11: Complaints & Appeals */}
+          {(activeSection === 'all' || activeSection === 'appeals') && (
+            <section className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 space-y-4 border-0 transition-colors">
+              <h2 className="text-base font-black text-gray-900 dark:text-white border-b border-gray-150 dark:border-gray-800 pb-3 flex items-center gap-2">
+                <HelpCircle className="text-primary-500" size={20} />
+                {isBn ? '১১. অভিযোগ ও আপিল' : '11. Complaints & Appeals'}
+              </h2>
+              {isBn ? (
+                <div className="text-xs text-gray-600 dark:text-gray-300 space-y-2.5 leading-relaxed font-bold">
+                  <p>১. আবেদন প্রত্যাখ্যান, ভুল তথ্য হিসেবে চিহ্নিত হওয়া, পেমেন্ট/ডিপোজিটের হিসাবের অমিল বা অন্য কোনো আবেদন-সংক্রান্ত সিদ্ধান্ত পুনর্বিবেচনার জন্য অ্যাপের Support পৃষ্ঠা ব্যবহার করুন। সেখানে বর্তমানে চালু যোগাযোগ মাধ্যম নির্বাচন করে আবেদন নম্বর, সমস্যার বিবরণ এবং প্রাসঙ্গিক প্রমাণ দিন।</p>
+                  <p>২. অভিযোগ জমা দেওয়া ঋণ অনুমোদন, অর্থ বিতরণ বা স্বয়ংক্রিয় ফেরতের নিশ্চয়তা নয়। অভিযোগ যাচাই করে প্রযোজ্য নীতিমালা অনুযায়ী উত্তর দেওয়া হবে।</p>
+                  <p>৩. Support পৃষ্ঠায় কোনো যোগাযোগ মাধ্যম “সেট করা নেই” দেখালে সেই মাধ্যম বর্তমানে সক্রিয় নয়। স্বতন্ত্র অভিযোগ-টিকিট ও ট্র্যাকিং ব্যবস্থা এখনও নিশ্চিত নয়; প্রশাসনকে একটি কার্যকর যোগাযোগ মাধ্যম সক্রিয় করতে হবে।</p>
+                  <button type="button" onClick={() => navigate('/support')} className="mt-2 rounded-xl bg-primary-600 px-4 py-2.5 text-xs font-black text-white">সহায়তা পৃষ্ঠায় যান</button>
+                </div>
+              ) : (
+                <div className="text-xs text-gray-600 dark:text-gray-300 space-y-2.5 leading-relaxed font-bold">
+                  <p>1. To request reconsideration of a rejected application, an incorrect information flag, a payment/deposit discrepancy or another application-related decision, use the Support page in the app. Select a currently enabled contact channel and provide the application reference, issue description and relevant evidence.</p>
+                  <p>2. Filing a complaint does not guarantee loan approval, disbursement or an automatic refund. The complaint will be reviewed and answered under the applicable policy.</p>
+                  <p>3. If a Support contact channel is marked “Not configured,” it is not active. A dedicated complaint ticket and tracking system is not currently confirmed; the administrator must configure a working contact channel.</p>
+                  <button type="button" onClick={() => navigate('/support')} className="mt-2 rounded-xl bg-primary-600 px-4 py-2.5 text-xs font-black text-white">Open Support</button>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Section 12: FAQ */}
           {(activeSection === 'all' || activeSection === 'faq') && (
             <section className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 space-y-4 border-0 transition-colors">
               <h2 className="text-base font-black text-gray-900 dark:text-white border-b border-gray-150 dark:border-gray-800 pb-3 flex items-center gap-2">
@@ -398,12 +424,12 @@ export default function Terms() {
               <div className="space-y-4 text-xs font-bold text-gray-600 dark:text-gray-300">
                 <div>
                   <h4 className="font-extrabold text-gray-900 dark:text-white mb-1">
-                    {isBn ? 'প্রশ্নঃ প্রসেসিং ফি এবং সঞ্চয় আমানত কত শতাংশ?' : 'Q: What percentage is the processing fee and savings deposit?'}
+                    {isBn ? 'প্রশ্নঃ প্রসেসিং ফি ফেরত ও সঞ্চয় আমানতের নিয়ম কী?' : 'Q: What are the processing-fee refund and savings-deposit rules?'}
                   </h4>
                   <p className="leading-relaxed">
                     {isBn 
-                      ? `উত্তরঃ প্রসেসিং ফি ${percentLabel(processingFeeUpTo1m)} (১০ লাখ টাকার উপরে ${percentLabel(processingFeeAbove1m)}) যা অফেরতযোগ্য। সঞ্চয় আমানত ${percentLabel(securityDepositUpTo500k)} (৫ লাখ টাকার উপরে ${percentLabel(securityDepositAbove500k)}) যা আপনার অ্যাকাউন্টে জমা থাকে এবং উত্তোলনের পরও সুরক্ষিত থাকে।` 
-                      : `A: Processing fee is ${percentLabel(processingFeeUpTo1m)} (${percentLabel(processingFeeAbove1m)} above BDT 1M) and is non-refundable. Savings deposit is ${percentLabel(securityDepositUpTo500k)} (${percentLabel(securityDepositAbove500k)} above BDT 500K) and remains visible in your savings balance.`}
+                    <p className="pl-4">প্রসেসিং ফি অ্যাডমিনের বর্তমান অনুমোদিত সিস্টেম সেটিংস অনুযায়ী নির্ধারিত হবে। পেমেন্টের আগে আবেদনপত্রে প্রদর্শিত হার ও পরিমাণ যাচাই করুন। আবেদন প্রত্যাখ্যাত বা বাতিল হলে, অথবা প্রযোজ্য ক্ষেত্রে সেবা সম্পন্ন না হলে, ফি ফেরতযোগ্য; ফেরতের অনুরোধ অ্যাপের Support পৃষ্ঠা দিয়ে করতে হবে।</p>
+                    <p className="pl-4">The processing fee is determined by the administrator's currently approved system settings. Check the rate and amount displayed in the application before payment. The fee is refundable if the application is rejected or cancelled, or the service is not completed in an applicable case; use the in-app Support page to request a refund.</p>
                   </p>
                 </div>
                 
@@ -413,8 +439,8 @@ export default function Terms() {
                   </h4>
                   <p className="leading-relaxed">
                     {isBn 
-                      ? 'উত্তরঃ প্রসেসিং ফি এবং সঞ্চয় আমানত এর স্ক্রিনশট ও নাম্বার সহ ডিপোজিট সাবমিট করার পর এডমিন ভেরিফাই সম্পন্ন করলেই লোন আবেদনটি স্বয়ংক্রিয়ভাবে "Under Review" স্ট্যাটাসে চলে যায়। সাধারণত ১২ থেকে ৪৮ ঘণ্টার মধ্যে ঋণ ফাইলটি অনুমোদন বা সিদ্ধান্ত লাভ করে।' 
-                      : 'A: Once both processing fee and savings deposits are submitted and verified by the admin, the application automatically moves to "Under Review". Audit decisions are finalized within 12 to 48 hours.'}
+                      ? 'উত্তরঃ প্রয়োজনীয় তথ্য ও নথি জমা এবং প্রযোজ্য পেমেন্ট যাচাইয়ের পর প্রাথমিক পর্যালোচনার লক্ষ্যমাত্রা সাধারণত ১২–৪৮ ঘণ্টা। এটি অনুমোদনের নিশ্চয়তা নয়; অসম্পূর্ণ নথি, সংশোধন বা অতিরিক্ত যাচাইয়ের কারণে সময় বাড়তে পারে। আবেদনটির স্ট্যাটাস অ্যাপে দেখুন.'
+                      : 'A: After required information and documents are submitted and applicable payments are verified, the target for initial review is generally 12–48 hours. This is not a guarantee of approval; incomplete documents, revisions or extra checks may extend the timeline. Check the application status in the app.'}
                   </p>
                 </div>
 
