@@ -3,22 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
-import Home from './pages/Home';
-import ApplyLoan from './pages/ApplyLoan';
-import Deposit from './pages/Deposit';
-import Withdraw from './pages/Withdraw';
-import Transactions from './pages/Transactions';
-import Loans from './pages/Loans';
-import LoanCategories from './pages/LoanCategories';
-import PayEMI from './pages/PayEMI';
-import ApplicationDetails from './pages/ApplicationDetails';
-import Profile from './pages/Profile';
-import Support from './pages/Support';
-import Terms from './pages/Terms';
-import AdminDashboard from './pages/admin/AdminDashboard';
+const Home = lazy(() => import('./pages/Home'));
+const ApplyLoan = lazy(() => import('./pages/ApplyLoan'));
+const Deposit = lazy(() => import('./pages/Deposit'));
+const Withdraw = lazy(() => import('./pages/Withdraw'));
+const Transactions = lazy(() => import('./pages/Transactions'));
+const Loans = lazy(() => import('./pages/Loans'));
+const LoanCategories = lazy(() => import('./pages/LoanCategories'));
+const PayEMI = lazy(() => import('./pages/PayEMI'));
+const ApplicationDetails = lazy(() => import('./pages/ApplicationDetails'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Support = lazy(() => import('./pages/Support'));
+const Terms = lazy(() => import('./pages/Terms'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 import { Toaster } from 'sonner';
 import { useAppStore } from './lib/store';
 import { sendTelegramNotification } from './lib/telegram';
@@ -158,9 +158,10 @@ export default function App() {
     <Router>
       <Toaster position="top-center" richColors theme={theme === 'dark' ? 'dark' : 'light'} />
       <Routes>
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin" element={<Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 text-sm font-semibold">Loading dashboard…</div>}><AdminDashboard /></Suspense>} />
         <Route path="/*" element={
           <Layout>
+            <Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center text-slate-500 dark:text-slate-400 text-sm font-semibold">Loading screen…</div>}>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/terms" element={<Terms />} />
@@ -175,6 +176,7 @@ export default function App() {
               <Route path="/support" element={<Support />} />
               <Route path="/pay" element={<PayEMI />} />
             </Routes>
+            </Suspense>
           </Layout>
         } />
       </Routes>
