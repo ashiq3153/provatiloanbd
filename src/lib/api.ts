@@ -21,18 +21,28 @@ export async function getProfile(chatId: number): Promise<Profile | null> {
   return data;
 }
 
-export async function upsertProfile(profile: Partial<Profile> & { chat_id: number; first_name: string }): Promise<Profile | null> {
-  const { data, error } = await supabase
-    .from('profiles')
-    .upsert(profile, { onConflict: 'chat_id' })
-    .select()
-    .single();
+export async function upsertProfile(_profile: Partial<Profile> & { chat_id: number; first_name: string }): Promise<Profile | null> {
+  try {
+    // Profile writes must go through the Telegram-verified server gateway;
+    // the browser must not have direct INSERT/UPDATE privileges on profiles.
+    // @ts-ignore
+    const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+    if (!initData) throw new Error('Telegram initData is missing');
 
-  if (error) {
-    console.error('upsertProfile error:', error);
+    const response = await fetch('/api/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, action: 'sync_profile' }),
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result?.ok || !result?.data) {
+      throw new Error(result?.error || 'Profile synchronization failed');
+    }
+    return result.data as Profile;
+  } catch (error) {
+    console.error('upsertProfile gateway error:', error);
     return null;
   }
-  return data;
 }
 
 // ── Loan Application APIs ────────────────────────────────
