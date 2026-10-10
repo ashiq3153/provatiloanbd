@@ -617,3 +617,22 @@ div[id^="accordion-section-"] > button [class*="text-[10px]"] {
     padding: 12px !important;
   }
 }
+
+
+/* Safe-area sizing for centered detail and repayment dialogs */
+.apply-loan-screen [class*="z-[70]"] > div[class*="max-h-[84vh]"] {
+  width: min(100%, 520px) !important;
+  max-height: calc(100dvh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+  margin: auto !important;
+  border-radius: 22px !important;
+  overflow: hidden;
+}
+.apply-loan-screen [class*="z-[70]"] > div[class*="max-h-[88vh]"][class*="sm:max-w-lg"] {
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+}
+@media (max-width: 639px) {
+  .apply-loan-screen [class*="z-[70]"] > div[class*="max-h-[88vh]"][class*="sm:max-w-lg"] {
+    border-radius: 24px 24px 0 0 !important;
+    margin-top: auto !important;
+  }
+}
