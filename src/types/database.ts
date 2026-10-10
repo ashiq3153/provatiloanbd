@@ -11,6 +11,7 @@ export interface Profile {
   phone: string | null;
   address: string | null;
   nid_number: string | null;
+  personal_details?: Record<string, unknown> | null;
   is_banned: boolean;
   is_locked?: boolean;
   lock_reason?: string | null;
