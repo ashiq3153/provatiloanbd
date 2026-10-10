@@ -330,14 +330,14 @@ export default function ApplyLoan() {
 
   // Warnings Checklist Checklist States
   const [checkAntiFraud, setCheckAntiFraud] = useState(false);
-  const [checkRefundPolicy, setCheckNoRefund] = useState(false);
+  const [checkRefundPolicy, setCheckRefundPolicy] = useState(false);
   const [checkSavingsRule, setCheckSavingsRule] = useState(false);
   const [checkEmiObligation, setCheckEmiObligation] = useState(false);
 
   const handleCloseVerification = () => {
     setVerificationStage('idle');
     setCheckAntiFraud(false);
-    setCheckNoRefund(false);
+    setCheckRefundPolicy(false);
     setCheckSavingsRule(false);
     setCheckEmiObligation(false);
     setProgressPercent(0);
@@ -3706,7 +3706,7 @@ export default function ApplyLoan() {
                           id="checkRefundPolicy"
                           type="checkbox" 
                           checked={checkRefundPolicy}
-                          onChange={(e) => setCheckNoRefund(e.target.checked)}
+                          onChange={(e) => setCheckRefundPolicy(e.target.checked)}
                           className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer mt-0.5"
                         />
                         <span className="text-[11px] text-gray-600 dark:text-gray-300 font-medium leading-tight group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
