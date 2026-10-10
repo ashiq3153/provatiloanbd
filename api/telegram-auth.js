@@ -182,7 +182,16 @@ async function updateMyLoanApplication(telegramUser, applicationId, payload) {
       nid_number: data.nid_number,
       current_address: data.current_address,
       permanent_address: data.permanent_address,
-      professional_info: data.professional_info
+      professional_info: data.professional_info,
+      bank_name: data.bank_name,
+      account_name: data.account_name,
+      account_number: data.account_number,
+      routing_number: data.routing_number,
+      mobile_banking: data.mobile_banking,
+      nominee_name: data.nominee_name,
+      nominee_relation: data.nominee_relation,
+      nominee_mobile: data.nominee_mobile,
+      nominee_nid: data.nominee_nid
     });
   } catch (profileError) {
     console.error("Profile auto-sync after loan revision failed:", profileError);
@@ -380,7 +389,9 @@ async function getMyDashboardStats(telegramUser) {
 const PROFILE_DETAIL_KEYS = {
   fullName: 120, fatherName: 120, motherName: 120, dob: 20, gender: 32,
   mobile: 20, whatsapp: 20, email: 254, nidNumber: 40, eTin: 40,
-  bloodGroup: 8, maritalStatus: 32, spouseProfession: 120, spouseIncome: 30
+  bloodGroup: 8, maritalStatus: 32, spouseProfession: 120, spouseIncome: 30,
+  bankName: 120, accountName: 120, accountNumber: 50, routingNumber: 30,
+  mobileBanking: 50, nomineeName: 120, nomineeRelation: 80, nomineeMobile: 20, nomineeNid: 40
 };
 const PROFILE_ADDRESS_KEYS = [
   "district","upazila","union","village","postCode","houseNo","flatNo",
@@ -489,7 +500,16 @@ async function syncProfileDetailsFromLoan(telegramUser, applicationPayload) {
     bloodGroup: source.professional_info?.bloodGroup,
     maritalStatus: source.professional_info?.maritalStatus,
     spouseProfession: source.professional_info?.spouseProfession,
-    spouseIncome: source.professional_info?.spouseIncome
+    spouseIncome: source.professional_info?.spouseIncome,
+    bankName: source.bank_name,
+    accountName: source.account_name,
+    accountNumber: source.account_number,
+    routingNumber: source.routing_number,
+    mobileBanking: source.mobile_banking,
+    nomineeName: source.nominee_name,
+    nomineeRelation: source.nominee_relation,
+    nomineeMobile: source.nominee_mobile,
+    nomineeNid: source.nominee_nid
   };
   const normalized = sanitizeProfileDetails(candidate, { keepEmpty: false });
   if (!Object.keys(normalized).length) return null;
