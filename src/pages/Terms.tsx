@@ -419,7 +419,7 @@ export default function Terms() {
             <section className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-[24px] p-5 space-y-4 border-0 transition-colors">
               <h2 className="text-base font-black text-gray-900 dark:text-white border-b border-gray-150 dark:border-gray-800 pb-3 flex items-center gap-2">
                 <HelpCircle className="text-primary-500" size={20} />
-                {isBn ? '১১. সাধারণ জিজ্ঞাসা (FAQ)' : '11. FAQ'}
+                {isBn ? '১২. সাধারণ জিজ্ঞাসা (FAQ)' : '12. FAQ'}
               </h2>
               <div className="space-y-4 text-xs font-bold text-gray-600 dark:text-gray-300">
                 <div>
@@ -427,9 +427,9 @@ export default function Terms() {
                     {isBn ? 'প্রশ্নঃ প্রসেসিং ফি ফেরত ও সঞ্চয় আমানতের নিয়ম কী?' : 'Q: What are the processing-fee refund and savings-deposit rules?'}
                   </h4>
                   <p className="leading-relaxed">
-                    {isBn 
-                    <p className="pl-4">প্রসেসিং ফি অ্যাডমিনের বর্তমান অনুমোদিত সিস্টেম সেটিংস অনুযায়ী নির্ধারিত হবে। পেমেন্টের আগে আবেদনপত্রে প্রদর্শিত হার ও পরিমাণ যাচাই করুন। আবেদন প্রত্যাখ্যাত বা বাতিল হলে, অথবা প্রযোজ্য ক্ষেত্রে সেবা সম্পন্ন না হলে, ফি ফেরতযোগ্য; ফেরতের অনুরোধ অ্যাপের Support পৃষ্ঠা দিয়ে করতে হবে।</p>
-                    <p className="pl-4">The processing fee is determined by the administrator's currently approved system settings. Check the rate and amount displayed in the application before payment. The fee is refundable if the application is rejected or cancelled, or the service is not completed in an applicable case; use the in-app Support page to request a refund.</p>
+                    {isBn
+                      ? 'উত্তরঃ ফি ও ডিপোজিটের হার অ্যাডমিনের অনুমোদিত সিস্টেম সেটিংস অনুযায়ী নির্ধারিত হবে; পেমেন্টের আগে আবেদনপত্রে প্রদর্শিত অঙ্ক যাচাই করুন। আবেদন প্রত্যাখ্যাত বা বাতিল হলে প্রসেসিং ফি ফেরতযোগ্য। সঞ্চয়/সিকিউরিটি ডিপোজিট লক থাকবে এবং সব কিস্তি ও প্রযোজ্য বকেয়া পরিশোধের পর হিসাব যাচাই করে মুক্তির যোগ্যতা নির্ধারণ হবে। ফেরত বা মুক্তির অনুরোধ অ্যাপের Support পৃষ্ঠা দিয়ে জানাতে হবে.'
+                      : 'Fee and deposit rates follow the administrator\'s approved settings; check the displayed amount before payment. The processing fee is refundable if the application is rejected or cancelled. The savings/security deposit remains locked and release eligibility is reviewed after all instalments and applicable dues are paid. Use the in-app Support page to request a refund or release review.'}
                   </p>
                 </div>
                 
