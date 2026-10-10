@@ -87,6 +87,15 @@ type ProfileEditorFields = {
   maritalStatus: string;
   spouseProfession: string;
   spouseIncome: string;
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+  routingNumber: string;
+  mobileBanking: string;
+  nomineeName: string;
+  nomineeRelation: string;
+  nomineeMobile: string;
+  nomineeNid: string;
 };
 
 const blankProfileEditor: ProfileEditorFields = {
@@ -143,6 +152,15 @@ export default function Profile() {
       maritalStatus: details.maritalStatus || '',
       spouseProfession: details.spouseProfession || '',
       spouseIncome: details.spouseIncome || '',
+      bankName: details.bankName || '',
+      accountName: details.accountName || '',
+      accountNumber: details.accountNumber || '',
+      routingNumber: details.routingNumber || '',
+      mobileBanking: details.mobileBanking || '',
+      nomineeName: details.nomineeName || '',
+      nomineeRelation: details.nomineeRelation || '',
+      nomineeMobile: details.nomineeMobile || '',
+      nomineeNid: details.nomineeNid || '',
     });
     setEditorCurrentAddress(profileAddress(details.currentAddress, userProfile?.address));
     setEditorPermanentAddress(profileAddress(details.permanentAddress));
@@ -181,6 +199,7 @@ export default function Profile() {
   const phone = userProfile?.phone?.trim() ? maskTail(userProfile.phone) : displayOrMissing(null, isBn);
   const address = displayOrMissing(userProfile?.address, isBn);
   const nid = userProfile?.nid_number?.trim() ? maskTail(userProfile.nid_number) : displayOrMissing(null, isBn);
+  const personalDetails = (userProfile?.personal_details || {}) as Record<string, any>;
   const hasProfilePhoto = Boolean(userProfile?.photo_url || user.photo_url);
   const profileChecks = [
     Boolean(userProfile?.phone?.trim()),
@@ -256,6 +275,14 @@ export default function Profile() {
           <InfoRow icon={Mail} title={isBn ? 'ইমেইল' : 'Email'} value={displayOrMissing((userProfile?.personal_details as any)?.email, isBn)} onClick={openProfileEditor} />
         </SectionCard>
 
+        <SectionCard title={isBn ? 'ব্যাংক ও নমিনি তথ্য' : 'Bank & nominee details'} icon={Wallet} action={<button type="button" className="fig-profile-text-action" onClick={openProfileEditor}>{isBn ? 'সম্পাদনা' : 'Edit'}</button>}>
+          <InfoRow icon={Landmark} title={isBn ? 'ব্যাংক' : 'Bank'} value={displayOrMissing(personalDetails.bankName, isBn)} onClick={openProfileEditor} /><RowDivider />
+          <InfoRow icon={UserRound} title={isBn ? 'হিসাবের নাম' : 'Account name'} value={displayOrMissing(personalDetails.accountName, isBn)} onClick={openProfileEditor} /><RowDivider />
+          <InfoRow icon={Wallet} title={isBn ? 'হিসাব নম্বর' : 'Account number'} value={personalDetails.accountNumber ? maskTail(personalDetails.accountNumber) : displayOrMissing(null, isBn)} onClick={openProfileEditor} /><RowDivider />
+          <InfoRow icon={UserRound} title={isBn ? 'নমিনি' : 'Nominee'} value={displayOrMissing(personalDetails.nomineeName, isBn)} onClick={openProfileEditor} /><RowDivider />
+          <InfoRow icon={Phone} title={isBn ? 'নমিনির মোবাইল' : 'Nominee mobile'} value={personalDetails.nomineeMobile ? maskTail(personalDetails.nomineeMobile) : displayOrMissing(null, isBn)} onClick={openProfileEditor} />
+        </SectionCard>
+
         <SectionCard title={isBn ? 'যোগাযোগ' : 'Contact'} icon={Phone}>
           <InfoRow icon={Phone} title={isBn ? 'মোবাইল' : 'Mobile'} value={phone} description={isBn ? 'সংরক্ষিত নম্বরের শেষ চারটি অঙ্ক দেখানো হচ্ছে' : 'Only the last four digits of a saved number are shown'} onClick={openProfileEditor} /><RowDivider />
           <InfoRow icon={MapPin} title={isBn ? 'ঠিকানা' : 'Address'} value={address} description={isBn ? 'প্রোফাইলে থাকা ঠিকানা' : 'Address currently saved in your profile'} onClick={openProfileEditor} />
@@ -311,6 +338,18 @@ export default function Profile() {
                   <label>{isBn ? 'বৈবাহিক অবস্থা' : 'Marital status'}<select value={editorFields.maritalStatus} onChange={e => updateEditorField('maritalStatus',e.target.value)}><option value="">{isBn ? 'নির্বাচন করুন' : 'Select'}</option><option value="Single">{isBn ? 'অবিবাহিত' : 'Single'}</option><option value="Married">{isBn ? 'বিবাহিত' : 'Married'}</option><option value="Widowed">{isBn ? 'বিধবা/বিপত্নীক' : 'Widowed'}</option><option value="Divorced">{isBn ? 'তালাকপ্রাপ্ত' : 'Divorced'}</option></select></label>
                   <label>{isBn ? 'স্বামী/স্ত্রীর পেশা (ঐচ্ছিক)' : 'Spouse profession (optional)'}<input maxLength={120} value={editorFields.spouseProfession} onChange={e => updateEditorField('spouseProfession',e.target.value)}/></label>
                   <label>{isBn ? 'স্বামী/স্ত্রীর আয় (ঐচ্ছিক)' : 'Spouse income (optional)'}<input inputMode="numeric" maxLength={30} value={editorFields.spouseIncome} onChange={e => updateEditorField('spouseIncome',e.target.value)}/></label>
+                </div>
+                <h3 className="fig-profile-editor-subhead">{isBn ? 'ব্যাংক ও নমিনি তথ্য' : 'Bank & nominee details'}</h3>
+                <div className="fig-profile-editor-grid">
+                  <label>{isBn ? 'ব্যাংকের নাম' : 'Bank name'}<input autoComplete="off" maxLength={120} value={editorFields.bankName} onChange={e => updateEditorField('bankName',e.target.value)}/></label>
+                  <label>{isBn ? 'হিসাবের নাম' : 'Account name'}<input autoComplete="off" maxLength={120} value={editorFields.accountName} onChange={e => updateEditorField('accountName',e.target.value)}/></label>
+                  <label>{isBn ? 'ব্যাংক হিসাব নম্বর' : 'Bank account number'}<input autoComplete="off" inputMode="numeric" maxLength={50} value={editorFields.accountNumber} onChange={e => updateEditorField('accountNumber',e.target.value)}/></label>
+                  <label>{isBn ? 'রাউটিং নম্বর (ঐচ্ছিক)' : 'Routing number (optional)'}<input autoComplete="off" inputMode="numeric" maxLength={30} value={editorFields.routingNumber} onChange={e => updateEditorField('routingNumber',e.target.value)}/></label>
+                  <label>{isBn ? 'মোবাইল ব্যাংকিং (ঐচ্ছিক)' : 'Mobile banking (optional)'}<input autoComplete="off" maxLength={50} value={editorFields.mobileBanking} onChange={e => updateEditorField('mobileBanking',e.target.value)}/></label>
+                  <label>{isBn ? 'নমিনির নাম' : 'Nominee name'}<input maxLength={120} value={editorFields.nomineeName} onChange={e => updateEditorField('nomineeName',e.target.value)}/></label>
+                  <label>{isBn ? 'নমিনির সঙ্গে সম্পর্ক' : 'Nominee relationship'}<input maxLength={80} value={editorFields.nomineeRelation} onChange={e => updateEditorField('nomineeRelation',e.target.value)}/></label>
+                  <label>{isBn ? 'নমিনির মোবাইল' : 'Nominee mobile'}<input inputMode="tel" maxLength={20} value={editorFields.nomineeMobile} onChange={e => updateEditorField('nomineeMobile',e.target.value)}/></label>
+                  <label>{isBn ? 'নমিনির NID' : 'Nominee NID'}<input inputMode="numeric" maxLength={40} value={editorFields.nomineeNid} onChange={e => updateEditorField('nomineeNid',e.target.value)}/></label>
                 </div>
                 <div className="fig-profile-editor-address"><AddressSelector label={isBn ? 'বর্তমান ঠিকানা' : 'Current address'} value={editorCurrentAddress} onChange={setEditorCurrentAddress} isBn={isBn} prefix="profile-current" showDetailedFields showOwnershipFields /></div>
                 <div className="fig-profile-editor-address"><AddressSelector label={isBn ? 'স্থায়ী ঠিকানা (NID অনুযায়ী)' : 'Permanent address (as per NID)'} value={editorPermanentAddress} onChange={setEditorPermanentAddress} isBn={isBn} prefix="profile-permanent" showDetailedFields /></div>
