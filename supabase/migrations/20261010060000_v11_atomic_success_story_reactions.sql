@@ -16,7 +16,7 @@ as $function$
 declare
   updated_count integer;
 begin
-  if p_reaction_type not in (
+  if p_reaction_type is null or p_reaction_type not in (
     'like', 'dislike', 'love', 'loveit',
     'congratulation', 'wow', 'sad', 'hundred'
   ) then
