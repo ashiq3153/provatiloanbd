@@ -5,10 +5,28 @@ import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../
 import { toast } from 'sonner';
 import { useAppStore } from '../../lib/store';
 import { convertDigits, formatCurrency } from '../../lib/translation';
-import { reactToSuccessStory } from '../../lib/api';
+import { reactToSuccessStory, getPrivateDocumentUrl } from '../../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { supabase } from '../../lib/supabase';
+
+async function openPrivateDocumentReference(reference: string, isBn: boolean) {
+  const popup = window.open('about:blank', '_blank');
+  if (!popup) {
+    toast.error(isBn ? 'ডকুমেন্ট খুলতে নতুন ট্যাব অনুমতি দিন' : 'Allow a new tab to open the document');
+    return;
+  }
+  popup.opener = null;
+  try {
+    const signedUrl = await getPrivateDocumentUrl(reference);
+    if (!signedUrl) throw new Error('No document URL returned');
+    popup.location.href = signedUrl;
+  } catch (error) {
+    popup.close();
+    console.error('Private document open failed:', error);
+    toast.error(isBn ? 'ডকুমেন্ট খোলা যায়নি বা অনুমতি নেই' : 'Could not open document or access was denied');
+  }
+}
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings' | 'broadcast' | 'kyc'>('overview');
@@ -1184,9 +1202,9 @@ export default function AdminDashboard() {
                             </td>
                             <td className="px-6 py-4">
                               {txn.screenshot_url ? (
-                                <a href={txn.screenshot_url} target="_blank" rel="noreferrer" className="text-primary-600 bg-primary-50 px-3 py-1.5 rounded-lg hover:bg-primary-100 transition-colors text-xs flex items-center gap-1.5 font-bold w-max">
+                                <button type="button" onClick={() => void openPrivateDocumentReference(String(txn.screenshot_url), isBn)} className="text-primary-600 bg-primary-50 px-3 py-1.5 rounded-lg hover:bg-primary-100 transition-colors text-xs flex items-center gap-1.5 font-bold w-max">
                                   <Eye size={14} /> View
-                                </a>
+                                </button>
                               ) : (
                                 <span className="text-gray-400 text-xs italic">No image</span>
                               )}
@@ -2440,14 +2458,13 @@ export default function AdminDashboard() {
                                 {url.split('/').pop() || 'document_file'}
                               </span>
                             </div>
-                            <a 
-                              href={url} 
-                              target="_blank" 
-                              rel="noreferrer" 
+                            <button
+                              type="button"
+                              onClick={() => void openPrivateDocumentReference(String(url), isBn)}
                               className="px-3 py-2 bg-primary-50 hover:bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400 dark:hover:bg-primary-900/50 rounded-lg text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                             >
                               <Eye size={14} /> {isBn ? 'ডকুমেন্ট দেখুন' : 'View Document'}
-                            </a>
+                            </button>
                           </div>
                         ))}
                       </div>
