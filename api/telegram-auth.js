@@ -719,7 +719,6 @@ async function adminAction(action, payload) {
       if (ADMIN_CHAT_IDS.has(String(targetChatId))) throw new Error("An allowlisted admin account cannot be deactivated here");
       const { data, error } = await db.from("profiles")
         .update({
-          is_banned: true,
           is_locked: true,
           lock_reason: "Deactivated by administrator; financial and audit history retained"
         })
