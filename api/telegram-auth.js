@@ -759,38 +759,28 @@ async function adminAction(action, payload) {
       return !(await db.from("loan_applications").update({ status: payload.status, admin_feedback: payload.feedback || null, approved_at: null }).eq("id", payload.id)).error;
     }
     case "update_system_setting": {
-      const existing = await db.from("system_settings").select("id").eq("key", payload.key).maybeSingle();
-      const saved = existing.data
-        ? !(await db.from("system_settings").update({ value: payload.value }).eq("key", payload.key)).error
-        : !(await db.from("system_settings").insert({ key: payload.key, value: payload.value })).error;
-      if (!saved) return false;
-
-      if (payload.key === "global_loan_config" && payload.value && typeof payload.value === "object") {
-        const rates = [
-          ["personal", payload.value.minRatePersonal],
-          ["business", payload.value.minRateBusiness],
-          ["expat", payload.value.minRateExpat],
-          ["student", payload.value.minRateStudent],
-          ["emergency", payload.value.minRateEmergency],
-          ["women", payload.value.minRateWomen]
-        ];
-        for (const [category, rate] of rates) {
-          if (!Number.isFinite(Number(rate))) continue;
-          await db.from("loan_rate_versions")
-            .update({ is_active: false, effective_to: new Date().toISOString() })
-            .eq("loan_category", category)
-            .eq("is_active", true);
-          const { error } = await db.from("loan_rate_versions").insert({
-            loan_category: category,
-            monthly_rate: Number(rate),
-            calculation_method: "flat",
-            effective_from: new Date().toISOString(),
-            is_active: true,
-            created_by_chat_id: Number(payload.chatId || 0) || null
-          });
-          if (error) throw error;
-        }
+      const key = typeof payload.key === "string" ? payload.key.trim() : "";
+      if (!key || key.length > 100 || !Object.prototype.hasOwnProperty.call(payload, "value")) {
+        throw new Error("Invalid system setting update");
       }
+
+      // This operation runs as one database transaction: configuration and
+      // all active category rate versions must save together or not at all.
+      if (key === "global_loan_config") {
+        const { data, error } = await db.rpc("apply_global_loan_config", {
+          p_value: payload.value,
+          p_created_by_chat_id: Number(payload.chatId || 0) || null
+        });
+        if (error) throw error;
+        return data === true;
+      }
+
+      const existing = await db.from("system_settings").select("id").eq("key", key).maybeSingle();
+      if (existing.error) throw existing.error;
+      const saved = existing.data
+        ? await db.from("system_settings").update({ value: payload.value }).eq("key", key)
+        : await db.from("system_settings").insert({ key, value: payload.value });
+      if (saved.error) throw saved.error;
       return true;
     }
     case "add_success_story": return !(await db.from("success_stories").insert(payload.story)).error;
