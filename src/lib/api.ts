@@ -318,22 +318,6 @@ export async function getSuccessStories(): Promise<SuccessStory[]> {
   return data || [];
 }
 
-export async function reactToSuccessStory(storyId: string, reactionType: string): Promise<boolean> {
-  // The database RPC validates reaction types and increments atomically so
-  // simultaneous reactions cannot overwrite each other's counter updates.
-  const { data, error } = await supabase.rpc('react_to_success_story', {
-    p_story_id: storyId,
-    p_reaction_type: reactionType,
-  });
-
-  if (error) {
-    console.error('reactToSuccessStory error:', error);
-    return false;
-  }
-
-  return data === true;
-}
-
 // ── Document Upload API ──────────────────────────────────
 
 async function uploadViaTelegramServer(file: File): Promise<string | null> {
