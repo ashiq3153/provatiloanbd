@@ -1663,7 +1663,7 @@ export default function AdminDashboard() {
                             
                             <div className="mt-4 rounded-xl border border-violet-200 dark:border-violet-800 p-3">
                               <p className="text-xs font-bold mb-1">{isBn ? 'কাস্টম ইমোজি ও সংখ্যা (JSON)' : 'Custom emoji counts (JSON)'}</p>
-                              <p className="text-[11px] text-gray-500 mb-2">{isBn ? 'প্রতিটি আইটেমে emoji, label ও count দিন। সংখ্যা সরাসরি লিখুন; বারবার ক্লিক করতে হবে না।' : 'Set emoji, label and count directly; no repeated clicking. Add as many entries as needed.'}</p>
+                              <p className="text-[11px] text-gray-500 mb-2">{isBn ? 'প্রতিটি আইটেমে emoji, label ও count দিন (সর্বোচ্চ ১,০০০টি)। সংখ্যা সরাসরি লিখুন; বারবার ক্লিক করতে হবে না।' : 'Set emoji, label and count directly; no repeated clicking. Add up to 1,000 entries.'}</p>
                               <textarea
                                 aria-label="Custom reaction emoji counts JSON"
                                 value={reactionDrafts[story.id] ?? JSON.stringify(story.custom_reactions?.length ? story.custom_reactions : [
