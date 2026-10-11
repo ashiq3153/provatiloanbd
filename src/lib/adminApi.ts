@@ -14,6 +14,7 @@ type AdminAction =
   | 'update_system_setting'
   | 'add_success_story'
   | 'delete_success_story'
+  | 'update_story_reactions'
   | 'get_chat_messages'
   | 'send_chat_message'
   | 'edit_chat_message'
@@ -60,6 +61,10 @@ export async function updateSystemSettings(key: string, value: any): Promise<boo
 export async function getAllAdminSuccessStories(): Promise<SuccessStory[]> { return (await callAdmin<SuccessStory[]>('get_success_stories')) || []; }
 export async function addSuccessStory(story: Omit<SuccessStory, 'id'>): Promise<boolean> { return (await callAdmin<boolean>('add_success_story', { story })) === true; }
 export async function deleteSuccessStory(id: string): Promise<boolean> { return (await callAdmin<boolean>('delete_success_story', { id })) === true; }
+export type CustomStoryReaction = { emoji: string; label?: string; count: number };
+export async function updateStoryReactions(id: string, reactions: CustomStoryReaction[]): Promise<boolean> {
+  return (await callAdmin<boolean>('update_story_reactions', { id, reactions })) === true;
+}
 
 /**
  * Sends a Telegram Bot API message to any chat_id on the admin's behalf.
