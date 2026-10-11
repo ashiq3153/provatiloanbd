@@ -785,6 +785,23 @@ async function adminAction(action, payload) {
     }
     case "add_success_story": return !(await db.from("success_stories").insert(payload.story)).error;
     case "delete_success_story": return !(await db.from("success_stories").delete().eq("id", payload.id)).error;
+    case "update_story_reactions": {
+      const id = String(payload.id || "");
+      if (!id) throw new Error("Story ID is required");
+      if (!Array.isArray(payload.reactions) || payload.reactions.length > 100) throw new Error("Reaction list must contain at most 100 entries");
+      const reactions = payload.reactions.map((item) => {
+        const emoji = typeof item?.emoji === "string" ? item.emoji.trim() : "";
+        const label = typeof item?.label === "string" ? item.label.trim().slice(0, 40) : "";
+        const count = Number(item?.count);
+        if (!emoji || [...emoji].length > 16 || !Number.isSafeInteger(count) || count < 0 || count > 1000000000) {
+          throw new Error("Each reaction needs an emoji and a whole-number count between 0 and 1,000,000,000");
+        }
+        return { emoji, label, count };
+      });
+      const { error } = await db.from("success_stories").update({ custom_reactions: reactions }).eq("id", id);
+      if (error) throw error;
+      return true;
+    }
     case "send_telegram_message": return await sendTelegramBotMessage(payload.chatId, payload.message, payload.replyMarkup);
     case "broadcast_telegram_message": {
       const chatIds = Array.isArray(payload.chatIds) ? payload.chatIds.map(Number).filter(Boolean) : [];
