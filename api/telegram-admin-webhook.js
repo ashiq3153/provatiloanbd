@@ -16,7 +16,7 @@ const ADMIN_CHAT_IDS = new Set(
     .map((value) => value.trim())
     .filter(Boolean)
 );
-const ADMIN_APP_URL = process.env.ADMIN_PANEL_URL || new URL("/admin", process.env.MINI_APP_URL || "https://provatiloanbd.vercel.app").toString();
+const ADMIN_APP_URL = "https://provatiloanbd.vercel.app/admin";
 
 function safeEqual(received, expected) {
   if (typeof received !== "string" || typeof expected !== "string" || !received || !expected) return false;
