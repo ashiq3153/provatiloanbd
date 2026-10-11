@@ -368,18 +368,9 @@ async function uploadViaTelegramServer(file: File): Promise<string | null> {
     throw new Error(uploadError.message || 'File upload failed');
   }
 
-  const urlResponse = await fetch('/api/telegram-document-url', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ initData, path: prepared.path }),
-  });
-
-  const urlResult = await urlResponse.json().catch(() => null);
-  if (!urlResponse.ok || !urlResult?.ok || !urlResult?.url) {
-    throw new Error(urlResult?.error || 'Could not create file URL');
-  }
-
-  return urlResult.url;
+  // Keep a durable object path in the database. Signed URLs must be
+  // requested only when a document is actually opened.
+  return prepared.path;
 }
 
 export async function uploadDocument(file: File, _userId: number, _docType: string): Promise<string | null> {
@@ -395,6 +386,43 @@ export async function uploadDocument(file: File, _userId: number, _docType: stri
     console.error('uploadDocument error:', error);
     return null;
   }
+}
+
+function privateDocumentPath(reference: string): string | null {
+  const value = String(reference || '').trim();
+  if (!value) return null;
+  if (!/^https?:\/\//i.test(value)) return value;
+
+  try {
+    const parsed = new URL(value);
+    const marker = '/object/sign/loan_documents/';
+    const index = parsed.pathname.indexOf(marker);
+    if (index < 0) return null;
+    return decodeURIComponent(parsed.pathname.slice(index + marker.length));
+  } catch {
+    return null;
+  }
+}
+
+/** Request a short-lived private document URL at the moment it is viewed. */
+export async function getPrivateDocumentUrl(reference: string): Promise<string | null> {
+  const path = privateDocumentPath(reference);
+  if (!path) return null;
+
+  // @ts-ignore Telegram WebApp is injected by Telegram at runtime.
+  const initData = typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || '' : '';
+  if (!initData) throw new Error('Telegram initData is missing');
+
+  const response = await fetch('/api/telegram-document-url', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ initData, path }),
+  });
+  const result = await response.json().catch(() => null);
+  if (!response.ok || !result?.ok || typeof result.url !== 'string') {
+    throw new Error(result?.error || 'Could not create file URL');
+  }
+  return result.url;
 }
 
 export async function uploadSupportAttachment(file: File, _userId: number): Promise<string | null> {
