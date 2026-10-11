@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, Copy, ArrowLeft, Edit2, Lock, Unlock, ThumbsUp, Heart, MessageCircle } from 'lucide-react';
+import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, Copy, ArrowLeft, Edit2, Lock, Unlock, MessageCircle } from 'lucide-react';
 import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, sendAdminTelegramMessage, broadcastAdminTelegramMessage, getFinancialReconciliationReport, getKycReviewQueue, updateKycReview, setAdminPresence } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
@@ -143,13 +143,6 @@ export default function AdminDashboard() {
     profession: '',
     loan_tenure: '',
     deposit_payment: '',
-    like_count: 0,
-    dislike_count: 0,
-    love_count: 0,
-    loveit_count: 0,
-    congratulation_count: 0,
-    wow_count: 0,
-    sad_count: 0,
     hundred_count: 0
   });
   
@@ -379,7 +372,7 @@ export default function AdminDashboard() {
     // Mark online immediately
     setOnline();
 
-    // Heartbeat every 30 seconds to keep "online" fresh
+    // beat every 30 seconds to keep "online" fresh
     const heartbeat = setInterval(setOnline, 30_000);
 
     // Mark offline when admin closes tab or navigates away
@@ -1599,13 +1592,6 @@ export default function AdminDashboard() {
                                 profession: '',
                                 loan_tenure: '',
                                 deposit_payment: '',
-                                like_count: 0,
-                                dislike_count: 0,
-                                love_count: 0,
-                                loveit_count: 0,
-                                congratulation_count: 0,
-                                wow_count: 0,
-                                sad_count: 0,
                                 hundred_count: 0
                               });
                             } else {
@@ -1659,36 +1645,6 @@ export default function AdminDashboard() {
                               </button>
                             </div>
                             
-                            {/* Reaction Controls */}
-                            <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-700/50 flex gap-3">
-                              <button
-                                onClick={async () => {
-                                  const success = await (story.id, 'like');
-                                  if (success) {
-                                    setStories(stories.map(s => s.id === story.id ? { ...s, like_count: (s.like_count || 0) + 1 } : s));
-                                    toast.success('Like added successfully');
-                                  }
-                                }}
-                                className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors font-semibold text-sm"
-                              >
-                                <ThumbsUp size={16} />
-                                <span>{story.like_count || 0} Likes</span>
-                              </button>
-                              
-                              <button
-                                onClick={async () => {
-                                  const success = await (story.id, 'love');
-                                  if (success) {
-                                    setStories(stories.map(s => s.id === story.id ? { ...s, love_count: (s.love_count || 0) + 1 } : s));
-                                    toast.success('Love added successfully');
-                                  }
-                                }}
-                                className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors font-semibold text-sm"
-                              >
-                                <Heart size={16} />
-                                <span>{story.love_count || 0} Loves</span>
-                              </button>
-                            </div>
                           </div>
                         ))}
                         {stories.length === 0 && (
