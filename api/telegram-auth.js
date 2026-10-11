@@ -3,6 +3,7 @@
  */
 import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import { calculateAuthoritativeLoanTerms, LoanConfigurationError } from "./loan-finance.js";
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const ADMIN_BOT_TOKEN = process.env.TELEGRAM_ADMIN_BOT_TOKEN;
@@ -140,23 +141,54 @@ async function getMyLoanApplicationById(telegramUser, applicationId) {
   return data || null;
 }
 
+async function loadAuthoritativeLoanTerms(db, input) {
+  const [settingsResult, rateResult] = await Promise.all([
+    db.from("system_settings").select("value").eq("key", "global_loan_config").maybeSingle(),
+    db.from("loan_rate_versions")
+      .select("id,loan_category,monthly_rate,calculation_method,is_active")
+      .eq("loan_category", input.category)
+      .eq("is_active", true)
+      .maybeSingle()
+  ]);
+  if (settingsResult.error || rateResult.error) {
+    throw new Error("Could not verify current approved loan settings");
+  }
+  return calculateAuthoritativeLoanTerms({
+    ...input,
+    config: settingsResult.data?.value,
+    rateVersion: rateResult.data
+  });
+}
+
 async function updateMyLoanApplication(telegramUser, applicationId, payload) {
   const db = adminClient();
   const chatId = Number(telegramUser?.id);
-  if (!chatId || !applicationId || !payload || typeof payload !== "object") {
+  if (!chatId || !applicationId || !payload || typeof payload !== "object" || Array.isArray(payload)) {
     throw new Error("Invalid loan update request");
   }
 
+  // Read the owner-scoped source values first. Financial outputs below are always
+  // recomputed from server settings and the active rate version, never copied from the browser.
+  const { data: currentLoan, error: currentLoanError } = await db.from("loan_applications")
+    .select("id,chat_id,loan_category,amount,tenure_months")
+    .eq("id", applicationId)
+    .eq("chat_id", chatId)
+    .maybeSingle();
+  if (currentLoanError) throw currentLoanError;
+  if (!currentLoan) throw new Error("Loan application not found");
+
+  const category = Object.prototype.hasOwnProperty.call(payload, "loan_category") ? payload.loan_category : currentLoan.loan_category;
+  const amount = Object.prototype.hasOwnProperty.call(payload, "amount") ? payload.amount : currentLoan.amount;
+  const tenureMonths = Object.prototype.hasOwnProperty.call(payload, "tenure_months") ? payload.tenure_months : currentLoan.tenure_months;
+  const terms = await loadAuthoritativeLoanTerms(db, { category, amount, tenureMonths });
+
   const allowedFields = [
-    "loan_category","amount","tenure_months","interest_rate","emi_amount",
-    "processing_fee","security_deposit","full_name","father_name","mother_name",
-    "dob","gender","mobile","whatsapp","email","current_address",
-    "permanent_address","nid_number","professional_info","bank_name",
-    "account_name","account_number","routing_number","mobile_banking",
-    "nominee_name","nominee_relation","nominee_mobile","nominee_nid",
-    "documents","admin_feedback"
+    "full_name","father_name","mother_name","dob","gender","mobile","whatsapp","email",
+    "current_address","permanent_address","nid_number","professional_info","bank_name",
+    "account_name","account_number","routing_number","mobile_banking","nominee_name",
+    "nominee_relation","nominee_mobile","nominee_nid","documents"
   ];
-  const update = { status: "pending" };
+  const update = { status: "pending", ...terms };
   for (const key of allowedFields) {
     if (Object.prototype.hasOwnProperty.call(payload, key)) update[key] = payload[key];
   }
@@ -203,28 +235,31 @@ async function submitLoanApplication(telegramUser, payload) {
   const db = adminClient();
   const chatId = Number(telegramUser?.id);
   if (!chatId) throw new Error("Invalid Telegram user");
-  if (!payload || typeof payload !== "object") throw new Error("Invalid loan payload");
-  await syncProfile(telegramUser);
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) throw new Error("Invalid loan payload");
+
+  const terms = await loadAuthoritativeLoanTerms(db, {
+    category: payload.loan_category,
+    amount: payload.amount,
+    tenureMonths: payload.tenure_months
+  });
 
   const allowedFields = [
-    "loan_category","amount","tenure_months","interest_rate","emi_amount",
-    "processing_fee","security_deposit","full_name","father_name","mother_name",
-    "dob","gender","mobile","whatsapp","email","current_address",
-    "permanent_address","nid_number","professional_info","bank_name",
-    "account_name","account_number","routing_number","mobile_banking",
-    "nominee_name","nominee_relation","nominee_mobile","nominee_nid",
-    "documents","admin_feedback"
+    "full_name","father_name","mother_name","dob","gender","mobile","whatsapp","email",
+    "current_address","permanent_address","nid_number","professional_info","bank_name",
+    "account_name","account_number","routing_number","mobile_banking","nominee_name",
+    "nominee_relation","nominee_mobile","nominee_nid","documents"
   ];
-  const record = { chat_id: chatId, status: "pending" };
+  const record = { chat_id: chatId, status: "pending", ...terms };
   for (const key of allowedFields) {
     if (Object.prototype.hasOwnProperty.call(payload, key)) record[key] = payload[key];
   }
 
+  // Fail validation before writing profile or application data when approved terms
+  // are unavailable or inconsistent.
+  await syncProfile(telegramUser);
   const { data, error } = await db.from("loan_applications").insert(record).select().single();
   if (error) throw error;
 
-  // Keep reusable personal fields in the member profile after a successful application.
-  // A profile-sync failure must not turn an already-created loan into a false submit failure.
   try {
     await syncProfileDetailsFromLoan(telegramUser, payload);
   } catch (profileError) {
@@ -856,6 +891,9 @@ export default async function handler(req, res) {
     }
     return res.status(200).json({ ok: true, user: result.user, identityBound: Boolean(req.body?.accessToken) });
   } catch (error) {
+    if (error?.code === "LOAN_CONFIGURATION" || error instanceof LoanConfigurationError) {
+      return res.status(409).json({ ok: false, error: error.message });
+    }
     console.error("Telegram authentication error:", error);
     return res.status(400).json({ ok: false, error: "Authentication or server operation failed" });
   }
