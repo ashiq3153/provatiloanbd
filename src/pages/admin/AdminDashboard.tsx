@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, Copy, ArrowLeft, Edit2, Lock, Unlock, ThumbsUp, Heart, MessageCircle } from 'lucide-react';
-import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, sendAdminTelegramMessage, broadcastAdminTelegramMessage, getFinancialReconciliationReport, getKycReviewQueue, updateKycReview, setAdminPresence } from '../../lib/adminApi';
+import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, sendAdminTelegramMessage, broadcastAdminTelegramMessage, getFinancialReconciliationReport, getKycReviewQueue, updateKycReview, setAdminPresence, updateStoryReactions } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
 import { useAppStore } from '../../lib/store';
@@ -130,6 +130,8 @@ export default function AdminDashboard() {
       setFlaggedDocuments(false);
     }
   }, [selectedLoan]);
+
+  const [reactionDrafts, setReactionDrafts] = useState<Record<string, string>>({});
 
   // New Story Form State
   const [newStory, setNewStory] = useState({
@@ -1659,6 +1661,41 @@ export default function AdminDashboard() {
                               </button>
                             </div>
                             
+                            <div className="mt-4 rounded-xl border border-violet-200 dark:border-violet-800 p-3">
+                              <p className="text-xs font-bold mb-1">{isBn ? 'কাস্টম ইমোজি ও সংখ্যা (JSON)' : 'Custom emoji counts (JSON)'}</p>
+                              <p className="text-[11px] text-gray-500 mb-2">{isBn ? 'প্রতিটি আইটেমে emoji, label ও count দিন। সংখ্যা সরাসরি লিখুন; বারবার ক্লিক করতে হবে না।' : 'Set emoji, label and count directly; no repeated clicking. Add as many entries as needed.'}</p>
+                              <textarea
+                                aria-label="Custom reaction emoji counts JSON"
+                                value={reactionDrafts[story.id] ?? JSON.stringify(story.custom_reactions?.length ? story.custom_reactions : [
+                                  {emoji:'👍',label:'Like',count:Number(story.like_count||0)},
+                                  {emoji:'👎',label:'Dislike',count:Number(story.dislike_count||0)},
+                                  {emoji:'❤️',label:'Love',count:Number(story.love_count||0)},
+                                  {emoji:'🎉',label:'Congratulations',count:Number(story.congratulation_count||0)},
+                                  {emoji:'😮',label:'Wow',count:Number(story.wow_count||0)},
+                                  {emoji:'😢',label:'Sad',count:Number(story.sad_count||0)},
+                                  {emoji:'🔥',label:'Fire',count:0}
+                                ], null, 2)}
+                                onChange={e => setReactionDrafts(prev => ({...prev, [story.id]: e.target.value}))}
+                                rows={5}
+                                className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-2 text-xs font-mono"
+                              />
+                              <button type="button" onClick={async () => {
+                                try {
+                                  const parsed = JSON.parse(reactionDrafts[story.id] ?? JSON.stringify(story.custom_reactions || []));
+                                  if (!Array.isArray(parsed)) throw new Error('Use a JSON array');
+                                  const normalized = parsed.map((item: any) => ({emoji:String(item.emoji || '').trim(), label:String(item.label || ''), count:Number(item.count)}));
+                                  const ok = await updateStoryReactions(story.id, normalized);
+                                  if (!ok) throw new Error('Save failed');
+                                  setStories(stories.map(s => s.id === story.id ? {...s, custom_reactions: normalized} : s));
+                                  setReactionDrafts(prev => ({...prev, [story.id]: JSON.stringify(normalized, null, 2)}));
+                                  toast.success(isBn ? 'ইমোজির সংখ্যা সংরক্ষণ হয়েছে' : 'Emoji counts saved');
+                                } catch (error) {
+                                  toast.error(isBn ? 'JSON ও সংখ্যা যাচাই করুন' : (error instanceof Error ? error.message : 'Invalid reaction JSON'));
+                                }
+                              }} className="mt-2 px-3 py-2 rounded-lg bg-violet-600 text-white text-xs font-bold">
+                                {isBn ? 'ইমোজি/সংখ্যা সংরক্ষণ' : 'Save emoji counts'}
+                              </button>
+                            </div>
                             {/* Reaction Controls */}
                             <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-700/50 flex gap-3">
                               <button
