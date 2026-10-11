@@ -5,6 +5,7 @@ import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { calculateAuthoritativeLoanTerms, LoanConfigurationError } from "./loan-finance.js";
 import { normalizeUserPrivateDocumentReference, normalizeUserPrivateDocumentMap } from "./private-documents.js";
+import { assertMemberAccountActive, MemberAccountSuspendedError } from "./member-access.js";
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const ADMIN_BOT_TOKEN = process.env.TELEGRAM_ADMIN_BOT_TOKEN;
@@ -43,6 +44,18 @@ export function verifyInitData(initData) {
 function adminClient() {
   if (!SUPABASE_URL || !SERVICE_ROLE_KEY) throw new Error("Server database credentials are not configured");
   return createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+}
+
+async function assertMemberActive(telegramUser) {
+  const chatId = Number(telegramUser?.id);
+  if (!Number.isSafeInteger(chatId) || chatId <= 0) throw new Error("Invalid Telegram identity");
+  const { data, error } = await adminClient()
+    .from("profiles")
+    .select("is_banned,is_locked")
+    .eq("chat_id", chatId)
+    .maybeSingle();
+  if (error) throw error;
+  assertMemberAccountActive(data);
 }
 
 async function bridgeIdentity(telegramChatId, accessToken) {
@@ -700,10 +713,27 @@ async function adminAction(action, payload) {
     }
     case "ban_user": return !(await db.from("profiles").update({ is_banned: !!payload.isBanned }).eq("chat_id", payload.chatId)).error;
     case "lock_user": return !(await db.from("profiles").update({ is_locked: !!payload.isLocked, lock_reason: payload.isLocked ? (payload.reason || null) : null }).eq("chat_id", payload.chatId)).error;
-    case "delete_user":
-      for (const table of ["transactions", "loan_applications"]) await db.from(table).delete().eq("chat_id", payload.chatId);
-      return !(await db.from("profiles").delete().eq("chat_id", payload.chatId)).error;
+    case "delete_user": {
+      const targetChatId = Number(payload.chatId);
+      if (!Number.isSafeInteger(targetChatId) || targetChatId <= 0) throw new Error("Invalid member identity");
+      if (ADMIN_CHAT_IDS.has(String(targetChatId))) throw new Error("An allowlisted admin account cannot be deactivated here");
+      const { data, error } = await db.from("profiles")
+        .update({
+          is_banned: true,
+          is_locked: true,
+          lock_reason: "Deactivated by administrator; financial and audit history retained"
+        })
+        .eq("chat_id", targetChatId)
+        .select("chat_id")
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) throw new Error("Member profile not found");
+      return true;
+    }
     case "update_transaction": {
+      if (!["pending", "completed", "rejected", "failed"].includes(payload.status)) {
+        throw new Error("Unsupported transaction status");
+      }
       const patch = {
         status: payload.status,
         verified_by_chat_id: Number(payload.chatId || 0) || null,
@@ -719,6 +749,9 @@ async function adminAction(action, payload) {
       return true;
     }
     case "update_loan": {
+      if (!["pending", "under_review", "approved", "active", "completed", "rejected", "action_required", "cancelled"].includes(payload.status)) {
+        throw new Error("Unsupported loan status");
+      }
       if (payload.status === "approved") {
         const { error } = await db.rpc("approve_loan_atomic", { p_loan_id: payload.id, p_feedback: payload.feedback || null });
         if (error) throw error;
@@ -792,6 +825,9 @@ export default async function handler(req, res) {
   try {
     const result = verifyInitData(req.body?.initData);
     if (!result?.user?.id) return res.status(401).json({ ok: false, error: "Invalid Telegram initData" });
+    // Admin actions must remain usable to unlock accounts; all member-facing API
+    // routes enforce the database-backed lock/ban flags before proceeding.
+    if (req.body?.action !== "admin") await assertMemberActive(result.user);
     if (req.body?.accessToken) {
       const bridged = await bridgeIdentity(Number(result.user.id), req.body.accessToken);
       if (!bridged) return res.status(401).json({ ok: false, error: "Supabase identity binding failed" });
@@ -900,6 +936,9 @@ export default async function handler(req, res) {
     }
     return res.status(200).json({ ok: true, user: result.user, identityBound: Boolean(req.body?.accessToken) });
   } catch (error) {
+    if (error instanceof MemberAccountSuspendedError || error?.code === "ACCOUNT_SUSPENDED") {
+      return res.status(403).json({ ok: false, error: error.message });
+    }
     if (error?.code === "LOAN_CONFIGURATION" || error instanceof LoanConfigurationError) {
       return res.status(409).json({ ok: false, error: error.message });
     }
