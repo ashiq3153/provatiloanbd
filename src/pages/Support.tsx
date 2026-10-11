@@ -25,10 +25,10 @@ export default function Support(){
   {key:'emailSupport',name:'Email',url:systemSettings?.emailSupport,icon:<Mail className="w-7 h-7"/>,tone:'text-[#64748B]',bg:'bg-slate-500/10 border-slate-500/20'}
  ];
  const faqs=[
-  {q:isBn?'লোন প্রসেসিং ফি এবং সঞ্চয় আমানত কত এবং কেন দিতে হয়?':'What are the processing fees and savings deposits?',a:isBn?'প্রযোজ্য লোনের শর্ত অনুযায়ী প্রসেসিং ফি ও সঞ্চয় আমানত দিতে হতে পারে। আবেদন করার আগে ড্যাশবোর্ডে দেখানো প্রযোজ্য পরিমাণ যাচাই করুন।':'Applicable processing fees and savings deposits may be required according to the loan terms. Check the amount shown in the application before proceeding.'},
-  {q:isBn?'লোন চূড়ান্ত অনুমোদন হতে কত সময় লাগে?':'How long does loan approval take?',a:isBn?'প্রয়োজনীয় ডকুমেন্টস ও তথ্য সঠিকভাবে জমা দেওয়ার পর আবেদন যাচাই করা হয়। কোনো সংশোধন প্রয়োজন হলে আপনাকে জানানো হবে।':'Once the required documents and information are submitted correctly, the application is reviewed. You will be notified if any correction is needed.'},
-  {q:isBn?'আমি লোন পাওয়ার পর কিভাবে টাকা উত্তোলন করব?':'How can I withdraw my approved loan?',a:isBn?'অনুমোদিত লোনের ক্ষেত্রে আপনার ড্যাশবোর্ড থেকে প্রযোজ্য উত্তোলন রিকোয়েস্ট দিতে পারবেন।':'For an approved loan, you can submit an applicable withdrawal request from your dashboard.'},
-  {q:isBn?'আমার একাউন্ট স্থগিত হওয়ার কারণ কি?':'Why would my account be suspended?',a:isBn?'ভুল তথ্য, জাল ডকুমেন্ট, প্রতারণামূলক কার্যক্রম বা নীতিমালা ভঙ্গের কারণে অ্যাকাউন্টে ব্যবস্থা নেওয়া হতে পারে।':'Incorrect information, fraudulent documents, abusive activity, or policy violations may result in account restrictions.'}
+  {q:isBn?'প্রসেসিং ফি ফেরত ও সিকিউরিটি ডিপোজিটের নিয়ম কী?':'What are the processing-fee refund and security-deposit rules?',a:isBn?'আবেদন প্রত্যাখ্যাত বা বাতিল হলে প্রসেসিং ফি ফেরতযোগ্য; Support-এর মাধ্যমে অনুরোধ করুন। সিকিউরিটি ডিপোজিট লক থাকে এবং সব কিস্তি ও প্রযোজ্য বকেয়া পরিশোধের পর হিসাব যাচাই করে মুক্তির যোগ্যতা নির্ধারণ করা হয়। হার ও পরিমাণ পেমেন্টের আগে আবেদনপত্রে যাচাই করুন।':'The processing fee is refundable if an application is rejected or cancelled; request it through Support. The security deposit remains locked, and release eligibility is reviewed after all instalments and applicable dues are paid. Check the applicable rates and amounts in the application before payment.'},
+  {q:isBn?'আবেদন যাচাই হতে কত সময় লাগে?':'How long does application review take?',a:isBn?'প্রয়োজনীয় তথ্য ও ডকুমেন্ট জমা এবং প্রযোজ্য পেমেন্ট যাচাইয়ের পর প্রাথমিক পর্যালোচনার লক্ষ্য সাধারণত ১২–৪৮ ঘণ্টা। এটি অনুমোদনের নিশ্চয়তা নয়; সংশোধন বা অতিরিক্ত যাচাইয়ে সময় বাড়তে পারে।':'After required information and documents are submitted and applicable payments are verified, the target for initial review is generally 12–48 hours. This is not an approval guarantee; revisions or additional checks may take longer.'},
+  {q:isBn?'অনুমোদিত লোনের টাকা কীভাবে তুলব?':'How can I withdraw my approved loan?',a:isBn?'ঋণ অনুমোদন মানেই পুরো টাকা উত্তোলনযোগ্য হওয়া নয়। ড্যাশবোর্ডে Available Balance যাচাই করে প্রযোজ্য উত্তোলন অনুরোধ দিন।':'Loan approval does not mean the full amount is immediately withdrawable. Check your Available Balance on the dashboard before submitting an eligible withdrawal request.'},
+  {q:isBn?'অভিযোগ বা সিদ্ধান্ত পুনর্বিবেচনার অনুরোধ কীভাবে করব?':'How can I file a complaint or request reconsideration?',a:isBn?'এই পৃষ্ঠায় বর্তমানে চালু যোগাযোগ মাধ্যম নির্বাচন করে আবেদন নম্বর, সমস্যার বিবরণ এবং প্রাসঙ্গিক প্রমাণ দিন। কোনো মাধ্যম “সেট করা নেই” দেখালে সেটি সক্রিয় নয়।':'Choose an enabled contact channel on this page and provide your application reference, issue details, and relevant evidence. A channel marked “Not configured” is not active.'}
  ];
  return <div className="support-screen h-full w-full overflow-hidden bg-slate-50 dark:bg-[#08111f] flex flex-col text-slate-900 dark:text-slate-100">
   <div className="px-4 py-3 sticky top-0 z-20 flex items-center gap-3 shrink-0 bg-slate-50/95 dark:bg-[#08111f]/95 backdrop-blur border-b border-slate-200 dark:border-slate-800">
@@ -43,9 +43,16 @@ export default function Support(){
    <div className="grid grid-cols-2 gap-2.5">
     {contacts.map(c=>{
       const configuredUrl = c.url?.trim();
-      const href = c.key === 'emailSupport' && configuredUrl && !/^(mailto:|https?:)/i.test(configuredUrl)
+      const isEmail = c.key === 'emailSupport';
+      const candidateHref = isEmail && configuredUrl && !/^(mailto:|https?:)/i.test(configuredUrl)
         ? `mailto:${configuredUrl}`
         : configuredUrl;
+      // Only allow expected web/mail links from admin-configured settings.
+      const href = candidateHref && (isEmail
+        ? /^(mailto:|https?:\/\/)/i.test(candidateHref)
+        : /^https:\/\//i.test(candidateHref))
+        ? candidateHref
+        : undefined;
       const enabled=Boolean(href);
       return <a key={c.key} href={enabled?href:undefined} target={enabled && !href?.startsWith('mailto:')?'_blank':undefined} rel={enabled && !href?.startsWith('mailto:')?'noopener noreferrer':undefined} aria-disabled={!enabled}
         className={`support-contact-card ${c.key} rounded-2xl border px-3 py-2.5 flex items-center gap-2.5 min-h-[72px] transition-all ${c.bg} ${c.tone} ${enabled?'active:scale-[.97] cursor-pointer hover:shadow-md':'cursor-not-allowed opacity-75'}`}>
