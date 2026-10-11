@@ -789,7 +789,11 @@ async function adminAction(action, payload) {
     case "update_story_reactions": {
       const id = String(payload.id || "");
       if (!id) throw new Error("Story ID is required");
-      if (!Array.isArray(payload.reactions) || payload.reactions.length > 100) throw new Error("Reaction list must contain at most 100 entries");
+      if (!Array.isArray(payload.reactions) || payload.reactions.length > 1000) throw new Error("Reaction list must contain at most 1,000 entries");
+      const { data: existingStory, error: readError } = await db.from("success_stories").select("id,custom_reactions").eq("id", id).maybeSingle();
+      if (readError) throw readError;
+      if (!existingStory) throw new Error("Success story not found");
+      const existingReactions = Array.isArray(existingStory.custom_reactions) ? existingStory.custom_reactions : [];
       const reactions = payload.reactions.map((item) => {
         const emoji = typeof item?.emoji === "string" ? item.emoji.trim() : "";
         const label = typeof item?.label === "string" ? item.label.trim().slice(0, 40) : "";
@@ -797,7 +801,8 @@ async function adminAction(action, payload) {
         if (!emoji || [...emoji].length > 16 || !Number.isSafeInteger(count) || count < 0 || count > 1000000000) {
           throw new Error("Each reaction needs an emoji and a whole-number count between 0 and 1,000,000,000");
         }
-        return { emoji, label, count };
+        const previous = existingReactions.find((reaction) => reaction?.emoji === emoji);
+        return { emoji, label, count, genuine_count: Number.isSafeInteger(Number(previous?.genuine_count)) && Number(previous?.genuine_count) >= 0 ? Number(previous.genuine_count) : 0 };
       });
       const { error } = await db.from("success_stories").update({ custom_reactions: reactions }).eq("id", id);
       if (error) throw error;
