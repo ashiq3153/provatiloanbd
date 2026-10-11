@@ -95,13 +95,13 @@ test("server calculator rejects rate/config disagreement", () => {
   );
 });
 
-test("server calculator rejects client-controlled amount or tenure outside allowed choices", () => {
+test("server calculator rejects amount or tenure outside approved category limits", () => {
   const base = {
     category: "personal",
     config: settings(),
     rateVersion: activeRate(),
   };
-  assert.throws(() => calculateAuthoritativeLoanTerms({ ...base, amount: 100001, tenureMonths: 12 }), /Unsupported loan amount/);
-  assert.throws(() => calculateAuthoritativeLoanTerms({ ...base, amount: 100000, tenureMonths: 13 }), /Unsupported loan tenure/);
   assert.throws(() => calculateAuthoritativeLoanTerms({ ...base, amount: 700000, tenureMonths: 12 }), /approved category limit/);
+  assert.throws(() => calculateAuthoritativeLoanTerms({ ...base, amount: 100000, tenureMonths: 72 }), /approved category range/);
+  assert.equal(calculateAuthoritativeLoanTerms({ ...base, amount: 100001, tenureMonths: 13 }).amount, 100001);
 });
