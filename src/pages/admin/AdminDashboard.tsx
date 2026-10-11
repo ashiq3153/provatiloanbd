@@ -688,15 +688,15 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteUser = async (chatId: number) => {
-    if (!window.confirm('Are you sure you want to completely delete this user and all their data? This action cannot be undone.')) return;
+    if (!window.confirm('Deactivate this member? App access will be blocked, but loan, transaction, and audit history will be retained. You can unlock the member later.')) return;
     const success = await deleteUser(chatId);
     if (success) {
-      toast.success('User and all associated data deleted');
-      setProfiles(profiles.filter(p => p.chat_id !== chatId));
-      setLoans(loans.filter(l => l.chat_id !== chatId));
-      setTransactions(transactions.filter(t => t.chat_id !== chatId));
+      toast.success('Member deactivated; financial history retained');
+      setProfiles(profiles.map(p => p.chat_id === chatId
+        ? { ...p, is_locked: true, lock_reason: 'Deactivated by administrator; financial and audit history retained' }
+        : p));
     } else {
-      toast.error('Failed to delete user');
+      toast.error('Failed to deactivate member');
     }
   };
 
@@ -1410,9 +1410,9 @@ export default function AdminDashboard() {
                               <button 
                                 onClick={() => handleDeleteUser(user.chat_id)}
                                 className="p-2 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl transition-colors"
-                                title="Delete User & Data"
+                                title="Deactivate member; retain financial history"
                               >
-                                <Trash2 size={16} />
+                                <Lock size={16} />
                               </button>
                             </td>
                           </motion.tr>
