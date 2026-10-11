@@ -334,6 +334,26 @@ export async function reactToSuccessStory(storyId: string, reactionType: string)
   return data === true;
 }
 
+export async function reactToCustomSuccessStory(storyId: string, emoji: string): Promise<{ok:boolean;alreadyReacted?:boolean}> {
+  const initData = typeof window !== 'undefined'
+    ? (window as Window & { Telegram?: { WebApp?: { initData?: string } } }).Telegram?.WebApp?.initData || ''
+    : '';
+  if (!initData) return { ok: false };
+  try {
+    const response = await fetch('/api/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, action: 'story_reaction', storyId, emoji }),
+    });
+    const result = await response.json().catch(() => null);
+    if (response.status === 409) return { ok: false, alreadyReacted: true };
+    return { ok: response.ok && result?.ok === true && result?.data === true };
+  } catch (error) {
+    console.error('reactToCustomSuccessStory error:', error);
+    return { ok: false };
+  }
+}
+
 // ── Document Upload API ──────────────────────────────────
 
 async function uploadViaTelegramServer(file: File): Promise<string | null> {
