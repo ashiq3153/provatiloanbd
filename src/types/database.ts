@@ -119,6 +119,7 @@ export interface SuccessStory {
   wow_count?: number;
   sad_count?: number;
   hundred_count?: number;
+  custom_reactions?: Array<{ emoji: string; label?: string; count: number }>;
 }
 
 // Supabase Database type helper
