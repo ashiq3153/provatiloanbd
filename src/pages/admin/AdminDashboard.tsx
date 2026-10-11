@@ -1683,7 +1683,7 @@ export default function AdminDashboard() {
                                 try {
                                   const parsed = JSON.parse(reactionDrafts[story.id] ?? JSON.stringify(story.custom_reactions || []));
                                   if (!Array.isArray(parsed)) throw new Error('Use a JSON array');
-                                  const normalized = parsed.map((item: any) => ({emoji:String(item.emoji || '').trim(), label:String(item.label || ''), count:Number(item.count)}));
+                                  const normalized = parsed.map((item: any) => ({emoji:String(item.emoji || '').trim(), label:String(item.label || ''), count:Number(item.count), genuine_count:Number(story.custom_reactions?.find(reaction => reaction.emoji === String(item.emoji || '').trim())?.genuine_count || 0)}));
                                   const ok = await updateStoryReactions(story.id, normalized);
                                   if (!ok) throw new Error('Save failed');
                                   setStories(stories.map(s => s.id === story.id ? {...s, custom_reactions: normalized} : s));
