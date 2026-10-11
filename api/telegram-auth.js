@@ -629,7 +629,8 @@ const ADMIN_ACTION_ROLES = {
   mark_chat_seen: ["owner","admin","support","viewer"],
   delete_chat_message: ["owner","admin"],
   send_telegram_message: ["owner","admin","support"],
-  broadcast_telegram_message: ["owner","admin","support"]
+  broadcast_telegram_message: ["owner","admin","support"],
+  update_story_reactions: ["owner","admin"]
 };
 
 async function adminAction(action, payload) {
@@ -837,6 +838,26 @@ export default async function handler(req, res) {
     if (req.body?.accessToken) {
       const bridged = await bridgeIdentity(Number(result.user.id), req.body.accessToken);
       if (!bridged) return res.status(401).json({ ok: false, error: "Supabase identity binding failed" });
+    }
+    if (req.body?.action === "story_reaction") {
+      const storyId = String(req.body?.storyId || "");
+      const emoji = typeof req.body?.emoji === "string" ? req.body.emoji.trim() : "";
+      if (!storyId || !emoji || [...emoji].length > 16) {
+        return res.status(400).json({ ok: false, error: "A story and valid emoji are required" });
+      }
+      const db = adminClient();
+      const { data, error } = await db.rpc("react_to_success_story_once", {
+        p_story_id: storyId,
+        p_chat_id: Number(result.user.id),
+        p_emoji: emoji
+      });
+      if (error) {
+        if (error.code === "23505" || /already reacted/i.test(error.message || "")) {
+          return res.status(409).json({ ok: false, error: "You have already reacted to this story" });
+        }
+        throw error;
+      }
+      return res.status(200).json({ ok: true, data: data === true });
     }
     if (req.body?.action === "sync_profile") {
       const data = await syncProfile(result.user);
