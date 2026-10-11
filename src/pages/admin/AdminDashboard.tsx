@@ -5,7 +5,7 @@ import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../
 import { toast } from 'sonner';
 import { useAppStore } from '../../lib/store';
 import { convertDigits, formatCurrency } from '../../lib/translation';
-import { reactToSuccessStory, getPrivateDocumentUrl } from '../../lib/api';
+import {getPrivateDocumentUrl} from '../../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { supabase } from '../../lib/supabase';
@@ -1663,7 +1663,7 @@ export default function AdminDashboard() {
                             <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-700/50 flex gap-3">
                               <button
                                 onClick={async () => {
-                                  const success = await reactToSuccessStory(story.id, 'like');
+                                  const success = await (story.id, 'like');
                                   if (success) {
                                     setStories(stories.map(s => s.id === story.id ? { ...s, like_count: (s.like_count || 0) + 1 } : s));
                                     toast.success('Like added successfully');
@@ -1677,7 +1677,7 @@ export default function AdminDashboard() {
                               
                               <button
                                 onClick={async () => {
-                                  const success = await reactToSuccessStory(story.id, 'love');
+                                  const success = await (story.id, 'love');
                                   if (success) {
                                     setStories(stories.map(s => s.id === story.id ? { ...s, love_count: (s.love_count || 0) + 1 } : s));
                                     toast.success('Love added successfully');
