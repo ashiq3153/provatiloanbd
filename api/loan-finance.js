@@ -1,7 +1,4 @@
 const CATEGORIES = new Set(["personal", "business", "expat", "student", "emergency", "women"]);
-const AMOUNT_OPTIONS = new Set([50_000, 100_000, 150_000, 200_000, 300_000, 500_000, 700_000, 1_000_000, 1_500_000, 2_000_000, 2_500_000, 3_000_000, 4_000_000, 5_000_000]);
-const TENURE_OPTIONS = new Set([12, 24, 36, 48, 60, 72, 84, 96, 120, 144, 180]);
-
 export class LoanConfigurationError extends Error {
   constructor(message = "Approved loan terms are not configured") {
     super(message);
@@ -19,21 +16,6 @@ function money(value) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
-function tenureBandForAmount(amount) {
-  if (amount <= 50_000) return [12, 24];
-  if (amount <= 100_000) return [12, 36];
-  if (amount <= 150_000) return [24, 36];
-  if (amount <= 200_000) return [24, 48];
-  if (amount <= 300_000) return [24, 60];
-  if (amount <= 500_000) return [36, 84];
-  if (amount <= 700_000) return [36, 96];
-  if (amount <= 1_000_000) return [60, 120];
-  if (amount <= 1_500_000) return [84, 144];
-  if (amount <= 2_500_000) return [84, 180];
-  if (amount <= 3_000_000) return [96, 180];
-  return [120, 180];
-}
-
 /**
  * Calculate terms only from server-loaded settings and the active rate version.
  * Client-submitted fee/rate/EMI fields are deliberately never accepted here.
@@ -49,9 +31,6 @@ export function calculateAuthoritativeLoanTerms({ category, amount, tenureMonths
   if (months === null || !Number.isInteger(months) || months <= 0) {
     throw new Error("Invalid loan tenure");
   }
-  if (!AMOUNT_OPTIONS.has(principal)) throw new Error("Unsupported loan amount");
-  if (!TENURE_OPTIONS.has(months)) throw new Error("Unsupported loan tenure");
-
   if (!config || typeof config !== "object" || Array.isArray(config)) {
     throw new LoanConfigurationError();
   }
@@ -66,11 +45,9 @@ export function calculateAuthoritativeLoanTerms({ category, amount, tenureMonths
       minTenure <= 0 || maxTenure < minTenure) {
     throw new LoanConfigurationError("The approved category limits are incomplete");
   }
-  if (principal < 50_000 || principal > maxAmount) throw new Error("Loan amount is outside the approved category limit");
-
-  const [bandMin, bandMax] = tenureBandForAmount(principal);
-  if (months < Math.max(bandMin, minTenure) || months > Math.min(bandMax, maxTenure)) {
-    throw new Error("Loan tenure is outside the approved amount/category range");
+  if (principal > maxAmount) throw new Error("Loan amount is outside the approved category limit");
+  if (months < minTenure || months > maxTenure) {
+    throw new Error("Loan tenure is outside the approved category range");
   }
 
   const rateKey = `minRate${category[0].toUpperCase()}${category.slice(1)}`;
