@@ -4043,13 +4043,15 @@ export default function ApplyLoan() {
                 </h4>
                 {isBn ? (
                   <div className="space-y-1.5">
-                    <p><b>• প্রসেসিং ফি:</b> ৫০,০০০ থেকে ১০,০০,০০০ টাকা পর্যন্ত লোন আবেদনের ক্ষেত্রে {percentLabel(processingFeeUpTo1m)} প্রসেসিং ফি এবং ১০,০০,০০০ টাকার ওপরে হলে {percentLabel(processingFeeAbove1m)} প্রসেসিং ফি প্রযোজ্য।</p>
-                    <p><b>• সঞ্চয় আমানত:</b> সমবায় আমানত সুরক্ষার্থে ৫০,০০০ থেকে ৫,০০,০০০ টাকা ঋণের জন্য {percentLabel(securityDepositUpTo500k)} সঞ্চয় এবং ৫,০০,০০০ টাকার ওপরে হলে {percentLabel(securityDepositAbove500k)} সঞ্চয় ডিপোজিট করা বাধ্যতামূলক।</p>
+                    <p><b>• প্রসেসিং ফি:</b> আবেদন ফর্মে দেখানো অনুমোদিত বর্তমান সিস্টেম সেটিংস অনুযায়ী ফি গণনা হবে। চূড়ান্ত পরিমাণ আবেদন জমা দেওয়ার আগে যাচাই করুন।</p>
+                    <p><b>• সঞ্চয়/সিকিউরিটি ডিপোজিট:</b> প্রযোজ্য হার ও পরিমাণ অনুমোদিত বর্তমান সিস্টেম সেটিংস এবং আবেদন ফর্মে প্রদর্শিত হিসাব অনুযায়ী হবে। ডিপোজিট লক থাকবে এবং Available Balance-এর অংশ হবে না।</p>
+                    <p><b>• ফেরত ও মুক্তি:</b> আবেদন প্রত্যাখ্যাত বা বাতিল হলে প্রযোজ্য নীতি অনুযায়ী প্রসেসিং ফি ফেরতের অনুরোধ Support-এ জানান। সব কিস্তি ও প্রযোজ্য বকেয়া পরিশোধের পর ডিপোজিট মুক্তির যোগ্যতা যাচাইয়ের জন্য Support-এ অনুরোধ করুন।</p>
                   </div>
                 ) : (
                   <div className="space-y-1.5">
-                    <p><b>• Processing Fee:</b> BDT 50k to BDT 1M requires {percentLabel(processingFeeUpTo1m)} processing fee. BDT 1M+ requires {percentLabel(processingFeeAbove1m)}.</p>
-                    <p><b>• Savings Deposit:</b> BDT 50k to BDT 500k loans require a {percentLabel(securityDepositUpTo500k)} savings deposit. BDT 500k+ loans require a {percentLabel(securityDepositAbove500k)} savings deposit.</p>
+                    <p><b>• Processing Fee:</b> The fee is calculated from the currently approved system settings and the amount shown in the application. Review the final amount before submitting.</p>
+                    <p><b>• Savings/Security Deposit:</b> The applicable rate and amount follow the currently approved system settings and the calculation displayed in the application. The deposit remains locked and is excluded from Available Balance.</p>
+                    <p><b>• Refund and Release:</b> If an application is rejected or cancelled, request any applicable processing-fee refund through Support. After all instalments and applicable dues are paid, contact Support to request a deposit-release eligibility review.</p>
                   </div>
                 )}
               </section>
