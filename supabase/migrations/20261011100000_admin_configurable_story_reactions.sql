@@ -9,6 +9,17 @@ alter table public.success_stories
   add constraint success_stories_custom_reactions_array_check
   check (jsonb_typeof(custom_reactions) = 'array');
 
+-- Preserve existing counters as genuine reactions for existing stories.
+update public.success_stories set custom_reactions = jsonb_build_array(
+ jsonb_build_object('emoji','👍','label','Like','count',0,'genuine_count',coalesce(like_count,0)),
+ jsonb_build_object('emoji','👎','label','Dislike','count',0,'genuine_count',coalesce(dislike_count,0)),
+ jsonb_build_object('emoji','❤️','label','Love','count',0,'genuine_count',coalesce(love_count,0)),
+ jsonb_build_object('emoji','🎉','label','Congratulations','count',0,'genuine_count',coalesce(congratulation_count,0)),
+ jsonb_build_object('emoji','😮','label','Wow','count',0,'genuine_count',coalesce(wow_count,0)),
+ jsonb_build_object('emoji','😢','label','Sad','count',0,'genuine_count',coalesce(sad_count,0)),
+ jsonb_build_object('emoji','🔥','label','Fire','count',0,'genuine_count',0)
+);
+
 create table if not exists public.success_story_reactions (
   id bigint generated always as identity primary key,
   story_id uuid not null references public.success_stories(id) on delete cascade,
