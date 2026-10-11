@@ -3,7 +3,7 @@ import { ArrowLeft, LoaderCircle, RefreshCw, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAppStore } from '../lib/store';
-import { getSuccessStories, reactToSuccessStory } from '../lib/api';
+import { getSuccessStories, reactToCustomSuccessStory } from '../lib/api';
 import { SuccessStories } from '../components/home/SuccessStories';
 import type { SuccessStory } from '../types/database';
 
@@ -12,6 +12,7 @@ export default function SuccessStoriesPage() {
   const isBn = language === 'bn';
   const [stories, setStories] = useState<SuccessStory[]>([]);
   const [reactions, setReactions] = useState<Record<string, { like: number; love: number; wow: number }>>({});
+  const [reactedStories, setReactedStories] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
 
   const loadStories = useCallback(async () => {
@@ -22,16 +23,32 @@ export default function SuccessStoriesPage() {
   }, [isBn]);
   useEffect(() => { void loadStories(); }, [loadStories]);
 
-  const handleReact = async (story: SuccessStory, type: 'like' | 'love' | 'wow') => {
-    const ok = await reactToSuccessStory(story.id, type);
-    if (!ok) { toast.error(isBn ? 'রিঅ্যাকশন দেওয়া যায়নি' : 'Could not add reaction'); return; }
-    const field = (type + '_count') as 'like_count' | 'love_count' | 'wow_count';
-    setReactions(prev => ({ ...prev, [story.id]: {
-      like: prev[story.id]?.like ?? Number(story.like_count || 0),
-      love: prev[story.id]?.love ?? Number(story.love_count || 0),
-      wow: prev[story.id]?.wow ?? Number(story.wow_count || 0),
-      [type]: (prev[story.id]?.[type] ?? Number(story[field] || 0)) + 1,
-    }}));
+  const handleReact = async (story: SuccessStory, emoji: string) => {
+    if (reactedStories[story.id]) {
+      toast.error(isBn ? 'এই গল্পে আপনি ইতিমধ্যে রিঅ্যাকশন দিয়েছেন' : 'You have already reacted to this story');
+      return;
+    }
+    const result = await reactToCustomSuccessStory(story.id, emoji);
+    if (!result.ok) {
+      toast.error(result.alreadyReacted
+        ? (isBn ? 'এই গল্পে আপনি ইতিমধ্যে রিঅ্যাকশন দিয়েছেন' : 'You have already reacted to this story')
+        : (isBn ? 'রিঅ্যাকশন দেওয়া যায়নি। Telegram Mini App খুলে চেষ্টা করুন।' : 'Could not react. Open the Telegram Mini App and try again.'));
+      if (result.alreadyReacted) setReactedStories(prev => ({...prev, [story.id]: true}));
+      return;
+    }
+    setReactedStories(prev => ({...prev, [story.id]: true}));
+    setStories(prev => prev.map(item => {
+      if (item.id !== story.id) return item;
+      const current = Array.isArray(item.custom_reactions) ? item.custom_reactions : [];
+      const found = current.some(reaction => reaction.emoji === emoji);
+      const updated = found
+        ? current.map(reaction => reaction.emoji === emoji
+          ? {...reaction, genuine_count: Number(reaction.genuine_count || 0) + 1}
+          : reaction)
+        : [...current, {emoji, label: emoji, count: 0, genuine_count: 1}];
+      return {...item, custom_reactions: updated};
+    }));
+    toast.success(isBn ? 'রিঅ্যাকশন যোগ হয়েছে' : 'Reaction added');
   };
 
   return (
