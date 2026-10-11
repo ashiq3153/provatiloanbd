@@ -2,90 +2,74 @@
  * Telegram Webhook Handler — Vercel Serverless Function
  * Endpoint: POST /api/telegram-webhook
  *
- * Replies to ANY user text message with a fixed support message
- * plus an inline button to open the Telegram Mini App.
+ * Requests are accepted only when Telegram's configured secret-token header
+ * matches TELEGRAM_WEBHOOK_SECRET. Never expose bot/service-role credentials to
+ * the browser.
  */
+import crypto from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || process.env.VITE_TELEGRAM_BOT_TOKEN;
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
 const MINI_APP_URL = process.env.MINI_APP_URL || "https://provatiloanbd.vercel.app";
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-/**
- * Send a message via Telegram Bot API.
- */
-async function sendMessage(chatId, text, replyMarkup) {
-  const body = {
-    chat_id: chatId,
-    text,
-    parse_mode: "HTML",
-  };
-  if (replyMarkup) {
-    body.reply_markup = replyMarkup;
-  }
-
-  const res = await fetch(
-    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    }
-  );
-  return res.json();
+function safeEqual(received, expected) {
+  if (typeof received !== "string" || typeof expected !== "string" || !received || !expected) return false;
+  const a = Buffer.from(received, "utf8");
+  const b = Buffer.from(expected, "utf8");
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
-/**
- * Save user to Supabase 'profiles' table.
- */
+function adminClient() {
+  if (!SUPABASE_URL || !SERVICE_ROLE_KEY) return null;
+  return createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
+/** Save a Telegram user using a server-only database credential. */
 async function saveUserProfile(chatId, firstName, lastName, username) {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return;
-  
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
-      method: "POST",
-      headers: {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-        "Content-Type": "application/json",
-        "Prefer": "resolution=merge-duplicates"
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-        first_name: firstName || "",
-        last_name: lastName || null,
-        username: username || null
-      }),
-    });
-  } catch (err) {
-    console.error("Failed to save user profile:", err);
+  const db = adminClient();
+  if (!db) {
+    console.error("Webhook profile sync skipped: server database credentials are not configured");
+    return;
   }
+  const { error } = await db.from("profiles").upsert({
+    chat_id: chatId,
+    first_name: firstName || "",
+    last_name: lastName || null,
+    username: username || null,
+  }, { onConflict: "chat_id" });
+  if (error) throw error;
 }
 
-/**
- * Update bot_status in Supabase 'profiles' table.
- */
+/** Update bot_status using a server-only database credential. */
 async function updateBotStatus(chatId, botStatus) {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return;
-  
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/profiles?chat_id=eq.${chatId}`, {
-      method: "PATCH",
-      headers: {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ bot_status: botStatus }),
-    });
-  } catch (err) {
-    console.error("Failed to update bot status:", err);
+  const db = adminClient();
+  if (!db) {
+    console.error("Webhook bot status sync skipped: server database credentials are not configured");
+    return;
   }
+  const { error } = await db.from("profiles").update({ bot_status: botStatus }).eq("chat_id", chatId);
+  if (error) throw error;
 }
 
-/**
- * The fixed support reply message.
- */
+async function sendMessage(chatId, text, replyMarkup) {
+  if (!BOT_TOKEN) throw new Error("Telegram bot token is not configured");
+  const body = { chat_id: chatId, text, parse_mode: "HTML" };
+  if (replyMarkup) body.reply_markup = replyMarkup;
+  const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.ok) throw new Error(data.description || "Telegram sendMessage failed");
+  return data;
+}
+
 const SUPPORT_MESSAGE =
   `📢 <b>লোন আবেদন, স্ট্যাটাস চেক বা বিস্তারিত তথ্যের জন্য অনুগ্রহ করে Loan Application App টি খুলুন।</b>\n\n` +
   `সকল লোন-সংক্রান্ত সহায়তা ইন-অ্যাপ <b>Live Chat</b> সিস্টেমের মাধ্যমে পাওয়া যাবে।\n\n` +
@@ -95,44 +79,39 @@ const SUPPORT_MESSAGE =
   `✅ Telegram Support\n\n` +
   `নিচের বাটনটি ক্লিক করে এগিয়ে যান।`;
 
-/**
- * Inline keyboard with Mini App button.
- */
 function getMiniAppKeyboard() {
   return {
-    inline_keyboard: [
-      [
-        {
-          text: "📝 Open Loan Application",
-          web_app: { url: MINI_APP_URL },
-        },
-      ],
-    ],
+    inline_keyboard: [[{
+      text: "📝 Open Loan Application",
+      web_app: { url: MINI_APP_URL },
+    }]],
   };
 }
 
 export default async function handler(req, res) {
-  // Only accept POST requests from Telegram
   if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
+  // Fail closed until a strong secret is configured in Vercel and registered
+  // with Telegram through the protected setup endpoint.
+  if (!WEBHOOK_SECRET || !safeEqual(req.headers["x-telegram-bot-api-secret-token"], WEBHOOK_SECRET)) {
+    return res.status(401).json({ error: "Unauthorized webhook request" });
+  }
+
+  if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+    return res.status(400).json({ error: "Invalid update payload" });
   }
 
   try {
     const update = req.body;
-
-    // Handle regular text messages
-    const message = update?.message;
-    if (message && message.text && message.chat?.id) {
+    const message = update.message;
+    if (message && typeof message.text === "string" && message.chat?.id) {
       const chatId = message.chat.id;
       const text = message.text.trim();
-
-      // Ignore /start command (welcome message is sent from the frontend)
-      // but still reply if you want — just remove this check to always reply
       if (text === "/start") {
-        // Save user to DB on /start
         await saveUserProfile(chatId, message.chat.first_name, message.chat.last_name, message.chat.username);
-
-        // Optionally send welcome for /start too
         await sendMessage(
           chatId,
           `🏦 <b>PROVATI LOAN-এ আপনাকে স্বাগতম।</b>\n\n` +
@@ -143,31 +122,22 @@ export default async function handler(req, res) {
           getMiniAppKeyboard()
         );
       } else {
-        // Any other text → always send the fixed support message
         await sendMessage(chatId, SUPPORT_MESSAGE, getMiniAppKeyboard());
       }
     }
 
-    // Handle bot block/unblock
-    if (update?.my_chat_member) {
-      const myChatMember = update.my_chat_member;
-      const chatId = myChatMember.chat?.id;
-      const newStatus = myChatMember.new_chat_member?.status;
-
+    if (update.my_chat_member) {
+      const memberUpdate = update.my_chat_member;
+      const chatId = memberUpdate.chat?.id;
+      const newStatus = memberUpdate.new_chat_member?.status;
       if (chatId && newStatus) {
-        let botStatus = 'active';
-        if (newStatus === 'kicked') botStatus = 'blocked';
-        else if (newStatus === 'member') botStatus = 'active';
-        
-        await updateBotStatus(chatId, botStatus);
+        const botStatus = newStatus === "kicked" ? "blocked" : newStatus === "member" ? "active" : null;
+        if (botStatus) await updateBotStatus(chatId, botStatus);
       }
     }
-
-    // Telegram requires 200 OK response
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error("Webhook handler error:", err);
-    // Still return 200 to avoid Telegram retry loops
-    return res.status(200).json({ ok: false });
+    return res.status(500).json({ ok: false });
   }
 }
