@@ -1667,12 +1667,12 @@ export default function AdminDashboard() {
                               <textarea
                                 aria-label="Custom reaction emoji counts JSON"
                                 value={reactionDrafts[story.id] ?? JSON.stringify(story.custom_reactions?.length ? story.custom_reactions : [
-                                  {emoji:'👍',label:'Like',count:Number(story.like_count||0)},
-                                  {emoji:'👎',label:'Dislike',count:Number(story.dislike_count||0)},
-                                  {emoji:'❤️',label:'Love',count:Number(story.love_count||0)},
-                                  {emoji:'🎉',label:'Congratulations',count:Number(story.congratulation_count||0)},
-                                  {emoji:'😮',label:'Wow',count:Number(story.wow_count||0)},
-                                  {emoji:'😢',label:'Sad',count:Number(story.sad_count||0)},
+                                  {emoji:'👍',label:'Like',count:0},
+                                  {emoji:'👎',label:'Dislike',count:0},
+                                  {emoji:'❤️',label:'Love',count:0},
+                                  {emoji:'🎉',label:'Congratulations',count:0},
+                                  {emoji:'😮',label:'Wow',count:0},
+                                  {emoji:'😢',label:'Sad',count:0},
                                   {emoji:'🔥',label:'Fire',count:0}
                                 ], null, 2)}
                                 onChange={e => setReactionDrafts(prev => ({...prev, [story.id]: e.target.value}))}
