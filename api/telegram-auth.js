@@ -4,6 +4,7 @@
 import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { calculateAuthoritativeLoanTerms, LoanConfigurationError } from "./loan-finance.js";
+import { normalizeUserPrivateDocumentReference, normalizeUserPrivateDocumentMap } from "./private-documents.js";
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const ADMIN_BOT_TOKEN = process.env.TELEGRAM_ADMIN_BOT_TOKEN;
@@ -192,6 +193,9 @@ async function updateMyLoanApplication(telegramUser, applicationId, payload) {
   for (const key of allowedFields) {
     if (Object.prototype.hasOwnProperty.call(payload, key)) update[key] = payload[key];
   }
+  if (Object.prototype.hasOwnProperty.call(payload, "documents")) {
+    update.documents = normalizeUserPrivateDocumentMap(payload.documents, chatId, SUPABASE_URL);
+  }
 
   const { data, error } = await db.from("loan_applications")
     .update(update)
@@ -253,6 +257,9 @@ async function submitLoanApplication(telegramUser, payload) {
   for (const key of allowedFields) {
     if (Object.prototype.hasOwnProperty.call(payload, key)) record[key] = payload[key];
   }
+  if (Object.prototype.hasOwnProperty.call(payload, "documents")) {
+    record.documents = normalizeUserPrivateDocumentMap(payload.documents, chatId, SUPABASE_URL);
+  }
 
   // Fail validation before writing profile or application data when approved terms
   // are unavailable or inconsistent.
@@ -302,7 +309,9 @@ async function createMyTransaction(telegramUser, payload) {
     payment_method: typeof payload.payment_method === "string" ? payload.payment_method : null,
     sender_number: typeof payload.sender_number === "string" ? payload.sender_number : null,
     trx_id: typeof payload.trx_id === "string" ? payload.trx_id : null,
-    screenshot_url: typeof payload.screenshot_url === "string" ? payload.screenshot_url : null,
+    screenshot_url: payload.screenshot_url == null || payload.screenshot_url === ""
+      ? null
+      : normalizeUserPrivateDocumentReference(payload.screenshot_url, chatId, SUPABASE_URL),
     status: "pending"
   };
 
