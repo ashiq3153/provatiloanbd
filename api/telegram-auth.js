@@ -793,7 +793,11 @@ async function adminAction(action, payload) {
         if (error) throw error;
         return true;
       }
-      return !(await db.from("loan_applications").update({ status: payload.status, admin_feedback: payload.feedback || null, approved_at: null }).eq("id", payload.id)).error;
+      const loanPatch = { status: payload.status, admin_feedback: payload.feedback || null };
+      if (["pending", "under_review", "rejected", "action_required", "cancelled"].includes(payload.status)) {
+        loanPatch.approved_at = null;
+      }
+      return !(await db.from("loan_applications").update(loanPatch).eq("id", payload.id)).error;
     }
     case "update_system_setting": {
       const key = typeof payload.key === "string" ? payload.key.trim() : "";
