@@ -4,7 +4,7 @@ import crypto from "node:crypto";
 
 process.env.TELEGRAM_BOT_TOKEN = "test-bot-token-for-unit-tests";
 
-const { verifyInitData } = await import("../api/telegram-auth.js");
+const { verifyInitData, resolveAdminRoleFallback } = await import("../api/telegram-auth.js");
 
 function buildInitData({ authDate = Math.floor(Date.now() / 1000), user = { id: 7879069458, first_name: "Test" } } = {}) {
   const params = new URLSearchParams();
@@ -63,4 +63,24 @@ test("rejects future-dated Telegram initData", () => {
 test("rejects missing initData", () => {
   assert.equal(verifyInitData(""), null);
   assert.equal(verifyInitData(undefined), null);
+});
+
+
+test("admin allowlist alone does not grant owner fallback", () => {
+  const allowlist = new Set(["111", "222"]);
+  assert.equal(resolveAdminRoleFallback(111, allowlist, ""), null);
+  assert.equal(resolveAdminRoleFallback(222, allowlist, "111"), null);
+});
+
+test("explicit configured owner receives fallback only when allowlisted", () => {
+  const allowlist = new Set(["111", "222"]);
+  assert.equal(resolveAdminRoleFallback(111, allowlist, "111"), "owner");
+  assert.equal(resolveAdminRoleFallback(222, allowlist, "111"), null);
+});
+
+test("invalid identities never receive owner fallback", () => {
+  const allowlist = new Set(["111"]);
+  for (const id of [0, -1, NaN, "not-a-number", 1.5, null]) {
+    assert.equal(resolveAdminRoleFallback(id, allowlist, "111"), null);
+  }
 });
