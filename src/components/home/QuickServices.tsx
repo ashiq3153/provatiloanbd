@@ -1,4 +1,4 @@
-import { ChevronRight, CreditCard, PiggyBank, FolderOpen, Headphones, WalletCards, Star } from 'lucide-react';
+import { ChevronRight, CreditCard, PiggyBank, FolderOpen, Headphones, WalletCards, Star, ArrowDownToLine } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 type QuickServicesProps = {
@@ -10,6 +10,7 @@ export function QuickServices({ isBn, onQuickBalance }: QuickServicesProps) {
   const quickActions = [
     { label: isBn ? 'কিস্তি' : 'EMI', sub: isBn ? 'পরিশোধ করুন' : 'Make payment', icon: CreditCard, link: '/pay' },
     { label: isBn ? 'সঞ্চয়' : 'Savings', sub: isBn ? 'জমা দিন' : 'Deposit', icon: PiggyBank, link: '/deposit' },
+    { label: isBn ? 'উত্তোলন' : 'Withdraw', sub: isBn ? 'টাকা উত্তোলন করুন' : 'Request withdrawal', icon: ArrowDownToLine, link: '/withdraw' },
     { label: isBn ? 'ডকুমেন্ট' : 'Documents', sub: isBn ? 'নথি দেখুন' : 'View files', icon: FolderOpen, link: '/profile' },
     { label: isBn ? 'আরও' : 'More', sub: isBn ? 'সাপোর্ট ও সহায়তা' : 'Support & help', icon: Headphones, link: '/support' },
     { label: isBn ? 'কুইক ব্যালেন্স' : 'Quick Balance', sub: isBn ? 'ব্যালেন্সের হিসাব' : 'Balance breakdown', icon: WalletCards, link: null },
@@ -23,7 +24,7 @@ export function QuickServices({ isBn, onQuickBalance }: QuickServicesProps) {
           <p className="text-[10px] uppercase tracking-wider font-black text-slate-500">{isBn ? 'সদস্য সেবা' : 'MEMBER SERVICES'}</p>
           <h2 className="text-xl font-extrabold mt-1 text-slate-900 dark:text-white">{isBn ? 'দ্রুত সেবা' : 'Quick services'}</h2>
         </div>
-        <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">{isBn ? '৬টি সেবা' : '6 services'} <span className="ml-1">← →</span></span>
+        <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">{isBn ? '৭টি সেবা' : '7 services'} <span className="ml-1">← →</span></span>
       </div>
       <div className="-mx-3 px-3 overflow-x-auto hide-scrollbar snap-x snap-mandatory">
         <div className="flex gap-2.5 sm:gap-3 w-max pb-1">

@@ -4,7 +4,7 @@ import crypto from "node:crypto";
 
 process.env.TELEGRAM_BOT_TOKEN = "test-bot-token-for-unit-tests";
 
-const { verifyInitData, resolveAdminRoleFallback } = await import("../api/telegram-auth.js");
+const { verifyInitData, resolveAdminRoleFallback, calculateAvailableWithdrawalBalance } = await import("../api/telegram-auth.js");
 
 function buildInitData({ authDate = Math.floor(Date.now() / 1000), user = { id: 7879069458, first_name: "Test" } } = {}) {
   const params = new URLSearchParams();
@@ -64,6 +64,33 @@ test("rejects missing initData", () => {
   assert.equal(verifyInitData(""), null);
   assert.equal(verifyInitData(undefined), null);
 });
+
+test("available balance is based on credited loan funds, not loan status", () => {
+  const transactions = [
+    { type: "disbursement", amount: 100000, status: "completed" },
+  ];
+  assert.equal(calculateAvailableWithdrawalBalance(transactions), 100000);
+});
+
+test("pending and completed withdrawals reserve available loan funds", () => {
+  const transactions = [
+    { type: "disbursement", amount: 100000, status: "completed" },
+    { type: "withdraw", amount: 25000, status: "pending" },
+    { type: "withdraw", amount: 10000, status: "completed" },
+    { type: "withdraw", amount: 7000, status: "failed" },
+    { type: "deposit", amount: 9000, status: "completed" },
+  ];
+  assert.equal(calculateAvailableWithdrawalBalance(transactions), 65000);
+});
+
+test("available loan balance never becomes negative", () => {
+  const transactions = [
+    { type: "disbursement", amount: 10000, status: "completed" },
+    { type: "withdraw", amount: 12000, status: "pending" },
+  ];
+  assert.equal(calculateAvailableWithdrawalBalance(transactions), 0);
+});
+
 
 
 test("admin allowlist alone does not grant owner fallback", () => {

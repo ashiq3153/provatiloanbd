@@ -70,7 +70,7 @@ export default function Transactions() {
             title = 'EMI Payment';
           } else if (t.type === 'disbursement') {
             type = 'loan';
-            title = 'Loan Disbursed';
+            title = isBn ? 'অনুমোদিত লোনের ব্যালেন্স' : 'Approved loan balance';
           }
           return {
             id: t.id,
@@ -156,7 +156,7 @@ export default function Transactions() {
     }
   };
 
-  const getAppStatusLabel = (status: LoanAppStatus) => ({ pending: isBn ? 'জমা হয়েছে' : 'Submitted', under_review: isBn ? 'যাচাই চলছে' : 'Under review', approved: isBn ? 'অনুমোদিত' : 'Approved', active: isBn ? 'সক্রিয়' : 'Active', completed: isBn ? 'সম্পন্ন' : 'Completed', rejected: isBn ? 'প্রত্যাখ্যাত' : 'Rejected', action_required: isBn ? 'পদক্ষেপ প্রয়োজন' : 'Action required', cancelled: isBn ? 'বাতিল' : 'Cancelled' }[status]);
+  const getAppStatusLabel = (status: LoanAppStatus) => ({ pending: isBn ? 'জমা হয়েছে' : 'Submitted', under_review: isBn ? 'যাচাই চলছে' : 'Under review', approved: isBn ? 'অনুমোদিত' : 'Approved', active: isBn ? 'সক্রিয়' : 'Active', completed: isBn ? 'লোন পরিশোধ সম্পন্ন' : 'Loan repaid', rejected: isBn ? 'প্রত্যাখ্যাত' : 'Rejected', action_required: isBn ? 'পদক্ষেপ প্রয়োজন' : 'Action required', cancelled: isBn ? 'বাতিল' : 'Cancelled' }[status]);
 
   const getAppStatusStyles = (status: LoanAppStatus) => {
     switch (status) {
