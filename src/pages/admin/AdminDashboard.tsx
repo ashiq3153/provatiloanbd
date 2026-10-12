@@ -558,7 +558,7 @@ export default function AdminDashboard() {
         } else if (status === 'cancelled') {
           msg = `⚠️ <b>প্রিয় ${loan.full_name},</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটি বাতিল করা হয়েছে।${feedback ? `\n\n📝 কারণ: <i>${feedback}</i>` : ''}`;
         } else if (status === 'completed') {
-          msg = `✅ <b>অভিনন্দন ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোনটি</b> সফলভাবে সম্পূর্ণ বা পরিশোধ হয়েছে।\n\nআমাদের সাথে থাকার জন্য ধন্যবাদ!`;
+          msg = `✅ <b>অভিনন্দন ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোনের</b> সব বকেয়া পরিশোধ সম্পন্ন হয়েছে বলে রেকর্ড করা হয়েছে।\n\nআমাদের সাথে থাকার জন্য ধন্যবাদ!`;
         }
 
         if (msg) {
@@ -572,6 +572,14 @@ export default function AdminDashboard() {
   };
 
   const handleTxnStatus = async (id: string, status: Transaction['status']) => {
+    const pendingTransaction = transactions.find(t => t.id === id);
+    if (pendingTransaction?.type === 'withdraw' && status === 'completed') {
+      const confirmPaymentSent = window.confirm(isBn
+        ? 'আপনি কি বাস্তবে সদস্যের ব্যাংক/ওয়ালেটে টাকা পাঠিয়েছেন? টাকা পাঠানো নিশ্চিত না হলে উত্তোলনকে Paid/Completed করবেন না।'
+        : 'Have you actually sent the money to the member’s bank/wallet? Do not mark this withdrawal paid until the transfer is confirmed.');
+      if (!confirmPaymentSent) return;
+    }
+
     const success = await updateTransactionStatus(id, status);
     if (success) {
       toast.success(`Transaction marked as ${status}`);
@@ -904,7 +912,7 @@ export default function AdminDashboard() {
                     ['Deposit', financialReport?.completed_deposits],
                     ['EMI', financialReport?.completed_emi],
                     ['Withdraw', financialReport?.completed_withdrawals],
-                    ['Disbursement', financialReport?.completed_disbursements],
+                    ['Available loan funds', financialReport?.completed_disbursements],
                     ['Pending', financialReport?.pending_amount],
                   ].map(([label, value]) => (
                     <div key={String(label)} className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl p-4">
@@ -1214,7 +1222,7 @@ export default function AdminDashboard() {
                             <td className="px-6 py-4 flex gap-2">
                               {txn.status === 'pending' && (
                                 <>
-                                  <button onClick={() => handleTxnStatus(txn.id, 'completed')} className="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-xl transition-colors font-bold text-xs flex items-center gap-1"><CheckCircle size={14} /> Done</button>
+                                  <button onClick={() => handleTxnStatus(txn.id, 'completed')} className="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-xl transition-colors font-bold text-xs flex items-center gap-1"><CheckCircle size={14} /> {txn.type === 'withdraw' ? (isBn ? 'টাকা পাঠানো হয়েছে' : 'Mark Paid') : (isBn ? 'সম্পন্ন' : 'Done')}</button>
                                   <button onClick={() => handleTxnStatus(txn.id, 'failed')} className="px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl transition-colors font-bold text-xs flex items-center gap-1"><XCircle size={14} /> Fail</button>
                                 </>
                               )}
@@ -2154,7 +2162,19 @@ export default function AdminDashboard() {
                       )}
                       {(selectedLoan.status === 'approved' || selectedLoan.status === 'active') && (
                         <>
-                          <button onClick={() => { handleLoanStatus(selectedLoan.id, 'completed'); setSelectedLoan({...selectedLoan, status: 'completed'}); }} className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm">Mark Completed</button>
+                          <button
+                            onClick={() => {
+                              const confirmRepaid = window.confirm(isBn
+                                ? 'শুধু তখনই এই লোনকে পরিশোধ সম্পন্ন করুন, যখন সব বকেয়া কিস্তি পরিশোধ হয়েছে। এটি টাকা উত্তোলন বা ব্যাংকে পাঠানোর কাজ নয়। আপনি কি নিশ্চিত?'
+                                : 'Only mark this loan as repaid after all outstanding installments are paid. This does not approve or send a withdrawal. Continue?');
+                              if (!confirmRepaid) return;
+                              void handleLoanStatus(selectedLoan.id, 'completed');
+                              setSelectedLoan({ ...selectedLoan, status: 'completed' });
+                            }}
+                            className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"
+                          >
+                            {isBn ? 'লোন পরিশোধ সম্পন্ন' : 'Mark Loan Repaid'}
+                          </button>
                           <button 
                             onClick={() => { 
                               const confirmCancel = window.confirm(isBn ? 'আপনি কি নিশ্চিত যে আপনি এই লোন আবেদনটি বাতিল করতে চান?' : 'Are you sure you want to cancel this loan application?');
