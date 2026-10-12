@@ -12,6 +12,7 @@ const ADMIN_BOT_TOKEN = process.env.TELEGRAM_ADMIN_BOT_TOKEN;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const ADMIN_CHAT_IDS = new Set(String(process.env.TELEGRAM_ADMIN_CHAT_IDS || "").split(",").map(v => v.trim()).filter(Boolean));
+const OWNER_CHAT_ID = String(process.env.TELEGRAM_OWNER_CHAT_ID || "").trim();
 const MAX_AUTH_AGE_SECONDS = 24 * 60 * 60;
 
 function verifyInitDataWithToken(initData, botToken) {
@@ -589,16 +590,28 @@ async function syncProfile(telegramUser) {
   return data;
 }
 
+export function resolveAdminRoleFallback(chatId, adminChatIds = ADMIN_CHAT_IDS, ownerChatId = OWNER_CHAT_ID) {
+  const numericChatId = Number(chatId);
+  if (!Number.isSafeInteger(numericChatId) || numericChatId <= 0) return null;
+  const normalizedId = String(numericChatId);
+  if (!adminChatIds.has(normalizedId)) return null;
+
+  // The configured admin allowlist is intentionally single-person. When it
+  // contains exactly one valid identity, that same identity is the sole owner;
+  // no second environment variable or second person is required. If more than
+  // one ID is configured, fail closed unless an explicit owner ID is configured.
+  if (adminChatIds.size === 1) return "owner";
+  if (ownerChatId && normalizedId === ownerChatId) return "owner";
+  return null;
+}
+
 async function getAdminRole(chatId) {
   const numericChatId = Number(chatId);
+  if (!Number.isSafeInteger(numericChatId) || numericChatId <= 0) return null;
   const { data, error } = await adminClient().rpc("get_admin_role", { p_chat_id: numericChatId });
   if (error) throw error;
   if (data) return data;
-
-  // Backward-compatible fallback: the existing server-side admin allowlist
-  // remains authoritative when the optional admin_roles row is absent.
-  if (ADMIN_CHAT_IDS.has(String(numericChatId))) return "owner";
-  return null;
+  return resolveAdminRoleFallback(numericChatId);
 }
 
 const ADMIN_ACTION_ROLES = {
