@@ -594,11 +594,14 @@ export function resolveAdminRoleFallback(chatId, adminChatIds = ADMIN_CHAT_IDS, 
   const numericChatId = Number(chatId);
   if (!Number.isSafeInteger(numericChatId) || numericChatId <= 0) return null;
   const normalizedId = String(numericChatId);
-  // An allowlist entry only permits reaching the admin gateway; it does not
-  // itself grant owner privileges. Owner fallback requires a separate,
-  // explicit server-side owner identity. Database-backed active roles still
-  // take precedence in getAdminRole below.
-  if (adminChatIds.has(normalizedId) && ownerChatId && normalizedId === ownerChatId) return "owner";
+  if (!adminChatIds.has(normalizedId)) return null;
+
+  // The configured admin allowlist is intentionally single-person. When it
+  // contains exactly one valid identity, that same identity is the sole owner;
+  // no second environment variable or second person is required. If more than
+  // one ID is configured, fail closed unless an explicit owner ID is configured.
+  if (adminChatIds.size === 1) return normalizedId;
+  if (ownerChatId && normalizedId === ownerChatId) return "owner";
   return null;
 }
 
