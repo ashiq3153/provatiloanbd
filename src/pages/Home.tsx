@@ -92,6 +92,24 @@ export default function Home() {
     if (!refreshing) setRefreshKey(v => v + 1);
   };
 
+  // Refresh status and balances when the member returns to the Mini App after an admin review.
+  useEffect(() => {
+    let lastRefreshAt = 0;
+    const refreshWhenVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      const now = Date.now();
+      if (now - lastRefreshAt < 1500) return;
+      lastRefreshAt = now;
+      setRefreshKey(value => value + 1);
+    };
+
+    window.addEventListener('focus', refreshWhenVisible);
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+    return () => {
+      window.removeEventListener('focus', refreshWhenVisible);
+      document.removeEventListener('visibilitychange', refreshWhenVisible);
+    };
+  }, []);
 
   const handleHomeTouchStart = (event: React.TouchEvent<HTMLElement>) => {
     if (window.scrollY <= 4) setTouchStartY(event.touches[0]?.clientY ?? null);
@@ -147,7 +165,7 @@ export default function Home() {
       under_review: { bn: 'যাচাই চলছে', en: 'Under review', tone: 'amber' },
       approved: { bn: 'অনুমোদিত', en: 'Approved', tone: 'green' },
       active: { bn: 'ঋণ চলমান', en: 'Loan active', tone: 'green' },
-      completed: { bn: 'ঋণ সম্পন্ন', en: 'Loan completed', tone: 'green' },
+      completed: { bn: 'লোন পরিশোধ সম্পন্ন', en: 'Loan repaid', tone: 'green' },
       rejected: { bn: 'আবেদন প্রত্যাখ্যাত', en: 'Application rejected', tone: 'red' },
       cancelled: { bn: 'আবেদন বাতিল', en: 'Application cancelled', tone: 'slate' },
       action_required: { bn: 'আপনার পদক্ষেপ প্রয়োজন', en: 'Action required', tone: 'amber' },
