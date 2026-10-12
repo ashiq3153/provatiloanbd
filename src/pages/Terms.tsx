@@ -304,17 +304,16 @@ export default function Terms() {
               </h2>
               {isBn ? (
                 <div className="text-xs text-gray-600 dark:text-gray-300 space-y-2.5 leading-relaxed font-bold">
-                  <p>ক. ঋণ অনুমোদন, ঋণের অর্থ বিতরণ এবং উত্তোলনযোগ্য ব্যালেন্স পৃথক ধাপ। শুধু ঋণ অনুমোদিত হলেই পুরো অনুমোদিত অঙ্ক Available Balance-এ যোগ হয়েছে বলে গণ্য হবে না।</p>
-                  <p>খ. Available Balance-এ কেবল যাচাইকৃত ও লেজারে নথিভুক্ত এমন অর্থ গণ্য হবে, যা বাস্তবে উত্তোলন করা যায়। উত্তোলনের অনুরোধের আগে অ্যাপে প্রদর্শিত বর্তমান ব্যালেন্স যাচাই করুন।</p>
-                  <p>গ. উত্তোলন সফল হলে লেনদেনের পরিমাণ অনুযায়ী Available Balance হালনাগাদ হবে। অপেক্ষমাণ উত্তোলন অনুরোধের অর্থ প্রযোজ্য ক্ষেত্রে সাময়িকভাবে সংরক্ষিত থাকতে পারে।</p>
-                  <p>ঘ. লক থাকা সঞ্চয়/সিকিউরিটি ডিপোজিট পৃথকভাবে হিসাবভুক্ত হবে এবং উত্তোলনযোগ্য ব্যালেন্সের সঙ্গে যোগ হবে না।</p>
-                </div>
+                  <p>ক. Admin লোন অনুমোদন করলে অনুমোদিত ঋণের অঙ্ক সদস্যের Available Balance-এ যোগ হবে এবং ইউজার আলাদা উত্তোলন অনুরোধ দিতে পারবেন। এটি ব্যাংক বা মোবাইল ওয়ালেটে টাকা পাঠানোর প্রমাণ নয়।</p>
+                  <p>খ. Available Balance হিসাব হবে অনুমোদিত লোনের রেকর্ড করা ক্রেডিট থেকে Pending ও Completed উত্তোলনের অঙ্ক বাদ দিয়ে। উত্তোলনের অনুরোধ Pending থাকা অবস্থায় সেই অঙ্ক পুনরায় উত্তোলনের জন্য ব্যবহার করা যাবে না।</p>
+                  <p>গ. Admin বাস্তবে ব্যাংক/ওয়ালেটে টাকা পাঠানোর পরই উত্তোলনকে Completed/পরিশোধিত হিসেবে চিহ্নিত করবেন; সেই সময় Available Balance হালনাগাদ হবে।</p>
+                  <p>ঘ. সঞ্চয়/সিকিউরিটি ডিপোজিট পৃথকভাবে হিসাবভুক্ত হবে এবং Available Balance-এর সঙ্গে যোগ হবে না.</p></div>
               ) : (
                 <div className="text-xs text-gray-600 dark:text-gray-300 space-y-2.5 leading-relaxed font-bold">
-                  <p>a. Loan approval, disbursement and available withdrawal balance are separate stages. Approval alone does not mean that the full approved amount is available to withdraw.</p>
-                  <p>b. Available Balance includes only verified funds properly recorded in the ledger and actually available for withdrawal. Check the balance displayed in the app before requesting a withdrawal.</p>
-                  <p>c. After a successful withdrawal, the Available Balance is updated by the transaction amount. Funds associated with pending withdrawal requests may be reserved where applicable.</p>
-                  <p>d. Locked savings/security deposits are accounted for separately and are not included in the withdrawable balance.</p>
+                  <p>a. When an admin approves a loan, the approved amount is credited to the member's Available Balance, and the member may submit a separate withdrawal request. This does not mean the money has already been sent to a bank or mobile wallet.</p>
+                  <p>b. Available Balance is calculated from recorded approved-loan credits minus pending and completed withdrawals. Amounts reserved by pending withdrawal requests cannot be withdrawn a second time.</p>
+                  <p>c. The admin must mark a withdrawal Completed/Paid only after the money has actually been sent to the member's bank or wallet. The Available Balance is updated accordingly.</p>
+                  <p>d. Savings/security deposits are accounted for separately and are not added to Available Balance.</p>
                 </div>
               )}
             </section>
