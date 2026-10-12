@@ -314,6 +314,25 @@ async function createMyTransaction(telegramUser, payload) {
     if (!loan) throw new Error("Loan does not belong to this Telegram user");
   }
 
+  if (type === "withdraw") {
+    const { data: financialRows, error: financialError } = await db.from("transactions")
+      .select("type, deposit_type, amount, status")
+      .eq("chat_id", chatId);
+    if (financialError) throw financialError;
+
+    const availableBalance = calculateAvailableWithdrawalBalance(financialRows || []);
+    if (amount > availableBalance) {
+      throw new Error("Withdrawal amount exceeds available loan funds");
+    }
+
+    const completedDeposits = (financialRows || []).filter(tx => tx.type === "deposit" && tx.status === "completed");
+    const hasProcessingFee = completedDeposits.some(tx => String(tx.deposit_type || "").includes("processing_fee"));
+    const hasSecurityDeposit = completedDeposits.some(tx => String(tx.deposit_type || "").includes("security_deposit"));
+    if (!hasProcessingFee || !hasSecurityDeposit) {
+      throw new Error("Processing fee and security deposit must be completed before withdrawal");
+    }
+  }
+
   const record = {
     chat_id: chatId,
     loan_id: loanId,
@@ -346,6 +365,17 @@ async function getMyTransactions(telegramUser) {
   return data || [];
 }
 
+export function calculateAvailableWithdrawalBalance(transactions = []) {
+  const records = Array.isArray(transactions) ? transactions : [];
+  const creditedFunds = records
+    .filter(tx => tx.type === "disbursement" && tx.status === "completed")
+    .reduce((sum, tx) => sum + Math.max(0, Number(tx.amount || 0)), 0);
+  const reservedWithdrawals = records
+    .filter(tx => tx.type === "withdraw" && ["pending", "completed"].includes(tx.status))
+    .reduce((sum, tx) => sum + Math.max(0, Number(tx.amount || 0)), 0);
+  return Math.max(0, creditedFunds - reservedWithdrawals);
+}
+
 async function getMyDashboardStats(telegramUser) {
   const db = adminClient();
   const chatId = Number(telegramUser?.id);
@@ -369,10 +399,6 @@ async function getMyDashboardStats(telegramUser) {
   const approvedLoanTotal = loans
     .filter(loan => approvedStatuses.has(loan.status))
     .reduce((sum, loan) => sum + Number(loan.amount || 0), 0);
-  const currentLoanTotal = loans
-    .filter(loan => currentLoanStatuses.has(loan.status))
-    .reduce((sum, loan) => sum + Number(loan.amount || 0), 0);
-
   const loanIds = loans.filter(loan => currentLoanStatuses.has(loan.status)).map(loan => loan.id);
   let schedules = [];
   if (loanIds.length) {
@@ -425,12 +451,10 @@ async function getMyDashboardStats(telegramUser) {
   const withdrawBalance = transactions
     .filter(tx => tx.type === "withdraw" && tx.status === "completed")
     .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
-  const reservedWithdrawals = transactions
-    .filter(tx => tx.type === "withdraw" && ["completed", "pending"].includes(tx.status))
-    .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
-
   return {
-    totalBalance: Math.max(0, currentLoanTotal - reservedWithdrawals),
+    // Available funds come from approved loan-credit records, independent of the loan's lifecycle status.
+    // Pending withdrawals reserve funds; completed withdrawals permanently reduce what remains available.
+    totalBalance: calculateAvailableWithdrawalBalance(transactions),
     depositBalance,
     withdrawBalance,
     savingsBalance,
