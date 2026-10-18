@@ -711,6 +711,13 @@ export default function AdminDashboard() {
 
   const filteredLoans = loans.filter(l => (l.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || l.id.includes(searchTerm));
   const filteredTxns = transactions.filter(t => (t.trx_id?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || t.chat_id.toString().includes(searchTerm));
+  const approvedLoanFunds = loans
+    .filter(loan => loan.status === 'approved' || loan.status === 'active')
+    .reduce((sum, loan) => sum + Math.max(0, Number(loan.amount || 0)), 0);
+  const reservedWithdrawals = transactions
+    .filter(tx => tx.type === 'withdraw' && (tx.status === 'pending' || tx.status === 'completed'))
+    .reduce((sum, tx) => sum + Math.max(0, Number(tx.amount || 0)), 0);
+  const availableApprovedLoanFunds = Math.max(0, approvedLoanFunds - reservedWithdrawals);
 
   const getTrendData = () => {
     const completedTxns = transactions.filter(t => t.status === 'completed');
@@ -851,6 +858,7 @@ export default function AdminDashboard() {
                   loans: 'ঋণ আবেদনসমূহ',
                   deposits: 'ডিপোজিট সমূহ',
                   withdrawals: 'উত্তোলন সমূহ',
+                  repayments: 'লোন পরিশোধ',
                   users: 'ইউজার নিয়ন্ত্রণ',
                   broadcast: 'টেলিগ্রাম ব্রডকাস্ট',
                   stories: 'সফলতার গল্প',
@@ -921,7 +929,7 @@ export default function AdminDashboard() {
                     ['Deposit', financialReport?.completed_deposits],
                     ['EMI', financialReport?.completed_emi],
                     ['Withdraw', financialReport?.completed_withdrawals],
-                    ['Available loan funds', financialReport?.completed_disbursements],
+                    [isBn ? 'উত্তোলনযোগ্য অনুমোদিত ব্যালেন্স' : 'Available approved funds', availableApprovedLoanFunds],
                     ['Pending', financialReport?.pending_amount],
                   ].map(([label, value]) => (
                     <div key={String(label)} className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl p-4">
