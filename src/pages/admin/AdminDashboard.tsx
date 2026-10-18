@@ -29,7 +29,7 @@ async function openPrivateDocumentReference(reference: string, isBn: boolean) {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings' | 'broadcast' | 'kyc'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'repayments' | 'users' | 'stories' | 'settings' | 'broadcast' | 'kyc'>('overview');
   const [settingsSubTab, setSettingsSubTab] = useState<'general' | 'payments' | 'announcements' | 'categories'>('general');
 
   const [showLockModal, setShowLockModal] = useState<number | null>(null);
