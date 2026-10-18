@@ -328,6 +328,13 @@ async function createMyTransaction(telegramUser, payload) {
     if (loanResult.error) throw loanResult.error;
     const financialRows = financialResult.data || [];
     const withdrawableLoans = loanResult.data || [];
+    // Keep a withdrawal tied to the loan when the member has exactly one
+    // eligible loan. That lets the paid-withdrawal finalizer move it from
+    // Approved to Active. For multiple loans, preserve the aggregate request.
+
+    if (!loanId && withdrawableLoans.length === 1) {
+      loanId = withdrawableLoans[0].id;
+    }
 
     const availableBalance = calculateAvailableWithdrawalBalance(financialRows, withdrawableLoans);
     if (amount > availableBalance) {
