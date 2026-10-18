@@ -537,7 +537,13 @@ export default function AdminDashboard() {
   };
 
   const handleLoanStatus = async (id: string, status: LoanApplication['status'], feedback?: string) => {
-    const success = await updateLoanApplicationStatus(id, status, feedback);
+    let success = false;
+    try {
+      success = await updateLoanApplicationStatus(id, status, feedback);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update loan status');
+      return false;
+    }
     if (success) {
       toast.success(`Loan marked as ${status.replace('_', ' ')}`);
       setLoans(loans.map(l => l.id === id ? { ...l, status, admin_feedback: feedback || l.admin_feedback } : l));
@@ -569,7 +575,11 @@ export default function AdminDashboard() {
         }
 
         if (msg) {
-          await sendAdminTelegramMessage(loan.chat_id, msg);
+          try {
+            await sendAdminTelegramMessage(loan.chat_id, msg);
+          } catch (notificationError) {
+            console.warn('Telegram loan notification failed; in-app notification is handled server-side:', notificationError);
+          }
         }
 
       }
@@ -649,8 +659,17 @@ export default function AdminDashboard() {
         }
 
         if (msg) {
-          await sendAdminTelegramMessage(txn.chat_id, msg);
+          try {
+            await sendAdminTelegramMessage(txn.chat_id, msg);
+          } catch (notificationError) {
+            console.warn('Telegram transaction notification failed; in-app notification is handled server-side:', notificationError);
+          }
         }
+      }
+      try {
+        setRepaymentQueue(await getLoanRepaymentQueue());
+      } catch (queueError) {
+        console.warn('Could not refresh loan repayment queue:', queueError);
       }
     } else {
       toast.error('Failed to update transaction status');
@@ -1165,14 +1184,17 @@ export default function AdminDashboard() {
               {activeTab === 'repayments' && (
                 <section className="bg-white dark:bg-gray-800 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
                   <div className="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/70">
-                    <div className="flex items-start gap-3">
-                      <div className="w-11 h-11 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 flex items-center justify-center">
-                        <CreditCard size={21} />
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 flex items-center justify-center">
+                          <CreditCard size={21} />
+                        </div>
+                        <div>
+                          <h2 className="font-bold text-gray-900 dark:text-white text-xl">{isBn ? 'লোন পরিশোধ ব্যবস্থাপনা' : 'Loan Repayment Management'}</h2>
+                          <p className="text-sm text-gray-500 mt-1">{isBn ? 'এটি আবেদন অনুমোদন ও উত্তোলন থেকে আলাদা। বকেয়া শূন্য না হলে লোন বন্ধ করা যাবে না।' : 'Separate from application approval and withdrawals. A loan cannot be marked repaid while installments remain.'}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h2 className="font-bold text-gray-900 dark:text-white text-xl">{isBn ? 'লোন পরিশোধ ব্যবস্থাপনা' : 'Loan Repayment Management'}</h2>
-                        <p className="text-sm text-gray-500 mt-1">{isBn ? 'এটি আবেদন অনুমোদন ও উত্তোলন থেকে আলাদা। বকেয়া শূন্য না হলে লোন বন্ধ করা যাবে না।' : 'Separate from application approval and withdrawals. A loan cannot be marked repaid while installments remain.'}</p>
-                      </div>
+                      <button type="button" onClick={async () => { try { setRepaymentQueue(await getLoanRepaymentQueue()); } catch (error) { toast.error(isBn ? 'রিপেমেন্ট কিউ রিফ্রেশ হয়নি' : 'Could not refresh repayment queue'); } }} className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:border-primary-400">{isBn ? 'রিফ্রেশ' : 'Refresh'}</button>
                     </div>
                   </div>
                   {repaymentQueue.length === 0 ? (
