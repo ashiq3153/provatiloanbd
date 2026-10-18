@@ -315,17 +315,33 @@ async function createMyTransaction(telegramUser, payload) {
   }
 
   if (type === "withdraw") {
-    const { data: financialRows, error: financialError } = await db.from("transactions")
-      .select("type, deposit_type, amount, status")
-      .eq("chat_id", chatId);
-    if (financialError) throw financialError;
+    const [financialResult, loanResult] = await Promise.all([
+      db.from("transactions")
+        .select("type, deposit_type, amount, status")
+        .eq("chat_id", chatId),
+      db.from("loan_applications")
+        .select("id, amount, status")
+        .eq("chat_id", chatId)
+        .in("status", ["approved", "active"])
+    ]);
+    if (financialResult.error) throw financialResult.error;
+    if (loanResult.error) throw loanResult.error;
+    const financialRows = financialResult.data || [];
+    const withdrawableLoans = loanResult.data || [];
+    // Keep a withdrawal tied to the loan when the member has exactly one
+    // eligible loan. That lets the paid-withdrawal finalizer move it from
+    // Approved to Active. For multiple loans, preserve the aggregate request.
 
-    const availableBalance = calculateAvailableWithdrawalBalance(financialRows || []);
-    if (amount > availableBalance) {
-      throw new Error("Withdrawal amount exceeds available loan funds");
+    if (!loanId && withdrawableLoans.length === 1) {
+      loanId = withdrawableLoans[0].id;
     }
 
-    const completedDeposits = (financialRows || []).filter(tx => tx.type === "deposit" && tx.status === "completed");
+    const availableBalance = calculateAvailableWithdrawalBalance(financialRows, withdrawableLoans);
+    if (amount > availableBalance) {
+      throw new Error("Withdrawal amount exceeds available approved-loan funds");
+    }
+
+    const completedDeposits = financialRows.filter(tx => tx.type === "deposit" && tx.status === "completed");
     const hasProcessingFee = completedDeposits.some(tx => String(tx.deposit_type || "").includes("processing_fee"));
     const hasSecurityDeposit = completedDeposits.some(tx => String(tx.deposit_type || "").includes("security_deposit"));
     if (!hasProcessingFee || !hasSecurityDeposit) {
@@ -365,15 +381,19 @@ async function getMyTransactions(telegramUser) {
   return data || [];
 }
 
-export function calculateAvailableWithdrawalBalance(transactions = []) {
+export function calculateAvailableWithdrawalBalance(transactions = [], loans = []) {
   const records = Array.isArray(transactions) ? transactions : [];
-  const creditedFunds = records
-    .filter(tx => tx.type === "disbursement" && tx.status === "completed")
-    .reduce((sum, tx) => sum + Math.max(0, Number(tx.amount || 0)), 0);
+  const eligibleLoans = Array.isArray(loans) ? loans : [];
+  // Approval makes the approved amount available; a disbursement/payout is
+  // recorded only when a withdrawal is actually paid. Keep legacy
+  // disbursement transactions for history, but never double-count them here.
+  const approvedLoanFunds = eligibleLoans
+    .filter(loan => ["approved", "active"].includes(loan.status))
+    .reduce((sum, loan) => sum + Math.max(0, Number(loan.amount || 0)), 0);
   const reservedWithdrawals = records
     .filter(tx => tx.type === "withdraw" && ["pending", "completed"].includes(tx.status))
     .reduce((sum, tx) => sum + Math.max(0, Number(tx.amount || 0)), 0);
-  return Math.max(0, creditedFunds - reservedWithdrawals);
+  return Math.max(0, approvedLoanFunds - reservedWithdrawals);
 }
 
 async function getMyDashboardStats(telegramUser) {
@@ -454,7 +474,7 @@ async function getMyDashboardStats(telegramUser) {
   return {
     // Available funds come from approved loan-credit records, independent of the loan's lifecycle status.
     // Pending withdrawals reserve funds; completed withdrawals permanently reduce what remains available.
-    totalBalance: calculateAvailableWithdrawalBalance(transactions),
+    totalBalance: calculateAvailableWithdrawalBalance(transactions, loans),
     depositBalance,
     withdrawBalance,
     savingsBalance,
@@ -647,6 +667,7 @@ const ADMIN_ACTION_ROLES = {
   get_kyc_reviews: ["owner","admin","support","viewer","finance"],
   get_profiles: ["owner","admin","support","viewer","finance"],
   get_loans: ["owner","admin","support","viewer","finance"],
+  get_repayment_queue: ["owner","admin","finance","viewer"],
   get_transactions: ["owner","admin","finance","viewer"],
   get_success_stories: ["owner","admin","support","viewer"],
   get_system_setting: ["owner","admin","finance","support","viewer"],
@@ -733,6 +754,44 @@ async function adminAction(action, payload) {
       if (error) throw error;
       return data || [];
     }
+    case "get_repayment_queue": {
+      const { data: loanRows, error: loanError } = await db.from("loan_applications")
+        .select("*")
+        .in("status", ["approved", "active"])
+        .order("approved_at", { ascending: false });
+      if (loanError) throw loanError;
+      const repaymentLoans = loanRows || [];
+      if (!repaymentLoans.length) return [];
+
+      const loanIds = repaymentLoans.map(loan => loan.id);
+      const [scheduleResult, paymentResult] = await Promise.all([
+        db.from("loan_emi_schedule")
+          .select("loan_id,total_due,paid_amount,status")
+          .in("loan_id", loanIds),
+        db.from("transactions")
+          .select("loan_id,amount,status")
+          .eq("type", "emi_payment")
+          .eq("status", "completed")
+          .in("loan_id", loanIds)
+      ]);
+      if (scheduleResult.error) throw scheduleResult.error;
+      if (paymentResult.error) throw paymentResult.error;
+      const schedules = scheduleResult.data || [];
+      const payments = paymentResult.data || [];
+
+      return repaymentLoans.map(loan => {
+        const loanSchedules = schedules.filter(item => item.loan_id === loan.id);
+        const outstanding = loanSchedules.length
+          ? loanSchedules.reduce((sum, item) => {
+              if (item.status === "paid" || item.status === "waived") return sum;
+              return sum + Math.max(0, Number(item.total_due || 0) - Number(item.paid_amount || 0));
+            }, 0)
+          : Math.max(0, Number(loan.total_payable || loan.amount || 0) -
+              payments.filter(payment => payment.loan_id === loan.id)
+                .reduce((sum, payment) => sum + Number(payment.amount || 0), 0));
+        return { ...loan, repayment_outstanding: outstanding, emi_schedule_count: loanSchedules.length };
+      });
+    }
     case "get_transactions": {
       const { data, error } = await db.from("transactions").select("*").order("created_at", { ascending: false });
       if (error) throw error;
@@ -770,6 +829,34 @@ async function adminAction(action, payload) {
       if (!["pending", "completed", "rejected", "failed"].includes(payload.status)) {
         throw new Error("Unsupported transaction status");
       }
+      const { data: originalTxn, error: originalTxnError } = await db.from("transactions")
+        .select("id,chat_id,type,amount,status")
+        .eq("id", payload.id)
+        .maybeSingle();
+      if (originalTxnError) throw originalTxnError;
+      if (!originalTxn) throw new Error("Transaction not found");
+
+      // Confirm the current server-side balance before paying a withdrawal.
+      if (originalTxn.type === "withdraw" && payload.status === "completed" && originalTxn.status !== "completed") {
+        const { data: financialRows, error: financialError } = await db.from("transactions")
+          .select("id,type,amount,status")
+          .eq("chat_id", originalTxn.chat_id);
+        if (financialError) throw financialError;
+        const alreadyReserved = (financialRows || [])
+          .filter(tx => tx.type === "withdraw" && ["pending", "completed"].includes(tx.status) && tx.id !== originalTxn.id)
+          .reduce((sum, tx) => sum + Math.max(0, Number(tx.amount || 0)), 0);
+        const { data: approvedLoans, error: loansError } = await db.from("loan_applications")
+          .select("id,amount,status")
+          .eq("chat_id", originalTxn.chat_id)
+          .in("status", ["approved", "active"]);
+        if (loansError) throw loansError;
+        const approvedFunds = (approvedLoans || [])
+          .reduce((sum, loan) => sum + Math.max(0, Number(loan.amount || 0)), 0);
+        if (alreadyReserved + Number(originalTxn.amount || 0) > approvedFunds) {
+          throw new Error("Withdrawal exceeds remaining approved-loan funds");
+        }
+      }
+
       const patch = {
         status: payload.status,
         verified_by_chat_id: Number(payload.chatId || 0) || null,
@@ -782,22 +869,107 @@ async function adminAction(action, payload) {
         const { error: finalizeError } = await db.rpc("finalize_completed_transaction", { p_transaction_id: payload.id });
         if (finalizeError) throw finalizeError;
       }
+      if (originalTxn.status !== payload.status && originalTxn.type === "withdraw") {
+        const notification = payload.status === "completed"
+          ? { title: "উত্তোলন সম্পন্ন", message: "আপনার উত্তোলনের অনুরোধটি সম্পন্ন হয়েছে। পরিমাণ: ৳" + Number(originalTxn.amount || 0).toLocaleString("en-BD") + "।" }
+          : ["failed", "rejected"].includes(payload.status)
+            ? { title: "উত্তোলন সম্পন্ন হয়নি", message: "আপনার উত্তোলনের অনুরোধটি " + (payload.status === "failed" ? "ব্যর্থ" : "বাতিল") + " হয়েছে। সংরক্ষিত ব্যালেন্স আবার উপলভ্য হয়েছে।" }
+            : null;
+        if (notification) {
+          const { error: notificationError } = await db.from("notifications").insert({
+            chat_id: originalTxn.chat_id,
+            type: "payment",
+            title: notification.title,
+            message: notification.message,
+            entity_type: "transaction",
+            entity_id: originalTxn.id
+          });
+          if (notificationError) console.error("Could not create withdrawal notification:", notificationError);
+        }
+      }
       return true;
     }
     case "update_loan": {
       if (!["pending", "under_review", "approved", "active", "completed", "rejected", "action_required", "cancelled"].includes(payload.status)) {
         throw new Error("Unsupported loan status");
       }
+      const loanId = String(payload.id || "").trim();
+      if (!loanId) throw new Error("Loan id is required");
+      const { data: originalLoan, error: loanReadError } = await db.from("loan_applications")
+        .select("*")
+        .eq("id", loanId)
+        .maybeSingle();
+      if (loanReadError) throw loanReadError;
+      if (!originalLoan) throw new Error("Loan application not found");
+
+      // Keep long-term repayment completion separate from application review/payout.
+      if (payload.status === "completed" && originalLoan.status !== "completed") {
+        const { data: scheduleRows, error: scheduleError } = await db.from("loan_emi_schedule")
+          .select("total_due,paid_amount,status")
+          .eq("loan_id", loanId);
+        if (scheduleError) throw scheduleError;
+        let remaining = 0;
+        if ((scheduleRows || []).length) {
+          remaining = scheduleRows.reduce((sum, item) => {
+            if (item.status === "paid" || item.status === "waived") return sum;
+            return sum + Math.max(0, Number(item.total_due || 0) - Number(item.paid_amount || 0));
+          }, 0);
+        } else {
+          const { data: paidRows, error: paidError } = await db.from("transactions")
+            .select("amount")
+            .eq("loan_id", loanId)
+            .eq("type", "emi_payment")
+            .eq("status", "completed");
+          if (paidError) throw paidError;
+          const paidTotal = (paidRows || []).reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+          remaining = Math.max(0, Number(originalLoan.total_payable || originalLoan.amount || 0) - paidTotal);
+        }
+        if (remaining > 0.01) {
+          throw new Error("Cannot mark loan repaid while outstanding installments remain");
+        }
+      }
+
       if (payload.status === "approved") {
-        const { error } = await db.rpc("approve_loan_atomic", { p_loan_id: payload.id, p_feedback: payload.feedback || null });
+        const { error } = await db.rpc("approve_loan_atomic", { p_loan_id: loanId, p_feedback: payload.feedback || null });
         if (error) throw error;
-        return true;
+      } else {
+        const loanPatch = { status: payload.status, admin_feedback: payload.feedback || null };
+        if (["pending", "under_review", "rejected", "action_required", "cancelled"].includes(payload.status)) {
+          loanPatch.approved_at = null;
+        }
+        const { error } = await db.from("loan_applications").update(loanPatch).eq("id", loanId);
+        if (error) throw error;
       }
-      const loanPatch = { status: payload.status, admin_feedback: payload.feedback || null };
-      if (["pending", "under_review", "rejected", "action_required", "cancelled"].includes(payload.status)) {
-        loanPatch.approved_at = null;
+
+      if (originalLoan.status !== payload.status) {
+        const amountLabel = Number(originalLoan.amount || 0).toLocaleString("en-BD");
+        const categoryLabel = String(originalLoan.loan_category || "লোন");
+        const notice = payload.status === "under_review"
+          ? { title: "লোন আবেদন রিভিউ হচ্ছে", message: "আপনার " + categoryLabel + " লোন আবেদনটি যাচাই করা হচ্ছে।" }
+          : payload.status === "approved"
+            ? { title: "লোন আবেদন অনুমোদিত", message: "আপনার " + categoryLabel + " লোন আবেদন অনুমোদিত হয়েছে। অনুমোদিত পরিমাণ: ৳" + amountLabel + "। উত্তোলনের জন্য অ্যাপের Withdraw অপশন ব্যবহার করুন।" }
+            : payload.status === "completed"
+              ? { title: "লোন পরিশোধ সম্পন্ন", message: "আপনার লোনের সব বকেয়া পরিশোধ সম্পন্ন হয়েছে বলে রেকর্ড করা হয়েছে।" }
+              : payload.status === "action_required"
+                ? { title: "লোন আবেদনে সংশোধন দরকার", message: "আপনার আবেদন আপডেট করতে হবে। অ্যাপ থেকে অ্যাডমিনের মন্তব্য দেখুন।" }
+                : ["rejected", "cancelled"].includes(payload.status)
+                  ? { title: "লোন আবেদন বাতিল", message: "আপনার লোন আবেদনটি অনুমোদিত হয়নি বা বাতিল করা হয়েছে।" }
+                  : payload.status === "active"
+                    ? { title: "লোন বিতরণ শুরু", message: "আপনার লোন এখন সক্রিয়।" }
+                    : null;
+        if (notice) {
+          const { error: notificationError } = await db.from("notifications").insert({
+            chat_id: originalLoan.chat_id,
+            type: "loan",
+            title: notice.title,
+            message: notice.message,
+            entity_type: "loan",
+            entity_id: loanId
+          });
+          if (notificationError) console.error("Could not create loan notification:", notificationError);
+        }
       }
-      return !(await db.from("loan_applications").update(loanPatch).eq("id", payload.id)).error;
+      return true;
     }
     case "update_system_setting": {
       const key = typeof payload.key === "string" ? payload.key.trim() : "";

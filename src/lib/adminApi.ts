@@ -3,6 +3,7 @@ import type { Profile, LoanApplication, Transaction, SuccessStory } from '../typ
 type AdminAction =
   | 'get_profiles'
   | 'get_loans'
+  | 'get_repayment_queue'
   | 'get_transactions'
   | 'get_success_stories'
   | 'get_system_setting'
@@ -50,6 +51,10 @@ export async function banUser(chatId: number, isBanned: boolean): Promise<boolea
 export async function lockUser(chatId: number, isLocked: boolean, reason?: string | null): Promise<boolean> { return (await callAdmin<boolean>('lock_user', { chatId, isLocked, reason: reason || null })) === true; }
 export async function deleteUser(chatId: number): Promise<boolean> { return (await callAdmin<boolean>('delete_user', { chatId })) === true; }
 export async function getAllLoanApplications(): Promise<LoanApplication[]> { return (await callAdmin<LoanApplication[]>('get_loans')) || []; }
+export type LoanRepaymentQueueItem = LoanApplication & { repayment_outstanding: number; emi_schedule_count: number };
+export async function getLoanRepaymentQueue(): Promise<LoanRepaymentQueueItem[]> {
+  return (await callAdmin<LoanRepaymentQueueItem[]>('get_repayment_queue')) || [];
+}
 export async function updateLoanApplicationStatus(id: string, status: LoanApplication['status'], feedback?: string): Promise<boolean> { return (await callAdmin<boolean>('update_loan', { id, status, feedback: feedback || null })) === true; }
 export async function getAllTransactions(): Promise<Transaction[]> { return (await callAdmin<Transaction[]>('get_transactions')) || []; }
 export async function updateTransactionStatus(id: string, status: Transaction['status'], verificationNote?: string): Promise<boolean> {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ShieldAlert, Users, FileText, Activity, CheckCircle, XCircle, Search, DollarSign, Trash2, Ban, Eye, Menu, X, LayoutDashboard, Settings, Star, Download, Upload, ClipboardCheck, Megaphone, ToggleLeft, ToggleRight, Landmark, CreditCard, ChevronRight, Clock, Copy, ArrowLeft, Edit2, Lock, Unlock, MessageCircle } from 'lucide-react';
-import { getAllProfiles, getAllLoanApplications, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, sendAdminTelegramMessage, broadcastAdminTelegramMessage, getFinancialReconciliationReport, getKycReviewQueue, updateKycReview, setAdminPresence } from '../../lib/adminApi';
+import { getAllProfiles, getAllLoanApplications, getLoanRepaymentQueue, getAllTransactions, updateLoanApplicationStatus, updateTransactionStatus, updateSystemSettings, getAllAdminSuccessStories, addSuccessStory, deleteSuccessStory, banUser, deleteUser, lockUser, sendAdminTelegramMessage, broadcastAdminTelegramMessage, getFinancialReconciliationReport, getKycReviewQueue, updateKycReview, setAdminPresence } from '../../lib/adminApi';
 import type { Profile, LoanApplication, Transaction, SuccessStory } from '../../types/database';
 import { toast } from 'sonner';
 import { useAppStore } from '../../lib/store';
@@ -29,7 +29,7 @@ async function openPrivateDocumentReference(reference: string, isBn: boolean) {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'users' | 'stories' | 'settings' | 'broadcast' | 'kyc'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'repayments' | 'users' | 'stories' | 'settings' | 'broadcast' | 'kyc'>('overview');
   const [settingsSubTab, setSettingsSubTab] = useState<'general' | 'payments' | 'announcements' | 'categories'>('general');
 
   const [showLockModal, setShowLockModal] = useState<number | null>(null);
@@ -54,6 +54,7 @@ export default function AdminDashboard() {
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loans, setLoans] = useState<LoanApplication[]>([]);
+  const [repaymentQueue, setRepaymentQueue] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [stories, setStories] = useState<SuccessStory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -400,6 +401,12 @@ export default function AdminDashboard() {
       setTransactions(t);
       setStories(s);
       try {
+        setRepaymentQueue(await getLoanRepaymentQueue());
+      } catch (err) {
+        console.error('Failed to load loan repayment queue:', err);
+        setRepaymentQueue([]);
+      }
+      try {
         setFinancialReport(await getFinancialReconciliationReport());
       } catch (err) {
         console.error('Failed to load financial reconciliation report:', err);
@@ -530,7 +537,13 @@ export default function AdminDashboard() {
   };
 
   const handleLoanStatus = async (id: string, status: LoanApplication['status'], feedback?: string) => {
-    const success = await updateLoanApplicationStatus(id, status, feedback);
+    let success = false;
+    try {
+      success = await updateLoanApplicationStatus(id, status, feedback);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update loan status');
+      return false;
+    }
     if (success) {
       toast.success(`Loan marked as ${status.replace('_', ' ')}`);
       setLoans(loans.map(l => l.id === id ? { ...l, status, admin_feedback: feedback || l.admin_feedback } : l));
@@ -562,13 +575,18 @@ export default function AdminDashboard() {
         }
 
         if (msg) {
-          await sendAdminTelegramMessage(loan.chat_id, msg);
+          try {
+            await sendAdminTelegramMessage(loan.chat_id, msg);
+          } catch (notificationError) {
+            console.warn('Telegram loan notification failed; in-app notification is handled server-side:', notificationError);
+          }
         }
 
       }
     } else {
       toast.error('Failed to update loan status');
     }
+    return success;
   };
 
   const handleTxnStatus = async (id: string, status: Transaction['status']) => {
@@ -641,8 +659,17 @@ export default function AdminDashboard() {
         }
 
         if (msg) {
-          await sendAdminTelegramMessage(txn.chat_id, msg);
+          try {
+            await sendAdminTelegramMessage(txn.chat_id, msg);
+          } catch (notificationError) {
+            console.warn('Telegram transaction notification failed; in-app notification is handled server-side:', notificationError);
+          }
         }
+      }
+      try {
+        setRepaymentQueue(await getLoanRepaymentQueue());
+      } catch (queueError) {
+        console.warn('Could not refresh loan repayment queue:', queueError);
       }
     } else {
       toast.error('Failed to update transaction status');
@@ -703,6 +730,13 @@ export default function AdminDashboard() {
 
   const filteredLoans = loans.filter(l => (l.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || l.id.includes(searchTerm));
   const filteredTxns = transactions.filter(t => (t.trx_id?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || t.chat_id.toString().includes(searchTerm));
+  const approvedLoanFunds = loans
+    .filter(loan => loan.status === 'approved' || loan.status === 'active')
+    .reduce((sum, loan) => sum + Math.max(0, Number(loan.amount || 0)), 0);
+  const reservedWithdrawals = transactions
+    .filter(tx => tx.type === 'withdraw' && (tx.status === 'pending' || tx.status === 'completed'))
+    .reduce((sum, tx) => sum + Math.max(0, Number(tx.amount || 0)), 0);
+  const availableApprovedLoanFunds = Math.max(0, approvedLoanFunds - reservedWithdrawals);
 
   const getTrendData = () => {
     const completedTxns = transactions.filter(t => t.status === 'completed');
@@ -758,6 +792,7 @@ export default function AdminDashboard() {
     { id: 'loans', label: isBn ? 'ঋণ আবেদনসমূহ' : 'Loan Applications', icon: FileText },
     { id: 'deposits', label: isBn ? 'ডিপোজিট সমূহ' : 'Deposits', icon: Download },
     { id: 'withdrawals', label: isBn ? 'উত্তোলন সমূহ' : 'Withdrawals', icon: Upload },
+    { id: 'repayments', label: isBn ? 'লোন পরিশোধ' : 'Loan Repayments', icon: CreditCard },
     { id: 'users', label: isBn ? 'ইউজার নিয়ন্ত্রণ' : 'Manage Users', icon: Users },
     { id: 'kyc', label: isBn ? 'KYC রিভিউ' : 'KYC Review', icon: ClipboardCheck },
     { id: 'broadcast', label: isBn ? 'ব্রডকাস্ট' : 'Broadcast', icon: Megaphone },
@@ -842,6 +877,7 @@ export default function AdminDashboard() {
                   loans: 'ঋণ আবেদনসমূহ',
                   deposits: 'ডিপোজিট সমূহ',
                   withdrawals: 'উত্তোলন সমূহ',
+                  repayments: 'লোন পরিশোধ',
                   users: 'ইউজার নিয়ন্ত্রণ',
                   broadcast: 'টেলিগ্রাম ব্রডকাস্ট',
                   stories: 'সফলতার গল্প',
@@ -912,7 +948,7 @@ export default function AdminDashboard() {
                     ['Deposit', financialReport?.completed_deposits],
                     ['EMI', financialReport?.completed_emi],
                     ['Withdraw', financialReport?.completed_withdrawals],
-                    ['Available loan funds', financialReport?.completed_disbursements],
+                    [isBn ? 'উত্তোলনযোগ্য অনুমোদিত ব্যালেন্স' : 'Available approved funds', availableApprovedLoanFunds],
                     ['Pending', financialReport?.pending_amount],
                   ].map(([label, value]) => (
                     <div key={String(label)} className="bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl p-4">
@@ -1143,6 +1179,94 @@ export default function AdminDashboard() {
                     </table>
                   </div>
                 </div>
+              )}
+
+              {activeTab === 'repayments' && (
+                <section className="bg-white dark:bg-gray-800 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                  <div className="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/70">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 flex items-center justify-center">
+                          <CreditCard size={21} />
+                        </div>
+                        <div>
+                          <h2 className="font-bold text-gray-900 dark:text-white text-xl">{isBn ? 'লোন পরিশোধ ব্যবস্থাপনা' : 'Loan Repayment Management'}</h2>
+                          <p className="text-sm text-gray-500 mt-1">{isBn ? 'এটি আবেদন অনুমোদন ও উত্তোলন থেকে আলাদা। বকেয়া শূন্য না হলে লোন বন্ধ করা যাবে না।' : 'Separate from application approval and withdrawals. A loan cannot be marked repaid while installments remain.'}</p>
+                        </div>
+                      </div>
+                      <button type="button" onClick={async () => { try { setRepaymentQueue(await getLoanRepaymentQueue()); } catch (error) { toast.error(isBn ? 'রিপেমেন্ট কিউ রিফ্রেশ হয়নি' : 'Could not refresh repayment queue'); } }} className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:border-primary-400">{isBn ? 'রিফ্রেশ' : 'Refresh'}</button>
+                    </div>
+                  </div>
+                  {repaymentQueue.length === 0 ? (
+                    <div className="p-10 text-center">
+                      <CheckCircle size={28} className="mx-auto text-emerald-500 mb-3" />
+                      <p className="font-bold text-gray-800 dark:text-gray-100">{isBn ? 'এখন পরিশোধ সম্পন্ন করার মতো কোনো সক্রিয় লোন নেই' : 'No active loans are awaiting repayment closure'}</p>
+                      <p className="text-xs text-gray-500 mt-2">{isBn ? 'সক্রিয় বা অনুমোদিত লোন এখানে দেখাবে।' : 'Approved and active loans appear here until fully repaid.'}</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left min-w-[820px]">
+                        <thead className="bg-gray-50 dark:bg-gray-900/40 text-xs text-gray-500 uppercase">
+                          <tr>
+                            <th className="px-5 py-4">{isBn ? 'সদস্য' : 'Member'}</th>
+                            <th className="px-5 py-4">{isBn ? 'লোন' : 'Loan'}</th>
+                            <th className="px-5 py-4">{isBn ? 'অনুমোদিত' : 'Approved'}</th>
+                            <th className="px-5 py-4">{isBn ? 'বকেয়া' : 'Outstanding'}</th>
+                            <th className="px-5 py-4">{isBn ? 'স্ট্যাটাস' : 'Status'}</th>
+                            <th className="px-5 py-4">{isBn ? 'অ্যাকশন' : 'Action'}</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                          {repaymentQueue.map(loan => {
+                            const outstanding = Math.max(0, Number(loan.repayment_outstanding || 0));
+                            const settled = outstanding <= 0.01;
+                            return (
+                              <tr key={loan.id} className="hover:bg-gray-50/70 dark:hover:bg-gray-900/30">
+                                <td className="px-5 py-4">
+                                  <p className="font-bold text-gray-900 dark:text-white">{loan.full_name || '—'}</p>
+                                  <p className="text-xs text-gray-500 mt-1">{loan.chat_id}</p>
+                                </td>
+                                <td className="px-5 py-4">
+                                  <p className="font-semibold text-gray-800 dark:text-gray-100 capitalize">{String(loan.loan_category || 'loan').replace(/_/g, ' ')}</p>
+                                  <p className="text-xs text-gray-500 mt-1">{isBn ? 'মেয়াদ' : 'Tenure'}: {convertDigits(loan.tenure_months || 0, isBn)} {isBn ? 'মাস' : 'months'}</p>
+                                </td>
+                                <td className="px-5 py-4 font-bold">{formatCurrency(loan.amount || 0, isBn)}</td>
+                                <td className="px-5 py-4">
+                                  <p className={settled ? 'font-bold text-emerald-600' : 'font-bold text-amber-600'}>{formatCurrency(outstanding, isBn)}</p>
+                                  <p className="text-[10px] text-gray-500 mt-1">{settled ? (isBn ? 'সব কিস্তি মিটেছে' : 'All dues settled') : (isBn ? 'পরিশোধ বাকি' : 'Payment due')}</p>
+                                </td>
+                                <td className="px-5 py-4">
+                                  <span className={settled ? 'rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 px-3 py-1 text-xs font-bold' : 'rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 px-3 py-1 text-xs font-bold'}>
+                                    {settled ? (isBn ? 'পরিশোধিত হওয়ার জন্য প্রস্তুত' : 'Ready to close') : (isBn ? 'পরিশোধ চলছে' : 'Repayment in progress')}
+                                  </span>
+                                </td>
+                                <td className="px-5 py-4">
+                                  <button
+                                    type="button"
+                                    disabled={!settled}
+                                    onClick={async () => {
+                                      const confirmed = window.confirm(isBn
+                                        ? 'সব বকেয়া কিস্তি পরিশোধ হয়েছে কি? নিশ্চিত হলে লোনটি পরিশোধ সম্পন্ন হিসেবে বন্ধ হবে।'
+                                        : 'Confirm all installments have been paid. This will close the loan as repaid, not send a withdrawal.');
+                                      if (!confirmed) return;
+                                      const ok = await handleLoanStatus(loan.id, 'completed');
+                                      if (ok) setRepaymentQueue(current => current.filter(item => item.id !== loan.id));
+                                    }}
+                                    className={settled
+                                      ? 'rounded-xl bg-emerald-600 hover:bg-emerald-700 px-3 py-2 text-xs font-bold text-white'
+                                      : 'rounded-xl bg-gray-100 dark:bg-gray-700 px-3 py-2 text-xs font-bold text-gray-400 cursor-not-allowed'}
+                                  >
+                                    {isBn ? 'পরিশোধ সম্পন্ন করুন' : 'Mark Repaid'}
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </section>
               )}
 
               {(activeTab === 'deposits' || activeTab === 'withdrawals') && (
@@ -2152,42 +2276,20 @@ export default function AdminDashboard() {
                     {/* Inline Status Actions */}
                     <div className="flex flex-wrap gap-2">
                       {selectedLoan.status === 'pending' && (
-                        <button onClick={() => { handleLoanStatus(selectedLoan.id, 'under_review'); setSelectedLoan({...selectedLoan, status: 'under_review'}); }} className="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"><Clock size={14} /> Start Review</button>
+                        <button onClick={async () => { const ok = await handleLoanStatus(selectedLoan.id, 'under_review'); if (ok) setSelectedLoan({...selectedLoan, status: 'under_review'}); }} className="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"><Clock size={14} /> Start Review</button>
                       )}
                       {(selectedLoan.status === 'pending' || selectedLoan.status === 'under_review') && (
                         <>
-                          <button onClick={() => { handleLoanStatus(selectedLoan.id, 'approved'); setSelectedLoan({...selectedLoan, status: 'approved'}); }} className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"><CheckCircle size={14} /> Approve Application</button>
-                          <button onClick={() => { handleLoanStatus(selectedLoan.id, 'cancelled'); setSelectedLoan({...selectedLoan, status: 'rejected'}); }} className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"><XCircle size={14} /> Reject Application</button>
+                          <button onClick={async () => { const ok = await handleLoanStatus(selectedLoan.id, 'approved'); if (ok) setSelectedLoan({...selectedLoan, status: 'approved'}); }} className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"><CheckCircle size={14} /> Approve Application</button>
+                          <button onClick={async () => { const ok = await handleLoanStatus(selectedLoan.id, 'rejected'); if (ok) setSelectedLoan({...selectedLoan, status: 'rejected'}); }} className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"><XCircle size={14} /> Reject Application</button>
                         </>
                       )}
                       {(selectedLoan.status === 'approved' || selectedLoan.status === 'active') && (
-                        <>
-                          <button
-                            onClick={() => {
-                              const confirmRepaid = window.confirm(isBn
-                                ? 'শুধু তখনই এই লোনকে পরিশোধ সম্পন্ন করুন, যখন সব বকেয়া কিস্তি পরিশোধ হয়েছে। এটি টাকা উত্তোলন বা ব্যাংকে পাঠানোর কাজ নয়। আপনি কি নিশ্চিত?'
-                                : 'Only mark this loan as repaid after all outstanding installments are paid. This does not approve or send a withdrawal. Continue?');
-                              if (!confirmRepaid) return;
-                              void handleLoanStatus(selectedLoan.id, 'completed');
-                              setSelectedLoan({ ...selectedLoan, status: 'completed' });
-                            }}
-                            className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"
-                          >
-                            {isBn ? 'লোন পরিশোধ সম্পন্ন' : 'Mark Loan Repaid'}
-                          </button>
-                          <button 
-                            onClick={() => { 
-                              const confirmCancel = window.confirm(isBn ? 'আপনি কি নিশ্চিত যে আপনি এই লোন আবেদনটি বাতিল করতে চান?' : 'Are you sure you want to cancel this loan application?');
-                              if (confirmCancel) {
-                                handleLoanStatus(selectedLoan.id, 'rejected'); 
-                                setSelectedLoan({...selectedLoan, status: 'rejected'}); 
-                              }
-                            }} 
-                            className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm flex items-center gap-1.5"
-                          >
-                            <Trash2 size={14} /> {isBn ? 'আবেদন বাতিল করুন' : 'Cancel Application'}
-                          </button>
-                        </>
+                        <div className="w-full basis-full rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/70 dark:bg-emerald-950/20 p-3 text-xs text-emerald-800 dark:text-emerald-200">
+                          {isBn
+                            ? 'আবেদন অনুমোদিত। টাকা পাঠানোর অনুরোধ “উত্তোলন” বিভাগে এবং দীর্ঘমেয়াদি কিস্তি/লোন পরিশোধ “লোন পরিশোধ” বিভাগে পরিচালনা করুন।'
+                            : 'Application approved. Manage payout requests under “Withdrawals” and long-term repayment under “Loan Repayments”.'}
+                        </div>
                       )}
                       {selectedLoan.status === 'action_required' && (
                         <button 

@@ -65,30 +65,47 @@ test("rejects missing initData", () => {
   assert.equal(verifyInitData(undefined), null);
 });
 
-test("available balance is based on credited loan funds, not loan status", () => {
+test("approved loan amount is available before a payout/disbursement transaction exists", () => {
+  const transactions = [];
+  const loans = [{ status: "approved", amount: 100000 }];
+  assert.equal(calculateAvailableWithdrawalBalance(transactions, loans), 100000);
+});
+
+test("legacy disbursement rows are not double-counted with approved loan records", () => {
   const transactions = [
     { type: "disbursement", amount: 100000, status: "completed" },
   ];
-  assert.equal(calculateAvailableWithdrawalBalance(transactions), 100000);
+  const loans = [{ status: "approved", amount: 100000 }];
+  assert.equal(calculateAvailableWithdrawalBalance(transactions, loans), 100000);
 });
 
-test("pending and completed withdrawals reserve available loan funds", () => {
+test("pending and completed withdrawals reserve approved loan funds", () => {
   const transactions = [
-    { type: "disbursement", amount: 100000, status: "completed" },
     { type: "withdraw", amount: 25000, status: "pending" },
     { type: "withdraw", amount: 10000, status: "completed" },
     { type: "withdraw", amount: 7000, status: "failed" },
     { type: "deposit", amount: 9000, status: "completed" },
   ];
-  assert.equal(calculateAvailableWithdrawalBalance(transactions), 65000);
+  const loans = [{ status: "approved", amount: 100000 }];
+  assert.equal(calculateAvailableWithdrawalBalance(transactions, loans), 65000);
+});
+
+test("ineligible and repaid loans do not add available loan funds", () => {
+  const loans = [
+    { status: "pending", amount: 50000 },
+    { status: "rejected", amount: 100000 },
+    { status: "completed", amount: 25000 },
+    { status: "active", amount: 20000 },
+  ];
+  assert.equal(calculateAvailableWithdrawalBalance([], loans), 20000);
 });
 
 test("available loan balance never becomes negative", () => {
   const transactions = [
-    { type: "disbursement", amount: 10000, status: "completed" },
     { type: "withdraw", amount: 12000, status: "pending" },
   ];
-  assert.equal(calculateAvailableWithdrawalBalance(transactions), 0);
+  const loans = [{ status: "approved", amount: 10000 }];
+  assert.equal(calculateAvailableWithdrawalBalance(transactions, loans), 0);
 });
 
 
