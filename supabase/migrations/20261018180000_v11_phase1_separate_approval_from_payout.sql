@@ -47,3 +47,39 @@ END;
 $function$;
 
 REVOKE EXECUTE ON FUNCTION public.approve_loan_atomic(uuid, text) FROM PUBLIC, anon, authenticated;
+
+-- When a paid withdrawal belongs to a single approved loan, move the loan
+-- lifecycle to Active. This is the disbursement point; it is not repayment.
+CREATE OR REPLACE FUNCTION public.finalize_completed_transaction(p_transaction_id uuid)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+DECLARE
+  v_tx public.transactions;
+BEGIN
+  SELECT * INTO v_tx
+  FROM public.transactions
+  WHERE id = p_transaction_id
+  FOR UPDATE;
+
+  IF NOT FOUND OR v_tx.status <> 'completed' THEN
+    RETURN false;
+  END IF;
+
+  IF v_tx.type = 'emi_payment' THEN
+    PERFORM public.apply_completed_emi_to_schedule(v_tx.id);
+  ELSIF v_tx.type = 'withdraw' AND v_tx.loan_id IS NOT NULL THEN
+    UPDATE public.loan_applications
+    SET status = 'active',
+        approved_at = COALESCE(approved_at, NOW())
+    WHERE id = v_tx.loan_id
+      AND status = 'approved';
+  END IF;
+
+  RETURN true;
+END;
+$function$;
+
+REVOKE EXECUTE ON FUNCTION public.finalize_completed_transaction(uuid) FROM PUBLIC, anon, authenticated;
