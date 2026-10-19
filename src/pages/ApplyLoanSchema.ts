@@ -23,6 +23,7 @@ export const getLoanSchema = (isBn: boolean) => z.object({
   motherName: z.string().min(3, { message: isBn ? "মাতার নাম দিন" : "Enter mother's name" }),
   dob: z.string().min(1, { message: isBn ? "জন্ম তারিখ দিন" : "Select date of birth" }),
   gender: z.string().min(1, { message: isBn ? "লিঙ্গ নির্বাচন করুন" : "Select gender" }),
+  profession: z.string().min(2, { message: isBn ? "আপনার পেশা বা কাজের ধরন লিখুন" : "Enter your occupation or type of work" }),
   mobile: z.string().regex(/^(01)[3-9][0-9]{8}$/, { message: isBn ? "সঠিক মোবাইল নাম্বার দিন (১১ ডিজিট)" : "Enter valid mobile number" }),
   whatsapp: z.string().optional().or(z.literal('')),
   email: z.string().email({ message: isBn ? "সঠিক ইমেইল দিন" : "Enter a valid email" }).optional().or(z.literal('')),
@@ -185,8 +186,8 @@ export const getLoanSchema = (isBn: boolean) => z.object({
 
   // Step 5
   bankName: z.string().min(2, { message: isBn ? "ব্যাংকের নাম দিন" : "Enter bank name" }),
-  accountName: z.string().min(2, { message: isBn ? "একাউন্টের নাম দিন" : "Enter account name" }),
-  accountNumber: z.string().min(5, { message: isBn ? "সঠিক একাউন্ট নম্বর দিন" : "Enter valid account number" }),
+  accountName: z.string().min(2, { message: isBn ? "ব্যাংক হিসাবের নাম লিখুন" : "Enter the bank account holder name" }),
+  accountNumber: z.string().min(5, { message: isBn ? "সঠিক ব্যাংক হিসাব নম্বর লিখুন" : "Enter a valid bank account number" }),
   routingNumber: z.string().optional(),
   mobileBanking: z.string().regex(/^(01)[3-9][0-9]{8}$/, { message: isBn ? "সঠিক নাম্বার দিন (১১ ডিজিট)" : "Enter valid number" }).optional().or(z.literal('')),
   nomineeName: z.string().min(3, { message: isBn ? "নমিনির নাম দিন" : "Enter nominee name" }),
