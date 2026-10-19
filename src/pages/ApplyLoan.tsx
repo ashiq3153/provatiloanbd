@@ -1388,10 +1388,11 @@ export default function ApplyLoan() {
 
     const selectedOption =
       professionOptions.find(item => item.label === selectedProfession) ||
-      quickProfessionGroups.find(item => item.label === selectedProfession);
+      quickProfessionGroups.find(item => item.label === selectedProfession) ||
+      quickProfessionGroups[0];
 
     // Profession helps prefill the form; it must not block access to any loan category.
-    const selectedCategories = categories.map(cat => cat.id);
+    const selectedCategories = selectedOption?.categories || [];
     const visibleCategories = categories;
     const filteredProfessions = professionOptions.filter(item =>
       item.label.toLowerCase().includes(professionSearch.trim().toLowerCase())
@@ -1456,7 +1457,7 @@ export default function ApplyLoan() {
 
             <div className="mt-2.5 flex gap-1.5 overflow-x-auto pb-1">
               {quickProfessionGroups.map(item => {
-                const active = selectedCategories.length > 0 && item.categories.some(id => selectedCategories.includes(id));
+                const active = Boolean(selectedProfession) && selectedCategories.length > 0 && item.categories.some(id => selectedCategories.includes(id));
                 const Icon = item.icon;
                 return (
                   <button
@@ -3202,7 +3203,9 @@ export default function ApplyLoan() {
     const requirement = getLoanDocumentRequirements(category?.id || 'personal').find(d => d.key === id);
     const displayTitle = requirement?.required
       ? `${title} ${isBn ? '• আবশ্যক' : '• Required'}`
-      : title;
+      : requirement?.conditional
+        ? `${title} ${isBn ? '• প্রযোজ্য হলে' : '• If applicable'}`
+        : `${title} ${isBn ? '• ঐচ্ছিক' : '• Optional'}`;
     return (
       <div className="relative">
         <input 
