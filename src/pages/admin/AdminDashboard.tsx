@@ -193,6 +193,7 @@ export default function AdminDashboard() {
   });
   
   useEffect(() => {
+    if (isBrowserPreview) return;
     const loadAdminRole = async () => {
       const telegramWebApp = (window as Window & { Telegram?: { WebApp?: { initData?: string } } }).Telegram?.WebApp;
       const initData = telegramWebApp?.initData;
