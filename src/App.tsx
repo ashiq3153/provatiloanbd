@@ -6,6 +6,9 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import BrowserPreviewHome from './components/BrowserPreviewHome';
+import TelegramAccessGate from './components/TelegramAccessGate';
+import { hasTelegramInitData, isBrowserPreviewMode } from './lib/browser-preview';
 const Home = lazy(() => import('./pages/Home'));
 const SuccessStoriesPage = lazy(() => import('./pages/SuccessStoriesPage'));
 const ApplyLoan = lazy(() => import('./pages/ApplyLoan'));
@@ -28,6 +31,8 @@ import { playUIClick, playUITap } from './lib/sound';
 import { ensureSupabaseAuthSession, supabase } from './lib/supabase';
 
 export default function App() {
+  const telegramReady = hasTelegramInitData();
+  const browserPreview = isBrowserPreviewMode();
   const theme = useAppStore(state => state.theme);
   const setSystemSettings = useAppStore(state => state.setSystemSettings);
 
@@ -64,6 +69,7 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
+    if (!telegramReady || browserPreview) return;
     if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
       (window as any).Telegram.WebApp.ready();
       (window as any).Telegram.WebApp.expand();
@@ -156,18 +162,24 @@ export default function App() {
     return () => {
       if (presenceChannel) supabase.removeChannel(presenceChannel);
     };
-  }, [setSystemSettings]);
+  }, [setSystemSettings, telegramReady, browserPreview]);
 
   return (
     <Router>
       <Toaster position="top-center" richColors theme={theme === 'dark' ? 'dark' : 'light'} />
       <Routes>
-        <Route path="/admin" element={<Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 text-sm font-semibold">Loading dashboard…</div>}><AdminDashboard /></Suspense>} />
-        <Route path="/*" element={
+        <Route path="/admin" element={
+          !telegramReady && !browserPreview
+            ? <TelegramAccessGate isAdmin />
+            : <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 text-sm font-semibold">Loading dashboard…</div>}><AdminDashboard /></Suspense>
+        } />
+        <Route path="/" element={
+          browserPreview ? <BrowserPreviewHome /> : !telegramReady ? <TelegramAccessGate /> : <Layout><Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center text-slate-500 dark:text-slate-400 text-sm font-semibold">Loading screen…</div>}><Home /></Suspense></Layout>
+        } />
+        <Route path="/*" element={!telegramReady && !browserPreview ? <TelegramAccessGate isAdmin={window.location.pathname.startsWith('/admin')} /> : browserPreview ? <BrowserPreviewHome /> : (
           <Layout>
             <Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center text-slate-500 dark:text-slate-400 text-sm font-semibold">Loading screen…</div>}>
             <Routes>
-              <Route path="/" element={<Home />} />
               <Route path="/success-stories" element={<SuccessStoriesPage />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/apply" element={<ApplyLoan />} />
@@ -183,7 +195,7 @@ export default function App() {
             </Routes>
             </Suspense>
           </Layout>
-        } />
+        )} />
       </Routes>
     </Router>
   );
