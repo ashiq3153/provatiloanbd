@@ -9,6 +9,7 @@ import {getPrivateDocumentUrl} from '../../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { supabase } from '../../lib/supabase';
+import { isBrowserPreviewMode } from '../../lib/browser-preview';
 
 async function openPrivateDocumentReference(reference: string, isBn: boolean) {
   const popup = window.open('about:blank', '_blank');
@@ -28,8 +29,50 @@ async function openPrivateDocumentReference(reference: string, isBn: boolean) {
   }
 }
 
+const PREVIEW_LOAN: LoanApplication = {
+  id: 'demo-application-2026-001',
+  chat_id: 700001234,
+  loan_category: 'personal',
+  amount: 250000,
+  tenure_months: 24,
+  interest_rate: 0.0055,
+  emi_amount: 12250,
+  processing_fee: 2500,
+  security_deposit: 25000,
+  full_name: 'মো. রহিম উদ্দিন',
+  father_name: 'আব্দুল করিম',
+  mother_name: 'রোকেয়া বেগম',
+  dob: '1994-06-15',
+  gender: 'পুরুষ',
+  mobile: '01700000000',
+  whatsapp: '01700000000',
+  email: 'rahim.preview@example.test',
+  current_address: 'গ্রাম: মধুপুর, উপজেলা: সাভার, জেলা: ঢাকা',
+  permanent_address: 'গ্রাম: মধুপুর, উপজেলা: সাভার, জেলা: ঢাকা',
+  nid_number: '19941234567890123',
+  professional_info: { profession: 'বেসরকারি চাকরি', companyName: 'উদাহরণ প্রতিষ্ঠান', designation: 'অফিস সহকারী', workDuration: '৩ বছর', monthlyIncome: '35000' },
+  documents: {},
+  bank_name: 'উদাহরণ ব্যাংক',
+  account_name: 'মো. রহিম উদ্দিন',
+  account_number: 'PREVIEW-ACCOUNT-0001',
+  routing_number: null,
+  mobile_banking: null,
+  nominee_name: 'করিম উদ্দিন',
+  nominee_relation: 'ভাই',
+  nominee_mobile: '01800000000',
+  nominee_nid: '19941234567890124',
+  status: 'pending',
+  admin_feedback: null,
+  applied_at: '2026-10-19T09:30:00.000Z',
+  approved_at: null,
+  calculation_method: 'reducing_balance',
+  total_interest: 44000,
+  total_payable: 294000,
+};
+
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'repayments' | 'users' | 'stories' | 'settings' | 'broadcast' | 'kyc'>('overview');
+  const isBrowserPreview = isBrowserPreviewMode();
+  const [activeTab, setActiveTab] = useState<'overview' | 'loans' | 'deposits' | 'withdrawals' | 'repayments' | 'users' | 'stories' | 'settings' | 'broadcast' | 'kyc'>(isBrowserPreview ? 'loans' : 'overview');
   const [settingsSubTab, setSettingsSubTab] = useState<'general' | 'payments' | 'announcements' | 'categories'>('general');
 
   const [showLockModal, setShowLockModal] = useState<number | null>(null);
@@ -59,6 +102,7 @@ export default function AdminDashboard() {
   const [stories, setStories] = useState<SuccessStory[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loanStatusFilter, setLoanStatusFilter] = useState('all');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<LoanApplication | null>(null);
 
@@ -70,6 +114,7 @@ export default function AdminDashboard() {
   const canManageBroadcast = adminRole === 'owner' || adminRole === 'admin' || adminRole === 'support';
 
   useEffect(() => {
+    if (isBrowserPreview) return;
     const channel = supabase.channel('online_users');
     
     channel.on('presence', { event: 'sync' }, () => {
@@ -389,6 +434,24 @@ export default function AdminDashboard() {
 
   const fetchData = async () => {
     setLoading(true);
+    if (isBrowserPreview) {
+      const demoProfile: Profile = {
+        chat_id: PREVIEW_LOAN.chat_id, first_name: 'রহিম', last_name: 'উদ্দিন',
+        username: null, photo_url: null, phone: PREVIEW_LOAN.mobile,
+        address: PREVIEW_LOAN.current_address, nid_number: PREVIEW_LOAN.nid_number,
+        personal_details: null, is_banned: false, is_locked: false,
+        lock_reason: null, bot_status: 'active', created_at: PREVIEW_LOAN.applied_at
+      };
+      setProfiles([demoProfile]);
+      setLoans([PREVIEW_LOAN]);
+      setTransactions([]);
+      setStories([]);
+      setRepaymentQueue([]);
+      setFinancialReport({ completed_deposits: 0, completed_emi: 0, completed_withdrawals: 0, pending_amount: 0 });
+      setKycReviews([]);
+      setLoading(false);
+      return;
+    }
     try {
       const [p, l, t, s] = await Promise.all([
         getAllProfiles(),
@@ -429,6 +492,7 @@ export default function AdminDashboard() {
   };
 
   const handleBulkBroadcast = async () => {
+    if (isBrowserPreview) { toast.info(isBn ? 'প্রিভিউ মোডে কোনো বার্তা পাঠানো হয় না' : 'Broadcast is disabled in preview mode'); return; }
     if (!broadcastMessage.trim()) return toast.error(isBn ? 'মেসেজ লিখুন' : 'Please enter a message');
     if (profiles.length === 0) return toast.error('No users found');
     if (!window.confirm(isBn ? `আপনি কি ${profiles.length} জন ইউজারকে মেসেজ পাঠাতে চান?` : `Send message to ${profiles.length} users?`)) return;
@@ -461,6 +525,7 @@ export default function AdminDashboard() {
   };
 
   const handleSendDirectMessage = async () => {
+    if (isBrowserPreview) { toast.info(isBn ? 'প্রিভিউ মোডে মেসেজ পাঠানো যায় না' : 'Messaging is disabled in preview mode'); return; }
     if (directMessageUsers.length === 0 || !directMessageText.trim()) return;
     setIsSendingDirect(true);
     let delivered = 0;
@@ -481,6 +546,7 @@ export default function AdminDashboard() {
   };
 
   const handleSaveSettings = async () => {
+    if (isBrowserPreview) { toast.info(isBn ? 'প্রিভিউ মোডে সেটিংস সংরক্ষণ হয় না' : 'Settings cannot be saved in preview mode'); return; }
     const loadingId = toast.loading('Saving settings...');
     const newSettings = {
       // Keep the legacy single-rate keys in sync with the first tier for older screens.
@@ -537,6 +603,7 @@ export default function AdminDashboard() {
   };
 
   const handleLoanStatus = async (id: string, status: LoanApplication['status'], feedback?: string) => {
+    if (isBrowserPreview) { toast.info(isBn ? 'প্রিভিউ মোডে আবেদন স্ট্যাটাস পরিবর্তন হয় না' : 'Loan status changes are disabled in preview mode'); return false; }
     let success = false;
     try {
       success = await updateLoanApplicationStatus(id, status, feedback);
@@ -590,6 +657,7 @@ export default function AdminDashboard() {
   };
 
   const handleTxnStatus = async (id: string, status: Transaction['status']) => {
+    if (isBrowserPreview) { toast.info(isBn ? 'প্রিভিউ মোডে লেনদেন পরিবর্তন হয় না' : 'Transaction changes are disabled in preview mode'); return; }
     const pendingTransaction = transactions.find(t => t.id === id);
     if (pendingTransaction?.type === 'withdraw' && status === 'completed') {
       const confirmPaymentSent = window.confirm(isBn
@@ -728,7 +796,25 @@ export default function AdminDashboard() {
     }
   };
 
-  const filteredLoans = loans.filter(l => (l.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || l.id.includes(searchTerm));
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const filteredLoans = loans.filter(l => {
+    const matchesSearch = !normalizedSearch || [
+      l.full_name, l.id, l.mobile, l.nid_number, String(l.chat_id),
+      l.loan_category, l.professional_info?.profession || ''
+    ].some(value => String(value || '').toLowerCase().includes(normalizedSearch));
+    const matchesStatus = loanStatusFilter === 'all' || l.status === loanStatusFilter;
+    return matchesSearch && matchesStatus;
+  });
+  const loanCategoryLabel = (category: string) => {
+    const bn: Record<string, string> = { personal: 'ব্যক্তিগত ঋণ', business: 'ব্যবসায়িক ঋণ', expat: 'প্রবাসী ঋণ', student: 'শিক্ষা ঋণ', emergency: 'জরুরি ঋণ', women: 'নারী উদ্যোক্তা ঋণ', home: 'গৃহঋণ' };
+    const en: Record<string, string> = { personal: 'Personal Loan', business: 'Business Loan', expat: 'Probashi Loan', student: 'Education Loan', emergency: 'Emergency Loan', women: 'Women Entrepreneur Loan', home: 'Home Loan' };
+    return (isBn ? bn : en)[category] || category.replace(/_/g, ' ');
+  };
+  const loanStatusLabel = (status: string) => {
+    const bn: Record<string, string> = { pending: 'অপেক্ষমাণ', under_review: 'যাচাই চলছে', approved: 'অনুমোদিত', active: 'চলমান', rejected: 'বাতিল', action_required: 'সংশোধন প্রয়োজন', completed: 'সম্পন্ন', cancelled: 'বাতিল' };
+    const en: Record<string, string> = { pending: 'Pending', under_review: 'Under review', approved: 'Approved', active: 'Active', rejected: 'Rejected', action_required: 'Action required', completed: 'Completed', cancelled: 'Cancelled' };
+    return (isBn ? bn : en)[status] || status.replace(/_/g, ' ');
+  };
   const filteredTxns = transactions.filter(t => (t.trx_id?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || t.chat_id.toString().includes(searchTerm));
   const approvedLoanFunds = loans
     .filter(loan => loan.status === 'approved' || loan.status === 'active')
@@ -905,6 +991,12 @@ export default function AdminDashboard() {
 
         {/* Scrollable Content */}
         <main className="flex-1 min-w-0 min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain p-3 sm:p-5 lg:p-8 pb-[max(1rem,env(safe-area-inset-bottom))] relative z-10 custom-scrollbar">
+          {isBrowserPreview && (
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-amber-300/40 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-xs font-bold text-amber-800 dark:text-amber-200">
+              <span>PREVIEW MODE · {isBn ? 'শুধু নমুনা আবেদন দেখানো হচ্ছে' : 'Showing a sample application only'}</span>
+              <span className="rounded-full border border-amber-400/50 px-2.5 py-1">{isBn ? 'শুধু দেখার জন্য' : 'Read only'}</span>
+            </div>
+          )}
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -1086,29 +1178,47 @@ export default function AdminDashboard() {
                 <div className="bg-white dark:bg-gray-800 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
                   <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gray-50/50 dark:bg-gray-800/50">
                     <div>
-                      <h2 className="font-bold text-gray-900 dark:text-white text-xl">Loan Applications</h2>
-                      <p className="text-sm text-gray-500 mt-1">Manage and review all loan requests.</p>
+                      <h2 className="font-bold text-gray-900 dark:text-white text-xl">{isBn ? 'ঋণের আবেদনসমূহ' : 'Loan Applications'}</h2>
+                      <p className="text-sm text-gray-500 mt-1">{isBn ? 'আবেদনকারীর তথ্য দেখুন, যাচাই করুন এবং স্ট্যাটাস অনুযায়ী আবেদন খুঁজুন।' : 'Review applicants, check key details and filter requests by status.'}</p>
                     </div>
-                    <div className="relative w-full sm:w-64">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <input 
-                        type="text" 
-                        placeholder="Search loans..." 
-                        className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm transition-shadow"
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                      />
+                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                      <div className="relative w-full sm:w-72">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <input
+                          type="search"
+                          aria-label={isBn ? 'ঋণ আবেদন খুঁজুন' : 'Search loan applications'}
+                          placeholder={isBn ? 'নাম, মোবাইল, এনআইডি বা আবেদন আইডি' : 'Name, mobile, NID or application ID'}
+                          className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm transition-shadow"
+                          value={searchTerm}
+                          onChange={e => setSearchTerm(e.target.value)}
+                        />
+                      </div>
+                      <select
+                        aria-label={isBn ? 'আবেদনের স্ট্যাটাস ফিল্টার' : 'Filter by application status'}
+                        value={loanStatusFilter}
+                        onChange={e => setLoanStatusFilter(e.target.value)}
+                        className="w-full sm:w-48 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-3 text-sm font-semibold text-gray-700 dark:text-gray-200"
+                      >
+                        <option value="all">{isBn ? 'সব স্ট্যাটাস' : 'All statuses'}</option>
+                        <option value="pending">{loanStatusLabel('pending')}</option>
+                        <option value="under_review">{loanStatusLabel('under_review')}</option>
+                        <option value="action_required">{loanStatusLabel('action_required')}</option>
+                        <option value="approved">{loanStatusLabel('approved')}</option>
+                        <option value="active">{loanStatusLabel('active')}</option>
+                        <option value="rejected">{loanStatusLabel('rejected')}</option>
+                        <option value="completed">{loanStatusLabel('completed')}</option>
+                      </select>
                     </div>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
                       <thead className="bg-gray-50/80 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider text-xs border-b border-gray-200 dark:border-gray-700">
                         <tr>
-                          <th className="px-6 py-4">ID / Applicant</th>
-                          <th className="px-6 py-4">Category</th>
-                          <th className="px-6 py-4">Amount</th>
-                          <th className="px-6 py-4">Status</th>
-                          <th className="px-6 py-4">Actions</th>
+                          <th className="px-6 py-4">{isBn ? 'আবেদনকারী / আইডি' : 'Applicant / ID'}</th>
+                          <th className="px-6 py-4">{isBn ? 'ঋণের ধরন / পেশা' : 'Loan type / occupation'}</th>
+                          <th className="px-6 py-4">{isBn ? 'আবেদনের পরিমাণ' : 'Requested amount'}</th>
+                          <th className="px-6 py-4">{isBn ? 'স্ট্যাটাস' : 'Status'}</th>
+                          <th className="px-6 py-4">{isBn ? 'কাজ' : 'Action'}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -1148,9 +1258,13 @@ export default function AdminDashboard() {
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                               <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs font-bold capitalize">
-                                 {loan.loan_category}
-                               </span>
+                               <div className="space-y-1.5">
+                                 <span className="inline-flex px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs font-bold">
+                                   {loanCategoryLabel(loan.loan_category)}
+                                 </span>
+                                 <p className="text-xs text-gray-500 dark:text-gray-400">{isBn ? 'পেশা:' : 'Occupation:'} {loan.professional_info?.profession || '—'}</p>
+                                 <p className="text-[10px] text-gray-400">{loan.applied_at ? new Date(loan.applied_at).toLocaleDateString(isBn ? 'bn-BD' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</p>
+                               </div>
                             </td>
                             <td className="px-6 py-4 font-black text-gray-900 dark:text-white text-base">{formatCurrency(loan.amount || 0, isBn)}</td>
                             <td className="px-6 py-4">
@@ -1161,7 +1275,7 @@ export default function AdminDashboard() {
                                 loan.status === 'action_required' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-200 dark:border-orange-800/30' :
                                 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/30'
                               }`}>
-                                {loan.status.replace('_', ' ')}
+                                {loanStatusLabel(loan.status)}
                               </span>
                             </td>
                             <td className="px-6 py-4">
@@ -2223,7 +2337,7 @@ export default function AdminDashboard() {
                   <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
                   <div>
                     <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-2.5 py-1 rounded-full text-white/90">
-                      {selectedLoan.loan_category} Loan Review
+                      {loanCategoryLabel(selectedLoan.loan_category)} · {isBn ? 'আবেদন পর্যালোচনা' : 'Application review'}
                     </span>
                     <div className="flex items-center gap-2 mt-2">
                       <h3 className="text-xl sm:text-2xl font-black leading-none">{selectedLoan.full_name}</h3>
@@ -2337,6 +2451,10 @@ export default function AdminDashboard() {
                             <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.gender}</span>
                           </div>
                           <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'পেশা/কাজের ধরন' : 'Occupation'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.professional_info?.profession || '—'}</span>
+                          </div>
+                          <div>
                             <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'মোবাইল' : 'Mobile'}</span>
                             <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.mobile}</span>
                           </div>
@@ -2428,6 +2546,14 @@ export default function AdminDashboard() {
                           <div>
                             <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'পরিমাণ' : 'Amount'}</span>
                             <span className="font-black text-primary-600 dark:text-primary-400 text-base">{formatCurrency(selectedLoan.amount, isBn)}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'মাসিক কিস্তি (আনুমানিক)' : 'Estimated monthly instalment'}</span>
+                            <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(selectedLoan.emi_amount || 0, isBn)}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'আবেদনের তারিখ' : 'Applied on'}</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">{selectedLoan.applied_at ? new Date(selectedLoan.applied_at).toLocaleString(isBn ? 'bn-BD' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}</span>
                           </div>
                           <div>
                             <span className="text-gray-400 font-semibold block mb-0.5">{isBn ? 'মেয়াদকাল' : 'Tenure'}</span>
