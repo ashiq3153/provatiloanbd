@@ -28,6 +28,9 @@ type AdminAction =
   | 'set_admin_status';
 
 async function callAdmin<T>(adminAction: AdminAction, payload: Record<string, unknown> = {}): Promise<T> {
+  if (import.meta.env.VITE_BROWSER_PREVIEW === 'true') {
+    throw new Error('Admin API is disabled in read-only preview mode');
+  }
   const telegramWebApp = (window as Window & { Telegram?: { WebApp?: { initData?: string } } }).Telegram?.WebApp;
   const initData = telegramWebApp?.initData;
   if (!initData) {

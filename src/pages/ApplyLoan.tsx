@@ -372,7 +372,7 @@ export default function ApplyLoan() {
     if (user && user.id) {
       supabase.from('profiles').select('is_banned').eq('chat_id', user.id).single().then(({ data }) => {
         if (data?.is_banned) {
-          toast.error(isBn ? 'আপনার অ্যাকাউন্ট স্থগিত করা হয়েছে। আপনি লোন আবেদন করতে পারবেন না।' : 'Your account is suspended. You cannot apply for loans.');
+          toast.error(isBn ? 'আপনার অ্যাকাউন্ট স্থগিত করা হয়েছে। আপনি ঋণ আবেদন করতে পারবেন না।' : 'Your account is suspended. You cannot apply for loans.');
           navigate('/');
         }
       });
@@ -464,6 +464,7 @@ export default function ApplyLoan() {
 
           methods.reset(defaultFields);
           if (loan.documents) setDocuments(loan.documents);
+          if ((loan.professional_info as any)?.profession) setSelectedProfession((loan.professional_info as any).profession);
 
           // Parse admin feedback JSON for flagged sections
           let feedbackText = loan.admin_feedback || '';
@@ -690,7 +691,7 @@ export default function ApplyLoan() {
         methods.setValue('currentAddress', currentAddress as any);
         methods.setValue('permanentAddress', permanentAddress as any);
 
-        const personalFields: (keyof LoanFormData)[] = ['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'mobile', 'whatsapp', 'email', 'nidNumber'];
+        const personalFields: (keyof LoanFormData)[] = ['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'profession', 'mobile', 'whatsapp', 'email', 'nidNumber'];
         
         let profFields: (keyof LoanFormData)[] = [];
         if (category?.id === 'personal') profFields = ['companyName', 'designation', 'workDuration', 'monthlyIncome', 'jobAddress'];
@@ -821,7 +822,7 @@ export default function ApplyLoan() {
         return;
       }
 
-      const professionalInfo: Record<string, string> = {};
+      const professionalInfo: Record<string, string> = { profession: formData.profession || "" };
       if (category?.id === 'personal') {
         professionalInfo.companyName = formData.companyName || '';
         professionalInfo.designation = formData.designation || '';
@@ -1387,10 +1388,12 @@ export default function ApplyLoan() {
 
     const selectedOption =
       professionOptions.find(item => item.label === selectedProfession) ||
-      quickProfessionGroups.find(item => item.label === selectedProfession);
+      quickProfessionGroups.find(item => item.label === selectedProfession) ||
+      quickProfessionGroups[0];
 
+    // Profession helps prefill the form; it must not block access to any loan category.
     const selectedCategories = selectedOption?.categories || [];
-    const visibleCategories = categories.filter(cat => selectedCategories.includes(cat.id));
+    const visibleCategories = categories;
     const filteredProfessions = professionOptions.filter(item =>
       item.label.toLowerCase().includes(professionSearch.trim().toLowerCase())
     );
@@ -1402,7 +1405,7 @@ export default function ApplyLoan() {
       ? getLoanDocumentRequirements(detailsCategory.id)
       : [];
     const detailInfoLabels: Record<string, string> = {
-      fullName: "পূর্ণ নাম", fatherName: "পিতার নাম", motherName: "মাতার নাম", dob: "জন্ম তারিখ", gender: "লিঙ্গ",
+      fullName: "পূর্ণ নাম", fatherName: "পিতার নাম", motherName: "মাতার নাম", dob: "জন্মতারিখ", gender: "লিঙ্গ", profession: "পেশা/কাজের ধরন",
       mobile: "মোবাইল নম্বর", nidNumber: "NID নম্বর", currentAddress: "বর্তমান ঠিকানা", permanentAddress: "স্থায়ী ঠিকানা",
       companyName: "প্রতিষ্ঠানের নাম", designation: "পদবী", workDuration: "চাকরির মেয়াদ", monthlyIncome: "মাসিক আয়",
       businessName: "ব্যবসার নাম", shopAddress: "ব্যবসার ঠিকানা", tradeLicense: "ট্রেড লাইসেন্স", bankName: "ব্যাংকের নাম",
@@ -1431,6 +1434,7 @@ export default function ApplyLoan() {
 
     const selectProfession = (item: ProfessionOption) => {
       setSelectedProfession(item.label);
+      methods.setValue("profession", item.label, { shouldValidate: true, shouldDirty: true });
       setShowProfessionModal(false);
       setProfessionSearch("");
     };
@@ -1442,10 +1446,10 @@ export default function ApplyLoan() {
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h2 className="text-[15px] leading-tight font-black text-slate-900 dark:text-white">
-                  {isBn ? "আপনার পেশা নির্বাচন করুন" : "Choose your profession"}
+                  {isBn ? "আপনার পেশা নির্বাচন করুন" : "Choose your occupation"}
                 </h2>
                 <p className="mt-0.5 text-[8px] leading-3.5 text-slate-500 dark:text-slate-400">
-                  {isBn ? "আপনার পেশা অনুযায়ী শুধু প্রযোজ্য লোন দেখানো হবে" : "Only applicable loans will be shown for your profession"}
+                  {isBn ? "পেশা বেছে নিতে পারেন, অথবা সরাসরি নিচের যেকোনো ঋণের ধরন নির্বাচন করুন। আবেদন ফর্মে আপনার পেশা জানতে চাওয়া হবে।" : "You can select your occupation here or choose any loan category below. Your occupation will also be requested in the application form."}
                 </p>
               </div>
               
@@ -1453,7 +1457,7 @@ export default function ApplyLoan() {
 
             <div className="mt-2.5 flex gap-1.5 overflow-x-auto pb-1">
               {quickProfessionGroups.map(item => {
-                const active = selectedCategories.length > 0 && item.categories.some(id => selectedCategories.includes(id));
+                const active = Boolean(selectedProfession) && selectedCategories.length > 0 && item.categories.some(id => selectedCategories.includes(id));
                 const Icon = item.icon;
                 return (
                   <button
@@ -1491,13 +1495,13 @@ export default function ApplyLoan() {
 <div className="flex items-center justify-between px-1 pt-1">
           <div>
             <h3 className="text-[12px] font-black text-slate-800 dark:text-white">
-              {isBn ? "উপযুক্ত ক্যাটাগরি" : "Applicable loan categories"}
+              {isBn ? "ঋণের ধরন নির্বাচন করুন" : "Choose a loan category"}
             </h3>
             <p className="text-[8px] text-slate-400 mt-0.5">
               {isBn ? (visibleCategories.length + "টি ক্যাটাগরি দেখানো হচ্ছে") : (visibleCategories.length + " applicable")}
             </p>
           </div>
-          <span className="text-[8px] font-semibold text-slate-400">{isBn ? "পেশা অনুযায়ী ফিল্টার" : "Filtered by profession"}</span>
+          <span className="text-[8px] font-semibold text-slate-400">{isBn ? "আপনার প্রয়োজন অনুযায়ী নির্বাচন করুন" : "Choose based on your needs"}</span>
         </div>
 
         <div className="space-y-2.5">
@@ -1535,7 +1539,7 @@ export default function ApplyLoan() {
                       </div>
                       <div className="min-w-0">
                         <h4 className="text-[12px] font-black leading-[1.1] text-slate-900 dark:text-white">
-                          {cat.title} {isBn ? "লোন" : "Loan"} <span className="font-semibold text-slate-400">({cat.id === "expat" ? "Probashi" : cat.id === "business" ? "SME" : cat.id === "student" ? "Student" : cat.id === "personal" ? "Personal" : cat.id === "women" ? "Women Entrepreneur" : "Emergency"})</span>
+                          {cat.title} {isBn ? "ঋণ" : "Loan"} <span className="font-semibold text-slate-400">({cat.id === "expat" ? "Probashi" : cat.id === "business" ? "SME" : cat.id === "student" ? "Student" : cat.id === "personal" ? "Personal" : cat.id === "women" ? "Women Entrepreneur" : "Emergency"})</span>
                         </h4>
                         <p className={"mt-0.5 text-[8px] font-bold " + (cat.id === "emergency" ? "text-rose-500" : "text-emerald-600 dark:text-emerald-300")}>
                           {isBn ? "সর্বোচ্চ " + cat.limit + " পর্যন্ত" : "Up to " + cat.limit}
@@ -1579,7 +1583,7 @@ export default function ApplyLoan() {
                       onClick={() => setDetailsCategoryId(cat.id)}
                       className="h-7 rounded-full border border-slate-400 dark:border-slate-600 bg-white dark:bg-transparent text-[8px] font-black text-slate-700 dark:text-slate-200"
                     >
-                      {isBn ? "লোনের বিস্তারিত" : "Loan details"}
+                      {isBn ? "ঋণের বিস্তারিত" : "Loan details"}
                     </button>
                     <button
                       type="button"
@@ -1596,17 +1600,17 @@ export default function ApplyLoan() {
         </div>
         {visibleCategories.length === 0 && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/50 px-3 py-3 text-center">
-            <p className="text-[9px] font-black text-amber-800 dark:text-amber-200">{isBn ? "এই পেশার জন্য কোনো সক্রিয় ক্যাটাগরি নেই।" : "No active category is available for this profession."}</p>
+            <p className="text-[9px] font-black text-amber-800 dark:text-amber-200">{isBn ? "এখন কোনো ঋণের ধরন চালু নেই।" : "No loan categories are currently available."}</p>
           </div>
         )}
           </>
         ) : (
           <div className="rounded-xl border border-dashed border-emerald-300 dark:border-emerald-900/60 bg-emerald-50/60 dark:bg-emerald-950/20 px-4 py-5 text-center">
             <p className="text-[11px] font-black text-emerald-800 dark:text-emerald-200">
-              {isBn ? "প্রথমে আপনার পেশা নির্বাচন করুন" : "Please select your profession first"}
+              {isBn ? "আপনার প্রয়োজন অনুযায়ী ঋণের ধরন বেছে নিন" : "Choose a loan category that fits your needs"}
             </p>
             <p className="mt-1 text-[8px] text-slate-500 dark:text-slate-400">
-              {isBn ? "পেশা নির্বাচন করার পর শুধু আপনার জন্য প্রযোজ্য লোন ক্যাটাগরি দেখানো হবে।" : "Only the loan categories applicable to your profession will appear after selection."}
+              {isBn ? "সব ক্যাটাগরি থেকে আবেদন শুরু করা যাবে। ফর্মে পেশা ও ক্যাটাগরি অনুযায়ী প্রয়োজনীয় তথ্য দিতে হবে।" : "You can start with any category. The form will request the relevant occupation and category-specific details."}
             </p>
           </div>
         )}
@@ -1672,8 +1676,8 @@ export default function ApplyLoan() {
                   <FileText size={18} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-[15px] font-black text-slate-900 dark:text-white">{detailsCategory.title} {isBn ? "লোনের বিস্তারিত" : "Loan details"}</h3>
-                  <p className="text-[9px] text-slate-400 mt-0.5">{isBn ? "লোনের শর্ত, প্রয়োজনীয় কাগজপত্র ও আবেদন ধাপ" : "Terms, required documents and application steps"}</p>
+                  <h3 className="text-[15px] font-black text-slate-900 dark:text-white">{detailsCategory.title} {isBn ? "ঋণের বিস্তারিত" : "Loan details"}</h3>
+                  <p className="text-[9px] text-slate-400 mt-0.5">{isBn ? "ঋণের শর্ত, প্রয়োজনীয় কাগজপত্র ও আবেদন ধাপ" : "Terms, required documents and application steps"}</p>
                 </div>
                 <button type="button" onClick={() => setDetailsCategoryId(null)} className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                   <X size={17} />
@@ -1682,7 +1686,7 @@ export default function ApplyLoan() {
 
               <div className="p-4 overflow-y-auto max-h-[74vh] space-y-4">
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><p className="text-[8px] text-slate-400">সর্বোচ্চ লোন</p><p className="text-[10px] font-black mt-1 text-slate-900 dark:text-white">{detailsCategory.limit}</p></div>
+                  <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><p className="text-[8px] text-slate-400">সর্বোচ্চ ঋণ</p><p className="text-[10px] font-black mt-1 text-slate-900 dark:text-white">{detailsCategory.limit}</p></div>
                   <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><p className="text-[8px] text-slate-400">সুদের হার</p><p className="text-[10px] font-black mt-1 text-slate-900 dark:text-white">{detailsCategory.intRates}/মাস</p></div>
                   <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><p className="text-[8px] text-slate-400">মেয়াদ</p><p className="text-[10px] font-black mt-1 text-slate-900 dark:text-white">{detailsCategory.tenureRange}</p></div>
                   <div className="rounded-xl bg-slate-50 dark:bg-slate-900 p-3"><p className="text-[8px] text-slate-400">প্রসেসিং সময়</p><p className="text-[10px] font-black mt-1 text-slate-900 dark:text-white">{detailsCategory.procTime}</p></div>
@@ -1733,7 +1737,7 @@ export default function ApplyLoan() {
                 <section>
                   <h4 className="text-[11px] font-black text-slate-900 dark:text-white">আবেদনের ধাপ</h4>
                   <ol className="mt-2 space-y-1.5">
-                    {["লোনের পরিমাণ নির্বাচন", "ব্যক্তিগত ও পেশাগত তথ্য পূরণ", "প্রয়োজনীয় ডকুমেন্ট আপলোড", "আবেদন জমা ও যাচাই", "অনুমোদনের পর প্রযোজ্য ফি/ডিপোজিট", "চূড়ান্ত অনুমোদন ও বিতরণ"].map((stepLabel, index) => (
+                    {["ঋণের পরিমাণ নির্বাচন", "ব্যক্তিগত ও পেশাগত তথ্য পূরণ", "প্রয়োজনীয় ডকুমেন্ট আপলোড", "আবেদন জমা ও যাচাই", "অনুমোদনের পর প্রযোজ্য ফি/ডিপোজিট", "চূড়ান্ত অনুমোদন ও বিতরণ"].map((stepLabel, index) => (
                       <li key={stepLabel} className="flex items-center gap-2 text-[9px] text-slate-600 dark:text-slate-300">
                         <span className="w-5 h-5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-[8px] font-black shrink-0">{index + 1}</span>
                         <span>{stepLabel}</span>
@@ -1751,7 +1755,7 @@ export default function ApplyLoan() {
                   }}
                   className="w-full h-10 rounded-xl bg-[#075f50] text-white text-[10px] font-black flex items-center justify-center gap-1"
                 >
-                  {isBn ? "এই লোনের জন্য আবেদন করুন" : "Apply for this loan"} <ChevronRight size={13} />
+                  {isBn ? "এই ঋণের জন্য আবেদন করুন" : "Apply for this loan"} <ChevronRight size={13} />
                 </button>
               </div>
             </div>
@@ -1804,7 +1808,7 @@ export default function ApplyLoan() {
         <div className="px-1 pt-1">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-xl font-black text-gray-900 dark:text-white">{isBn ? "লোনের পরিমাণ ও মেয়াদ" : "Loan amount & tenure"}</h2>
+              <h2 className="text-xl font-black text-gray-900 dark:text-white">{isBn ? "ঋণের পরিমাণ ও মেয়াদ" : "Loan amount & tenure"}</h2>
               <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{isBn ? "আপনার প্রয়োজন অনুযায়ী পরিমাণ ও কিস্তির সময় নির্বাচন করুন" : "Choose the amount and repayment period that fits you"}</p>
             </div>
             <span className="px-3 py-1.5 rounded-full neu-raised text-[10px] font-black text-primary-700 dark:text-primary-300 shrink-0">{category.title}</span>
@@ -1815,7 +1819,7 @@ export default function ApplyLoan() {
           <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full bg-primary-500/10 blur-2xl pointer-events-none" />
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
-              <label className="text-sm font-black text-gray-800 dark:text-gray-100">{isBn ? "লোনের পরিমাণ" : "Loan Amount"}</label>
+              <label className="text-sm font-black text-gray-800 dark:text-gray-100">{isBn ? "ঋণের পরিমাণ" : "Loan Amount"}</label>
               <span className="px-2.5 py-1 rounded-full bg-primary-500/10 text-primary-700 dark:text-primary-300 text-[9px] font-black border border-primary-500/10">
                 {isBn ? "সর্বোচ্চ" : "Max"} {category.limit}
               </span>
@@ -1976,7 +1980,7 @@ export default function ApplyLoan() {
                 <button type="button" onClick={() => setShowRepaymentSchedule(false)} className="w-9 h-9 rounded-full neu-btn flex items-center justify-center text-gray-200"><X size={17} /></button>
               </div>
               <div className="px-4 py-3 bg-[#0c1422] border-b border-white/10">
-                <label className="block text-[9px] font-black text-gray-400 mb-1.5">{isBn ? "লোন/কিস্তি শুরুর তারিখ" : "Loan / repayment start date"}</label>
+                <label className="block text-[9px] font-black text-gray-400 mb-1.5">{isBn ? "ঋণ/কিস্তি শুরুর তারিখ" : "Loan / repayment start date"}</label>
                 <input type="date" value={repaymentStartDate} onChange={e => setRepaymentStartDate(e.target.value)} className="w-full rounded-xl bg-[#101827] border border-white/10 px-3 py-2.5 text-xs font-bold text-white outline-none focus:border-primary-500" />
               </div>
               <div className="overflow-auto max-h-[62vh]">
@@ -2069,9 +2073,15 @@ export default function ApplyLoan() {
         >
           <div className="space-y-3 text-xs">
             <div>
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পূর্ণ নাম (NID অনুযায়ী)" : "Full Name (as per NID)"}</label>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পূর্ণ নাম (NID অনুযায়ী)" : "Full name (as shown on NID)"}</label>
               <input type="text" {...register("fullName")} className={`w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 ${errors.fullName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: মোঃ রহিম উদ্দিন" : "e.g. Md. Rahim Uddin"} />
               <ErrorText field="fullName" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পেশা/কাজের ধরন" : "Occupation / type of work"} <span className="text-rose-500">*</span></label>
+              <input type="text" {...register("profession")} className={`w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 ${errors.profession ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: শিক্ষক, দোকানদার, শিক্ষার্থী" : "e.g. Teacher, shop owner, student"} />
+              <ErrorText field="profession" />
+              <p className="mt-1 text-[10px] text-gray-500 dark:text-gray-400">{isBn ? "আপনার পেশা অনুযায়ী প্রাসঙ্গিক তথ্য ও কাগজপত্র যাচাই করা হবে।" : "Relevant details and documents will be checked based on your occupation."}</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -2317,13 +2327,13 @@ export default function ApplyLoan() {
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
                   <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3">{isBn ? "অন্যান্য ঋণ/কার্ডের তথ্য" : "Existing Loan/Card Info"}</h4>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বর্তমান লোন ব্যাংক/আর্থিক প্রতিষ্ঠান" : "Existing Loan Bank"}</label>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "বর্তমান ঋণ ব্যাংক/আর্থিক প্রতিষ্ঠান" : "Existing Loan Bank"}</label>
                     <input type="text" {...register("existingLoanBank")} className={`w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 ${errors.existingLoanBank ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: ব্র্যাক ব্যাংক" : "e.g. BRAC Bank"} />
                     <ErrorText field="existingLoanBank" />
                   </div>
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "লোনের মাসিক কিস্তি (EMI)" : "Loan EMI"}</label>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ঋণের মাসিক কিস্তি (EMI)" : "Loan EMI"}</label>
                       <input type="number" {...register("existingLoanEmi")} className={`w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 ${errors.existingLoanEmi ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                       <ErrorText field="existingLoanEmi" />
                     </div>
@@ -2465,9 +2475,9 @@ export default function ApplyLoan() {
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "লোনের উদ্দেশ্য ও ব্যাংকিং হিস্ট্রি" : "Loan Purpose & Banking"}</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-800">{isBn ? "ঋণের উদ্দেশ্য ও ব্যাংকিং হিস্ট্রি" : "Loan Purpose & Banking"}</h4>
                   <div className="mb-3">
-                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "লোন ইউটিলাইজেশন প্ল্যান" : "Loan Utilization Plan"}</label>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ঋণ ইউটিলাইজেশন প্ল্যান" : "Loan Utilization Plan"}</label>
                     <textarea rows={2} {...register("loanPurposeDetails")} className={`w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 ${errors.loanPurposeDetails ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all resize-none`} placeholder={isBn ? "Working Capital, CapEx, নাকি Expansion?" : "Working Capital, CapEx, or Expansion?"} />
                     <ErrorText field="loanPurposeDetails" />
                   </div>
@@ -2484,7 +2494,7 @@ export default function ApplyLoan() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "অন্যান্য সক্রিয় লোন/লিজ" : "Other Active Loans/Leases"}</label>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "অন্যান্য সক্রিয় ঋণ/লিজ" : "Other Active Loans/Leases"}</label>
                     <input type="text" {...register("otherActiveLoans")} className={`w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 ${errors.otherActiveLoans ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="Details of active loans" />
                     <ErrorText field="otherActiveLoans" />
                   </div>
@@ -2576,7 +2586,7 @@ export default function ApplyLoan() {
                   <div>
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "সরকারি স্কিম/ফান্ডিং (বাংলাদেশ ব্যাংক/SME)" : "Govt. Scheme / SME Funding"}</label>
                     <select {...register("govtScheme")} className={`w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 ${errors.govtScheme ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all cursor-pointer`}>
-                      <option value="">{isBn ? "সাধারণ লোন" : "General Loan"}</option>
+                      <option value="">{isBn ? "সাধারণ ঋণ" : "General Loan"}</option>
                       <option value="BB Refinancing">{isBn ? "বাংলাদেশ ব্যাংক রিফাইন্যান্সিং" : "BB Refinancing Scheme"}</option>
                       <option value="SME Foundation">{isBn ? "এসএমই ফাউন্ডেশন" : "SME Foundation"}</option>
                     </select>
@@ -2999,7 +3009,7 @@ export default function ApplyLoan() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ঘাটতি বা লোনের পরিমাণ" : "Shortfall/Loan Amount"}</label>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "ঘাটতি বা ঋণের পরিমাণ" : "Shortfall/Loan Amount"}</label>
                     <input type="number" {...register("shortfallAmount")} className={`w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 ${errors.shortfallAmount ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder="৳" />
                   </div>
                   <div>
@@ -3193,7 +3203,9 @@ export default function ApplyLoan() {
     const requirement = getLoanDocumentRequirements(category?.id || 'personal').find(d => d.key === id);
     const displayTitle = requirement?.required
       ? `${title} ${isBn ? '• আবশ্যক' : '• Required'}`
-      : title;
+      : requirement?.conditional
+        ? `${title} ${isBn ? '• প্রযোজ্য হলে' : '• If applicable'}`
+        : `${title} ${isBn ? '• ঐচ্ছিক' : '• Optional'}`;
     return (
       <div className="relative">
         <input 
@@ -3403,14 +3415,14 @@ export default function ApplyLoan() {
         <div className="bg-gray-100/40 dark:bg-gray-900/20 p-4 border-b border-gray-200/50 dark:border-gray-800 flex justify-between items-center">
           <div className="flex items-center gap-2">
             {category?.icon && <category.icon size={18} className="text-gray-500" />}
-            <span className="font-bold text-sm text-gray-800 dark:text-gray-200">{category?.title} লোন</span>
+            <span className="font-bold text-sm text-gray-800 dark:text-gray-200">{category?.title} ঋণ</span>
           </div>
           <span className="text-xs font-bold bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 border-slate-200 dark:border-slate-800 px-2.5 py-1 rounded-full">New</span>
         </div>
         
         <div className="p-4 divide-y divide-gray-200/40 dark:divide-gray-700/50">
           <div className="py-2.5 flex justify-between">
-            <span className="text-gray-500 text-sm">{isBn ? "লোনের পরিমাণ" : "Loan Amount"}</span>
+            <span className="text-gray-500 text-sm">{isBn ? "ঋণের পরিমাণ" : "Loan Amount"}</span>
             <span className="font-bold text-gray-900 dark:text-white transition-colors">{formatCurrency(amount, isBn)}</span>
           </div>
           <div className="py-2.5 flex justify-between">
@@ -3447,7 +3459,7 @@ export default function ApplyLoan() {
           >
             {isBn ? "শর্তাবলীতে" : "Terms & Conditions"}
           </button>
-          {isBn ? " সম্মত আছি এবং লোন অনুমোদনের ক্ষেত্রে Authorities এর সিদ্ধান্ত চূড়ান্ত বলে গণ্য হবে।" : " and authority decision will be considered final regarding loan approval."}
+          {isBn ? " সম্মত আছি এবং ঋণ অনুমোদনের ক্ষেত্রে Authorities এর সিদ্ধান্ত চূড়ান্ত বলে গণ্য হবে।" : " and authority decision will be considered final regarding loan approval."}
         </p>
       </label>
     </div>
@@ -3485,7 +3497,7 @@ export default function ApplyLoan() {
           </h3>
           <p className="text-xs font-medium text-amber-700 dark:text-amber-400 mt-1 transition-colors leading-relaxed">
             {isBn 
-              ? 'আপনার লোন ফাইলটি চূড়ান্ত সক্রিয় করতে নির্ধারিত প্রসেসিং ফি এবং সমবায় সঞ্চয় আমানত নীতিমালা অনুযায়ী জমা দিন। কিস্তির বিস্তারিত জানতে বা সহায়তা পেতে সরাসরি আমাদের হেল্প সেন্টারে যোগাযোগ করতে পারেন।' 
+              ? 'আপনার ঋণ ফাইলটি চূড়ান্ত সক্রিয় করতে নির্ধারিত প্রসেসিং ফি এবং সমবায় সঞ্চয় আমানত নীতিমালা অনুযায়ী জমা দিন। কিস্তির বিস্তারিত জানতে বা সহায়তা পেতে সরাসরি আমাদের হেল্প সেন্টারে যোগাযোগ করতে পারেন।' 
               : 'To finalize your loan activation, please complete the processing fee and savings deposit as per cooperative policy. For queries regarding EMI or support, contact our help center.'}
           </p>
         </div>
@@ -3563,7 +3575,7 @@ export default function ApplyLoan() {
             {step >= 2 && category && (
               <div className="mt-3 flex items-center gap-2 overflow-x-auto no-scrollbar">
                 <span className="shrink-0 px-3 py-1.5 rounded-full bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 text-[10px] font-black text-slate-700 dark:text-slate-200">{isBn ? `ধাপ ${convertDigits(step, true)} / ${convertDigits(totalSteps, true)} • ${step === 2 ? "পরিমাণ ও মেয়াদ" : step === 3 ? "আবেদনকারীর তথ্য" : "ডকুমেন্ট আপলোড"}` : `Step ${step} / ${totalSteps} • ${step === 2 ? "Amount & Tenure" : step === 3 ? "Applicant Details" : "Documents"}`}</span>
-                <span className="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 text-[10px] font-black text-blue-800 dark:text-blue-200">{category.title} {isBn ? "লোন" : "Loan"}</span>
+                <span className="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 text-[10px] font-black text-blue-800 dark:text-blue-200">{category.title} {isBn ? "ঋণ" : "Loan"}</span>
               </div>
             )}
           </div>
@@ -3650,7 +3662,7 @@ export default function ApplyLoan() {
                 <>
                   <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     <h4 className="font-bold text-gray-900 dark:text-white text-xs">
-                      {isBn ? 'লোন ও আবেদনকারী সারসংক্ষেপ' : 'Loan & Applicant Summary'}
+                      {isBn ? 'ঋণ ও আবেদনকারী সারসংক্ষেপ' : 'Loan & Applicant Summary'}
                     </h4>
                     <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-600 dark:text-gray-400">
                       <div>
@@ -3849,7 +3861,7 @@ export default function ApplyLoan() {
                     {/* Check 4 */}
                     <div className="flex items-center justify-between text-[11px] font-bold">
                       <span className={activeCheck >= 4 ? 'text-emerald-600 dark:text-emerald-400' : activeCheck === 3 ? 'text-gray-950 dark:text-white' : 'text-gray-400'}>
-                        {isBn ? '৪. লোন ফাইল প্রসেসিং ও ডাটাবেস এন্ট্রি (Submission)' : '4. Final Database Entry & Cryptography'}
+                        {isBn ? '৪. ঋণ ফাইল প্রসেসিং ও ডাটাবেস এন্ট্রি (Submission)' : '4. Final Database Entry & Cryptography'}
                       </span>
                       {activeCheck >= 4 ? (
                         <CheckCircle2 size={15} className="text-emerald-500 shrink-0" />
@@ -3926,9 +3938,9 @@ export default function ApplyLoan() {
             </div>
             <div className="px-5 py-5 space-y-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
               {step === 1 ? (
-                <><p>{isBn ? "প্রথমে আপনার পেশা বা প্রয়োজন নির্বাচন করুন। এরপর আপনার জন্য প্রযোজ্য লোন ক্যাটাগরি দেখানো হবে।" : "Choose your profession or need first. The app will then show matching loan categories."}</p><p>{isBn ? "ক্যাটাগরির বিস্তারিত দেখে সর্বোচ্চ সীমা, সুদের হার, মেয়াদ ও প্রয়োজনীয় কাগজপত্র মিলিয়ে নিন।" : "Open loan details to review the limit, rate, tenure and required documents."}</p></>
+                <><p>{isBn ? "প্রথমে আপনার পেশা বা প্রয়োজন নির্বাচন করুন। এরপর আপনার জন্য প্রযোজ্য ঋণ ক্যাটাগরি দেখানো হবে।" : "Choose your profession or need first. The app will then show matching loan categories."}</p><p>{isBn ? "ক্যাটাগরির বিস্তারিত দেখে সর্বোচ্চ সীমা, সুদের হার, মেয়াদ ও প্রয়োজনীয় কাগজপত্র মিলিয়ে নিন।" : "Open loan details to review the limit, rate, tenure and required documents."}</p></>
               ) : step === 2 ? (
-                <><p>{isBn ? "স্লাইডার বা দ্রুত পরিমাণের বোতাম দিয়ে লোনের পরিমাণ নির্ধারণ করুন। এরপর অনুমোদিত মেয়াদ নির্বাচন করুন।" : "Set your loan amount using the slider or quick amount buttons, then choose an allowed tenure."}</p><p>{isBn ? "মাসিক কিস্তি, মোট পরিশোধ ও প্রাথমিক ফি আনুমানিক হিসাব—চালিয়ে যাওয়ার আগে পুরো হিসাব দেখে নিন।" : "Monthly EMI, total payable and upfront fees are estimates; review the full calculation before continuing."}</p></>
+                <><p>{isBn ? "স্লাইডার বা দ্রুত পরিমাণের বোতাম দিয়ে ঋণের পরিমাণ নির্ধারণ করুন। এরপর অনুমোদিত মেয়াদ নির্বাচন করুন।" : "Set your loan amount using the slider or quick amount buttons, then choose an allowed tenure."}</p><p>{isBn ? "মাসিক কিস্তি, মোট পরিশোধ ও প্রাথমিক ফি আনুমানিক হিসাব—চালিয়ে যাওয়ার আগে পুরো হিসাব দেখে নিন।" : "Monthly EMI, total payable and upfront fees are estimates; review the full calculation before continuing."}</p></>
               ) : step === 3 ? (
                 <><p>{isBn ? "ব্যক্তিগত, ঠিকানা, পেশাগত, ব্যাংক ও নমিনি তথ্যের প্রতিটি সেকশন খুলে প্রয়োজনীয় তথ্য পূরণ করুন।" : "Open each section and complete the required personal, address, professional, bank and nominee details."}</p><p>{isBn ? "লাল চিহ্নিত ত্রুটি থাকলে সংশোধন করুন। ঠিকানা ও পরিচয়পত্রের তথ্য সঠিকভাবে মিলিয়ে দিন।" : "Correct red validation messages and make sure address and identity information is accurate."}</p></>
               ) : (
@@ -3971,7 +3983,7 @@ export default function ApplyLoan() {
                 {isBn ? (
                   <div className="space-y-1.5">
                     <p>ক. <b>প্রভাতি সমবায় সমিতি</b> অ্যাপ্লিকেশনের মাধ্যমে ঋণ আবেদনের ক্ষেত্রে আবেদনকারীকে অবশ্যই সমিতির একজন বৈধ সদস্য হতে হবে এবং তার সমস্ত তথ্য সঠিক হতে হবে।</p>
-                    <p>খ. Authorities এর সিদ্ধান্ত লোন অনুমোদন, পুনর্নিরীক্ষণ (Revision), অথবা বাতিলের ক্ষেত্রে চূড়ান্ত বলে গণ্য হবে এবং আবেদনকারী তা মেনে নিতে বাধ্য থাকবেন।</p>
+                    <p>খ. Authorities এর সিদ্ধান্ত ঋণ অনুমোদন, পুনর্নিরীক্ষণ (Revision), অথবা বাতিলের ক্ষেত্রে চূড়ান্ত বলে গণ্য হবে এবং আবেদনকারী তা মেনে নিতে বাধ্য থাকবেন।</p>
                     <p>গ. ভুল তথ্য প্রদান বা জাল প্রমাণপত্র আপলোড করা হলে সমিতি কর্তৃপক্ষ কোনো নোটিশ ছাড়াই ব্যবহারকারীর অ্যাকাউন্ট সাময়িকভাবে বা চিরতরে স্থগিত (Suspended/Banned) করার অধিকার সংরক্ষণ করে।</p>
                   </div>
                 ) : (
@@ -3993,12 +4005,12 @@ export default function ApplyLoan() {
                   <div className="space-y-1.5">
                     <p>ঋণ পাওয়ার জন্য আবেদনকারীকে তার পেশা অনুযায়ী সঠিক ক্যাটাগরি নির্বাচন করতে হবে। প্রতিটি ক্যাটাগরির জন্য ঋণের সর্বোচ্চ সীমা এবং মাসিক সুদের হার আলাদা হতে পারে:</p>
                     <ul className="list-disc pl-5 space-y-1">
-                      <li><b>ব্যক্তিগত লোন (Personal):</b> সর্বোচ্চ {loanLimitLabel('personal', 500000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRatePersonal', 0.0055)}।</li>
-                      <li><b>ব্যবসায়িক লোন (Business):</b> সর্বোচ্চ {loanLimitLabel('business', 5000000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRateBusiness', 0.0055)}।</li>
-                      <li><b>প্রবাসী লোন (Probashi):</b> সর্বোচ্চ {loanLimitLabel('expat', 1000000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRateExpat', 0.005)}।</li>
-                      <li><b>শিক্ষা লোন (Student):</b> সর্বোচ্চ {loanLimitLabel('student', 500000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRateStudent', 0.005)}।</li>
-                      <li><b>জরুরি লোন (Emergency):</b> সর্বোচ্চ {loanLimitLabel('emergency', 100000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRateEmergency', 0.006)}।</li>
-                      <li><b>মহিলা উদ্যোক্তা লোন (Women):</b> সর্বোচ্চ {loanLimitLabel('women', 2000000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRateWomen', 0.0055)}।</li>
+                      <li><b>ব্যক্তিগত ঋণ (Personal):</b> সর্বোচ্চ {loanLimitLabel('personal', 500000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRatePersonal', 0.0055)}।</li>
+                      <li><b>ব্যবসায়িক ঋণ (Business):</b> সর্বোচ্চ {loanLimitLabel('business', 5000000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRateBusiness', 0.0055)}।</li>
+                      <li><b>প্রবাসী ঋণ (Probashi):</b> সর্বোচ্চ {loanLimitLabel('expat', 1000000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRateExpat', 0.005)}।</li>
+                      <li><b>শিক্ষা ঋণ (Student):</b> সর্বোচ্চ {loanLimitLabel('student', 500000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRateStudent', 0.005)}।</li>
+                      <li><b>জরুরি ঋণ (Emergency):</b> সর্বোচ্চ {loanLimitLabel('emergency', 100000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRateEmergency', 0.006)}।</li>
+                      <li><b>মহিলা উদ্যোক্তা ঋণ (Women):</b> সর্বোচ্চ {loanLimitLabel('women', 2000000)} টাকা। মাসিক সুদ {monthlyRateLabel('minRateWomen', 0.0055)}।</li>
                     </ul>
                   </div>
                 ) : (
