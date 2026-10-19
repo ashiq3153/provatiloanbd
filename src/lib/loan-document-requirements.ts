@@ -10,10 +10,10 @@ export type DocumentRequirement = {
 };
 
 const identity: DocumentRequirement[] = [
-  { key:"nid_front", labelBn:"NID সামনের অংশ", labelEn:"NID Front", required:true, mapsTo:["fullName","nidNumber","dob","gender"] },
-  { key:"nid_back", labelBn:"NID পেছনের অংশ", labelEn:"NID Back", required:true, mapsTo:["nidNumber","address"] },
-  { key:"selfie", labelBn:"সেলফি (NID সহ)", labelEn:"Selfie (with NID)", required:true, mapsTo:[] },
-  { key:"photo", labelBn:"পাসপোর্ট সাইজ ছবি", labelEn:"Passport Size Photo", required:true, mapsTo:[] },
+  { key:"nid_front", labelBn:"জাতীয় পরিচয়পত্রের সামনের অংশ", labelEn:"National ID — front side", required:true, mapsTo:["fullName","nidNumber","dob","gender"] },
+  { key:"nid_back", labelBn:"জাতীয় পরিচয়পত্রের পেছনের অংশ", labelEn:"National ID — back side", required:true, mapsTo:["nidNumber","address"] },
+  { key:"selfie", labelBn:"জাতীয় পরিচয়পত্রসহ সেলফি", labelEn:"Selfie holding your National ID", required:true, mapsTo:[] },
+  { key:"photo", labelBn:"পাসপোর্ট সাইজের ছবি", labelEn:"Passport-size photo", required:true, mapsTo:[] },
   { key:"nominee_photo", labelBn:"নমিনির ছবি", labelEn:"Nominee Photo", required:false, conditional:true, mapsTo:[] },
 ];
 
@@ -21,11 +21,11 @@ export const LOAN_DOCUMENT_REQUIREMENTS: Record<LoanCategoryId, DocumentRequirem
   personal: [
     ...identity,
     {key:"passport_copy",labelBn:"পাসপোর্ট কপি (যদি থাকে)",labelEn:"Passport Copy (if available)",required:false,conditional:true,mapsTo:["passportNumber"]},
-    {key:"office_id",labelBn:"অফিস আইডি কপি",labelEn:"Office ID",required:true,mapsTo:["companyName","designation"]},
-    {key:"hr_noc",labelBn:"HR লেটার/NOC",labelEn:"HR Letter/NOC",required:true,mapsTo:["companyName","designation","hrName","hrDesignation"]},
-    {key:"salary_statement",labelBn:"বেতন স্টেটমেন্ট (৬ মাস)",labelEn:"Salary Statement (6 Months)",required:true,mapsTo:["basicSalary","netTakeHomePay","monthlyIncome"]},
-    {key:"bank_statement",labelBn:"ব্যাংক স্টেটমেন্ট (৬ মাস)",labelEn:"Bank Statement (6 Months)",required:true,mapsTo:["bankName","accountName","accountNumber","monthlyIncome"]},
-    {key:"etin_cert",labelBn:"e-TIN/ট্যাক্স রিটার্ন",labelEn:"e-TIN/Tax Return",required:true,mapsTo:["eTin"]},
+    {key:"office_id",labelBn:"প্রতিষ্ঠানের পরিচয়পত্র",labelEn:"Work ID card",required:true,mapsTo:["companyName","designation"]},
+    {key:"hr_noc",labelBn:"নিয়োগকর্তার প্রত্যয়নপত্র বা অনাপত্তিপত্র",labelEn:"Employer letter or No Objection Certificate",required:true,mapsTo:["companyName","designation","hrName","hrDesignation"]},
+    {key:"salary_statement",labelBn:"গত ৬ মাসের বেতন বিবরণী",labelEn:"Salary records for the last 6 months",required:true,mapsTo:["basicSalary","netTakeHomePay","monthlyIncome"]},
+    {key:"bank_statement",labelBn:"গত ৬ মাসের ব্যাংক হিসাব বিবরণী",labelEn:"Bank statements for the last 6 months",required:true,mapsTo:["bankName","accountName","accountNumber","monthlyIncome"]},
+    {key:"etin_cert",labelBn:"ই-টিআইএন সনদ/আয়কর রিটার্ন",labelEn:"e-TIN certificate or income tax return",required:true,mapsTo:["eTin"]},
     {key:"utility_bill",labelBn:"ইউটিলিটি বিল (বর্তমান বাসা)",labelEn:"Utility Bill (Current Home)",required:false,conditional:true,mapsTo:["currentAddress"]},
     {key:"guarantor1_nid",labelBn:"গ্যারান্টর ১ NID",labelEn:"Guarantor 1 NID",required:true,mapsTo:["g1Name","g1Nid","g1Mobile","g1Address"]},
     {key:"guarantor1_photo",labelBn:"গ্যারান্টর ১ ছবি",labelEn:"Guarantor 1 Photo",required:true,mapsTo:[]},
@@ -36,8 +36,8 @@ export const LOAN_DOCUMENT_REQUIREMENTS: Record<LoanCategoryId, DocumentRequirem
   ],
   business: [
     ...identity,
-    {key:"trade_license_3yrs",labelBn:"ট্রেড লাইসেন্স (বিগত ৩ বছর)",labelEn:"Trade License (Last 3 Years)",required:true,mapsTo:["businessName","tradeLicense","tradeLicenseIssueDate"]},
-    {key:"bank_statement_12m",labelBn:"ব্যাংক স্টেটমেন্ট (১২ মাস)",labelEn:"Bank Statement (12 Months)",required:true,mapsTo:["bankName","accountName","accountNumber","avgMonthlySales"]},
+    {key:"trade_license_3yrs",labelBn:"গত ৩ বছরের ট্রেড লাইসেন্স",labelEn:"Trade licenses for the last 3 years",required:true,mapsTo:["businessName","tradeLicense","tradeLicenseIssueDate"]},
+    {key:"bank_statement_12m",labelBn:"গত ১২ মাসের ব্যাংক হিসাব বিবরণী",labelEn:"Bank statements for the last 12 months",required:true,mapsTo:["bankName","accountName","accountNumber","avgMonthlySales"]},
     {key:"premise_ownership_docs",labelBn:"জায়গার মালিকানা/ভাড়ার দলিল",labelEn:"Ownership Deed/Rent Agreement",required:true,mapsTo:["shopAddress","factoryAddress"]},
     {key:"supplier_buyer_invoices",labelBn:"সাপ্লায়ার ও ক্রেতার ইনভয়েস",labelEn:"Supplier & Buyer Invoices",required:true,mapsTo:["avgMonthlySales","productType"]},
     {key:"company_formation_docs",labelBn:"MOA/AOA/পার্টনারশিপ ডিড",labelEn:"MOA/AOA/Partnership Deed",required:true,mapsTo:["rjscNumber","applicantRole","equityPercentage"]},
@@ -73,8 +73,8 @@ export const LOAN_DOCUMENT_REQUIREMENTS: Record<LoanCategoryId, DocumentRequirem
   ],
   emergency: [
     ...identity,
-    {key:"diagnosis_report",labelBn:"ডায়াগনসিস রিপোর্ট ও প্রেসক্রিপশন",labelEn:"Diagnosis Report & Prescription",required:true,mapsTo:["patientName","patientCondition","treatmentType","hospitalName"]},
-    {key:"cost_estimation_letter",labelBn:"খরচের বাজেট লেটার",labelEn:"Cost Budget Letter",required:true,mapsTo:["estimatedCost","shortfallAmount"]},
+    {key:"diagnosis_report",labelBn:"রোগ নির্ণয়ের প্রতিবেদন ও চিকিৎসকের ব্যবস্থাপত্র",labelEn:"Medical diagnosis report and prescription",required:true,mapsTo:["patientName","patientCondition","treatmentType","hospitalName"]},
+    {key:"cost_estimation_letter",labelBn:"চিকিৎসা ব্যয়ের প্রাক্কলনপত্র",labelEn:"Estimated treatment cost statement",required:true,mapsTo:["estimatedCost","shortfallAmount"]},
     {key:"admission_slip",labelBn:"ভর্তির টিকিট/রানিং বিল",labelEn:"Admission Slip/Running Bill",required:false,conditional:true,mapsTo:["hospitalName","estimatedCost"]},
     {key:"income_proof_quick",labelBn:"আয়ের দ্রুত প্রমাণ",labelEn:"Quick Income Proof",required:true,mapsTo:["monthlyIncome"]},
   ],
