@@ -464,6 +464,7 @@ export default function ApplyLoan() {
 
           methods.reset(defaultFields);
           if (loan.documents) setDocuments(loan.documents);
+          if ((loan.professional_info as any)?.profession) setSelectedProfession((loan.professional_info as any).profession);
 
           // Parse admin feedback JSON for flagged sections
           let feedbackText = loan.admin_feedback || '';
@@ -690,7 +691,7 @@ export default function ApplyLoan() {
         methods.setValue('currentAddress', currentAddress as any);
         methods.setValue('permanentAddress', permanentAddress as any);
 
-        const personalFields: (keyof LoanFormData)[] = ['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'mobile', 'whatsapp', 'email', 'nidNumber'];
+        const personalFields: (keyof LoanFormData)[] = ['fullName', 'fatherName', 'motherName', 'dob', 'gender', 'profession', 'mobile', 'whatsapp', 'email', 'nidNumber'];
         
         let profFields: (keyof LoanFormData)[] = [];
         if (category?.id === 'personal') profFields = ['companyName', 'designation', 'workDuration', 'monthlyIncome', 'jobAddress'];
@@ -821,7 +822,7 @@ export default function ApplyLoan() {
         return;
       }
 
-      const professionalInfo: Record<string, string> = {};
+      const professionalInfo: Record<string, string> = { profession: formData.profession || "" };
       if (category?.id === 'personal') {
         professionalInfo.companyName = formData.companyName || '';
         professionalInfo.designation = formData.designation || '';
@@ -1389,8 +1390,9 @@ export default function ApplyLoan() {
       professionOptions.find(item => item.label === selectedProfession) ||
       quickProfessionGroups.find(item => item.label === selectedProfession);
 
-    const selectedCategories = selectedOption?.categories || [];
-    const visibleCategories = categories.filter(cat => selectedCategories.includes(cat.id));
+    // Profession helps prefill the form; it must not block access to any loan category.
+    const selectedCategories = categories.map(cat => cat.id);
+    const visibleCategories = categories;
     const filteredProfessions = professionOptions.filter(item =>
       item.label.toLowerCase().includes(professionSearch.trim().toLowerCase())
     );
@@ -1402,7 +1404,7 @@ export default function ApplyLoan() {
       ? getLoanDocumentRequirements(detailsCategory.id)
       : [];
     const detailInfoLabels: Record<string, string> = {
-      fullName: "পূর্ণ নাম", fatherName: "পিতার নাম", motherName: "মাতার নাম", dob: "জন্ম তারিখ", gender: "লিঙ্গ",
+      fullName: "পূর্ণ নাম", fatherName: "পিতার নাম", motherName: "মাতার নাম", dob: "জন্মতারিখ", gender: "লিঙ্গ", profession: "পেশা/কাজের ধরন",
       mobile: "মোবাইল নম্বর", nidNumber: "NID নম্বর", currentAddress: "বর্তমান ঠিকানা", permanentAddress: "স্থায়ী ঠিকানা",
       companyName: "প্রতিষ্ঠানের নাম", designation: "পদবী", workDuration: "চাকরির মেয়াদ", monthlyIncome: "মাসিক আয়",
       businessName: "ব্যবসার নাম", shopAddress: "ব্যবসার ঠিকানা", tradeLicense: "ট্রেড লাইসেন্স", bankName: "ব্যাংকের নাম",
@@ -1431,6 +1433,7 @@ export default function ApplyLoan() {
 
     const selectProfession = (item: ProfessionOption) => {
       setSelectedProfession(item.label);
+      methods.setValue("profession", item.label, { shouldValidate: true, shouldDirty: true });
       setShowProfessionModal(false);
       setProfessionSearch("");
     };
@@ -1442,10 +1445,10 @@ export default function ApplyLoan() {
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h2 className="text-[15px] leading-tight font-black text-slate-900 dark:text-white">
-                  {isBn ? "আপনার পেশা নির্বাচন করুন" : "Choose your profession"}
+                  {isBn ? "আপনার পেশা নির্বাচন করুন" : "Choose your occupation"}
                 </h2>
                 <p className="mt-0.5 text-[8px] leading-3.5 text-slate-500 dark:text-slate-400">
-                  {isBn ? "আপনার পেশা অনুযায়ী শুধু প্রযোজ্য লোন দেখানো হবে" : "Only applicable loans will be shown for your profession"}
+                  {isBn ? "পেশা বেছে নিতে পারেন, অথবা সরাসরি নিচের যেকোনো ঋণের ধরন নির্বাচন করুন। আবেদন ফর্মে আপনার পেশা জানতে চাওয়া হবে।" : "You can select your occupation here or choose any loan category below. Your occupation will also be requested in the application form."}
                 </p>
               </div>
               
@@ -1491,13 +1494,13 @@ export default function ApplyLoan() {
 <div className="flex items-center justify-between px-1 pt-1">
           <div>
             <h3 className="text-[12px] font-black text-slate-800 dark:text-white">
-              {isBn ? "উপযুক্ত ক্যাটাগরি" : "Applicable loan categories"}
+              {isBn ? "ঋণের ধরন নির্বাচন করুন" : "Choose a loan category"}
             </h3>
             <p className="text-[8px] text-slate-400 mt-0.5">
               {isBn ? (visibleCategories.length + "টি ক্যাটাগরি দেখানো হচ্ছে") : (visibleCategories.length + " applicable")}
             </p>
           </div>
-          <span className="text-[8px] font-semibold text-slate-400">{isBn ? "পেশা অনুযায়ী ফিল্টার" : "Filtered by profession"}</span>
+          <span className="text-[8px] font-semibold text-slate-400">{isBn ? "আপনার প্রয়োজন অনুযায়ী নির্বাচন করুন" : "Choose based on your needs"}</span>
         </div>
 
         <div className="space-y-2.5">
@@ -1596,17 +1599,17 @@ export default function ApplyLoan() {
         </div>
         {visibleCategories.length === 0 && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/50 px-3 py-3 text-center">
-            <p className="text-[9px] font-black text-amber-800 dark:text-amber-200">{isBn ? "এই পেশার জন্য কোনো সক্রিয় ক্যাটাগরি নেই।" : "No active category is available for this profession."}</p>
+            <p className="text-[9px] font-black text-amber-800 dark:text-amber-200">{isBn ? "এখন কোনো ঋণের ধরন চালু নেই।" : "No loan categories are currently available."}</p>
           </div>
         )}
           </>
         ) : (
           <div className="rounded-xl border border-dashed border-emerald-300 dark:border-emerald-900/60 bg-emerald-50/60 dark:bg-emerald-950/20 px-4 py-5 text-center">
             <p className="text-[11px] font-black text-emerald-800 dark:text-emerald-200">
-              {isBn ? "প্রথমে আপনার পেশা নির্বাচন করুন" : "Please select your profession first"}
+              {isBn ? "আপনার প্রয়োজন অনুযায়ী ঋণের ধরন বেছে নিন" : "Choose a loan category that fits your needs"}
             </p>
             <p className="mt-1 text-[8px] text-slate-500 dark:text-slate-400">
-              {isBn ? "পেশা নির্বাচন করার পর শুধু আপনার জন্য প্রযোজ্য লোন ক্যাটাগরি দেখানো হবে।" : "Only the loan categories applicable to your profession will appear after selection."}
+              {isBn ? "সব ক্যাটাগরি থেকে আবেদন শুরু করা যাবে। ফর্মে পেশা ও ক্যাটাগরি অনুযায়ী প্রয়োজনীয় তথ্য দিতে হবে।" : "You can start with any category. The form will request the relevant occupation and category-specific details."}
             </p>
           </div>
         )}
@@ -2069,9 +2072,15 @@ export default function ApplyLoan() {
         >
           <div className="space-y-3 text-xs">
             <div>
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পূর্ণ নাম (NID অনুযায়ী)" : "Full Name (as per NID)"}</label>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পূর্ণ নাম (NID অনুযায়ী)" : "Full name (as shown on NID)"}</label>
               <input type="text" {...register("fullName")} className={`w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 ${errors.fullName ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: মোঃ রহিম উদ্দিন" : "e.g. Md. Rahim Uddin"} />
               <ErrorText field="fullName" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">{isBn ? "পেশা/কাজের ধরন" : "Occupation / type of work"} <span className="text-rose-500">*</span></label>
+              <input type="text" {...register("profession")} className={`w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 ${errors.profession ? "border-red-500/80 focus:border-red-500/80 ring-2 ring-red-500/10" : "border-transparent focus:border-primary-500/50"} rounded-xl px-4 py-2.5 text-xs text-gray-800 dark:text-white font-medium outline-none transition-all`} placeholder={isBn ? "যেমন: শিক্ষক, দোকানদার, শিক্ষার্থী" : "e.g. Teacher, shop owner, student"} />
+              <ErrorText field="profession" />
+              <p className="mt-1 text-[10px] text-gray-500 dark:text-gray-400">{isBn ? "আপনার পেশা অনুযায়ী প্রাসঙ্গিক তথ্য ও কাগজপত্র যাচাই করা হবে।" : "Relevant details and documents will be checked based on your occupation."}</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
