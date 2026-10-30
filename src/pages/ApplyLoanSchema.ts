@@ -185,9 +185,9 @@ export const getLoanSchema = (isBn: boolean) => z.object({
   workAddress: z.string().min(1, { message: isBn ? "কাজের স্থান বা ঠিকানা দিন" : "Enter work location/address" }).optional(),
 
   // Step 5
-  bankName: z.string().min(2, { message: isBn ? "ব্যাংকের নাম দিন" : "Enter bank name" }),
-  accountName: z.string().min(2, { message: isBn ? "ব্যাংক হিসাবের নাম লিখুন" : "Enter the bank account holder name" }),
-  accountNumber: z.string().min(5, { message: isBn ? "সঠিক ব্যাংক হিসাব নম্বর লিখুন" : "Enter a valid bank account number" }),
+  bankName: z.string().optional(),
+  accountName: z.string().optional(),
+  accountNumber: z.string().optional(),
   routingNumber: z.string().optional(),
   mobileBanking: z.string().regex(/^(01)[3-9][0-9]{8}$/, { message: isBn ? "সঠিক নাম্বার দিন (১১ ডিজিট)" : "Enter valid number" }).optional().or(z.literal('')),
   nomineeName: z.string().min(3, { message: isBn ? "নমিনির নাম দিন" : "Enter nominee name" }),

@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { supabase } from '../../lib/supabase';
 import { isBrowserPreviewMode } from '../../lib/browser-preview';
+import { getLoanDocumentRequirements } from '../../lib/loan-document-requirements';
 
 async function openPrivateDocumentReference(reference: string, isBn: boolean) {
   const popup = window.open('about:blank', '_blank');
@@ -139,9 +140,20 @@ export default function AdminDashboard() {
   const [flaggedBank, setFlaggedBank] = useState(false);
   const [flaggedNominee, setFlaggedNominee] = useState(false);
   const [flaggedDocuments, setFlaggedDocuments] = useState(false);
+  const [selectedAdditionalDocKeys, setSelectedAdditionalDocKeys] = useState<string[]>([]);
 
   useEffect(() => {
     if (selectedLoan) {
+      let requestedKeys: string[] = [];
+      if (selectedLoan.admin_feedback && selectedLoan.admin_feedback.trim().startsWith('{')) {
+        try {
+          const parsed = JSON.parse(selectedLoan.admin_feedback);
+          if (Array.isArray(parsed.requestedDocuments)) {
+            requestedKeys = parsed.requestedDocuments.filter((key: unknown) => typeof key === 'string');
+          }
+        } catch {}
+      }
+      setSelectedAdditionalDocKeys(requestedKeys);
       let flagged = {
         personal: false,
         professional: false,
@@ -627,6 +639,15 @@ export default function AdminDashboard() {
                         loan.loan_category === 'emergency' ? 'জরুরি' : 'বাড়ি';
         
         const formattedAmount = formatCurrency(loan.amount, isBn);
+        let feedbackNote = feedback || '';
+        let requestedDocumentCount = 0;
+        if (typeof feedback === 'string' && feedback.trim().startsWith('{')) {
+          try {
+            const parsedFeedback = JSON.parse(feedback);
+            feedbackNote = parsedFeedback.note || '';
+            requestedDocumentCount = Array.isArray(parsedFeedback.requestedDocuments) ? parsedFeedback.requestedDocuments.length : 0;
+          } catch {}
+        }
         
         if (status === 'under_review') {
           msg = `🔍 <b>প্রিয় ${loan.full_name},</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটি বর্তমানে আমাদের অ্যাডমিন প্যানেলে রিভিউ করা হচ্ছে।\n\n💰 লোনের পরিমাণ: <b>${formattedAmount}</b>\n📅 মেয়াদ: <b>${convertDigits(loan.tenure_months, isBn)} মাস</b>\n\nঅতি শীঘ্রই পরবর্তী আপডেট জানানো হবে। ধন্যবাদ!`;
@@ -635,7 +656,10 @@ export default function AdminDashboard() {
         } else if (status === 'rejected') {
           msg = `❌ <b>দুঃখিত ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটি বাতিল করা হয়েছে।\n\n${feedback ? `📝 কারণ: <i>${feedback}</i>\n\n` : ''}ভবিষ্যতে পুনরায় আবেদন করার জন্য অনুরোধ করা হলো। ধন্যবাদ।`;
         } else if (status === 'action_required') {
-          msg = `⚠️ <b>মনোযোগ দিন ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটিতে কিছু সংশোধনী প্রয়োজন।\n\n📝 মন্তব্য: <b>${feedback}</b>\n\nঅনুগ্রহ করে প্রোফাইল থেকে প্রয়োজনীয় তথ্য ও ডকুমেন্ট আপডেট করুন। ধন্যবাদ!`;
+          const requestSummary = requestedDocumentCount > 0
+            ? `\n\n📎 অ্যাডমিন ${requestedDocumentCount}টি অতিরিক্ত ডকুমেন্ট চেয়েছেন। অ্যাপের সংশ্লিষ্ট আবেদন খুলে শুধু চাওয়া ডকুমেন্টগুলো আপলোড করুন।`
+            : '\n\nঅনুগ্রহ করে অ্যাপে সংশ্লিষ্ট আবেদন খুলে প্রয়োজনীয় তথ্য বা ডকুমেন্ট আপডেট করুন।';
+          msg = `⚠️ <b>মনোযোগ দিন ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটিতে কিছু সংশোধনী প্রয়োজন.${feedbackNote ? `\n\n📝 মন্তব্য: <b>${feedbackNote}</b>` : ''}${requestSummary}\n\nধন্যবাদ!`;
         } else if (status === 'cancelled') {
           msg = `⚠️ <b>প্রিয় ${loan.full_name},</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটি বাতিল করা হয়েছে।${feedback ? `\n\n📝 কারণ: <i>${feedback}</i>` : ''}`;
         } else if (status === 'completed') {
@@ -2804,6 +2828,36 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
+                      <div className="bg-white dark:bg-gray-900/60 p-4 rounded-xl border border-amber-200/40 space-y-3">
+                        <div>
+                          <p className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            {isBn ? 'এই আবেদনের জন্য অতিরিক্ত ডকুমেন্ট নির্বাচন করুন' : 'Request additional documents for this application'}
+                          </p>
+                          <p className="text-[11px] text-gray-500 mt-1">
+                            {isBn ? 'শুধু এখানে নির্বাচিত ডকুমেন্টগুলো এই আবেদনে দেখাবে; নতুন আবেদনে এগুলো যাবে না।' : 'Only selected documents will appear in this application. They will not carry over to future applications.'}
+                          </p>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+                          {getLoanDocumentRequirements(selectedLoan.loan_category).map(doc => (
+                            <label key={doc.key} className="flex items-start gap-2 rounded-lg border border-gray-100 dark:border-gray-800 p-2.5 text-xs cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={selectedAdditionalDocKeys.includes(doc.key)}
+                                onChange={event => setSelectedAdditionalDocKeys(current => event.target.checked
+                                  ? Array.from(new Set([...current, doc.key]))
+                                  : current.filter(key => key !== doc.key))}
+                                className="mt-0.5 accent-amber-500"
+                              />
+                              <span className="min-w-0">
+                                <span className="block font-bold text-gray-800 dark:text-gray-200">{isBn ? doc.labelBn : doc.labelEn}</span>
+                                <span className="block text-[10px] text-gray-400 mt-0.5">{doc.key.replace(/_/g, ' ')}{selectedLoan.documents?.[doc.key] ? (isBn ? ' • আগে থেকেই আপলোড আছে' : ' • Already uploaded') : ''}</span>
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                        <p className="text-[10px] text-gray-400">{isBn ? (selectedAdditionalDocKeys.length + 'টি ডকুমেন্ট নির্বাচিত') : (selectedAdditionalDocKeys.length + ' document(s) selected')}</p>
+                      </div>
+
                       <div className="flex flex-col gap-3">
                         <textarea 
                           rows={4}
@@ -2826,7 +2880,7 @@ export default function AdminDashboard() {
                           <button 
                             onClick={() => {
                               const fbText = (document.getElementById(`modal-feedback-${selectedLoan.id}`) as HTMLTextAreaElement).value;
-                              if(!fbText) return toast.error('Please enter feedback');
+                              if(!fbText.trim() && selectedAdditionalDocKeys.length === 0) return toast.error(isBn ? 'মন্তব্য লিখুন অথবা ডকুমেন্ট নির্বাচন করুন' : 'Enter feedback or select documents');
 
                               let existingHistory: any[] = [];
                               if (selectedLoan.admin_feedback && selectedLoan.admin_feedback.trim().startsWith('{')) {
@@ -2845,8 +2899,9 @@ export default function AdminDashboard() {
                                   professional: flaggedProfessional,
                                   bank: flaggedBank,
                                   nominee: flaggedNominee,
-                                  documents: flaggedDocuments
+                                  documents: flaggedDocuments || selectedAdditionalDocKeys.length > 0
                                 },
+                                requestedDocuments: selectedAdditionalDocKeys,
                                 history: existingHistory
                               };
 

@@ -306,6 +306,7 @@ export default function ApplyLoan() {
   const [editId, setEditId] = useState<string | null>(null);
   const [submittedApplicationId, setSubmittedApplicationId] = useState<string | null>(null);
   const [documents, setDocuments] = useState<Record<string, string>>({});
+  const [requestedDocumentKeys, setRequestedDocumentKeys] = useState<string[]>([]);
   const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
   const [showProfessionModal, setShowProfessionModal] = useState(false);
   const [professionSearch, setProfessionSearch] = useState("");
@@ -409,6 +410,7 @@ export default function ApplyLoan() {
     localStorage.removeItem('loan_draft_v1');
     const selectedCategory = params.get('category');
     const edit = params.get('edit');
+    setRequestedDocumentKeys([]);
 
     if (edit) {
       setEditId(edit);
@@ -482,6 +484,15 @@ export default function ApplyLoan() {
               if (loan.admin_feedback.trim().startsWith('{')) {
                 const parsed = JSON.parse(loan.admin_feedback);
                 feedbackText = parsed.note || '';
+                const requestedKeys = Array.isArray(parsed.requestedDocuments) ? parsed.requestedDocuments.filter((key: unknown) => typeof key === 'string') : [];
+                setRequestedDocumentKeys(requestedKeys);
+                if (requestedKeys.length > 0) {
+                  setDocuments(previous => {
+                    const next = { ...previous };
+                    requestedKeys.forEach((key: string) => { delete next[key]; });
+                    return next;
+                  });
+                }
                 if (parsed.flagged) {
                   flagged = {
                     personal: !!parsed.flagged.personal,
@@ -527,7 +538,13 @@ export default function ApplyLoan() {
     } else if (selectedCategory) {
       const matched = categories.find((cat) => cat.id === selectedCategory);
       if (matched) {
+        const safeAmount = Math.max(50000, Math.min(500000, Number(matched.maxAmount) || 500000));
+        const allowed = getAllowedTenure(safeAmount);
+        const minTenure = Math.max(allowed[0], matched.minTenure ?? 12);
+        const maxTenure = Math.min(allowed[1], matched.maxTenure ?? allowed[1]);
         setCategory(matched);
+        setAmount(safeAmount);
+        setTenure(Math.min(Math.max(24, minTenure), maxTenure));
         setStep(2);
       }
     } else {
@@ -605,11 +622,11 @@ export default function ApplyLoan() {
           maritalStatus: String(saved.maritalStatus || ''),
           spouseProfession: String(saved.spouseProfession || ''),
           spouseIncome: String(saved.spouseIncome || ''),
-          bankName: String(saved.bankName || ''),
-          accountName: String(saved.accountName || ''),
-          accountNumber: String(saved.accountNumber || ''),
-          routingNumber: String(saved.routingNumber || ''),
-          mobileBanking: String(saved.mobileBanking || ''),
+          bankName: '',
+          accountName: '',
+          accountNumber: '',
+          routingNumber: '',
+          mobileBanking: '',
           nomineeName: String(saved.nomineeName || ''),
           nomineeRelation: String(saved.nomineeRelation || ''),
           nomineeMobile: String(saved.nomineeMobile || ''),
@@ -640,15 +657,16 @@ export default function ApplyLoan() {
 
   // Auto-adjusted tenure state
   const handleAmountChange = (val: number) => {
-    setAmount(val);
-    const rawAllowed = getAllowedTenure(val);
+    const categoryMax = Number(category?.maxAmount) > 0 ? Number(category?.maxAmount) : 5000000;
+    const safeAmount = Math.max(50000, Math.min(val, categoryMax));
+    setAmount(safeAmount);
+    const rawAllowed = getAllowedTenure(safeAmount);
     const minAllowed = Math.max(rawAllowed[0], category?.minTenure ?? 12);
-    const maxAllowed = Math.min(rawAllowed[1], category?.maxTenure ?? 60);
-    if (tenure < minAllowed) setTenure(minAllowed);
-    if (tenure > maxAllowed) setTenure(maxAllowed);
+    const maxAllowed = Math.min(rawAllowed[1], category?.maxTenure ?? rawAllowed[1]);
+    setTenure(current => Math.min(Math.max(current, minAllowed), maxAllowed));
   };
 
-  const getLoanCalculation = () => {
+    const getLoanCalculation = () => {
     const feeRates = getLoanFeeRates(amount, systemSettings);
     return calculateLoan({
       principal: amount,
@@ -729,10 +747,10 @@ export default function ApplyLoan() {
           'estimatedCost', 'applicantContribution', 'insuranceCoverage', 'insuranceAmount', 'shortfallAmount', 'hrContactNumber'
         ];
         
-        const bankFields: (keyof LoanFormData)[] = ['bankName', 'accountName', 'accountNumber', 'routingNumber', 'mobileBanking'];
+        const bankFields: (keyof LoanFormData)[] = editId && flaggedSections.bank ? ['bankName', 'accountName', 'accountNumber', 'routingNumber', 'mobileBanking'] : [];
         const nomineeFields: (keyof LoanFormData)[] = ['nomineeName', 'nomineeRelation', 'nomineeMobile', 'nomineeNid'];
         let guarantorFields: (keyof LoanFormData)[] = [];
-        if (category?.id === 'personal') {
+        if (category?.id === 'personal' && editId && flaggedSections.guarantor) {
           guarantorFields = ['g1Name', 'g1Relation', 'g1Nid', 'g1Mobile', 'g1Address', 'g1Profession', 'g2Name', 'g2Designation', 'g2OfficialId', 'g2Email', 'g2Mobile'];
         }
         
@@ -761,7 +779,10 @@ export default function ApplyLoan() {
       }
 
       if (step === 4) {
-        const missingDocuments = getMissingRequiredDocuments(category?.id || 'personal', documents);
+        const allCategoryDocuments = getLoanDocumentRequirements(category?.id || 'personal');
+        const missingDocuments = editId && requestedDocumentKeys.length > 0
+          ? allCategoryDocuments.filter(doc => requestedDocumentKeys.includes(doc.key) && !documents[doc.key])
+          : getMissingRequiredDocuments(category?.id || 'personal', documents);
         if (missingDocuments.length > 0) {
           const preview = missingDocuments.slice(0, 3).map(d => isBn ? d.labelBn : d.labelEn).join(', ');
           const extra = missingDocuments.length > 3 ? (isBn ? ` এবং আরও ${missingDocuments.length - 3}টি` : ` and ${missingDocuments.length - 3} more`) : '';
@@ -802,7 +823,7 @@ export default function ApplyLoan() {
       const duplicateMatch = await checkDuplicateApplication(
         formData.mobile,
         formData.email || null,
-        formData.accountNumber,
+        formData.accountNumber || '',
         formData.nomineeNid,
         formData.nidNumber,
         formData.passportNumber || null,
@@ -1045,9 +1066,9 @@ export default function ApplyLoan() {
         permanent_address: JSON.stringify(permanentAddress),
         nid_number: formData.nidNumber,
         professional_info: professionalInfo,
-        bank_name: formData.bankName,
-        account_name: formData.accountName,
-        account_number: formData.accountNumber,
+        bank_name: formData.bankName || '',
+        account_name: formData.accountName || '',
+        account_number: formData.accountNumber || '',
         routing_number: formData.routingNumber || null,
         mobile_banking: formData.mobileBanking || null,
         nominee_name: formData.nomineeName,
@@ -1121,7 +1142,7 @@ export default function ApplyLoan() {
       const duplicateMatch = await checkDuplicateApplication(
         formData.mobile,
         formData.email || null,
-        formData.accountNumber,
+        formData.accountNumber || '',
         formData.nomineeNid,
         formData.nidNumber,
         formData.passportNumber || null,
@@ -1285,9 +1306,9 @@ export default function ApplyLoan() {
         permanent_address: JSON.stringify(permanentAddress),
         nid_number: formData.nidNumber,
         professional_info: professionalInfo,
-        bank_name: formData.bankName,
-        account_name: formData.accountName,
-        account_number: formData.accountNumber,
+        bank_name: formData.bankName || '',
+        account_name: formData.accountName || '',
+        account_number: formData.accountNumber || '',
         routing_number: formData.routingNumber || null,
         mobile_banking: formData.mobileBanking || null,
         nominee_name: formData.nomineeName,
@@ -1424,15 +1445,19 @@ export default function ApplyLoan() {
       .map(key => detailInfoLabels[key] || key);
 
     const selectCategory = (cat: ReturnType<typeof getCategories>[0]) => {
-      const rawAllowed = getAllowedTenure(amount);
+      const maxAmount = Number(cat.maxAmount) > 0 ? Number(cat.maxAmount) : 500000;
+      const nextAmount = Math.max(50000, Math.min(amount, maxAmount));
+      const rawAllowed = getAllowedTenure(nextAmount);
       const minAllowed = Math.max(rawAllowed[0], cat.minTenure ?? 12);
+      const maxAllowed = Math.min(rawAllowed[1], cat.maxTenure ?? rawAllowed[1]);
       setCategory(cat);
-      setTenure(minAllowed);
+      setAmount(nextAmount);
+      setTenure(Math.min(Math.max(tenure, minAllowed), maxAllowed));
       setStep(2);
       window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    const selectProfession = (item: ProfessionOption) => {
+        const selectProfession = (item: ProfessionOption) => {
       setSelectedProfession(item.label);
       methods.setValue("profession", item.label, { shouldValidate: true, shouldDirty: true });
       setShowProfessionModal(false);
@@ -2031,7 +2056,7 @@ export default function ApplyLoan() {
       'estimatedCost', 'applicantContribution', 'insuranceCoverage', 'insuranceAmount', 'shortfallAmount', 'hrContactNumber'
     ];
     
-    const bankFields: (keyof LoanFormData)[] = ['bankName', 'accountName', 'accountNumber', 'routingNumber', 'mobileBanking'];
+    const bankFields: (keyof LoanFormData)[] = editId && flaggedSections.bank ? ['bankName', 'accountName', 'accountNumber', 'routingNumber', 'mobileBanking'] : [];
     const nomineeFields: (keyof LoanFormData)[] = ['nomineeName', 'nomineeRelation', 'nomineeMobile', 'nomineeNid'];
 
     const handleInputFocus = (e: React.FocusEvent<HTMLDivElement>) => {
@@ -3022,6 +3047,8 @@ export default function ApplyLoan() {
           </div>
         </AccordionSection>
 
+        {editId && flaggedSections.bank && (
+        <>
         {/* 3. Bank Account Details */}
         <AccordionSection
           sectionKey="bank"
@@ -3065,6 +3092,9 @@ export default function ApplyLoan() {
           </div>
         </AccordionSection>
 
+
+        </>
+        )}
         {/* 4. Nominee Information */}
         <AccordionSection
           sectionKey="nominee"
@@ -3104,7 +3134,7 @@ export default function ApplyLoan() {
         </AccordionSection>
 
         {/* 5. Guarantor Information (Personal Loan Only) */}
-        {category?.id === 'personal' && (
+        {category?.id === 'personal' && editId && flaggedSections.guarantor && (
           <AccordionSection
             sectionKey="guarantor"
             title={isBn ? "৫. গ্যারান্টরের তথ্য" : "5. Guarantor Details"}
@@ -3201,11 +3231,14 @@ export default function ApplyLoan() {
   const renderFileUploader = (id: string, title: string) => {
     const isUploading = uploadingDoc === id;
     const requirement = getLoanDocumentRequirements(category?.id || 'personal').find(d => d.key === id);
-    const displayTitle = requirement?.required
-      ? `${title} ${isBn ? '• আবশ্যক' : '• Required'}`
-      : requirement?.conditional
-        ? `${title} ${isBn ? '• প্রযোজ্য হলে' : '• If applicable'}`
-        : `${title} ${isBn ? '• ঐচ্ছিক' : '• Optional'}`;
+    const isRequested = requestedDocumentKeys.includes(id);
+    const revisionOnly = Boolean(editId && requestedDocumentKeys.length > 0);
+    if (revisionOnly ? !isRequested : (!requirement?.required && !isRequested)) return null;
+    const displayTitle = isRequested
+      ? title + (isBn ? ' • অ্যাডমিন চেয়েছেন' : ' • Requested by admin')
+      : requirement?.required
+        ? title + (isBn ? ' • আবশ্যক' : ' • Required')
+        : title + (isBn ? ' • ঐচ্ছিক' : ' • Optional');
     return (
       <div className="relative">
         <input 
@@ -3261,7 +3294,13 @@ export default function ApplyLoan() {
     );
   };
 
-  const Step4Documents = () => (
+  const Step4Documents = () => {
+    const categoryDocuments = getLoanDocumentRequirements(category?.id || 'personal');
+    const revisionOnly = Boolean(editId && requestedDocumentKeys.length > 0);
+    const visibleDocuments = revisionOnly
+      ? categoryDocuments.filter(doc => requestedDocumentKeys.includes(doc.key))
+      : categoryDocuments.filter(doc => doc.required);
+    return (
     <div className="space-y-5 pb-6 text-xs">
       {flaggedSections.documents && (
         <div className="text-amber-800 dark:text-amber-300 p-4 rounded-2xl border border-amber-500/30 dark:border-amber-900/40 bg-amber-500/5 dark:bg-amber-950/10 text-xs font-semibold leading-relaxed flex gap-3 transition-colors mb-4 animate-pulse">
@@ -3278,137 +3317,37 @@ export default function ApplyLoan() {
         <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">{isBn ? "আবেদন রিভিউ ও অনুমোদনের জন্য প্রয়োজনীয় ডকুমেন্টস আপলোড করুন" : "Upload documents for profile verification and approval."}</p>
       </div>
 
-      {/* Uploads Block */}
-      <div className={`transition-all rounded-2xl border ${flaggedSections.documents ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800'} p-4 space-y-4 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm`}>
-        <h3 className="font-bold text-gray-800 dark:text-gray-200 text-sm border-b border-gray-200/50 dark:border-gray-800 transition-colors pb-2">{isBn ? "পরিচয়পত্র ও ছবি" : "Identity Documents & Photos"}</h3>
-        
-        {/* Upload Slot Grid */}
-        <div className="grid grid-cols-2 gap-3">
-          {renderFileUploader("nid_front", isBn ? "NID সামনের অংশ" : "NID Front")}
-          {renderFileUploader("nid_back", isBn ? "NID পেছনের অংশ" : "NID Back")}
-          {renderFileUploader("selfie", isBn ? "সেলফি (NID সহ)" : "Selfie (with NID)")}
-          {renderFileUploader("photo", isBn ? "পাসপোর্ট সাইজ ছবি" : "Passport Size Photo")}
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-4 bg-white dark:bg-[#111c2e] shadow-sm">
+        <div>
+          <h3 className="font-bold text-gray-800 dark:text-gray-200 text-sm">
+            {revisionOnly ? (isBn ? "অ্যাডমিন যে ডকুমেন্টগুলো চেয়েছেন" : "Documents requested by admin") : (isBn ? "প্রাথমিক আবেদনের প্রয়োজনীয় ডকুমেন্ট" : "Required documents for initial application")}
+          </h3>
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+            {revisionOnly
+              ? (isBn ? "এই আবেদনের জন্য নির্দিষ্টভাবে চাওয়া ডকুমেন্টগুলোই এখানে দেখানো হয়েছে।" : "Only documents requested for this specific application are shown here.")
+              : (isBn ? "শুধু প্রাথমিকভাবে প্রয়োজনীয় কাগজপত্র দিন। অতিরিক্ত কাগজপত্র দরকার হলে অ্যাডমিন পরে এই আবেদনের জন্য আলাদাভাবে চাইবেন।" : "Upload only the initial required documents. If more are needed, the admin will request them for this application later.")}
+          </p>
         </div>
-        <div className="mt-3 border-t border-gray-200/50 dark:border-gray-700/50 pt-3 grid grid-cols-2 gap-3">
-          {renderFileUploader("nominee_photo", isBn ? "নমিনির ছবি (ঐচ্ছিক)" : "Nominee Photo (Optional)")}
-          {category?.id === 'personal' && renderFileUploader("passport_copy", isBn ? "পাসপোর্ট কপি (যদি থাকে)" : "Passport Copy (If Any)")}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {visibleDocuments.map(doc => (
+            <React.Fragment key={doc.key}>
+              {renderFileUploader(doc.key, isBn ? doc.labelBn : doc.labelEn)}
+            </React.Fragment>
+          ))}
         </div>
+        {revisionOnly && visibleDocuments.length === 0 && (
+          <p className="text-xs text-gray-500">{isBn ? "অ্যাডমিন এখনো কোনো ডকুমেন্ট নির্বাচন করেননি।" : "No documents have been selected by the admin."}</p>
+        )}
       </div>
 
-      {/* Income Proofs Block */}
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800 p-4 space-y-4 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm">
-        <h3 className="font-bold text-gray-800 dark:text-gray-200 text-sm border-b border-gray-200/50 dark:border-gray-800 transition-colors pb-2">
-          {isBn ? "আয়ের প্রমাণপত্র" : "Income Proof"} ({category?.title})
-        </h3>
-        <div className="grid grid-cols-1 gap-3">
-          {category?.id === 'personal' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {renderFileUploader("office_id", isBn ? "অফিস আইডি কপি" : "Office ID")}
-                {renderFileUploader("hr_noc", isBn ? "HR লেটার/NOC" : "HR Letter/NOC")}
-                {renderFileUploader("salary_statement", isBn ? "বেতন স্টেটমেন্ট (৬ মাস)" : "Salary Statement (6 Months)")}
-                {renderFileUploader("bank_statement", isBn ? "ব্যাংক স্টেটমেন্ট (৬ মাস)" : "Bank Statement (6 Months)")}
-                {renderFileUploader("etin_cert", isBn ? "e-TIN/ট্যাক্স রিটার্ন" : "e-TIN/Tax Return")}
-                {renderFileUploader("utility_bill", isBn ? "ইউটিলিটি বিল (বর্তমান বাসা)" : "Utility Bill (Current Home)")}
-              </div>
-
-              <div className="border-t border-gray-200/50 dark:border-gray-800 pt-4">
-                <h4 className="text-xs font-bold text-gray-800 dark:text-gray-300 mb-3">{isBn ? "গ্যারান্টর ১ ডকুমেন্টস" : "Guarantor 1 Documents"}</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  {renderFileUploader("guarantor1_nid", isBn ? "এনআইডি কপি" : "NID Copy")}
-                  {renderFileUploader("guarantor1_photo", isBn ? "পাসপোর্ট সাইজ ছবি" : "Photo")}
-                  {renderFileUploader("guarantor1_income", isBn ? "ব্যাংক/ইনকাম প্রুফ" : "Income/Bank Proof")}
-                </div>
-              </div>
-
-              <div className="border-t border-gray-200/50 dark:border-gray-800 pt-4">
-                <h4 className="text-xs font-bold text-gray-800 dark:text-gray-300 mb-3">{isBn ? "গ্যারান্টর ২ ডকুমেন্টস" : "Guarantor 2 Documents"}</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  {renderFileUploader("guarantor2_nid", isBn ? "এনআইডি কপি" : "NID Copy")}
-                  {renderFileUploader("guarantor2_photo", isBn ? "পাসপোর্ট সাইজ ছবি" : "Photo")}
-                  {renderFileUploader("guarantor2_income", isBn ? "ব্যাংক/ইনকাম প্রুফ" : "Income/Bank Proof")}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {category?.id === 'business' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {renderFileUploader("trade_license_3yrs", isBn ? "ট্রেড লাইসেন্স (বিগত ৩ বছর)" : "Trade License (Last 3 Years)")}
-                {renderFileUploader("bank_statement_12m", isBn ? "ব্যাংক স্টেটমেন্ট (১২ মাস)" : "Bank Statement (12 Months)")}
-                {renderFileUploader("premise_ownership_docs", isBn ? "জায়গার মালিকানা/ভাড়ার দলিল" : "Ownership Deed/Rent Agreement")}
-                {renderFileUploader("supplier_buyer_invoices", isBn ? "সাপ্লায়ার এবং ক্রেতার ইনভয়েস" : "Supplier & Buyer Invoices")}
-                {renderFileUploader("company_formation_docs", isBn ? "MOA/AOA/পার্টনারশিপ ডিড" : "MOA/AOA/Partnership Deed")}
-                {renderFileUploader("audited_financials", isBn ? "অডিটেড ফাইন্যান্সিয়ালস (৩ বছর)" : "Audited Financials (3 Yrs)")}
-              </div>
-              <div className="border-t border-gray-200/50 dark:border-gray-800 pt-4">
-                <h4 className="text-xs font-bold text-gray-800 dark:text-gray-300 mb-3">{isBn ? "পার্টনার/ডিরেক্টরদের KYC" : "Partners/Directors KYC"}</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  {renderFileUploader("director_kyc", isBn ? "NID, ছবি ও e-TIN (একসাথে স্ক্যান)" : "NID, Photo & e-TIN (Combined)")}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {category?.id === 'women' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {renderFileUploader("women_trade_license", isBn ? "নারী উদ্যোক্তার নিজস্ব ট্রেড লাইসেন্স" : "Trade License (Self)")}
-                {renderFileUploader("rjsc_shareholding", isBn ? "আরজেএসসি (RJSC) শেয়ারহোল্ডিং (লিমিটেড হলে)" : "RJSC Shareholding (If Ltd)")}
-                {renderFileUploader("women_bank_statement", isBn ? "ব্যবসার ব্যাংক স্টেটমেন্ট (৬-১২ মাস)" : "Business Bank Statement (6-12m)")}
-                {renderFileUploader("ecommerce_proof", isBn ? "ই-কমার্স ডোমেইন/ফেসবুক পেমেন্ট হিস্ট্রি" : "E-commerce/F-commerce Proof")}
-                {renderFileUploader("chamber_membership", isBn ? "উইমেন চেম্বার/ই-ক্যাব মেম্বারশিপ (BWCCI/WE)" : "Chamber Membership (BWCCI/e-CAB/WE)")}
-              </div>
-            </div>
-          )}
-
-          {category?.id === 'expat' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {renderFileUploader("passport_scan_pages", isBn ? "পাসপোর্টের কপি (১-৫ পৃষ্ঠা ও সিল)" : "Passport Copy (Pages 1-5 & Seals)")}
-                {renderFileUploader("visa_iqama_copy", isBn ? "ওয়ার্ক ভিসা/আকামা কপি" : "Work Visa/Iqama Copy")}
-                {renderFileUploader("employment_contract", isBn ? "বর্তমান চাকরির চুক্তিনামা" : "Employment Contract")}
-                {renderFileUploader("bmet_card", isBn ? "বিএমইটি (BMET) কার্ড" : "BMET Card")}
-                {renderFileUploader("remittance_statement_9m", isBn ? "রেমিট্যান্স স্টেটমেন্ট (৯ মাস)" : "Remittance Statement (9 Months)")}
-                {renderFileUploader("power_of_attorney", isBn ? "পাওয়ার অফ অ্যাটর্নি (Power of Attorney)" : "Power of Attorney (Local)")}
-              </div>
-            </div>
-          )}
-
-          {category?.id === 'student' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {renderFileUploader("academic_certificates", isBn ? "একাডেমিক সার্টিফিকেট/মার্কশিট" : "Academic Certificates")}
-                {renderFileUploader("admission_letter", isBn ? "অফার লেটার (Offer/Admission Letter)" : "Offer/Admission Letter")}
-                {renderFileUploader("i20_cas_letter", isBn ? "আই-২০/সিএএস (I-20/CAS Letter)" : "I-20 / CAS Letter")}
-                {renderFileUploader("english_proficiency", isBn ? "ইংরেজি দক্ষতা (IELTS/TOEFL)" : "English Proficiency (IELTS/TOEFL)")}
-                {renderFileUploader("sponsor_income_proof", isBn ? "স্পনসরের আয়ের প্রমাণপত্র" : "Sponsor's Income Proof")}
-                {renderFileUploader("sponsor_bank_statement_1yr", isBn ? "স্পনসরের ব্যাংক স্টেটমেন্ট (১ বছর)" : "Sponsor's Bank Statement (1 Yr)")}
-                {renderFileUploader("lien_property_fdr", isBn ? "লিয়েন/বন্ধকী সম্পত্তির দলিল (যদি থাকে)" : "Lien Property/FDR (If any)")}
-              </div>
-            </div>
-          )}
-
-          {category?.id === 'emergency' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {renderFileUploader("diagnosis_report", isBn ? "অফিশিয়াল ডায়াগনসিস রিপোর্ট ও প্রেসক্রিপশন" : "Diagnosis Report & Prescription")}
-                {renderFileUploader("cost_estimation_letter", isBn ? "খরচের বাজেট লেটার (সীল ও স্বাক্ষরসহ)" : "Cost Budget Letter")}
-                {renderFileUploader("admission_slip", isBn ? "ভর্তির টিকিট ও রানিং বিল (যদি থাকে)" : "Admission Slip & Running Bill")}
-                {renderFileUploader("income_proof_quick", isBn ? "আয়ের দ্রুত প্রমাণ (ইন্টারনেট ব্যাংকিং)" : "Quick Income Proof")}
-              </div>
-            </div>
-          )}
+      {!revisionOnly && (
+        <div className="p-3 rounded-2xl border border-amber-500/40 dark:border-amber-900/40 bg-amber-500/5 dark:bg-amber-950/10 flex items-start gap-3">
+          <AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-800 dark:text-amber-300 leading-normal font-medium">
+            {isBn ? "অতিরিক্ত ডকুমেন্টসের প্রয়োজন হলে অ্যাডমিন আপনার নির্দিষ্ট আবেদনে অনুরোধ পাঠাবেন। অন্য নতুন আবেদনে এই অনুরোধ দেখানো হবে না।" : "If additional documents are needed, the admin will request them on this specific application. Requests will not carry over to future applications."}
+          </p>
         </div>
-      </div>
-
-      <div className="p-3 rounded-2xl border border-amber-500/40 dark:border-amber-900/40 bg-amber-500/5 dark:bg-amber-950/10 flex items-start gap-3 transition-colors">
-        <AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" />
-        <p className="text-xs text-amber-800 dark:text-amber-300 leading-normal font-medium">
-          {isBn ? "অতিরিক্ত ডকুমেন্টস (যেমন: TIN Certificate, Utility Bill) এডমিন আপনার প্রোফাইল যাচাই করার পর সাবমিট করতে হতে পারে।" : "Additional documents (e.g. TIN, Utility Bill) may be required after admin reviews your profile."}
-        </p>
-      </div>
+      )}
 
       {/* Review Details Summary Card */}
       <div className="rounded-2xl border border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800 overflow-hidden mt-4 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm">
@@ -3464,6 +3403,7 @@ export default function ApplyLoan() {
       </label>
     </div>
   );
+  };
 
   const Step5Success = () => (
     <motion.div

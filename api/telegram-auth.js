@@ -185,7 +185,7 @@ async function updateMyLoanApplication(telegramUser, applicationId, payload) {
   // Read the owner-scoped source values first. Financial outputs below are always
   // recomputed from server settings and the active rate version, never copied from the browser.
   const { data: currentLoan, error: currentLoanError } = await db.from("loan_applications")
-    .select("id,chat_id,loan_category,amount,tenure_months")
+    .select("id,chat_id,loan_category,amount,tenure_months,status,admin_feedback")
     .eq("id", applicationId)
     .eq("chat_id", chatId)
     .maybeSingle();
@@ -209,6 +209,29 @@ async function updateMyLoanApplication(telegramUser, applicationId, payload) {
   }
   if (Object.prototype.hasOwnProperty.call(payload, "documents")) {
     update.documents = normalizeUserPrivateDocumentMap(payload.documents, chatId, SUPABASE_URL);
+  }
+
+  // A member has now submitted a requested revision. Clear only the active
+  // request list for this application, retain the audit trail, and reset the
+  // revision flags so requested documents never leak into a future application.
+  if (currentLoan.status === "action_required") {
+    let feedback = {};
+    if (typeof currentLoan.admin_feedback === "string" && currentLoan.admin_feedback.trim().startsWith("{")) {
+      try { feedback = JSON.parse(currentLoan.admin_feedback); } catch {}
+    }
+    const requested = Array.isArray(feedback.requestedDocuments)
+      ? feedback.requestedDocuments.filter(key => typeof key === "string").slice(0, 40)
+      : [];
+    const completed = Array.isArray(feedback.completedDocumentRequests) ? feedback.completedDocumentRequests : [];
+    update.admin_feedback = JSON.stringify({
+      ...feedback,
+      note: null,
+      flagged: { personal: false, professional: false, bank: false, nominee: false, guarantor: false, documents: false },
+      requestedDocuments: [],
+      completedDocumentRequests: requested.length
+        ? [...completed, { keys: requested, completedAt: new Date().toISOString() }].slice(-20)
+        : completed
+    });
   }
 
   const { data, error } = await db.from("loan_applications")
@@ -941,7 +964,14 @@ async function adminAction(action, payload) {
         if (error) throw error;
       }
 
-      if (originalLoan.status !== payload.status) {
+      let feedbackDetails = {};
+      if (typeof payload.feedback === "string" && payload.feedback.trim().startsWith("{")) {
+        try { feedbackDetails = JSON.parse(payload.feedback); } catch {}
+      }
+      const requestedDocumentCount = Array.isArray(feedbackDetails.requestedDocuments)
+        ? feedbackDetails.requestedDocuments.filter(key => typeof key === "string").length
+        : 0;
+      if (originalLoan.status !== payload.status || (payload.status === "action_required" && requestedDocumentCount > 0)) {
         const amountLabel = Number(originalLoan.amount || 0).toLocaleString("en-BD");
         const categoryLabel = String(originalLoan.loan_category || "লোন");
         const notice = payload.status === "under_review"
@@ -951,7 +981,7 @@ async function adminAction(action, payload) {
             : payload.status === "completed"
               ? { title: "লোন পরিশোধ সম্পন্ন", message: "আপনার লোনের সব বকেয়া পরিশোধ সম্পন্ন হয়েছে বলে রেকর্ড করা হয়েছে।" }
               : payload.status === "action_required"
-                ? { title: "লোন আবেদনে সংশোধন দরকার", message: "আপনার আবেদন আপডেট করতে হবে। অ্যাপ থেকে অ্যাডমিনের মন্তব্য দেখুন।" }
+                ? { title: "লোন আবেদনে সংশোধন দরকার", message: requestedDocumentCount > 0 ? "আপনার আবেদনের জন্য অ্যাডমিন " + requestedDocumentCount + "টি অতিরিক্ত ডকুমেন্ট চেয়েছেন। অ্যাপের সংশ্লিষ্ট আবেদন খুলে শুধু চাওয়া ডকুমেন্টগুলো আপলোড করুন।" : "আপনার আবেদন আপডেট করতে হবে। অ্যাপ থেকে অ্যাডমিনের মন্তব্য দেখুন।" }
                 : ["rejected", "cancelled"].includes(payload.status)
                   ? { title: "লোন আবেদন বাতিল", message: "আপনার লোন আবেদনটি অনুমোদিত হয়নি বা বাতিল করা হয়েছে।" }
                   : payload.status === "active"
