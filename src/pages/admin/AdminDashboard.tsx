@@ -639,6 +639,15 @@ export default function AdminDashboard() {
                         loan.loan_category === 'emergency' ? 'জরুরি' : 'বাড়ি';
         
         const formattedAmount = formatCurrency(loan.amount, isBn);
+        let feedbackNote = feedback || '';
+        let requestedDocumentCount = 0;
+        if (typeof feedback === 'string' && feedback.trim().startsWith('{')) {
+          try {
+            const parsedFeedback = JSON.parse(feedback);
+            feedbackNote = parsedFeedback.note || '';
+            requestedDocumentCount = Array.isArray(parsedFeedback.requestedDocuments) ? parsedFeedback.requestedDocuments.length : 0;
+          } catch {}
+        }
         
         if (status === 'under_review') {
           msg = `🔍 <b>প্রিয় ${loan.full_name},</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটি বর্তমানে আমাদের অ্যাডমিন প্যানেলে রিভিউ করা হচ্ছে।\n\n💰 লোনের পরিমাণ: <b>${formattedAmount}</b>\n📅 মেয়াদ: <b>${convertDigits(loan.tenure_months, isBn)} মাস</b>\n\nঅতি শীঘ্রই পরবর্তী আপডেট জানানো হবে। ধন্যবাদ!`;
@@ -647,7 +656,10 @@ export default function AdminDashboard() {
         } else if (status === 'rejected') {
           msg = `❌ <b>দুঃখিত ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটি বাতিল করা হয়েছে।\n\n${feedback ? `📝 কারণ: <i>${feedback}</i>\n\n` : ''}ভবিষ্যতে পুনরায় আবেদন করার জন্য অনুরোধ করা হলো। ধন্যবাদ।`;
         } else if (status === 'action_required') {
-          msg = `⚠️ <b>মনোযোগ দিন ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটিতে কিছু সংশোধনী প্রয়োজন।\n\n📝 মন্তব্য: <b>${feedback}</b>\n\nঅনুগ্রহ করে প্রোফাইল থেকে প্রয়োজনীয় তথ্য ও ডকুমেন্ট আপডেট করুন। ধন্যবাদ!`;
+          const requestSummary = requestedDocumentCount > 0
+            ? `\n\n📎 অ্যাডমিন ${requestedDocumentCount}টি অতিরিক্ত ডকুমেন্ট চেয়েছেন। অ্যাপের সংশ্লিষ্ট আবেদন খুলে শুধু চাওয়া ডকুমেন্টগুলো আপলোড করুন।`
+            : '\n\nঅনুগ্রহ করে অ্যাপে সংশ্লিষ্ট আবেদন খুলে প্রয়োজনীয় তথ্য বা ডকুমেন্ট আপডেট করুন।';
+          msg = `⚠️ <b>মনোযোগ দিন ${loan.full_name}!</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটিতে কিছু সংশোধনী প্রয়োজন.${feedbackNote ? `\n\n📝 মন্তব্য: <b>${feedbackNote}</b>` : ''}${requestSummary}\n\nধন্যবাদ!`;
         } else if (status === 'cancelled') {
           msg = `⚠️ <b>প্রিয় ${loan.full_name},</b>\n\nআপনার <b>${catName} লোন</b> আবেদনটি বাতিল করা হয়েছে।${feedback ? `\n\n📝 কারণ: <i>${feedback}</i>` : ''}`;
         } else if (status === 'completed') {
