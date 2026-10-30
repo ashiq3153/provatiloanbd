@@ -823,7 +823,7 @@ export default function ApplyLoan() {
       const duplicateMatch = await checkDuplicateApplication(
         formData.mobile,
         formData.email || null,
-        formData.accountNumber,
+        formData.accountNumber || '',
         formData.nomineeNid,
         formData.nidNumber,
         formData.passportNumber || null,
@@ -1142,7 +1142,7 @@ export default function ApplyLoan() {
       const duplicateMatch = await checkDuplicateApplication(
         formData.mobile,
         formData.email || null,
-        formData.accountNumber,
+        formData.accountNumber || '',
         formData.nomineeNid,
         formData.nidNumber,
         formData.passportNumber || null,
