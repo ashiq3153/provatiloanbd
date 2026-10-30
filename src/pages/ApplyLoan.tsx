@@ -747,10 +747,10 @@ export default function ApplyLoan() {
           'estimatedCost', 'applicantContribution', 'insuranceCoverage', 'insuranceAmount', 'shortfallAmount', 'hrContactNumber'
         ];
         
-        const bankFields: (keyof LoanFormData)[] = ['bankName', 'accountName', 'accountNumber', 'routingNumber', 'mobileBanking'];
+        const bankFields: (keyof LoanFormData)[] = editId && flaggedSections.bank ? ['bankName', 'accountName', 'accountNumber', 'routingNumber', 'mobileBanking'] : [];
         const nomineeFields: (keyof LoanFormData)[] = ['nomineeName', 'nomineeRelation', 'nomineeMobile', 'nomineeNid'];
         let guarantorFields: (keyof LoanFormData)[] = [];
-        if (category?.id === 'personal') {
+        if (category?.id === 'personal' && editId && flaggedSections.guarantor) {
           guarantorFields = ['g1Name', 'g1Relation', 'g1Nid', 'g1Mobile', 'g1Address', 'g1Profession', 'g2Name', 'g2Designation', 'g2OfficialId', 'g2Email', 'g2Mobile'];
         }
         
@@ -2056,7 +2056,7 @@ export default function ApplyLoan() {
       'estimatedCost', 'applicantContribution', 'insuranceCoverage', 'insuranceAmount', 'shortfallAmount', 'hrContactNumber'
     ];
     
-    const bankFields: (keyof LoanFormData)[] = ['bankName', 'accountName', 'accountNumber', 'routingNumber', 'mobileBanking'];
+    const bankFields: (keyof LoanFormData)[] = editId && flaggedSections.bank ? ['bankName', 'accountName', 'accountNumber', 'routingNumber', 'mobileBanking'] : [];
     const nomineeFields: (keyof LoanFormData)[] = ['nomineeName', 'nomineeRelation', 'nomineeMobile', 'nomineeNid'];
 
     const handleInputFocus = (e: React.FocusEvent<HTMLDivElement>) => {
@@ -3047,6 +3047,8 @@ export default function ApplyLoan() {
           </div>
         </AccordionSection>
 
+        {editId && flaggedSections.bank && (
+        <>
         {/* 3. Bank Account Details */}
         <AccordionSection
           sectionKey="bank"
@@ -3090,6 +3092,9 @@ export default function ApplyLoan() {
           </div>
         </AccordionSection>
 
+
+        </>
+        )}
         {/* 4. Nominee Information */}
         <AccordionSection
           sectionKey="nominee"
@@ -3129,7 +3134,7 @@ export default function ApplyLoan() {
         </AccordionSection>
 
         {/* 5. Guarantor Information (Personal Loan Only) */}
-        {category?.id === 'personal' && (
+        {category?.id === 'personal' && editId && flaggedSections.guarantor && (
           <AccordionSection
             sectionKey="guarantor"
             title={isBn ? "৫. গ্যারান্টরের তথ্য" : "5. Guarantor Details"}
