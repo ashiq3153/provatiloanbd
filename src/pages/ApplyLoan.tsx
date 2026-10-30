@@ -410,6 +410,7 @@ export default function ApplyLoan() {
     localStorage.removeItem('loan_draft_v1');
     const selectedCategory = params.get('category');
     const edit = params.get('edit');
+    setRequestedDocumentKeys([]);
 
     if (edit) {
       setEditId(edit);
@@ -483,7 +484,15 @@ export default function ApplyLoan() {
               if (loan.admin_feedback.trim().startsWith('{')) {
                 const parsed = JSON.parse(loan.admin_feedback);
                 feedbackText = parsed.note || '';
-                setRequestedDocumentKeys(Array.isArray(parsed.requestedDocuments) ? parsed.requestedDocuments.filter((key: unknown) => typeof key === 'string') : []);
+                const requestedKeys = Array.isArray(parsed.requestedDocuments) ? parsed.requestedDocuments.filter((key: unknown) => typeof key === 'string') : [];
+                setRequestedDocumentKeys(requestedKeys);
+                if (requestedKeys.length > 0) {
+                  setDocuments(previous => {
+                    const next = { ...previous };
+                    requestedKeys.forEach((key: string) => { delete next[key]; });
+                    return next;
+                  });
+                }
                 if (parsed.flagged) {
                   flagged = {
                     personal: !!parsed.flagged.personal,
@@ -529,7 +538,13 @@ export default function ApplyLoan() {
     } else if (selectedCategory) {
       const matched = categories.find((cat) => cat.id === selectedCategory);
       if (matched) {
+        const safeAmount = Math.max(50000, Math.min(500000, Number(matched.maxAmount) || 500000));
+        const allowed = getAllowedTenure(safeAmount);
+        const minTenure = Math.max(allowed[0], matched.minTenure ?? 12);
+        const maxTenure = Math.min(allowed[1], matched.maxTenure ?? allowed[1]);
         setCategory(matched);
+        setAmount(safeAmount);
+        setTenure(Math.min(Math.max(24, minTenure), maxTenure));
         setStep(2);
       }
     } else {
