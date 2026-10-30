@@ -306,6 +306,7 @@ export default function ApplyLoan() {
   const [editId, setEditId] = useState<string | null>(null);
   const [submittedApplicationId, setSubmittedApplicationId] = useState<string | null>(null);
   const [documents, setDocuments] = useState<Record<string, string>>({});
+  const [requestedDocumentKeys, setRequestedDocumentKeys] = useState<string[]>([]);
   const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
   const [showProfessionModal, setShowProfessionModal] = useState(false);
   const [professionSearch, setProfessionSearch] = useState("");
@@ -482,6 +483,7 @@ export default function ApplyLoan() {
               if (loan.admin_feedback.trim().startsWith('{')) {
                 const parsed = JSON.parse(loan.admin_feedback);
                 feedbackText = parsed.note || '';
+                setRequestedDocumentKeys(Array.isArray(parsed.requestedDocuments) ? parsed.requestedDocuments.filter((key: unknown) => typeof key === 'string') : []);
                 if (parsed.flagged) {
                   flagged = {
                     personal: !!parsed.flagged.personal,
@@ -640,15 +642,16 @@ export default function ApplyLoan() {
 
   // Auto-adjusted tenure state
   const handleAmountChange = (val: number) => {
-    setAmount(val);
-    const rawAllowed = getAllowedTenure(val);
+    const categoryMax = Number(category?.maxAmount) > 0 ? Number(category?.maxAmount) : 5000000;
+    const safeAmount = Math.max(50000, Math.min(val, categoryMax));
+    setAmount(safeAmount);
+    const rawAllowed = getAllowedTenure(safeAmount);
     const minAllowed = Math.max(rawAllowed[0], category?.minTenure ?? 12);
-    const maxAllowed = Math.min(rawAllowed[1], category?.maxTenure ?? 60);
-    if (tenure < minAllowed) setTenure(minAllowed);
-    if (tenure > maxAllowed) setTenure(maxAllowed);
+    const maxAllowed = Math.min(rawAllowed[1], category?.maxTenure ?? rawAllowed[1]);
+    setTenure(current => Math.min(Math.max(current, minAllowed), maxAllowed));
   };
 
-  const getLoanCalculation = () => {
+    const getLoanCalculation = () => {
     const feeRates = getLoanFeeRates(amount, systemSettings);
     return calculateLoan({
       principal: amount,
@@ -761,7 +764,10 @@ export default function ApplyLoan() {
       }
 
       if (step === 4) {
-        const missingDocuments = getMissingRequiredDocuments(category?.id || 'personal', documents);
+        const allCategoryDocuments = getLoanDocumentRequirements(category?.id || 'personal');
+        const missingDocuments = editId && requestedDocumentKeys.length > 0
+          ? allCategoryDocuments.filter(doc => requestedDocumentKeys.includes(doc.key) && !documents[doc.key])
+          : getMissingRequiredDocuments(category?.id || 'personal', documents);
         if (missingDocuments.length > 0) {
           const preview = missingDocuments.slice(0, 3).map(d => isBn ? d.labelBn : d.labelEn).join(', ');
           const extra = missingDocuments.length > 3 ? (isBn ? ` এবং আরও ${missingDocuments.length - 3}টি` : ` and ${missingDocuments.length - 3} more`) : '';
@@ -1424,15 +1430,19 @@ export default function ApplyLoan() {
       .map(key => detailInfoLabels[key] || key);
 
     const selectCategory = (cat: ReturnType<typeof getCategories>[0]) => {
-      const rawAllowed = getAllowedTenure(amount);
+      const maxAmount = Number(cat.maxAmount) > 0 ? Number(cat.maxAmount) : 500000;
+      const nextAmount = Math.max(50000, Math.min(amount, maxAmount));
+      const rawAllowed = getAllowedTenure(nextAmount);
       const minAllowed = Math.max(rawAllowed[0], cat.minTenure ?? 12);
+      const maxAllowed = Math.min(rawAllowed[1], cat.maxTenure ?? rawAllowed[1]);
       setCategory(cat);
-      setTenure(minAllowed);
+      setAmount(nextAmount);
+      setTenure(Math.min(Math.max(tenure, minAllowed), maxAllowed));
       setStep(2);
       window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    const selectProfession = (item: ProfessionOption) => {
+        const selectProfession = (item: ProfessionOption) => {
       setSelectedProfession(item.label);
       methods.setValue("profession", item.label, { shouldValidate: true, shouldDirty: true });
       setShowProfessionModal(false);
@@ -3201,11 +3211,14 @@ export default function ApplyLoan() {
   const renderFileUploader = (id: string, title: string) => {
     const isUploading = uploadingDoc === id;
     const requirement = getLoanDocumentRequirements(category?.id || 'personal').find(d => d.key === id);
-    const displayTitle = requirement?.required
-      ? `${title} ${isBn ? '• আবশ্যক' : '• Required'}`
-      : requirement?.conditional
-        ? `${title} ${isBn ? '• প্রযোজ্য হলে' : '• If applicable'}`
-        : `${title} ${isBn ? '• ঐচ্ছিক' : '• Optional'}`;
+    const isRequested = requestedDocumentKeys.includes(id);
+    const revisionOnly = Boolean(editId && requestedDocumentKeys.length > 0);
+    if (revisionOnly ? !isRequested : (!requirement?.required && !isRequested)) return null;
+    const displayTitle = isRequested
+      ? title + (isBn ? ' • অ্যাডমিন চেয়েছেন' : ' • Requested by admin')
+      : requirement?.required
+        ? title + (isBn ? ' • আবশ্যক' : ' • Required')
+        : title + (isBn ? ' • ঐচ্ছিক' : ' • Optional');
     return (
       <div className="relative">
         <input 
@@ -3290,7 +3303,9 @@ export default function ApplyLoan() {
           {renderFileUploader("photo", isBn ? "পাসপোর্ট সাইজ ছবি" : "Passport Size Photo")}
         </div>
         <div className="mt-3 border-t border-gray-200/50 dark:border-gray-700/50 pt-3 grid grid-cols-2 gap-3">
-          {renderFileUploader("nominee_photo", isBn ? "নমিনির ছবি (ঐচ্ছিক)" : "Nominee Photo (Optional)")}
+          {renderFileUploader("nominee_nid_front", isBn ? "নমিনির NID সামনের অংশ" : "Nominee NID Front")}
+          {renderFileUploader("nominee_nid_back", isBn ? "নমিনির NID পেছনের অংশ" : "Nominee NID Back")}
+          {renderFileUploader("nominee_photo", isBn ? "নমিনির ছবি" : "Nominee Photo")}
           {category?.id === 'personal' && renderFileUploader("passport_copy", isBn ? "পাসপোর্ট কপি (যদি থাকে)" : "Passport Copy (If Any)")}
         </div>
       </div>
@@ -3304,6 +3319,7 @@ export default function ApplyLoan() {
           {category?.id === 'personal' && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
+                {renderFileUploader("income_proof", isBn ? "আয়ের প্রমাণ" : "Income Proof")}
                 {renderFileUploader("office_id", isBn ? "অফিস আইডি কপি" : "Office ID")}
                 {renderFileUploader("hr_noc", isBn ? "HR লেটার/NOC" : "HR Letter/NOC")}
                 {renderFileUploader("salary_statement", isBn ? "বেতন স্টেটমেন্ট (৬ মাস)" : "Salary Statement (6 Months)")}
@@ -3335,6 +3351,7 @@ export default function ApplyLoan() {
           {category?.id === 'business' && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
+                {renderFileUploader("business_proof", isBn ? "ব্যবসার প্রমাণ" : "Business Proof")}
                 {renderFileUploader("trade_license_3yrs", isBn ? "ট্রেড লাইসেন্স (বিগত ৩ বছর)" : "Trade License (Last 3 Years)")}
                 {renderFileUploader("bank_statement_12m", isBn ? "ব্যাংক স্টেটমেন্ট (১২ মাস)" : "Bank Statement (12 Months)")}
                 {renderFileUploader("premise_ownership_docs", isBn ? "জায়গার মালিকানা/ভাড়ার দলিল" : "Ownership Deed/Rent Agreement")}
@@ -3354,6 +3371,7 @@ export default function ApplyLoan() {
           {category?.id === 'women' && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
+                {renderFileUploader("business_proof", isBn ? "ব্যবসার প্রমাণ" : "Business Proof")}
                 {renderFileUploader("women_trade_license", isBn ? "নারী উদ্যোক্তার নিজস্ব ট্রেড লাইসেন্স" : "Trade License (Self)")}
                 {renderFileUploader("rjsc_shareholding", isBn ? "আরজেএসসি (RJSC) শেয়ারহোল্ডিং (লিমিটেড হলে)" : "RJSC Shareholding (If Ltd)")}
                 {renderFileUploader("women_bank_statement", isBn ? "ব্যবসার ব্যাংক স্টেটমেন্ট (৬-১২ মাস)" : "Business Bank Statement (6-12m)")}
@@ -3366,6 +3384,7 @@ export default function ApplyLoan() {
           {category?.id === 'expat' && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
+                {renderFileUploader("income_proof", isBn ? "আয়/চাকরির প্রমাণ" : "Income/Employment Proof")}
                 {renderFileUploader("passport_scan_pages", isBn ? "পাসপোর্টের কপি (১-৫ পৃষ্ঠা ও সিল)" : "Passport Copy (Pages 1-5 & Seals)")}
                 {renderFileUploader("visa_iqama_copy", isBn ? "ওয়ার্ক ভিসা/আকামা কপি" : "Work Visa/Iqama Copy")}
                 {renderFileUploader("employment_contract", isBn ? "বর্তমান চাকরির চুক্তিনামা" : "Employment Contract")}
