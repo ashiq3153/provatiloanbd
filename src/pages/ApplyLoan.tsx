@@ -3274,7 +3274,13 @@ export default function ApplyLoan() {
     );
   };
 
-  const Step4Documents = () => (
+  const Step4Documents = () => {
+    const categoryDocuments = getLoanDocumentRequirements(category?.id || 'personal');
+    const revisionOnly = Boolean(editId && requestedDocumentKeys.length > 0);
+    const visibleDocuments = revisionOnly
+      ? categoryDocuments.filter(doc => requestedDocumentKeys.includes(doc.key))
+      : categoryDocuments.filter(doc => doc.required);
+    return (
     <div className="space-y-5 pb-6 text-xs">
       {flaggedSections.documents && (
         <div className="text-amber-800 dark:text-amber-300 p-4 rounded-2xl border border-amber-500/30 dark:border-amber-900/40 bg-amber-500/5 dark:bg-amber-950/10 text-xs font-semibold leading-relaxed flex gap-3 transition-colors mb-4 animate-pulse">
@@ -3291,143 +3297,37 @@ export default function ApplyLoan() {
         <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">{isBn ? "আবেদন রিভিউ ও অনুমোদনের জন্য প্রয়োজনীয় ডকুমেন্টস আপলোড করুন" : "Upload documents for profile verification and approval."}</p>
       </div>
 
-      {/* Uploads Block */}
-      <div className={`transition-all rounded-2xl border ${flaggedSections.documents ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800'} p-4 space-y-4 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm`}>
-        <h3 className="font-bold text-gray-800 dark:text-gray-200 text-sm border-b border-gray-200/50 dark:border-gray-800 transition-colors pb-2">{isBn ? "পরিচয়পত্র ও ছবি" : "Identity Documents & Photos"}</h3>
-        
-        {/* Upload Slot Grid */}
-        <div className="grid grid-cols-2 gap-3">
-          {renderFileUploader("nid_front", isBn ? "NID সামনের অংশ" : "NID Front")}
-          {renderFileUploader("nid_back", isBn ? "NID পেছনের অংশ" : "NID Back")}
-          {renderFileUploader("selfie", isBn ? "সেলফি (NID সহ)" : "Selfie (with NID)")}
-          {renderFileUploader("photo", isBn ? "পাসপোর্ট সাইজ ছবি" : "Passport Size Photo")}
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-4 bg-white dark:bg-[#111c2e] shadow-sm">
+        <div>
+          <h3 className="font-bold text-gray-800 dark:text-gray-200 text-sm">
+            {revisionOnly ? (isBn ? "অ্যাডমিন যে ডকুমেন্টগুলো চেয়েছেন" : "Documents requested by admin") : (isBn ? "প্রাথমিক আবেদনের প্রয়োজনীয় ডকুমেন্ট" : "Required documents for initial application")}
+          </h3>
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+            {revisionOnly
+              ? (isBn ? "এই আবেদনের জন্য নির্দিষ্টভাবে চাওয়া ডকুমেন্টগুলোই এখানে দেখানো হয়েছে।" : "Only documents requested for this specific application are shown here.")
+              : (isBn ? "শুধু প্রাথমিকভাবে প্রয়োজনীয় কাগজপত্র দিন। অতিরিক্ত কাগজপত্র দরকার হলে অ্যাডমিন পরে এই আবেদনের জন্য আলাদাভাবে চাইবেন।" : "Upload only the initial required documents. If more are needed, the admin will request them for this application later.")}
+          </p>
         </div>
-        <div className="mt-3 border-t border-gray-200/50 dark:border-gray-700/50 pt-3 grid grid-cols-2 gap-3">
-          {renderFileUploader("nominee_nid_front", isBn ? "নমিনির NID সামনের অংশ" : "Nominee NID Front")}
-          {renderFileUploader("nominee_nid_back", isBn ? "নমিনির NID পেছনের অংশ" : "Nominee NID Back")}
-          {renderFileUploader("nominee_photo", isBn ? "নমিনির ছবি" : "Nominee Photo")}
-          {category?.id === 'personal' && renderFileUploader("passport_copy", isBn ? "পাসপোর্ট কপি (যদি থাকে)" : "Passport Copy (If Any)")}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {visibleDocuments.map(doc => (
+            <React.Fragment key={doc.key}>
+              {renderFileUploader(doc.key, isBn ? doc.labelBn : doc.labelEn)}
+            </React.Fragment>
+          ))}
         </div>
+        {revisionOnly && visibleDocuments.length === 0 && (
+          <p className="text-xs text-gray-500">{isBn ? "অ্যাডমিন এখনো কোনো ডকুমেন্ট নির্বাচন করেননি।" : "No documents have been selected by the admin."}</p>
+        )}
       </div>
 
-      {/* Income Proofs Block */}
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800 p-4 space-y-4 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm">
-        <h3 className="font-bold text-gray-800 dark:text-gray-200 text-sm border-b border-gray-200/50 dark:border-gray-800 transition-colors pb-2">
-          {isBn ? "আয়ের প্রমাণপত্র" : "Income Proof"} ({category?.title})
-        </h3>
-        <div className="grid grid-cols-1 gap-3">
-          {category?.id === 'personal' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {renderFileUploader("income_proof", isBn ? "আয়ের প্রমাণ" : "Income Proof")}
-                {renderFileUploader("office_id", isBn ? "অফিস আইডি কপি" : "Office ID")}
-                {renderFileUploader("hr_noc", isBn ? "HR লেটার/NOC" : "HR Letter/NOC")}
-                {renderFileUploader("salary_statement", isBn ? "বেতন স্টেটমেন্ট (৬ মাস)" : "Salary Statement (6 Months)")}
-                {renderFileUploader("bank_statement", isBn ? "ব্যাংক স্টেটমেন্ট (৬ মাস)" : "Bank Statement (6 Months)")}
-                {renderFileUploader("etin_cert", isBn ? "e-TIN/ট্যাক্স রিটার্ন" : "e-TIN/Tax Return")}
-                {renderFileUploader("utility_bill", isBn ? "ইউটিলিটি বিল (বর্তমান বাসা)" : "Utility Bill (Current Home)")}
-              </div>
-
-              <div className="border-t border-gray-200/50 dark:border-gray-800 pt-4">
-                <h4 className="text-xs font-bold text-gray-800 dark:text-gray-300 mb-3">{isBn ? "গ্যারান্টর ১ ডকুমেন্টস" : "Guarantor 1 Documents"}</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  {renderFileUploader("guarantor1_nid", isBn ? "এনআইডি কপি" : "NID Copy")}
-                  {renderFileUploader("guarantor1_photo", isBn ? "পাসপোর্ট সাইজ ছবি" : "Photo")}
-                  {renderFileUploader("guarantor1_income", isBn ? "ব্যাংক/ইনকাম প্রুফ" : "Income/Bank Proof")}
-                </div>
-              </div>
-
-              <div className="border-t border-gray-200/50 dark:border-gray-800 pt-4">
-                <h4 className="text-xs font-bold text-gray-800 dark:text-gray-300 mb-3">{isBn ? "গ্যারান্টর ২ ডকুমেন্টস" : "Guarantor 2 Documents"}</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  {renderFileUploader("guarantor2_nid", isBn ? "এনআইডি কপি" : "NID Copy")}
-                  {renderFileUploader("guarantor2_photo", isBn ? "পাসপোর্ট সাইজ ছবি" : "Photo")}
-                  {renderFileUploader("guarantor2_income", isBn ? "ব্যাংক/ইনকাম প্রুফ" : "Income/Bank Proof")}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {category?.id === 'business' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {renderFileUploader("business_proof", isBn ? "ব্যবসার প্রমাণ" : "Business Proof")}
-                {renderFileUploader("trade_license_3yrs", isBn ? "ট্রেড লাইসেন্স (বিগত ৩ বছর)" : "Trade License (Last 3 Years)")}
-                {renderFileUploader("bank_statement_12m", isBn ? "ব্যাংক স্টেটমেন্ট (১২ মাস)" : "Bank Statement (12 Months)")}
-                {renderFileUploader("premise_ownership_docs", isBn ? "জায়গার মালিকানা/ভাড়ার দলিল" : "Ownership Deed/Rent Agreement")}
-                {renderFileUploader("supplier_buyer_invoices", isBn ? "সাপ্লায়ার এবং ক্রেতার ইনভয়েস" : "Supplier & Buyer Invoices")}
-                {renderFileUploader("company_formation_docs", isBn ? "MOA/AOA/পার্টনারশিপ ডিড" : "MOA/AOA/Partnership Deed")}
-                {renderFileUploader("audited_financials", isBn ? "অডিটেড ফাইন্যান্সিয়ালস (৩ বছর)" : "Audited Financials (3 Yrs)")}
-              </div>
-              <div className="border-t border-gray-200/50 dark:border-gray-800 pt-4">
-                <h4 className="text-xs font-bold text-gray-800 dark:text-gray-300 mb-3">{isBn ? "পার্টনার/ডিরেক্টরদের KYC" : "Partners/Directors KYC"}</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  {renderFileUploader("director_kyc", isBn ? "NID, ছবি ও e-TIN (একসাথে স্ক্যান)" : "NID, Photo & e-TIN (Combined)")}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {category?.id === 'women' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {renderFileUploader("business_proof", isBn ? "ব্যবসার প্রমাণ" : "Business Proof")}
-                {renderFileUploader("women_trade_license", isBn ? "নারী উদ্যোক্তার নিজস্ব ট্রেড লাইসেন্স" : "Trade License (Self)")}
-                {renderFileUploader("rjsc_shareholding", isBn ? "আরজেএসসি (RJSC) শেয়ারহোল্ডিং (লিমিটেড হলে)" : "RJSC Shareholding (If Ltd)")}
-                {renderFileUploader("women_bank_statement", isBn ? "ব্যবসার ব্যাংক স্টেটমেন্ট (৬-১২ মাস)" : "Business Bank Statement (6-12m)")}
-                {renderFileUploader("ecommerce_proof", isBn ? "ই-কমার্স ডোমেইন/ফেসবুক পেমেন্ট হিস্ট্রি" : "E-commerce/F-commerce Proof")}
-                {renderFileUploader("chamber_membership", isBn ? "উইমেন চেম্বার/ই-ক্যাব মেম্বারশিপ (BWCCI/WE)" : "Chamber Membership (BWCCI/e-CAB/WE)")}
-              </div>
-            </div>
-          )}
-
-          {category?.id === 'expat' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {renderFileUploader("income_proof", isBn ? "আয়/চাকরির প্রমাণ" : "Income/Employment Proof")}
-                {renderFileUploader("passport_scan_pages", isBn ? "পাসপোর্টের কপি (১-৫ পৃষ্ঠা ও সিল)" : "Passport Copy (Pages 1-5 & Seals)")}
-                {renderFileUploader("visa_iqama_copy", isBn ? "ওয়ার্ক ভিসা/আকামা কপি" : "Work Visa/Iqama Copy")}
-                {renderFileUploader("employment_contract", isBn ? "বর্তমান চাকরির চুক্তিনামা" : "Employment Contract")}
-                {renderFileUploader("bmet_card", isBn ? "বিএমইটি (BMET) কার্ড" : "BMET Card")}
-                {renderFileUploader("remittance_statement_9m", isBn ? "রেমিট্যান্স স্টেটমেন্ট (৯ মাস)" : "Remittance Statement (9 Months)")}
-                {renderFileUploader("power_of_attorney", isBn ? "পাওয়ার অফ অ্যাটর্নি (Power of Attorney)" : "Power of Attorney (Local)")}
-              </div>
-            </div>
-          )}
-
-          {category?.id === 'student' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {renderFileUploader("academic_certificates", isBn ? "একাডেমিক সার্টিফিকেট/মার্কশিট" : "Academic Certificates")}
-                {renderFileUploader("admission_letter", isBn ? "অফার লেটার (Offer/Admission Letter)" : "Offer/Admission Letter")}
-                {renderFileUploader("i20_cas_letter", isBn ? "আই-২০/সিএএস (I-20/CAS Letter)" : "I-20 / CAS Letter")}
-                {renderFileUploader("english_proficiency", isBn ? "ইংরেজি দক্ষতা (IELTS/TOEFL)" : "English Proficiency (IELTS/TOEFL)")}
-                {renderFileUploader("sponsor_income_proof", isBn ? "স্পনসরের আয়ের প্রমাণপত্র" : "Sponsor's Income Proof")}
-                {renderFileUploader("sponsor_bank_statement_1yr", isBn ? "স্পনসরের ব্যাংক স্টেটমেন্ট (১ বছর)" : "Sponsor's Bank Statement (1 Yr)")}
-                {renderFileUploader("lien_property_fdr", isBn ? "লিয়েন/বন্ধকী সম্পত্তির দলিল (যদি থাকে)" : "Lien Property/FDR (If any)")}
-              </div>
-            </div>
-          )}
-
-          {category?.id === 'emergency' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {renderFileUploader("diagnosis_report", isBn ? "অফিশিয়াল ডায়াগনসিস রিপোর্ট ও প্রেসক্রিপশন" : "Diagnosis Report & Prescription")}
-                {renderFileUploader("cost_estimation_letter", isBn ? "খরচের বাজেট লেটার (সীল ও স্বাক্ষরসহ)" : "Cost Budget Letter")}
-                {renderFileUploader("admission_slip", isBn ? "ভর্তির টিকিট ও রানিং বিল (যদি থাকে)" : "Admission Slip & Running Bill")}
-                {renderFileUploader("income_proof_quick", isBn ? "আয়ের দ্রুত প্রমাণ (ইন্টারনেট ব্যাংকিং)" : "Quick Income Proof")}
-              </div>
-            </div>
-          )}
+      {!revisionOnly && (
+        <div className="p-3 rounded-2xl border border-amber-500/40 dark:border-amber-900/40 bg-amber-500/5 dark:bg-amber-950/10 flex items-start gap-3">
+          <AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-800 dark:text-amber-300 leading-normal font-medium">
+            {isBn ? "অতিরিক্ত ডকুমেন্টসের প্রয়োজন হলে অ্যাডমিন আপনার নির্দিষ্ট আবেদনে অনুরোধ পাঠাবেন। অন্য নতুন আবেদনে এই অনুরোধ দেখানো হবে না।" : "If additional documents are needed, the admin will request them on this specific application. Requests will not carry over to future applications."}
+          </p>
         </div>
-      </div>
-
-      <div className="p-3 rounded-2xl border border-amber-500/40 dark:border-amber-900/40 bg-amber-500/5 dark:bg-amber-950/10 flex items-start gap-3 transition-colors">
-        <AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" />
-        <p className="text-xs text-amber-800 dark:text-amber-300 leading-normal font-medium">
-          {isBn ? "অতিরিক্ত ডকুমেন্টস (যেমন: TIN Certificate, Utility Bill) এডমিন আপনার প্রোফাইল যাচাই করার পর সাবমিট করতে হতে পারে।" : "Additional documents (e.g. TIN, Utility Bill) may be required after admin reviews your profile."}
-        </p>
-      </div>
+      )}
 
       {/* Review Details Summary Card */}
       <div className="rounded-2xl border border-slate-200 dark:border-slate-800 dark:border-slate-200 dark:border-slate-800 overflow-hidden mt-4 bg-white dark:bg-[#111c2e] border border-slate-200 dark:border-slate-800 shadow-sm">
@@ -3483,6 +3383,7 @@ export default function ApplyLoan() {
       </label>
     </div>
   );
+  };
 
   const Step5Success = () => (
     <motion.div
